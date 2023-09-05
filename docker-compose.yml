@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  dev:
+    stdin_open: true      # run interactively
+    tty: true
+    build: .              # Build from the image here
+    ports:
+      - 8000:8000         # Ports for mkdocs
+      - 8888:8888         # Ports for jupyter
+    volumes:
+      - ./:/methods/          # Mount the repo
+    container_name: beak-ta3-dev
