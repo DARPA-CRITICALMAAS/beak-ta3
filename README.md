@@ -100,10 +100,3 @@ You can also set-up a local conda environment on your OS using the environment.y
 ```
 conda env create -n <env-name> -f environment.yml
 ```
-## EIS-Toolkit
-In the near future, preprocessing functions from the current state of progress of the EU-funded project "Exploration Information System" from https://github.com/GispoCoding/eis_toolkit will be included for having easy access to pre-processing tools in code.
-To access them, import the functions like this:
-```
-from eis_tooklit.<module> import <function>
-```
-Please check the mentioned GitHub repository for further information.
