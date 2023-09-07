@@ -162,5 +162,10 @@ cython_debug/
 # Ignore local test data
 data/
 local/
-.obisidan/
 eis_toolkit/
+.obsidian/app.json
+.obsidian/appearance.json
+.obsidian/core-plugins-migration.json
+.obsidian/core-plugins.json
+.obsidian/hotkeys.json
+.obsidian/workspace.json
