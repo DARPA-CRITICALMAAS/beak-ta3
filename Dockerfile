@@ -36,7 +36,7 @@ RUN conda clean --all -y
 WORKDIR /methods
 
 # Copy the current directory contents into the containers WORKDIR
-COPY . .
+COPY som /tmp/
 
 
 
