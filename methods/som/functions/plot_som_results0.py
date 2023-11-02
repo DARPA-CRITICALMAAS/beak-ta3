@@ -36,14 +36,14 @@ import argsPlot
 
 args = argsPlot.Args()
 
-args.outsomfile= "data/data_output/somspace.txt"   # som calculation somspace output text file
+args.outsomfile= "data/output/somspace.txt"   # som calculation somspace output text file
 args.som_x= 10          # som x dimension
 args.som_y= 10          # som y dimension
-args.input_file= "data/data_input/SOM.lrn"    # Input file(*.lrn)
-args.dir= "data/data_output"            # Input file(*.lrn) or directory where som.dictionary was safet to (/output/som.dictionary)
+args.input_file= "data/input/SOM.lrn"    # Input file(*.lrn)
+args.dir= "data/output"            # Input file(*.lrn) or directory where som.dictionary was safet to (/output/som.dictionary)
 args.grid_type= 'rectangular' # grid type (square or hexa), (rectangular or hexagonal)
 args.redraw='true'       # whether to draw all plots, or only those required for clustering (true: draw all. false:draw only for clustering).
-args.outgeofile=None     # som geospace results txt file
+args.outgeofile='data/output/geospace.txt'     # som geospace results txt file
 args.dataType=None       # Data type (scatter or grid)
 args.noDataValue='NA'    # noData value
 
