@@ -36,14 +36,14 @@ import argsPlot
 
 args = argsPlot.Args()
 
-args.outsomfile= "data/output/somspace.txt"   # som calculation somspace output text file
+args.outsomfile= "/methods/methods/som/data/output/somspace.txt"   # som calculation somspace output text file
 args.som_x= 10          # som x dimension
 args.som_y= 10          # som y dimension
-args.input_file= "data/input/SOM.lrn"    # Input file(*.lrn)
-args.dir= "data/output"            # Input file(*.lrn) or directory where som.dictionary was safet to (/output/som.dictionary)
+args.input_file= "/methods/methods/som/data/input/SOM.lrn"    # Input file(*.lrn)
+args.dir= "/methods/methods/som/data/output"            # Input file(*.lrn) or directory where som.dictionary was safet to (/output/som.dictionary)
 args.grid_type= 'rectangular' # grid type (square or hexa), (rectangular or hexagonal)
 args.redraw='true'       # whether to draw all plots, or only those required for clustering (true: draw all. false:draw only for clustering).
-args.outgeofile='data/output/geospace.txt'     # som geospace results txt file
+args.outgeofile='/methods/methods/som/data/output/geospace.txt'     # som geospace results txt file
 args.dataType=None       # Data type (scatter or grid)
 args.noDataValue='NA'    # noData value
 
@@ -246,7 +246,7 @@ def plot_geospace_results_grid(geo_data, geo_headers, som_data):
         df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
         df.columns = ['X_value','Y_value','Z_value']
         df['Z_value'] = pd.to_numeric(df['Z_value'])
-        pivotted= df.pivot('Y_value','X_value','Z_value')
+        pivotted= df.pivot(index='Y_value', columns='X_value', values='Z_value')
         sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
         ax=sns.heatmap(pivotted,cmap='jet', square=True, linewidths=0, xticklabels="auto", yticklabels="auto")
 
@@ -295,7 +295,7 @@ def plot_geospace_results_grid(geo_data, geo_headers, som_data):
     df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
     df.columns = ['X_value','Y_value','Z_value']
     df['Z_value'] = pd.to_numeric(df['Z_value'])
-    pivotted= df.pivot('Y_value','X_value','Z_value')
+    pivotted= df.pivot(index='Y_value', columns='X_value', values='Z_value')
     sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
     ax=sns.heatmap(pivotted,cmap='jet', square=True, linewidths=0, xticklabels="auto", yticklabels="auto")
     
@@ -508,7 +508,7 @@ def plot_geospace_clusters_grid(geo_data):
     df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
     df.columns = ['X_value','Y_value','Z_value']
     df['Z_value'] = pd.to_numeric(df['Z_value'])
-    pivotted= df.pivot('Y_value','X_value','Z_value')
+    pivotted= df.pivot(index='Y_value', columns='X_value', values='Z_value')
     mpl.rcParams.update({'font.size': 14})
     ax=sns.heatmap(pivotted,cmap=discrete_cmap, vmin = -0.5, vmax = clusters - 0.5, square=True, linewidths=0, xticklabels="auto", yticklabels="auto", cbar_kws=dict(ticks=cluster_ticks))
 
