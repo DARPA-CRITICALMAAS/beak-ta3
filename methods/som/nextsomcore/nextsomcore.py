@@ -339,7 +339,7 @@ class NxtSomCore(object):
             df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
             df.columns = ['X_value','Y_value','Z_value']
             df['Z_value'] = pd.to_numeric(df['Z_value'])
-            pivotted= df.pivot('Y_value','X_value','Z_value')
+            pivotted= df.pivot(index='Y_value',columns='X_value',values='Z_value')
         
             cols=pivotted.shape[1] 
             rows=pivotted.shape[0]
@@ -373,7 +373,7 @@ class NxtSomCore(object):
         df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
         df.columns = ['X_value','Y_value','Z_value']
         df['Z_value'] = pd.to_numeric(df['Z_value'])
-        pivotted= df.pivot('Y_value','X_value','Z_value')
+        pivotted= df.pivot(index='Y_value',columns='X_value',values='Z_value')
     
         cols=pivotted.shape[1] 
         rows=pivotted.shape[0]

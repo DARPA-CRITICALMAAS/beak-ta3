@@ -2,12 +2,14 @@ class Args:
     input_file: str            # Input file(*.lrn)
     input_list_text=[]         # only for geotiff files: input_file= ",".join(input_list_text)
     output_folder: str         # Folder to save som dictionary and cluster dictionary
-    output_file_somspace: str   
-    outgeofile: str   
+    output_file_somspace: str   # Text file that will contain calculated values: som_x som_y b_data1 b_data2 b_dataN umatrix cluster in geospace
+    outgeofile: str  
 
     som_x: int                # X dimension of generated SOM
     som_y: int                # Y dimension of generated SOM
     epochs: int               # Number of epochs to run
+
+    #base parameters required for som calculation. Additional optional parameters below:
 
     maptype='toroid'            # Type of SOM (sheet, toroid)
     initialcodebook=None        # File path of initial codebook, 2D numpy.array of float32.
