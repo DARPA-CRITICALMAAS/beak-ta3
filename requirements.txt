@@ -1,0 +1,6 @@
+ipykernel==6.26.0
+notebook==7.0.3
+tensorflow==2.13.1
+tensorflow_probability==0.21.0
+somoclu==1.7.6
+

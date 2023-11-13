@@ -9,5 +9,5 @@ services:
       - 8000:8000         # Ports for mkdocs
       - 8888:8888         # Ports for jupyter
     volumes:
-      - ./:/methods/          # Mount the repo
+      - ./:/beak-ta3/          # Mount the repo
     container_name: beak-ta3-dev
