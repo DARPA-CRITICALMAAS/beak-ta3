@@ -30,213 +30,230 @@ from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker # HPacker,
 from matplotlib.ticker import FormatStrFormatter
 import math
 from matplotlib.lines import Line2D
-from plotting_functions import plot_hexa
-
-import argsPlot
-
-args = argsPlot.Args()
-
-args.outsomfile= "/methods/methods/som/data/output/result_som.txt"   # som calculation somspace output text file
-args.som_x= 50         # som x dimension
-args.som_y= 50         # som y dimension
-args.input_file= "/methods/methods/som/data/input/SOM_grav_mag.lrn"    # Input file(*.lrn)
-args.dir= "/methods/methods/som/data/output"            # Input file(*.lrn) or directory where som.dictionary was safet to (/output/som.dictionary)
-args.grid_type= 'rectangular' # grid type (square or hexa), (rectangular or hexagonal)
-args.redraw='true'       # whether to draw all plots, or only those required for clustering (true: draw all. false:draw only for clustering).
-args.outgeofile='/methods/methods/som/data/output/result_geo.txt'     # som geospace results txt file
-args.dataType='grid'       # Data type (scatter or grid)
-args.noDataValue='-9999'    # noData value
+from .plotting_functions import plot_hexa
 
 
-"""Load input parameters & do basic setup"""
-"""Initialize variables"""
-outsomfile=args.outsomfile  #somspace results txt file
-somx=int(args.som_x)        
-somy=int(args.som_y)        
-input_file=args.input_file  #original input file 
-dir=args.dir               
-grid_type=args.grid_type   
-redraw=args.redraw          #whether to draw all plots, or only those required for clustering (true: draw all. false:draw only for clustering)
-dataType=args.dataType
-outgeofile=None
-geo_data=None
-eastingIndex=None
-northingIndex=None
-if args.outgeofile is not None:
-    outgeofile=args.outgeofile      
-labelIndex="-2" #TODO: Now that labelIndex is no longer a parameter, this system should be removed.
+def run_basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, redraw, dataType, noDataValue, aOutgeofile):
+
+    """Load input parameters & do basic setup"""
+    """Initialize variables"""
+ 
+    somx=int(som_x)        
+    somy=int(som_y)
+    outgeofile=None          
+    geo_data=None
+    eastingIndex=None
+    northingIndex=None
+    if aOutgeofile is not None:
+        outgeofile=aOutgeofile      
+    labelIndex="-2" #TODO: Now that labelIndex is no longer a parameter, this system should be removed.
 
 
-with open(dir+"/som.dictionary", 'rb') as som_dictionary_file:
-     som_dict = pickle.load(som_dictionary_file)
-som_data= np.genfromtxt(outsomfile,skip_header=(1), delimiter=' ')
-working_dir=dir#+"/somresults"
-som=pd.read_csv(outsomfile, delimiter=' ', header=None)
-som_headers=som.iloc[0] 
-if outgeofile is not None:
-    geo_data=np.genfromtxt(outgeofile, skip_header=(1), delimiter=' ')
-som_table=np.zeros((somx,somy))#empty somx*somy sized table for som plots
-if outgeofile is not None: #if spatial, draw geo plots
-    geofile = open(outgeofile, "r")
-    header_line = geofile.readline()
-    geo_headers=['#']
-    geo_headers = geo_headers +header_line.split(" ")
+    with open(working_dir+"/som.dictionary", 'rb') as som_dictionary_file:
+         som_dict = pickle.load(som_dictionary_file)
+    som_data= np.genfromtxt(outsomfile,skip_header=(1), delimiter=' ')
+    som=pd.read_csv(outsomfile, delimiter=' ', header=None)
+    som_headers=som.iloc[0] 
+    if outgeofile is not None:
+        geo_data=np.genfromtxt(outgeofile, skip_header=(1), delimiter=' ')
+    som_table=np.zeros((somx,somy))#empty somx*somy sized table for som plots
+    if outgeofile is not None: #if spatial, draw geo plots
+        geofile = open(outgeofile, "r")
+        header_line = geofile.readline()
+        geo_headers=['#']
+        geo_headers = geo_headers +header_line.split(" ")
 
 
-#Generate colormaps and ticks for clustering
-clusters=int(max(som_data[:,len(som_data[0])-2])+1)
-discrete_cmap=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=False)
-discrete_cmap_2=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=True)
-cluster_ticks=[]
-cluster_tick_labels=[]
-cluster_hit_count=[]
+    #Generate colormaps and ticks for clustering
+    clusters=int(max(som_data[:,len(som_data[0])-2])+1)
+    discrete_cmap=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=False)
+    discrete_cmap_2=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=True)
+    cluster_ticks=[]
+    cluster_tick_labels=[]
+    cluster_hit_count=[]
 
 
-#labeling clusters in colorbar with format "cluster number:  number of data points in this cluster".
-if(clusters>1):
-    for i in range (clusters,0,-1):
-        cluster_array=som_dict['clusters'].transpose()#TODO: figure out if this a problem elsewhere.
-        cluster_ticks.append(i-1)   
-        count=0
-        for bmu in som_dict['bmus']:
-            if (cluster_array[bmu[0]][bmu[1]])+1==i:
-                count+=1
-        cluster_tick_labels.append(str(i-1)+ "   " +str(count)) 
+    #labeling clusters in colorbar with format "cluster number:  number of data points in this cluster".
+    if(clusters>1):
+        for i in range (clusters,0,-1):
+            cluster_array=som_dict['clusters'].transpose()#TODO: figure out if this a problem elsewhere.
+            cluster_ticks.append(i-1)   
+            count=0
+            for bmu in som_dict['bmus']:
+                if (cluster_array[bmu[0]][bmu[1]])+1==i:
+                    count+=1
+            cluster_tick_labels.append(str(i-1)+ "   " +str(count)) 
 
-palette=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=False)
-formatted_palette=[]
+    palette=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=False)
+    formatted_palette=[]
 
-#format color values to format rgb(x,y,x), where x y and z are values between 0 and 255. values before conversion are in format a,b,c where a b and c are values between 0 and 1
-for i in palette:
-    formatted_value='rgb('
-    for j in i:
-        formatted_value=formatted_value+str("{:.2f}".format(j*255))+','
-    formatted_value=formatted_value[:-1] #remove last comma 
-    formatted_value=formatted_value+')' 
-    formatted_palette.append(formatted_value)
-palette=formatted_palette
+    #format color values to format rgb(x,y,x), where x y and z are values between 0 and 255. values before conversion are in format a,b,c where a b and c are values between 0 and 1
+    for i in palette:
+        formatted_value='rgb('
+        for j in i:
+            formatted_value=formatted_value+str("{:.2f}".format(j*255))+','
+        formatted_value=formatted_value[:-1] #remove last comma 
+        formatted_value=formatted_value+')' 
+        formatted_palette.append(formatted_value)
+    palette=formatted_palette
 
-#Format palette into colorscale. for example 10 clusters: (0,0.1,rgb_val), (0.1,0.2 rgb_val_2),...... ,(0.9,1,rgb_val_x) ((not always distance of 0.1)) so each cluster is assigned a specific color.
-clusterColorscale=[]
-for i in range (0,clusters):
-    clusterColorscale.append([float(float(i)/float(clusters)),palette[i]])
-    clusterColorscale.append([float(float(i+1)/clusters),palette[i]])
-
-
-if(grid_type.lower()=="hexagonal"): #if grid shape is hexagonal, initialize corresponding variables for hexa plots
-    x=somx
-    y=somy
-    centers=[]
-    base_y=math.sqrt(3)/2
-
-    for i in range(0, x):	
-        for j in range(0, y):
-            if (j%2==0):
-                base_x=0
-            else:
-                base_x=0.5
-            centers.append([(i+1)+base_x,(j+1)*base_y])#+1 to convert from index to value
-
-    grid={'centers':np.array(centers), 
-        'x':np.array([float(x)]),
-        'y':np.array([float(y)])}
-else:
-    grid=None
+    #Format palette into colorscale. for example 10 clusters: (0,0.1,rgb_val), (0.1,0.2 rgb_val_2),...... ,(0.9,1,rgb_val_x) ((not always distance of 0.1)) so each cluster is assigned a specific color.
+    clusterColorscale=[]
+    for i in range (0,clusters):
+        clusterColorscale.append([float(float(i)/float(clusters)),palette[i]])
+        clusterColorscale.append([float(float(i+1)/clusters),palette[i]])
 
 
-header_line=""#check if file has label column in it
-with open(input_file,encoding='utf-8-sig') as fh:
-    fh.readline() #skip first 3 rows
-    fh.readline() #skip first 3 rows
-    fh.readline() #skip first 3 rows
-    header_line = fh.readline()
-colnames=header_line.split("\t")
-if('label' in colnames):
-    labelIndex=colnames.index('label')
-#if (labelIndex!="-2"):#eli tän checkin sijaan pitäs kattoa onko input filessä 'label' nimistä columnia hedereissä.
-    annot_strings={}
-    annot_strings_for_dict={}
-    annot_data=[]
-    data = np.loadtxt(
-            input_file, 
-            dtype='str',
-            delimiter='\t',
-            skiprows=3
-            )
-    outfile=[]
-
-    #So. the current label format is the one that should be written to file, as it preserves all data. But for the plots, the new labeling system
-    #should be changed so, that differences in count are not taken into account, i.e. A A B = A B B, both are reduced to A B. should clean up the legend by
-    #quite a bit
-
-    for i in range(0,len(data[0])):
-        if(data[0][i].replace("\"","")=='label'):
-            outfile=data[1:,i]
-    annot_ticks=np.empty([somx, somy], dtype="<U32")
-    bmus=som_dict["bmus"]
-    counter=1
-    for i in range(0,len(outfile)):   #AA. eli jos nonspatial: -2 sekoittaa. luultavasti ainakin tän takia. veikkaanpa että spatiaalilla on ton takia 2:n ekan skippi.      # ticks are added to list. annot_strings_for_dict stores them in a list, so that they can be sorted and reliably checked for duplicates including ones that are in different order.
-        tick=annot_ticks[bmus[i][0]][bmus[i][1]]
-        if(outfile[i]!='' and outfile[i]!= "nan" and outfile[i]!='NA' and outfile[i]!='NULL' and outfile[i]!='Null' and outfile[i]!='NoData' and outfile[i]!=args.noDataValue):#tähän jonon jatkoksi vielä noDataValue
-            if (tick==''): 
-                annot_ticks[bmus[i][0]][bmus[i][1]]=str(counter)    
-                annot_strings[str(counter)]=[outfile[i]]
-                annot_strings_for_dict[str(counter)]=[outfile[i]]
-                if outgeofile is not None:
-                    annot_data.append([(str(counter) + ": " + outfile[i]),(str(bmus[i][0]) + str(bmus[i][1])),(str(geo_data[i][0]) + ", " + str(geo_data[i][1]))]) 
+    if(grid_type.lower()=="hexagonal"): #if grid shape is hexagonal, initialize corresponding variables for hexa plots
+        x=somx
+        y=somy
+        centers=[]
+        base_y=math.sqrt(3)/2
+        for i in range(0, x):	
+            for j in range(0, y):
+                if (j%2==0):
+                    base_x=0
                 else:
-                    annot_data.append([(str(counter) + ": " + outfile[i]),(str(bmus[i][0]) + str(bmus[i][1]))])          
+                    base_x=0.5
+                centers.append([(i+1)+base_x,(j+1)*base_y])#+1 to convert from index to value
+        grid={'centers':np.array(centers), 
+            'x':np.array([float(x)]),
+            'y':np.array([float(y)])}
+    else:
+        grid=None
+
+
+    header_line=""#check if file has label column in it
+    with open(input_file,encoding='utf-8-sig') as fh:
+        fh.readline() #skip first 3 rows
+        fh.readline() #skip first 3 rows
+        fh.readline() #skip first 3 rows
+        header_line = fh.readline()
+    colnames=header_line.split("\t")
+    if('label' in colnames):
+        labelIndex=colnames.index('label')
+    #if (labelIndex!="-2"):#eli tän checkin sijaan pitäs kattoa onko input filessä 'label' nimistä columnia hedereissä.
+        annot_strings={}
+        annot_strings_for_dict={}
+        annot_data=[]
+        data = np.loadtxt(
+                input_file, 
+                dtype='str',
+                delimiter='\t',
+                skiprows=3
+                )
+        outfile=[]
+
+        #So. the current label format is the one that should be written to file, as it preserves all data. But for the plots, the new labeling system
+        #should be changed so, that differences in count are not taken into account, i.e. A A B = A B B, both are reduced to A B. should clean up the legend by
+        #quite a bit
+
+        for i in range(0,len(data[0])):
+            if(data[0][i].replace("\"","")=='label'):
+                outfile=data[1:,i]
+        annot_ticks=np.empty([somx, somy], dtype="<U32")
+        bmus=som_dict["bmus"]
+        counter=1
+        for i in range(0,len(outfile)):   #AA. eli jos nonspatial: -2 sekoittaa. luultavasti ainakin tän takia. veikkaanpa että spatiaalilla on ton takia 2:n ekan skippi.      # ticks are added to list. annot_strings_for_dict stores them in a list, so that they can be sorted and reliably checked for duplicates including ones that are in different order.
+            tick=annot_ticks[bmus[i][0]][bmus[i][1]]
+            if(outfile[i]!='' and outfile[i]!= "nan" and outfile[i]!='NA' and outfile[i]!='NULL' and outfile[i]!='Null' and outfile[i]!='NoData' and outfile[i]!=noDataValue):#tähän jonon jatkoksi vielä noDataValue
+                if (tick==''): 
+                    annot_ticks[bmus[i][0]][bmus[i][1]]=str(counter)    
+                    annot_strings[str(counter)]=[outfile[i]]
+                    annot_strings_for_dict[str(counter)]=[outfile[i]]
+                    if outgeofile is not None:
+                        annot_data.append([(str(counter) + ": " + outfile[i]),(str(bmus[i][0]) + str(bmus[i][1])),(str(geo_data[i][0]) + ", " + str(geo_data[i][1]))]) 
+                    else:
+                        annot_data.append([(str(counter) + ": " + outfile[i]),(str(bmus[i][0]) + str(bmus[i][1]))])          
+                    counter=counter+1
+                else:   
+                    annot_strings[tick].append(outfile[i])
+                    annot_strings_for_dict[tick].append(outfile[i])
+                    if outgeofile is not None:
+                        annot_data.append([(str(tick) + ": " + outfile[i]),(str(bmus[i][0]) + str(bmus[i][1])),(str(geo_data[i][0]) + ", " + str(geo_data[i][1]))])
+                    else:
+                        annot_data.append([(str(tick) + ": " + outfile[i]),(str(bmus[i][0]) + str(bmus[i][1]))])
+
+        for i in range(1, len(annot_strings_for_dict)+1): 
+            annot_strings_for_dict[str(i)].sort()
+
+        #add a step: merge duplicates within a labeling group. BUT the below result must also be kept...
+        #eli joku unique filtteri vaan vetää eka tähän, sit jatko saa mennä aivan samaan tapaan.
+        #merge duplicates:         
+        for i in range(1, len(annot_strings_for_dict)+1):
+            for j in range(1, len(annot_strings_for_dict)+1):
+                if ((i!=j) and annot_strings_for_dict[str(i)]==annot_strings_for_dict[str(j)]):		
+                    if(str(i) in annot_strings):
+                        annot_strings.pop(str(j))
+                    for a in range(0,len(annot_ticks)):
+                        for b in range(0,len(annot_ticks[a])):
+                            if(annot_ticks[a][b]==str(i)):
+                                annot_ticks[a][b]=str(j)	
+
+        #remove gaps in index numbers:                        
+        counter=0
+        for i in range (1, len(annot_strings_for_dict)+1):
+            if str(i) in annot_strings:
                 counter=counter+1
-            else:   
-                annot_strings[tick].append(outfile[i])
-                annot_strings_for_dict[tick].append(outfile[i])
-                if outgeofile is not None:
-                    annot_data.append([(str(tick) + ": " + outfile[i]),(str(bmus[i][0]) + str(bmus[i][1])),(str(geo_data[i][0]) + ", " + str(geo_data[i][1]))])
-                else:
-                    annot_data.append([(str(tick) + ": " + outfile[i]),(str(bmus[i][0]) + str(bmus[i][1]))])
-
-    for i in range(1, len(annot_strings_for_dict)+1): 
-        annot_strings_for_dict[str(i)].sort()
-
-    #add a step: merge duplicates within a labeling group. BUT the below result must also be kept...
-    #eli joku unique filtteri vaan vetää eka tähän, sit jatko saa mennä aivan samaan tapaan.
-    #merge duplicates:         
-    for i in range(1, len(annot_strings_for_dict)+1):
-        for j in range(1, len(annot_strings_for_dict)+1):
-            if ((i!=j) and annot_strings_for_dict[str(i)]==annot_strings_for_dict[str(j)]):		
-                if(str(i) in annot_strings):
-                    annot_strings.pop(str(j))
+                annot_strings[str(counter)] = annot_strings.pop(str(i)) 
                 for a in range(0,len(annot_ticks)):
                     for b in range(0,len(annot_ticks[a])):
                         if(annot_ticks[a][b]==str(i)):
-                            annot_ticks[a][b]=str(j)	
+                            annot_ticks[a][b]=counter	
+        #format ticks:
+        for i in range(1,len(annot_strings)+1):
+            annot_strings[str(i)]=str(i)+": "+ ','.join(annot_strings[str(i)])
 
-    #remove gaps in index numbers:                        
-    counter=0
-    for i in range (1, len(annot_strings_for_dict)+1):
-        if str(i) in annot_strings:
-            counter=counter+1
-            annot_strings[str(counter)] = annot_strings.pop(str(i)) 
-            for a in range(0,len(annot_ticks)):
-                for b in range(0,len(annot_ticks[a])):
-                    if(annot_ticks[a][b]==str(i)):
-                        annot_ticks[a][b]=counter	
-    #format ticks:
-    for i in range(1,len(annot_strings)+1):
-        annot_strings[str(i)]=str(i)+": "+ ','.join(annot_strings[str(i)])
+    else:
+        annot_ticks=np.empty([somx, somy], dtype='<U')
+        annot_ticks.fill("")
 
-else:
-    annot_ticks=np.empty([somx, somy], dtype='<U')
-    annot_ticks.fill("")
+    #return {'var1': var1, 'var2':var2}
+    return geo_data, geo_headers, som_data, som_table, som_headers, som_dict, grid, grid_type, annot_ticks, outgeofile, clusters, cluster_ticks, cluster_tick_labels, discrete_cmap, discrete_cmap_2
+    #return {'geo_data': geo_data, 'geo_headers': geo_headers, 'som_data': som_data, 'som_table': som_table, 'som_headers': som_headers, 'som_dict': som_dict, 'grid': grid, 'annot_ticks': annot_ticks, 'outgeofile': outgeofile, 'clusters': clusters}
 
-#return {'var1': var1, 'var2':var2}
-#return {geo_data, geo_headers, som_data, som_table, som_headers, som_dict, grid, annot_ticks, outgeofile}
+
+"""
+Run plotting scripts
+"""    
+def run_plotting_script(argsP):
+
+    [geo_data, geo_headers, som_data, som_table, som_headers, som_dict, grid, grid_type, annot_ticks, outgeofile, clusters, cluster_ticks, cluster_tick_labels, discrete_cmap, discrete_cmap_2] = run_basic_setup(argsP.outsomfile, argsP.som_x, argsP.som_y, argsP.input_file, argsP.dir, argsP.grid_type, argsP.redraw, argsP.dataType, argsP.noDataValue, argsP.outgeofile)
+
+    if argsP.outgeofile is not None: #if spatial, draw geo plots
+        if(argsP.dataType=='scatter'):
+            if(max(geo_data[:,(4)])>0): #if clusters
+                plot_geospace_clusters_scatter(geo_data, discrete_cmap_2, argsP.dir)
+            if(redraw!="false"):
+                plot_geospace_results_scatter(geo_data, geo_headers, som_data, argsP.dir)
+            print("GeoSpace plots finished")
+        else:
+            if(max(geo_data[:,(4)])>0):#if clusters
+                plot_geospace_clusters_grid(geo_data, discrete_cmap, clusters,cluster_ticks, cluster_tick_labels, argsP.dir)
+            if(argsP.redraw!="false"):
+                plot_geospace_results_grid(geo_data, geo_headers, som_data, argsP.dir)
+            print("GeoSpace plots finished")
+    if(clusters>1): #draw som cluster plot if there is more than 1 cluster
+        draw_som_clusters(som_data, som_table, annot_ticks, som_headers, discrete_cmap, discrete_cmap_2, argsP.dir)
+
+    draw_umatrix(som_data, som_table, grid, grid_type, annot_ticks, som_headers, argsP.dir)
+    draw_number_of_hits(som_dict,argsP.som_x,argsP.som_y,clusters,grid,cluster_tick_labels,grid_type)
+    #in case the function was called for redrawing after selecting a different clustering result. so that we can skip stuff we don't have to redraw to speed things up. CURRENTLY NOT IN USE, ALWAYS TRUE.
+    #if(redraw!="false"):
+    draw_som_results(som_data, som_table,grid, grid_type, annot_ticks, som_headers, argsP.dir)
+
+    print("SomSpace plots finshed")
+
+    if(som_dict['clusters'] is not None):
+        draw_boxplots(som_dict,som_data,discrete_cmap, argsP.dir)
+    print("Boxplots finished")
+
 
 
 """
 Plot geospace plots & q-error if type is grid
 """
-def plot_geospace_results_grid(geo_data, geo_headers, som_data):
+def plot_geospace_results_grid(geo_data, geo_headers, som_data, working_dir):
     mpl.rcParams.update({'font.size': 14})
 
     for i in range(0, len(som_data[0])-4): 
@@ -341,7 +358,7 @@ def plot_geospace_results_grid(geo_data, geo_headers, som_data):
 """
 Plot geospace plots & q-error if type is scatter
 """
-def plot_geospace_results_scatter(geo_data, geo_headers, som_data):
+def plot_geospace_results_scatter(geo_data, geo_headers, som_data, working_dir):
 
     centers=[]     
     for i in range(0, len(geo_data)):	
@@ -385,7 +402,7 @@ def plot_geospace_results_scatter(geo_data, geo_headers, som_data):
 """
 Draw Som result plots
 """
-def draw_som_results(som_data, som_table,grid, annot_ticks, som_headers):
+def draw_som_results(som_data, som_table,grid, grid_type, annot_ticks, som_headers,working_dir):
     for j in range(2,len(som_data[0])-3):
         if(grid_type.lower()=="rectangular"):
             for i in range(0,len(som_data)): 
@@ -409,7 +426,7 @@ def draw_som_results(som_data, som_table,grid, annot_ticks, som_headers):
 """
 Draw U-matrix plot
 """
-def draw_umatrix(som_data, som_table,grid, annot_ticks, som_headers):
+def draw_umatrix(som_data, som_table,grid, grid_type, annot_ticks, som_headers,working_dir):
     for j in range(len(som_data[0])-3,len(som_data[0])-2):
         if(grid_type.lower()=="rectangular"):
             for i in range(0,len(som_data)): 
@@ -432,7 +449,7 @@ def draw_umatrix(som_data, som_table,grid, annot_ticks, som_headers):
 """
 Draw Som Cluster plot
 """
-def draw_som_clusters(som_data, som_table, annot_ticks, som_headers):    
+def draw_som_clusters(som_data, som_table, annot_ticks, som_headers,discrete_cmap,discrete_cmap_2,working_dir):    
     if(grid_type.lower()=="rectangular"):
         mpl.rcParams.update({'font.size': 14})  
         for i in range(0,len(som_data)): 
@@ -500,7 +517,7 @@ def draw_som_clusters(som_data, som_table, annot_ticks, som_headers):
 """
 Plot geospace clusters, if there is more than 1 cluster and input type is grid
 """
-def plot_geospace_clusters_grid(geo_data):
+def plot_geospace_clusters_grid(geo_data,discrete_cmap,clusters,cluster_ticks,cluster_tick_labels,working_dir):
     #global geo_data
     x=geo_data[:,0]
     y=geo_data[:,1]
@@ -558,7 +575,7 @@ def plot_geospace_clusters_grid(geo_data):
 """
 Plot geospace clusters if input type is scatter
 """
-def plot_geospace_clusters_scatter(geo_data):
+def plot_geospace_clusters_scatter(geo_data,discrete_cmap_2,working_dir):
     #global geo_data
     z=geo_data[:,(4)]      
     centers=[]     
@@ -584,7 +601,7 @@ def plot_geospace_clusters_scatter(geo_data):
 Plot boxplots using som data.
 """
 
-def draw_boxplots(som_dict,som_data):
+def draw_boxplots(som_dict,som_data,discrete_cmap,working_dir):
     
     mpl.rcParams.update({'font.size': 12})  
     cluster_col=[]
@@ -615,7 +632,7 @@ def draw_boxplots(som_dict,som_data):
 """
 Draw number of hits
 """
-def draw_number_of_hits():
+def draw_number_of_hits(som_dict,somx,somy,clusters,grid,cluster_tick_labels,grid_type):
     mpl.rcParams.update({'font.size': 12}) 
     hits=np.zeros((somx,somy))   
     for i in range(0, len(som_dict['bmus'])):
@@ -640,38 +657,4 @@ def draw_number_of_hits():
     plt.clf()
     plt.cla()
     plt.close()
-    
-
-"""
-Run plotting scripts
-"""          
-if outgeofile is not None: #if spatial, draw geo plots
-    if(dataType=='scatter'):
-        if(max(geo_data[:,(4)])>0):#if clusters
-            plot_geospace_clusters_scatter(geo_data)
-        if(redraw!="false"):
-            plot_geospace_results_scatter(geo_data, geo_headers, som_data)
-        print("GeoSpace plots finished")
-    else:
-        if(max(geo_data[:,(4)])>0):#if clusters
-            plot_geospace_clusters_grid(geo_data)
-        if(redraw!="false"):
-            plot_geospace_results_grid(geo_data, geo_headers, som_data)
-        print("GeoSpace plots finished")
-if(clusters>1): #draw som cluster plot if there is more than 1 cluster
-    draw_som_clusters(som_data, som_table, annot_ticks, som_headers)
-
-draw_umatrix(som_data, som_table,grid, annot_ticks, som_headers)
-draw_number_of_hits()
-#in case the function was called for redrawing after selecting a different clustering result. so that we can skip stuff we don't have to redraw to speed things up. CURRENTLY NOT IN USE, ALWAYS TRUE.
-#if(redraw!="false"):
-draw_som_results(som_data, som_table,grid, annot_ticks, som_headers)
-
-print("SomSpace plots finshed")
-
-if(som_dict['clusters'] is not None):
-    draw_boxplots(som_dict,som_data)
-print("Boxplots finished")
-
-
-
+ 
