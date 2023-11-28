@@ -5,7 +5,13 @@ Advanced hybrid AI-methods for mineral predictive mapping
 
 This repository is still in development. Documentation will grow over time.
 
-Last update: **11-12-2023**
+Last update: **11-28-2023**
+
+What's new?
+- slight repo structure modifications
+- added **mvt_nat** experiment: modified data extraction from datacube and preparation for initial SOM model
+
+Used tools are currently in the `/experiments/mvt_nat/utilities` module. These will be changed in future updates to match in a more intuitive module structure (e.g. tools for io, rasterization, ..)
 
 Current contents include
 
@@ -35,7 +41,6 @@ The repository is build-up as following:
 ```
 
 The development for SOM, BNN and hybridization is accomplished on the respective branches:
-- processing_dev
 - som_dev
 - bnn_dev
 - hybrid_dev
@@ -66,7 +71,7 @@ All code and functionality is designed to run on CPU since GPU-processing requir
 
 The conda environment for both Docker and Conda installations is called **beak-ta3.** 
 
-## Setting up a local development environment with docker (recommended)
+## Setting up a local environment with docker
 
 Create a CMD-instance from within the beak-ta3 folder. Build and run the container. Run this and every other command in the repository root unless otherwise directed.
 
