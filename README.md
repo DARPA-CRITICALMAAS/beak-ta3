@@ -25,19 +25,19 @@ If you set-up the environment, please **always** build from the main branch!
 
 ## Repository structure
 
-The repository is build-up as following:
+The repository is structured as following:
 
 ```
 ├── beak-ta3/
 │   ├── docs/               # additional documentations
 │   ├── experiments/        # mineral systems (e.g. MVT-NAT, MVT-REG, ...) working on
-│   ├── local/              # stuff that's not beeing uploaded to GitHub
-│   └── methods/            # Basic code for the MPM-methods in development
+│   ├── local/              # stuff that's not being uploaded to GitHub
+│   └── methods/            # contains the code for the respective ML methods
 │       ├── bnn/
 │       ├── hybrid/
 │       ├── processing/
 │       └── som/
-│   └── utilities/          # helper functions   
+│   └── utilities/          # helper functions, will be modularize in future releases   
 ```
 
 The development for SOM, BNN and hybridization is accomplished on the respective branches:
@@ -73,7 +73,7 @@ The conda environment for both Docker and Conda installations is called **beak-t
 
 ## Setting up a local environment with docker
 
-Create a CMD-instance from within the beak-ta3 folder. Build and run the container. Run this and every other command in the repository root unless otherwise directed.
+Create a terminal instance from within the beak-ta3 folder. Build and run the container. Run this and every other command in the repository root unless otherwise directed.
 
 ```
 docker compose up -d

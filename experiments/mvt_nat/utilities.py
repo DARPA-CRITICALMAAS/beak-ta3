@@ -20,6 +20,15 @@ from rasterio import warp
 from shapely.wkt import loads
 
 
+# General helper functions
+def _replace_invalid_chars(string: str) -> str:
+    """Replace invalid characters in string."""
+    string = re.sub(r"[ /().,]", "_", string)
+    string = re.sub(r"(_+)", "_", string)
+    return string
+
+
+# IO functions
 def load_dataset(
     file: Path, encoding_type: str = "ISO-8859-1", nrows: Optional[int] = None
 ) -> pd.DataFrame:
@@ -32,13 +41,39 @@ def load_raster(file: Path) -> rasterio.io.DatasetReader:
     return rasterio.open(file)
 
 
+def load_rasters(
+    folder: Path, extensions: List[str] = [".tif", ".tiff"]
+) -> List[rasterio.io.DatasetReader]:
+    """Load multiple raster datasets."""
+    file_list = create_file_list(folder, extensions)
+    loaded_rasters = []
+
+    for file in tqdm(file_list):
+        loaded_raster = load_raster(file)
+        loaded_rasters.append(loaded_raster)
+
+    return file_list, loaded_rasters
+
+
 def read_raster(raster: rasterio.io.DatasetReader) -> np.ndarray:
     """Read raster dataset. Accepts only single-band rasters for simplicity."""
     assert raster.band_count == 1
     return raster.read()
 
 
-def create_file_list(folder: Path, extensions: List[str]) -> List[Path]:
+def read_rasters(raster_list: List[rasterio.io.DatasetReader]) -> List[np.ndarray]:
+    """Read multiple raster datasets."""
+    return [read_raster(raster) for raster in raster_list]
+
+
+def get_filename_and_extension(file: Path) -> Tuple[str, str]:
+    """Get filename and extension from file."""
+    return file.stem, file.suffix
+
+
+def create_file_list(
+    folder: Path, extensions: List[str] = [".tif", ".tiff"]
+) -> List[Path]:
     """Create a list of files with given extensions."""
     file_list = []
 
@@ -48,11 +83,6 @@ def create_file_list(folder: Path, extensions: List[str]) -> List[Path]:
             file_list.append(file)
 
     return file_list
-
-
-def get_filename_and_extension(file: Path) -> Tuple[str, str]:
-    """Get filename and extension from file."""
-    return file.stem, file.suffix
 
 
 def create_folder_list(root_folder: Path) -> List[Path]:
@@ -70,23 +100,10 @@ def create_folder_list(root_folder: Path) -> List[Path]:
     return folder_list, file_list
 
 
-def load_rasters(
-    folder: Path, extensions: List = [".tif", ".tiff"]
-) -> List[rasterio.io.DatasetReader]:
-    """Load multiple raster datasets."""
-    file_list = create_file_list(folder, extensions)
-    loaded_rasters = []
-
-    for file in tqdm(file_list):
-        loaded_raster = load_raster(file)
-        loaded_rasters.append(loaded_raster)
-
-    return file_list, loaded_rasters
-
-
-def read_rasters(raster_list: List[rasterio.io.DatasetReader]) -> List[np.ndarray]:
-    """Read multiple raster datasets."""
-    return [read_raster(raster) for raster in raster_list]
+def check_path(folder: Path):
+    """Check if path exists and create if not."""
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
 
 def save_raster(
@@ -127,12 +144,7 @@ def update_raster_metadata(raster: rasterio.io.DatasetReader, **kwargs) -> dict:
     return meta
 
 
-def check_path(folder: Path):
-    """Check if path exists and create if not."""
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-
-
+# Statics related functions
 def get_outliers_zscore(
     data: pd.DataFrame, column: str, threshold: float = 3.0
 ) -> pd.DataFrame:
@@ -175,11 +187,14 @@ def get_outliers_iqr(
     return outliers
 
 
-# Adapted core function from EIS Toolkit (main branch as of 2023-11-17)
+# Vector processing related functions
 def buffer_vector(
     geodataframe: gpd.GeoDataFrame, buffer_value: np.number
 ) -> gpd.GeoDataFrame:
-    """Buffer vector data."""
+    """Buffer vector data.
+
+    Adapted core function from EIS Toolkit (main branch as of 17-11-2023).
+    """
     geodataframe = geodataframe.copy()
     geodataframe["geometry"] = geodataframe["geometry"].apply(
         lambda geom: geom.buffer(buffer_value)
@@ -187,11 +202,14 @@ def buffer_vector(
     return geodataframe
 
 
-# Adapted core function from EIS Toolkit (main branch as of 2023-11-17)
 def _transform_from_geometries(
     geodataframe: gpd.GeoDataFrame, resolution: np.number
 ) -> Tuple[float, float, transform.Affine]:
-    """Determine transform from the input geometries."""
+    """Determine transform from the input geometries.
+
+    Adapted core function from EIS Toolkit (main branch as of 17-11-2023)
+
+    """
     min_x, min_y, max_x, max_y = geodataframe.total_bounds
 
     out_width = int((max_x - min_x) / resolution)
@@ -239,13 +257,7 @@ def _create_geodataframe_from_points(
     return geodataframe
 
 
-def _replace_invalid_chars(string: str) -> str:
-    """Replace invalid characters in string."""
-    string = re.sub(r"[ /().,]", "_", string)
-    string = re.sub(r"(_+)", "_", string)
-    return string
-
-
+# Raster related functions
 def fill_nodata_with_mean(
     array: np.ndarray,
     nodata_value: np.number,
@@ -285,8 +297,9 @@ def fill_nodata_with_mean(
     return np.where(np.isnan(out_array), nodata_value, out_array)
 
 
-# Helper function to pass arguments
+# Core functionality for creating raster data
 def _rasterize_vector_helper(args):
+    """Pass arguments to rasterize_vector_process."""
     return _rasterize_vector_process(*args)
 
 
@@ -305,6 +318,7 @@ def _rasterize_vector_process(
     dtype: Optional[np.dtype],
     impute_nodata: bool,
 ):
+    """Core function for rasterizing vector data."""
     # Create geometry-value pairs
     geometry_value_pairs = list(zip(geometries, values))
     dtype = values.dtype if dtype is None else dtype
@@ -340,6 +354,7 @@ def _rasterize_vector_create_encodings(
     data: pd.DataFrame,
     export_absent,
 ) -> pd.DataFrame:
+    """Create encodings for categorical data."""
     # Create binary encodings
     data_encoded = pd.get_dummies(data[value_columns], prefix=value_columns).astype(
         np.uint8
@@ -491,14 +506,42 @@ def rasterize_vector(
     return out_columns, out_rasters, out_transforms
 
 
-# Reproject raster: Adapted function from EIS Toolkit (main branch as of 2023-11-17)
-def reproject_raster(
+def reproject_raster_process(
+    file: Path,
+    input_folder: Path,
+    output_folder: Path,
+    target_epsg: int,
+    target_resolution: Optional[np.number],
+    resampling_method: warp.Resampling,
+):
+    """Run reprojection process for a single raster file."""
+    raster = load_raster(file)
+    out_file = output_folder / file.relative_to(Path(input_folder))
+    check_path(out_file.parent)
+    out_array, out_meta = _reproject_raster(
+        raster, target_epsg, target_resolution, resampling_method
+    )
+
+    save_raster(
+        out_file,
+        out_array,
+        target_epsg,
+        out_meta["height"],
+        out_meta["width"],
+        raster.nodata,
+        out_meta["transform"],
+    )
+
+
+def _reproject_raster(
     raster: rasterio.io.DatasetReader,
     target_crs: int,
-    target_resolution: Optional[np.number] = None,
-    resampling_method: warp.Resampling = warp.Resampling.nearest,
+    target_resolution: Optional[np.number],
+    resampling_method: warp.Resampling,
 ) -> Tuple[np.ndarray, dict]:
-    """Reproject raster data to a new coordinate reference system."""
+    """Core function for reprojecting raster data to a new coordinate reference system.
+    Adapted function from EIS Toolkit (main branch as of 2023-11-17)"""
+
     src_arr = raster.read()
     dst_crs = rasterio.crs.CRS.from_epsg(target_crs)
 
@@ -538,3 +581,52 @@ def reproject_raster(
     )
 
     return out_image.astype(src_arr.dtype), out_meta
+
+
+def reproject_raster(
+    input_folder: Path,
+    output_folder: Path,
+    target_epsg: int,
+    target_resolution: Optional[np.number] = None,
+    resampling_method: warp.Resampling = warp.Resampling.nearest,
+    n_workers: int = mp.cpu_count(),
+):
+    """Call function for reprojecting raster data."""
+    # Show selected folder
+    print(f"Selected folder: {input_folder}")
+
+    # Get all folders in the root folder
+    folders, _ = create_folder_list(Path(input_folder))
+    print(f"Total of folders found: {len(folders)}")
+
+    # Load rasters for each folder
+    file_list = []
+
+    with mp.Pool(n_workers) as pool:
+        results = pool.map(create_file_list, folders)
+
+    for result in results:
+        file_list.extend(result)
+
+    # Show results
+    print(f"Files loaded: {len(file_list)}")
+
+    # Set args list
+    args_list = [
+        (
+            file,
+            input_folder,
+            output_folder,
+            target_epsg,
+            target_resolution,
+            resampling_method,
+        )
+        for file in file_list
+    ]
+
+    # Run reprojection
+    with mp.Pool(n_workers) as pool:
+        with tqdm(total=len(args_list), desc="Processing files") as pbar:
+            for _ in pool.starmap(reproject_raster_process, args_list):
+                pbar.update(1)
+                time.sleep(0.1)
