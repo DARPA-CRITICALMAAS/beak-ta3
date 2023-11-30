@@ -19,10 +19,26 @@ from rasterio.crs import CRS
 from rasterio import warp
 from shapely.wkt import loads
 
+# References
+# Some non-trivial functionalities were adapted from other sources.
+# The original sources are listed below and referenced in the code as well.
+# 
+# EIS toolkit: 
+# GitHub repository https://github.com/GispoCoding/eis_toolkit under EUPL-1.2 license.
+
 
 # General helper functions
-def _replace_invalid_chars(string: str) -> str:
-    """Replace invalid characters in string."""
+def replace_invalid_characters(string: str) -> str:
+    """
+    Replace invalid characters in a string with an underscore.
+    Multiple consecutive underscores will be cropped to one.
+
+    Args:
+        string (str): Input string.
+
+    Returns:
+        str: String with replaced characters.
+    """    
     string = re.sub(r"[ /().,]", "_", string)
     string = re.sub(r"(_+)", "_", string)
     return string
@@ -32,19 +48,47 @@ def _replace_invalid_chars(string: str) -> str:
 def load_dataset(
     file: Path, encoding_type: str = "ISO-8859-1", nrows: Optional[int] = None
 ) -> pd.DataFrame:
-    """Load text-based dataset."""
+    """
+    Load a text-based dataset from disk.
+
+    Args:
+        file (Path): Location of the file to be loaded.
+        encoding_type (str, optional): Text encoding of the input file. Defaults to "ISO-8859-1".
+        nrows (Optional[int], optional): Number of rows to be loaded. Defaults to None.
+
+    Returns:
+        pd.DataFrame: Table with loaded data.
+    """    
     return pd.read_csv(file, encoding=encoding_type, nrows=nrows)
 
 
 def load_raster(file: Path) -> rasterio.io.DatasetReader:
-    """Load raster dataset."""
+    """
+    Load a single raster file using rasterio.
+
+    Args:
+        file (Path): The path to the raster file.
+
+    Returns:
+        rasterio.io.DatasetReader: The opened raster dataset.
+
+    """
     return rasterio.open(file)
 
 
 def load_rasters(
     folder: Path, extensions: List[str] = [".tif", ".tiff"]
 ) -> List[rasterio.io.DatasetReader]:
-    """Load multiple raster datasets."""
+    """
+    Load raster files of a given type from a folder.
+
+    Args:
+        folder (Path): The folder path where the raster files are located.
+        extensions (List[str], optional): List of file extensions to consider. Defaults to [".tif", ".tiff"].
+
+    Returns:
+        Tuple[List[Path], List[rasterio.io.DatasetReader]]: A tuple containing the list of file paths and the loaded raster datasets.
+    """
     file_list = create_file_list(folder, extensions)
     loaded_rasters = []
 
@@ -56,13 +100,29 @@ def load_rasters(
 
 
 def read_raster(raster: rasterio.io.DatasetReader) -> np.ndarray:
-    """Read raster dataset. Accepts only single-band rasters for simplicity."""
+    """
+    Read a raster single-band raster dataset.
+    
+    Args:
+        raster (rasterio.io.DatasetReader): The raster dataset to read.
+        
+    Returns:
+        np.ndarray: The raster data as a NumPy array.
+    """
     assert raster.band_count == 1
     return raster.read()
 
 
 def read_rasters(raster_list: List[rasterio.io.DatasetReader]) -> List[np.ndarray]:
-    """Read multiple raster datasets."""
+    """
+    Read multiple rasters and return them as a list of NumPy arrays.
+    
+    Args:
+        raster_list (List[rasterio.io.DatasetReader]): A list of rasterio dataset readers.
+        
+    Returns:
+        List[np.ndarray]: A list of NumPy arrays representing the read rasters.
+    """
     return [read_raster(raster) for raster in raster_list]
 
 
@@ -74,7 +134,16 @@ def get_filename_and_extension(file: Path) -> Tuple[str, str]:
 def create_file_list(
     folder: Path, extensions: List[str] = [".tif", ".tiff"]
 ) -> List[Path]:
-    """Create a list of files with given extensions."""
+    """
+    Create a list of files in the specified folder with the given extensions.
+
+    Args:
+        folder (Path): The folder path to search for files.
+        extensions (List[str], optional): The list of file extensions to include. Defaults to [".tif", ".tiff"].
+
+    Returns:
+        List[Path]: A list of Path objects representing the files found.
+    """
     file_list = []
 
     for file in folder.glob("*"):
@@ -86,7 +155,15 @@ def create_file_list(
 
 
 def create_folder_list(root_folder: Path) -> List[Path]:
-    """Create a list of folders in a root folder (including subfolders)."""
+    """
+    Create a list of folders in a root folder (including subfolders).
+
+    Args:
+        root_folder (Path): The root folder to search for folders.
+
+    Returns:
+        Tuple[List[Path], List[Path]]: A tuple containing two lists - the list of folders and the list of files.
+    """
     folder_list = []
     file_list = []
 
@@ -101,7 +178,15 @@ def create_folder_list(root_folder: Path) -> List[Path]:
 
 
 def check_path(folder: Path):
-    """Check if path exists and create if not."""
+    """
+    Check if path exists and create if not.
+
+    Args:
+        folder (Path): The path to check and create if necessary.
+        
+    Returns:
+        None
+    """
     if not os.path.exists(folder):
         os.makedirs(folder)
 
@@ -115,7 +200,21 @@ def save_raster(
     nodata_value: np.number,
     transform: dict,
 ):
-    """Save raster data to disk."""
+    """
+    Save raster data to disk.
+
+    Args:
+        path (Path): The file path where the raster will be saved.
+        array (np.ndarray): The raster data as a NumPy array.
+        epsg_code (int): The EPSG code specifying the coordinate reference system (CRS) of the raster.
+        height (int): The height (number of rows) of the raster.
+        width (int): The width (number of columns) of the raster.
+        nodata_value (np.number): The nodata value of the raster.
+        transform (dict): The affine transformation matrix that maps pixel coordinates to CRS coordinates.
+
+    Returns:
+        None
+    """
     count = array.shape[0]
     dtype = array.dtype
 
@@ -138,7 +237,17 @@ def save_raster(
 
 
 def update_raster_metadata(raster: rasterio.io.DatasetReader, **kwargs) -> dict:
-    """Update raster metadata."""
+    """
+    Update raster metadata.
+
+    Args:
+        raster (rasterio.io.DatasetReader): The input raster dataset.
+        **kwargs: Additional metadata key-value pairs to update.
+
+    Returns:
+        dict: The updated metadata dictionary.
+
+    """
     meta = raster.meta.copy()
     meta.update(kwargs)
     return meta
@@ -148,8 +257,18 @@ def update_raster_metadata(raster: rasterio.io.DatasetReader, **kwargs) -> dict:
 def get_outliers_zscore(
     data: pd.DataFrame, column: str, threshold: float = 3.0
 ) -> pd.DataFrame:
-    """Get outliers based on the z-score using scikit-learn."""
+    """
+    Get outliers based on the z-score using scikit-learn.
 
+    Args:
+        data (pd.DataFrame): The input DataFrame.
+        column (str): The column name to calculate z-scores and identify outliers.
+        threshold (float, optional): The threshold value for identifying outliers. Defaults to 3.0.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the outliers based on the z-score.
+
+    """
     # Extract the column data
     column_data = data[[column]]
 
@@ -166,8 +285,18 @@ def get_outliers_zscore(
 def get_outliers_iqr(
     data: pd.DataFrame, column: str, threshold: float = 1.5
 ) -> pd.Series:
-    """Get outliers based on the IQR method."""
+    """
+    Get outliers based on the IQR method.
 
+    Args:
+        data (pd.DataFrame): The input DataFrame.
+        column (str): The column name to calculate outliers for.
+        threshold (float, optional): The threshold value for outlier detection. Defaults to 1.5.
+
+    Returns:
+        pd.Series: A Series containing the outliers.
+
+    """
     # Extract the column data
     column_data = data[column]
 
@@ -191,9 +320,16 @@ def get_outliers_iqr(
 def buffer_vector(
     geodataframe: gpd.GeoDataFrame, buffer_value: np.number
 ) -> gpd.GeoDataFrame:
-    """Buffer vector data.
-
+    """
+    Buffer vector data.
     Adapted core function from EIS Toolkit (main branch as of 17-11-2023).
+
+    Args:
+        geodataframe (gpd.GeoDataFrame): The input GeoDataFrame.
+        buffer_value (np.number): The buffer distance.
+
+    Returns:
+        gpd.GeoDataFrame: The buffered GeoDataFrame.
     """
     geodataframe = geodataframe.copy()
     geodataframe["geometry"] = geodataframe["geometry"].apply(
@@ -202,12 +338,23 @@ def buffer_vector(
     return geodataframe
 
 
-def _transform_from_geometries(
+def transform_from_geometries(
     geodataframe: gpd.GeoDataFrame, resolution: np.number
 ) -> Tuple[float, float, transform.Affine]:
-    """Determine transform from the input geometries.
+    """
+    Calculate the transform parameters required to convert the input geometries
+    to a specified resolution. It takes a GeoDataFrame containing the geometries and the desired
+    resolution as input.
+    
+    Adapted core function from EIS Toolkit (main branch as of 17-11-2023).
 
-    Adapted core function from EIS Toolkit (main branch as of 17-11-2023)
+    Args:
+        geodataframe (gpd.GeoDataFrame): The input GeoDataFrame containing the geometries.
+        resolution (np.number): The desired resolution for the transformation.
+
+    Returns:
+        Tuple[float, float, transform.Affine]: A tuple containing the width, height, and transform
+        parameters required for the transformation.
 
     """
     min_x, min_y, max_x, max_y = geodataframe.total_bounds
@@ -219,12 +366,27 @@ def _transform_from_geometries(
     return out_width, out_height, out_transform
 
 
-def _create_geodataframe_from_polygons(
+def create_geodataframe_from_polygons(
     data: pd.DataFrame,
     polygon_col: str,
     epsg_code: Optional[int] = None,
 ) -> gpd.GeoDataFrame:
-    """Create GeoDataFrame from DataFrame."""
+    """
+    Create a GeoDataFrame from a DataFrame containing polygon geometries.
+
+    Args:
+        data (pd.DataFrame): The input DataFrame containing the polygon data.
+        polygon_col (str): The name of the column in the DataFrame that contains the polygon geometries.
+        epsg_code (Optional[int]): The EPSG code specifying the coordinate reference system (CRS) of the geometries.
+            If not provided, a ValueError will be raised.
+
+    Returns:
+        gpd.GeoDataFrame: The resulting GeoDataFrame with the polygon geometries.
+
+    Raises:
+        ValueError: If the `epsg_code` parameter is not provided.
+
+    """
     if epsg_code is None:
         raise ValueError("Parameter epsg_code must be given.")
 
@@ -239,13 +401,28 @@ def _create_geodataframe_from_polygons(
     return geodataframe
 
 
-def _create_geodataframe_from_points(
+def create_geodataframe_from_points(
     data: pd.DataFrame,
     long_col: str,
     lat_col: str,
     epsg_code: Optional[int] = None,
 ) -> gpd.GeoDataFrame:
-    """Create GeoDataFrame from DataFrame."""
+    """
+    Create a GeoDataFrame from a DataFrame.
+
+    Args:
+        data (pd.DataFrame): The input DataFrame containing the data.
+        long_col (str): The name of the column containing the longitude values.
+        lat_col (str): The name of the column containing the latitude values.
+        epsg_code (Optional[int]): The EPSG code specifying the coordinate reference system (CRS) of the data.
+            If not provided, a ValueError will be raised.
+
+    Returns:
+        gpd.GeoDataFrame: The resulting GeoDataFrame.
+
+    Raises:
+        ValueError: If the epsg_code parameter is not provided.
+    """
     if epsg_code is None:
         raise ValueError("Parameter epsg_code must be given.")
 
@@ -264,7 +441,18 @@ def fill_nodata_with_mean(
     size: Optional[int] = 3,
     num_nan_max: Optional[int] = 4,
 ) -> np.ndarray:
-    """Fill nodata values with mean from sourrounding cells."""
+    """
+    Fill nodata values with the mean from surrounding cells.
+
+    Args:
+        array (np.ndarray): Input array with nodata values.
+        nodata_value (np.number): Value representing nodata in the array.
+        size (Optional[int], optional): Size of the kernel used for calculating the mean. Defaults to 3.
+        num_nan_max (Optional[int], optional): Maximum number of nodata cells allowed for mean calculation. Defaults to 4.
+
+    Returns:
+        np.ndarray: Array with nodata values filled with the mean from surrounding cells.
+    """
     # Set kernel size
     kernel = np.ones((size, size))
 
@@ -299,7 +487,15 @@ def fill_nodata_with_mean(
 
 # Core functionality for creating raster data
 def _rasterize_vector_helper(args):
-    """Pass arguments to rasterize_vector_process."""
+    """
+    Pass arguments to rasterize_vector_process.
+
+    Args:
+        args: Tuple of arguments to be passed to rasterize_vector_process.
+
+    Returns:
+        The result of the rasterize_vector_process function.
+    """
     return _rasterize_vector_process(*args)
 
 
@@ -318,7 +514,26 @@ def _rasterize_vector_process(
     dtype: Optional[np.dtype],
     impute_nodata: bool,
 ):
-    """Core function for rasterizing vector data."""
+    """
+    Rasterize vector data based on the provided parameters.
+
+    Args:
+        value_column (str): The name of the column containing the values to be rasterized.
+        values (np.ndarray): The array of values to be rasterized.
+        geometries (gpd.array.GeometryArray): The array of geometries to be rasterized.
+        height (int): The height of the output raster.
+        width (int): The width of the output raster.
+        nodata_value (np.number): The nodata value to be used in the output raster.
+        transform (transform.Affine): The affine transformation to be applied to the output raster.
+        all_touched (bool): Whether to consider all pixels touched by the geometries as valid.
+        merge_strategy (str): The merge strategy to be used when multiple geometries overlap a pixel.
+        default_value (np.number): The default value to be used for pixels without any geometries.
+        dtype (Optional[np.dtype]): The data type of the output raster. If None, it will be inferred from the values array.
+        impute_nodata (bool): Whether to impute single nodata values in the output raster.
+
+    Returns:
+        Tuple[str, np.ndarray, transform.Affine]: A tuple containing the name of the output column, the rasterized array, and the output transformation.
+    """
     # Create geometry-value pairs
     geometry_value_pairs = list(zip(geometries, values))
     dtype = values.dtype if dtype is None else dtype
@@ -354,7 +569,19 @@ def _rasterize_vector_create_encodings(
     data: pd.DataFrame,
     export_absent,
 ) -> pd.DataFrame:
-    """Create encodings for categorical data."""
+    """
+    Create encodings for categorical data.
+
+    Args:
+        value_columns (List[str]): List of column names containing categorical values.
+        data (pd.DataFrame): Input data frame.
+        export_absent (bool): Flag indicating whether to export "Absent" columns.
+
+    Returns:
+        pd.DataFrame: Encoded data frame.
+        List[str]: List of new column names.
+
+    """
     # Create binary encodings
     data_encoded = pd.get_dummies(data[value_columns], prefix=value_columns).astype(
         np.uint8
@@ -393,7 +620,31 @@ def rasterize_vector(
     n_workers: int = mp.cpu_count(),
     chunksize: Optional[int] = None,
 ) -> Tuple[List, List, List]:
-    """Rasterize vector data."""
+    """
+    Rasterize vector data.
+
+    Args:
+        value_type (Literal["categorical", "numerical", "ground_truth"]): The type of the values to be rasterized.
+        value_columns (List[str]): The columns containing the values to be rasterized.
+        geodataframe (gpd.GeoDataFrame): The GeoDataFrame containing the vector data.
+        default_value (np.number, optional): The default value to be assigned to raster cells without a value. Defaults to 1.
+        nodata_value (np.number, optional): The nodata value to be assigned to raster cells. Defaults to -99999.
+        resolution (Optional[np.number], optional): The resolution of the raster cells. Defaults to None.
+        epsg_code (Optional[int], optional): The EPSG code of the coordinate reference system. Defaults to None.
+        base_raster_profile (Optional[Union[profiles.Profile, dict]], optional): The base raster profile to use for rasterization. Defaults to None.
+        merge_strategy (str, optional): The strategy to use when merging rasterized values. Defaults to "replace".
+        all_touched (bool, optional): Whether to consider all pixels touched by the vector geometry. Defaults to True.
+        dtype (Optional[np.dtype], optional): The data type of the raster cells. Defaults to None.
+        impute_nodata (bool, optional): Whether to impute nodata values in the raster. Defaults to False.
+        export_absent (bool, optional): Whether to export absent values as separate columns. Defaults to False.
+        raster_save (bool, optional): Whether to save the rasterized values as raster files. Defaults to False.
+        raster_save_folder (Optional[Path], optional): The folder to save the raster files. Defaults to None.
+        n_workers (int, optional): The number of worker processes to use for parallel rasterization. Defaults to mp.cpu_count().
+        chunksize (Optional[int], optional): The number of value columns to process in each worker process. Defaults to None.
+
+    Returns:
+        Tuple[List, List, List]: A tuple containing the list of output column names, the list of output rasters, and the list of output transforms.
+    """    
     # Check input arguments
     if resolution is not None and base_raster_profile is not None:
         raise ValueError(
@@ -426,7 +677,7 @@ def rasterize_vector(
     # Create Affine.transform
     geometries = geodataframe.geometry.values
     width, height, transform = (
-        _transform_from_geometries(geodataframe, resolution)
+        transform_from_geometries(geodataframe, resolution)
         if resolution is not None
         else (
             base_raster_profile["width"],
@@ -485,7 +736,7 @@ def rasterize_vector(
             out_transforms.append(transform)
 
             # Check column names and reduce underscores
-            column = _replace_invalid_chars(column)
+            column = replace_invalid_characters(column)
             check_path(raster_save_folder)
 
             if raster_save == True:
@@ -506,7 +757,7 @@ def rasterize_vector(
     return out_columns, out_rasters, out_transforms
 
 
-def reproject_raster_process(
+def _reproject_raster_process(
     file: Path,
     input_folder: Path,
     output_folder: Path,
@@ -514,11 +765,23 @@ def reproject_raster_process(
     target_resolution: Optional[np.number],
     resampling_method: warp.Resampling,
 ):
-    """Run reprojection process for a single raster file."""
+    """Run reprojection process for a single raster file.
+
+    Args:
+        file (Path): The path to the input raster file.
+        input_folder (Path): The path to the input folder.
+        output_folder (Path): The path to the output folder.
+        target_epsg (int): The target EPSG code for the reprojection.
+        target_resolution (Optional[np.number]): The target resolution for the reprojection.
+        resampling_method (warp.Resampling): The resampling method to use.
+
+    Returns:
+        None
+    """
     raster = load_raster(file)
     out_file = output_folder / file.relative_to(Path(input_folder))
     check_path(out_file.parent)
-    out_array, out_meta = _reproject_raster(
+    out_array, out_meta = _reproject_raster_core(
         raster, target_epsg, target_resolution, resampling_method
     )
 
@@ -533,15 +796,27 @@ def reproject_raster_process(
     )
 
 
-def _reproject_raster(
+def _reproject_raster_core(
     raster: rasterio.io.DatasetReader,
     target_crs: int,
     target_resolution: Optional[np.number],
     resampling_method: warp.Resampling,
 ) -> Tuple[np.ndarray, dict]:
-    """Core function for reprojecting raster data to a new coordinate reference system.
-    Adapted function from EIS Toolkit (main branch as of 2023-11-17)"""
+    """
+    Reproject a raster to a new coordinate reference system (CRS) and resolution.
 
+    Adapted function from EIS Toolkit (main branch as of 2023-11-17).
+    
+    Args:
+        raster (rasterio.io.DatasetReader): The input raster to be reprojected.
+        target_crs (int): The EPSG code of the target CRS.
+        target_resolution (Optional[np.number]): The target resolution of the reprojected raster.
+        resampling_method (warp.Resampling): The resampling method to be used during reprojection.
+
+    Returns:
+        Tuple[np.ndarray, dict]: A tuple containing the reprojected image as a NumPy array and the metadata of the reprojected raster.
+    """
+    
     src_arr = raster.read()
     dst_crs = rasterio.crs.CRS.from_epsg(target_crs)
 
@@ -591,7 +866,17 @@ def reproject_raster(
     resampling_method: warp.Resampling = warp.Resampling.nearest,
     n_workers: int = mp.cpu_count(),
 ):
-    """Call function for reprojecting raster data."""
+    """
+    Reprojects rasters from the input folder to the output folder using the specified target EPSG code.
+    
+    Args:
+        input_folder (Path): The path to the input folder containing the rasters.
+        output_folder (Path): The path to the output folder where the reprojected rasters will be saved.
+        target_epsg (int): The EPSG code of the target coordinate reference system (CRS).
+        target_resolution (Optional[np.number], optional): The target resolution of the reprojected rasters. Defaults to None.
+        resampling_method (warp.Resampling, optional): The resampling method to use during reprojection. Defaults to warp.Resampling.nearest.
+        n_workers (int, optional): The number of worker processes to use for parallel processing. Defaults to the number of CPU cores.
+    """
     # Show selected folder
     print(f"Selected folder: {input_folder}")
 
@@ -627,6 +912,6 @@ def reproject_raster(
     # Run reprojection
     with mp.Pool(n_workers) as pool:
         with tqdm(total=len(args_list), desc="Processing files") as pbar:
-            for _ in pool.starmap(reproject_raster_process, args_list):
+            for _ in pool.starmap(_reproject_raster_process, args_list):
                 pbar.update(1)
                 time.sleep(0.1)

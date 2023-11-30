@@ -1,5 +1,6 @@
 models = {
-    "MVT_PREFERRED": {  # Geology
+    "MVT_PREFERRED": {  
+        # Geology
         "Geology_Lithology_Majority": True,
         "Geology_Lithology_Minority": True,
         "Geology_Period_Maximum_Majority": True,
