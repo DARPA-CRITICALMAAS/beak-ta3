@@ -5,7 +5,7 @@ Advanced hybrid AI-methods for mineral predictive mapping
 
 This repository is still in development. Documentation will grow over time.
 
-Last update: **11-28-2023**
+Last update: **12-01-2023**
 
 What's new?
 - slight repo structure modifications
