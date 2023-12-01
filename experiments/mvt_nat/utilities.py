@@ -194,7 +194,7 @@ def check_path(folder: Path):
         folder (Path): The path to check and create if necessary.
 
     Returns:
-        None
+        (None): None
     """
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -222,7 +222,7 @@ def save_raster(
         transform (dict): The affine transformation matrix that maps pixel coordinates to CRS coordinates.
 
     Returns:
-        None
+        (None): None
     """
     count = array.shape[0]
     dtype = array.dtype
@@ -251,7 +251,7 @@ def update_raster_metadata(raster: rasterio.io.DatasetReader, **kwargs) -> dict:
 
     Args:
         raster (rasterio.io.DatasetReader): The input raster dataset.
-        **kwargs: Additional metadata key-value pairs to update.
+        **kwargs (tuple): Additional metadata key-value pairs to update.
 
     Returns:
         dict: The updated metadata dictionary.

@@ -1,5 +1,12 @@
+"""
+This file contains the models used for the MVT_NAT experiment.
+
+Currently, the models are:<br>
+    `MVT_PREFERRED`: The preferred model for MVT deposits from the Lawley et al. 2022 paper.
+"""
+
 models = {
-    "MVT_PREFERRED": {  
+    "MVT_PREFERRED": {
         # Geology
         "Geology_Lithology_Majority": True,
         "Geology_Lithology_Minority": True,
