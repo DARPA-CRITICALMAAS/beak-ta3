@@ -38,7 +38,6 @@ The repository is structured as following:
 │   └── methods/            # contains the code for the respective ML methods
 │       ├── bnn/
 │       ├── hybrid/
-│       ├── processing/
 │       └── som/
 │   └── utilities/          # helper functions, will be modularize in future releases   
 ```
