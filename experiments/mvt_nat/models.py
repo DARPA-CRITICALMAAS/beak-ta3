@@ -2,10 +2,28 @@
 This file contains the models used for the MVT_NAT experiment.
 
 Currently, the models are:<br>
-    `MVT_PREFERRED`: The preferred model for MVT deposits from the Lawley et al. 2022 paper.
+    `MVT_BASELINE`: The baseline model for MVT deposits from the Lawley et al. 2022 paper, containing only geophysical layers.<p>
+    `MVT_PREFERRED`: The preferred model for MVT deposits from the Lawley et al. 2022 paper, containing geophysical and geological layers.
 """
 
 models = {
+    "MVT_BASELINE": {
+        # Gravity
+        "Gravity_GOCE_ShapeIndex": True,
+        "Gravity_Bouguer": True,
+        "Gravity_Bouguer_HGM": True,
+        "Gravity_Bouguer_UpCont30km_HGM": True,
+        "Gravity_Bouguer_HGM_Worms_Proximity": True,
+        "Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity": True,
+        # Magnetic
+        "Magnetic_HGM": True,
+        "Magnetic_LongWavelength_HGM": True,
+        "Magnetic_HGM_Worms_Proximity": True,
+        "Magnetic_LongWavelength_HGM_Worms_Proximity": True,
+        # Seismic
+        "Seismic_LAB_Priestley": True,
+        "Seismic_Moho": True,
+    },
     "MVT_PREFERRED": {
         # Geology
         "Geology_Lithology_Majority": True,
@@ -38,7 +56,7 @@ models = {
         "Gravity_Bouguer_HGM": True,
         "Gravity_Bouguer_UpCont30km_HGM": True,
         "Gravity_Bouguer_HGM_Worms_Proximity": True,
-        "Gravity_Bouguer_HGM_Worms_Proximity": True,
+        "Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity": True,
         # Magnetic
         "Magnetic_HGM": True,
         "Magnetic_LongWavelength_HGM": True,
@@ -47,5 +65,5 @@ models = {
         # Seismic
         "Seismic_LAB_Priestley": True,
         "Seismic_Moho": True,
-    }
+    },
 }

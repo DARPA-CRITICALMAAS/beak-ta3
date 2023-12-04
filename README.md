@@ -5,11 +5,14 @@ Advanced hybrid AI-methods for mineral predictive mapping
 
 This repository is still in development. Documentation will grow over time.
 
-Last update: **12-01-2023**
+Last update: **12-04-2023**
 
 What's new?
+- updated dependencies
+- introduced [mkdocs](https://www.mkdocs.org/) for code documentation
+- some corrections for MVT model-setups and example notebook
 - slight repo structure modifications
-- added **mvt_nat** experiment: modified data extraction from datacube and preparation for initial SOM model
+
 
 Used tools are currently in the `/experiments/mvt_nat/utilities` module. These will be changed in future updates to match in a more intuitive module structure (e.g. tools for io, rasterization, ..)
 
@@ -37,6 +40,7 @@ The repository is structured as following:
 │       ├── hybrid/
 │       ├── processing/
 │       └── som/
+│   └── site/               # place for generated code documentation    
 │   └── utilities/          # helper functions, will be modularize in future releases   
 ```
 

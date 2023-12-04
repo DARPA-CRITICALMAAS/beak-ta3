@@ -262,7 +262,7 @@ def update_raster_metadata(raster: rasterio.io.DatasetReader, **kwargs) -> dict:
     return meta
 
 
-# Statistics related functions
+# Statics related functions
 def get_outliers_zscore(
     data: pd.DataFrame, column: str, threshold: np.number = 3.0
 ) -> pd.DataFrame:
