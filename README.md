@@ -40,7 +40,6 @@ The repository is structured as following:
 │       ├── hybrid/
 │       ├── processing/
 │       └── som/
-│   └── site/               # place for generated code documentation    
 │   └── utilities/          # helper functions, will be modularize in future releases   
 ```
 
