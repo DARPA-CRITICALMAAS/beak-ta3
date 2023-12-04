@@ -6,6 +6,8 @@ from typing import List, Literal, Optional, Tuple, Union
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+from preparation import create_encodings_from_dataframe, fill_nodata_with_mean
+from raster import check_path, replace_invalid_characters, save_raster
 from rasterio import features, profiles, transform
 from rasterio.crs import CRS
 from rasterio.enums import MergeAlg
@@ -21,6 +23,34 @@ from tqdm import tqdm
 
 
 # region: General helper functions
+def transform_from_geometries(
+    geodataframe: gpd.GeoDataFrame, resolution: np.number
+) -> Tuple[np.number, np.number, transform.Affine]:
+    """
+    Calculate the transform parameters required to convert the input geometries
+    to a specified resolution. It takes a GeoDataFrame containing the geometries and the desired
+    resolution as input.
+
+    Adapted core function from EIS Toolkit (main branch as of 17-11-2023).
+
+    Args:
+        geodataframe (gpd.GeoDataFrame): The input GeoDataFrame containing the geometries.
+        resolution (np.number): The desired resolution for the transformation.
+
+    Returns:
+        Tuple[float, float, transform.Affine]: A tuple containing the width, height, and transform
+        parameters required for the transformation.
+
+    """
+    min_x, min_y, max_x, max_y = geodataframe.total_bounds
+
+    out_width = int((max_x - min_x) / resolution)
+    out_height = int((max_y - min_y) / resolution)
+
+    out_transform = transform.from_origin(min_x, max_y, resolution, resolution)
+    return out_width, out_height, out_transform
+
+
 def create_geodataframe_from_polygons(
     data: pd.DataFrame,
     polygon_col: str,

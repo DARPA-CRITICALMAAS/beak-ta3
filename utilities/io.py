@@ -6,13 +6,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 from rasterio.crs import CRS
-
-# References
-# Some non-trivial functionalities were adapted from other sources.
-# The original sources are listed below and referenced in the code as well.
-#
-# EIS toolkit:
-# GitHub repository https://github.com/GispoCoding/eis_toolkit under EUPL-1.2 license.
+from tqdm import tqdm
 
 
 def load_dataset(

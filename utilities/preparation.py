@@ -1,15 +1,8 @@
 import numpy as np
 import pandas as pd
 import scipy
+import warnings
 from typing import List, Tuple
-
-
-# References
-# Some non-trivial functionalities were adapted from other sources.
-# The original sources are listed below and referenced in the code as well.
-#
-# EIS toolkit:
-# GitHub repository https://github.com/GispoCoding/eis_toolkit under EUPL-1.2 license.
 
 
 def fill_nodata_with_mean(
@@ -60,6 +53,7 @@ def fill_nodata_with_mean(
         )
 
     return np.where(np.isnan(out_array), nodata_value, out_array)
+
 
 def create_encodings_from_dataframe(
     value_columns: List[str],
