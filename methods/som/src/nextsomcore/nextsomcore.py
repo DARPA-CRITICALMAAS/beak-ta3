@@ -240,7 +240,7 @@ class NxtSomCore(object):
             np.savetxt(output_file, combined_cols,fmt=fmt_combined, header=header_line, delimiter=' ', comments='')
             np.savetxt(output_file[:-3]+"csv", combined_cols,fmt=fmt_combined.replace(" ",","), header=header_line.replace(" ",","), comments='')
 
-    def save_somspace_result(self, output_file, header, som, output_folder, input_file, normalized=False):
+    def save_somspace_result(self, output_file, header, som, output_folder, normalized=False):
         """Write SOM results with header line and input columns to disk in somspace.
 
         Output file columns:

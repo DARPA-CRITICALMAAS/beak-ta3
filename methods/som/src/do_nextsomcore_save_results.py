@@ -36,7 +36,7 @@ def run_SOM(args):
     if args.outgeofile is not None:
         nxtsomcore.save_geospace_result(args.outgeofile, header, som, output_folder, args.input_file, args.normalized, args.label) 
     
-    nxtsomcore.save_somspace_result(args.output_file_somspace, header, som, output_folder, args.input_file, args.normalized)  
+    nxtsomcore.save_somspace_result(args.output_file_somspace, header, som, output_folder, args.normalized)  
     if(args.geotiff_input is not None):
         inputFileArray=args.geotiff_input.split(",")    
         nxtsomcore.write_geotiff_out(args.output_folder, inputFileArray[0])

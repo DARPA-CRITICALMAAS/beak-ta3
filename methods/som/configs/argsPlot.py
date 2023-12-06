@@ -1,7 +1,7 @@
 class Args:
-#-- Arguments for drawing plots from self organizing maps
+#-- Arguments for drawing plots from SOM results
 
-    outsomfile: str     # dest="outsomfile", help='Som calculation somspace output text file')
+    outsomfile: str     # Som calculation somspace output text file')
     som_x: int          # som x dimension
     som_y:int           # som y dimension
     input_file: str     # Input file(*.lrn)

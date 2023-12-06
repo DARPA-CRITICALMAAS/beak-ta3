@@ -33,7 +33,7 @@ from matplotlib.lines import Line2D
 from .plotting_functions import plot_hexa
 
 
-def run_basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, redraw, dataType, noDataValue, aOutgeofile):
+def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, redraw, dataType, noDataValue, aOutgeofile):
 
     """Load input parameters & do basic setup"""
     """Initialize variables"""
@@ -209,7 +209,7 @@ def run_basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type
         annot_ticks.fill("")
 
     #return {'var1': var1, 'var2':var2}
-    return geo_data, geo_headers, som_data, som_table, som_headers, som_dict, grid, grid_type, annot_ticks, outgeofile, clusters, cluster_ticks, cluster_tick_labels, discrete_cmap, discrete_cmap_2
+    return geo_data, geo_headers, som_data, som_table, som_headers, som_dict, grid, grid_type, annot_ticks, outgeofile, clusters, cluster_ticks, cluster_tick_labels, discrete_cmap, discrete_cmap_2, labelIndex
     #return {'geo_data': geo_data, 'geo_headers': geo_headers, 'som_data': som_data, 'som_table': som_table, 'som_headers': som_headers, 'som_dict': som_dict, 'grid': grid, 'annot_ticks': annot_ticks, 'outgeofile': outgeofile, 'clusters': clusters}
 
 
@@ -218,7 +218,18 @@ Run plotting scripts
 """    
 def run_plotting_script(argsP):
 
-    [geo_data, geo_headers, som_data, som_table, som_headers, som_dict, grid, grid_type, annot_ticks, outgeofile, clusters, cluster_ticks, cluster_tick_labels, discrete_cmap, discrete_cmap_2] = run_basic_setup(argsP.outsomfile, argsP.som_x, argsP.som_y, argsP.input_file, argsP.dir, argsP.grid_type, argsP.redraw, argsP.dataType, argsP.noDataValue, argsP.outgeofile)
+    [geo_data, geo_headers, 
+     som_data, som_table, som_headers, som_dict,
+     grid, grid_type, annot_ticks, 
+     outgeofile, 
+     clusters, cluster_ticks, cluster_tick_labels, 
+     discrete_cmap, discrete_cmap_2, 
+     labelIndex
+     ] = basic_setup(
+        argsP.outsomfile, argsP.som_x, argsP.som_y, 
+        argsP.input_file, argsP.dir, 
+        argsP.grid_type, argsP.redraw, 
+        argsP.dataType, argsP.noDataValue, argsP.outgeofile)
 
     if argsP.outgeofile is not None: #if spatial, draw geo plots
         if(argsP.dataType=='scatter'):
@@ -234,7 +245,7 @@ def run_plotting_script(argsP):
                 plot_geospace_results_grid(geo_data, geo_headers, som_data, argsP.dir)
             print("GeoSpace plots finished")
     if(clusters>1): #draw som cluster plot if there is more than 1 cluster
-        draw_som_clusters(som_data, som_table, annot_ticks, som_headers, discrete_cmap, discrete_cmap_2, argsP.dir)
+        draw_som_clusters(som_data, som_table, annot_ticks, som_headers, discrete_cmap, discrete_cmap_2, argsP.dir, grid_type, clusters, cluster_ticks, cluster_tick_labels, labelIndex)
 
     draw_umatrix(som_data, som_table, grid, grid_type, annot_ticks, som_headers, argsP.dir)
     draw_number_of_hits(som_dict,argsP.som_x,argsP.som_y,clusters,grid,cluster_tick_labels,grid_type)
@@ -245,7 +256,7 @@ def run_plotting_script(argsP):
     print("SomSpace plots finshed")
 
     if(som_dict['clusters'] is not None):
-        draw_boxplots(som_dict,som_data,discrete_cmap, argsP.dir)
+        draw_boxplots(som_dict,som_data,som_headers,discrete_cmap, cluster_tick_labels, argsP.dir)
     print("Boxplots finished")
 
 
@@ -449,7 +460,7 @@ def draw_umatrix(som_data, som_table,grid, grid_type, annot_ticks, som_headers,w
 """
 Draw Som Cluster plot
 """
-def draw_som_clusters(som_data, som_table, annot_ticks, som_headers,discrete_cmap,discrete_cmap_2,working_dir):    
+def draw_som_clusters(som_data, som_table, annot_ticks, som_headers,discrete_cmap,discrete_cmap_2,working_dir,grid_type,clusters,cluster_ticks,cluster_tick_labels, labelIndex):    
     if(grid_type.lower()=="rectangular"):
         mpl.rcParams.update({'font.size': 14})  
         for i in range(0,len(som_data)): 
@@ -601,7 +612,7 @@ def plot_geospace_clusters_scatter(geo_data,discrete_cmap_2,working_dir):
 Plot boxplots using som data.
 """
 
-def draw_boxplots(som_dict,som_data,discrete_cmap,working_dir):
+def draw_boxplots(som_dict,som_data,som_headers,discrete_cmap,cluster_tick_labels,working_dir):
     
     mpl.rcParams.update({'font.size': 12})  
     cluster_col=[]
@@ -623,7 +634,7 @@ def draw_boxplots(som_dict,som_data,discrete_cmap,working_dir):
             custom_lines.append(Line2D([0], [0], color='blue', lw=4))#only working way I found to make legened properly without handles, was to pass custom width 0 handles. 
         ax.legend(custom_lines,cluster_tick_labels,bbox_to_anchor=(1.05, 1),loc=0,handlelength=0,fontsize=8,handletextpad=0 ,borderaxespad=0.)   
         plt.tight_layout()           
-        ax.figure.savefig(working_dir+'/boxplot_' +str(i)+'.png')   
+        ax.figure.savefig(working_dir+'/boxplot_' +str(i-1)+'.png')   
         plt.clf()
         plt.cla()
         plt.close()        
