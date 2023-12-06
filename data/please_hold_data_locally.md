@@ -1,1 +1,0 @@
-Please work with data locally. Do not push them to GitHub. The folder **data** will not be pushed to GitHub.
