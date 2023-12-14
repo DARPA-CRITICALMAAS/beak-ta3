@@ -321,15 +321,17 @@ class NxtSomCore(object):
 
 
 
-    def write_geotiff_out(self, output_folder, input_file): 
+    def write_geotiff_out(self, output_folder, geodatafile, somdatafile, input_file): 
         from osgeo import gdal
         import pandas as pd
         dir=output_folder
         inDs=gdal.Open(input_file.split(',')[0])
-        som_data= np.genfromtxt(dir+"/result_som.txt",skip_header=(1), delimiter=' ')
-        geo_data=np.genfromtxt(dir+"/result_geo.txt",skip_header=(1), delimiter=' ') 
+        #som_data= np.genfromtxt(dir+"/result_som.txt",skip_header=(1), delimiter=' ')
+        #geo_data=np.genfromtxt(dir+"/result_geo.txt",skip_header=(1), delimiter=' ') 
+        som_data= np.genfromtxt(somdatafile,skip_header=(1), delimiter=' ')
+        geo_data=np.genfromtxt(geodatafile,skip_header=(1), delimiter=' ') 
         headers=[]
-        with open(dir+"/result_geo.txt") as gd:
+        with open(geodatafile) as gd:
             line = gd.readline()
             headers=line.split()
         for a in range(0, len(som_data[0])-4): 

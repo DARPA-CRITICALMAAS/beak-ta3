@@ -1,3 +1,6 @@
+import os
+import glob
+
 class Args:
     input_file: str            # Input file(*.lrn)
     input_list_text=[]         # only for geotiff files: input_file= ",".join(input_list_text)
@@ -38,3 +41,38 @@ class Args:
     minN=0                  # Minimum value for normalization
     maxN=1                  # Maximum value for normalization
     label=None              # Whether data contains label column, true or false
+
+    def __init__(self):
+        """Constructor for the class
+        """
+
+    def create_list_from_pattern(self, file_path, file_patterns):
+        """Create a list of full file names from files matching the given file_patterns within the file_path
+        :param file_path: The name of the file path for files to be added to the input list.
+        :type filename: str.
+        :param file_patterns: One or more patterns for file names to be added to the input list.
+        :type filename: str.
+        :rtype: list of strings
+        """
+
+        #-- Lists to store matching files with their corresponding destination paths
+        input_list_text = []
+
+        for file_pattern in file_patterns:
+            #-- Use glob to get all files with the specified pattern
+            matching_files = glob.glob(os.path.join(file_path, file_pattern))
+
+            #-- Add matching files to the list
+            input_list_text.extend(matching_files)
+
+            print("Number of files added:", len(input_list_text))
+            print("Files:")
+            for i in range(min(10, len(input_list_text))): #-- option: change the max number of files to be printed
+                print(input_list_text[i])
+            if len(input_list_text) > 10:
+                print("...")
+                print(input_list_text[-1])
+
+        input_file= ",".join(input_list_text)
+
+        return input_file

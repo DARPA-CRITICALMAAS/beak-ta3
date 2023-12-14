@@ -24,7 +24,7 @@ def run_SOM(args):
         initialization=args.initialization,
         initialcodebook=args.initialcodebook,
         gridtype=args.gridtype
-        )          
+        )        
     if(args.output_folder==""):
         output_folder="C:/Temp/NextSom"
     else:
@@ -39,6 +39,9 @@ def run_SOM(args):
     nxtsomcore.save_somspace_result(args.output_file_somspace, header, som, output_folder, args.normalized)  
     if(args.geotiff_input is not None):
         inputFileArray=args.geotiff_input.split(",")    
-        nxtsomcore.write_geotiff_out(args.output_folder, inputFileArray[0])
+        #nxtsomcore.write_geotiff_out(args.output_folder, inputFileArray[0])
+        nxtsomcore.write_geotiff_out(args.output_folder, args.output_file_geospace, args.output_file_somspace, inputFileArray[0])
     with open(output_folder+'/som.dictionary', 'wb') as som_dictionary_file:
         pickle.dump(som, som_dictionary_file) #save som object to file.
+    
+    print("noDataValue: ", header['noDataValue'])  

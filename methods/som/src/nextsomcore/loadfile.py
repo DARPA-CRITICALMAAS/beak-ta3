@@ -8,7 +8,7 @@ Script that servers as launch point to loading geotiff, csv or lrn files. Possib
 """
 
 from .lrnfile import load_lrn_file, read_lrn_coordinate_columns, read_lrn_data_columns, read_lrn_header
-from ..load_geotiff import load_geotiff_files, read_geotiff_coordinate_columns, read_geotiff_data_columns
+from ..load_geotiff import load_geotiff_files, delete_rows_with_no_data, read_geotiff_coordinate_columns, read_geotiff_data_columns
 from ..load_csv import load_csv_file, read_csv_coordinate_columns,read_csv_data_columns,read_csv_header
 
 """
@@ -25,7 +25,10 @@ def load_input_file(input_file):#input file in case of lrn, input file list in c
         csv_header=load_csv_file(input_file)
         return csv_header
      else: 
-        geotiff_header=load_geotiff_files(input_file)
+        geotiff_header = load_geotiff_files(input_file)
+
+        # Delete rows with noDataValue
+        geotiff_header = delete_rows_with_no_data(geotiff_header)
         return geotiff_header
     
 

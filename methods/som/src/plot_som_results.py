@@ -123,25 +123,40 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, re
         grid=None
 
 
-    header_line=""#check if file has label column in it
-    with open(input_file,encoding='utf-8-sig') as fh:
-        fh.readline() #skip first 3 rows
-        fh.readline() #skip first 3 rows
-        fh.readline() #skip first 3 rows
-        header_line = fh.readline()
-    colnames=header_line.split("\t")
-    if('label' in colnames):
-        labelIndex=colnames.index('label')
-    #if (labelIndex!="-2"):#eli tän checkin sijaan pitäs kattoa onko input filessä 'label' nimistä columnia hedereissä.
+    ###check if file has label column:
+    
+    header_line=""
+    if aOutgeofile is not None:     # if input file is GeoTIFF unse outgeofile:
+        with open(outgeofile,encoding='utf-8-sig') as fh:
+            header_line = fh.readline()
+        colnames=header_line.split() # colums are separated by space
+    else:                            # if input_file is .lrn file:
+        with open(input_file,encoding='utf-8-sig') as fh:
+            for _ in range(3):
+                fh.readline() #skip first 3 rows
+            header_line = fh.readline()
+        colnames=header_line.split("\t") # colums are separated by tab
+
+    if 'label' in colnames:
+        labelIndex = colnames.index('label')
         annot_strings={}
         annot_strings_for_dict={}
         annot_data=[]
-        data = np.loadtxt(
+
+        if outgeofile is not None:  # If the input file is GeoTIFF, read data using space delimiter
+            data = np.loadtxt(
+                outgeofile,
+                dtype='str',
+                delimiter=' ',
+                skiprows=0  # Adjust skiprows as needed
+            )
+        else:   # If the input file is .lrn, read data using tab delimiter
+            data = np.loadtxt(
                 input_file, 
                 dtype='str',
                 delimiter='\t',
                 skiprows=3
-                )
+            )
         outfile=[]
 
         #So. the current label format is the one that should be written to file, as it preserves all data. But for the plots, the new labeling system
@@ -242,7 +257,7 @@ def run_plotting_script(argsP):
             if(max(geo_data[:,(4)])>0):#if clusters
                 plot_geospace_clusters_grid(geo_data, discrete_cmap, clusters,cluster_ticks, cluster_tick_labels, argsP.dir)
             if(argsP.redraw!="false"):
-                plot_geospace_results_grid(geo_data, geo_headers, som_data, argsP.dir)
+                plot_geospace_results_grid(geo_data, geo_headers, som_data, argsP.dir, argsP.noDataValue)
             print("GeoSpace plots finished")
     if(clusters>1): #draw som cluster plot if there is more than 1 cluster
         draw_som_clusters(som_data, som_table, annot_ticks, som_headers, discrete_cmap, discrete_cmap_2, argsP.dir, grid_type, clusters, cluster_ticks, cluster_tick_labels, labelIndex)
@@ -264,19 +279,24 @@ def run_plotting_script(argsP):
 """
 Plot geospace plots & q-error if type is grid
 """
-def plot_geospace_results_grid(geo_data, geo_headers, som_data, working_dir):
+def plot_geospace_results_grid(geo_data, geo_headers, som_data, working_dir, noDataValue):
     mpl.rcParams.update({'font.size': 14})
 
     for i in range(0, len(som_data[0])-4): 
         x=geo_data[:,0]
         y=geo_data[:,1]
         z=geo_data[:,(5+i)]
+
+        # Replace noDataValues with np.nan
+        z[z == noDataValue] = np.nan
+
         df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
         df.columns = ['X_value','Y_value','Z_value']
         df['Z_value'] = pd.to_numeric(df['Z_value'])
         pivotted= df.pivot(index='Y_value', columns='X_value', values='Z_value')
+        
         sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
-        ax=sns.heatmap(pivotted,cmap='jet', square=True, linewidths=0, xticklabels="auto", yticklabels="auto")
+        ax=sns.heatmap(pivotted,cmap='jet', square=True, linewidths=0, xticklabels="auto", yticklabels="auto", mask=np.isnan(pivotted))
 
         # Set tick labels
         fmt = '{:0.0f}'
