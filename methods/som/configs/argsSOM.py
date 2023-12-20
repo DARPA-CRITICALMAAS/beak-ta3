@@ -10,9 +10,9 @@ class Args:
 
     #Parameter required for som calculation. 
 
-    som_x: int                # X dimension of generated SOM
-    som_y: int                # Y dimension of generated SOM
-    epochs: int               # Number of epochs to run
+    som_x = 30                # X dimension of generated SOM
+    som_y = 30                # Y dimension of generated SOM
+    epochs = 10               # Number of epochs to run
 
     maptype='toroid'            # Type of SOM ("sheet", "toroid")
     initialcodebook=None        # File path of initial codebook, 2D numpy.array of float32.
@@ -65,13 +65,13 @@ class Args:
             #-- Add matching files to the list
             input_list_text.extend(matching_files)
 
-            print("Number of files added:", len(input_list_text))
-            print("Files:")
-            for i in range(min(10, len(input_list_text))): #-- option: change the max number of files to be printed
-                print(input_list_text[i])
-            if len(input_list_text) > 10:
-                print("...")
-                print(input_list_text[-1])
+        print("Number of files added:", len(input_list_text))
+        print("Files:")
+        for i in range(min(10, len(input_list_text))): #-- option: change the max number of files to be printed
+            print(input_list_text[i])
+        if len(input_list_text) > 10:
+            print("...")
+            print(input_list_text[-1])
 
         input_file= ",".join(input_list_text)
 

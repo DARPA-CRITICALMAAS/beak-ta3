@@ -9,7 +9,7 @@ by Peter Wittek to perform actual SOM calculations.
 import warnings
 with warnings.catch_warnings():
     import numpy as np
-    import sklearn.cluster
+    from sklearn.cluster import KMeans
     import somoclu
     import sys
     #from .lrnfile import load_lrn_file, read_coordidate_columns, read_data_columns
@@ -83,7 +83,7 @@ class NxtSomCore(object):
         :type cluster_count: int.
         :rtype: numpy.array
         """
-        algorithm = sklearn.cluster.KMeans(n_clusters=cluster_count, init='random')
+        algorithm = KMeans(n_clusters=cluster_count, init='random', n_init=10) # n_init='auto'
         original_shape = som['codebook'].shape
         som['codebook'].shape = (som['n_columns'] * som['n_rows'], som['n_dim'])
         linear_clusters = algorithm.fit_predict(som['codebook'])
@@ -112,7 +112,7 @@ class NxtSomCore(object):
         
         """               
         min=2 
-        algorithm = sklearn.cluster.KMeans()
+        algorithm = KMeans()
         original_shape = som['codebook'].shape       
         if (cluster_init<1):
             cluster_init=1
@@ -133,7 +133,7 @@ class NxtSomCore(object):
             min=float("inf")
             min_dict={}
             for j in range(0, cluster_init):
-                algorithm = sklearn.cluster.KMeans(n_clusters=a,init='random')
+                algorithm = KMeans(n_clusters=a,init='random', n_init=10)
                 som['codebook'].shape = (som['n_columns'] * som['n_rows'], som['n_dim'])  
                 linear_clusters=algorithm.fit_predict(som['codebook'])       
                 current=davies_bouldin_score(som['codebook'], linear_clusters)
