@@ -259,8 +259,13 @@ def run_plotting_script(argsP):
             if(argsP.redraw!="false"):
                 plot_geospace_results_grid(geo_data, geo_headers, som_data, argsP.dir, argsP.noDataValue)
             print("GeoSpace plots finished")
-    if(clusters>1): #draw som cluster plot if there is more than 1 cluster
+    if(clusters>1): 
+        #draw som cluster plot if there is more than 1 cluster
         draw_som_clusters(som_data, som_table, annot_ticks, som_headers, discrete_cmap, discrete_cmap_2, argsP.dir, grid_type, clusters, cluster_ticks, cluster_tick_labels, labelIndex)
+        # Load cluster dictionary
+        loaded_cluster_list = load_cluster_dictionary(argsP.dir)
+        # Plot and save the Davies-Bouldin Index vs Number of Clusters
+        plot_davies_bouldin(loaded_cluster_list, argsP.dir)
 
     draw_umatrix(som_data, som_table, grid, grid_type, annot_ticks, som_headers, argsP.dir)
     draw_number_of_hits(som_dict,argsP.som_x,argsP.som_y,clusters,grid,cluster_tick_labels,grid_type)
@@ -689,3 +694,38 @@ def draw_number_of_hits(som_dict,somx,somy,clusters,grid,cluster_tick_labels,gri
     plt.cla()
     plt.close()
  
+
+"""
+Draw Davies-Bouldin Index
+"""
+def load_cluster_dictionary(file_path):
+    """
+    Load the clustering dictionary from the specified file path.
+
+    :Param: file_path (str): The path to the 'cluster.dictionary' file.
+    :Returns: cluster_list (list): List containing clustering information.
+    """
+    with open(file_path+"/cluster.dictionary", 'rb') as cluster_dictionary_file:
+        cluster_list = pickle.load(cluster_dictionary_file)
+    return cluster_list
+
+def plot_davies_bouldin(cluster_list, output_path):
+    """
+    Plot the number of clusters against the Davies-Bouldin Index and save the plot to a file.
+    
+    :Params: cluster_list (list): List containing clustering information.
+    :Params: output_path (str): The path to save the plot as a PNG file.
+    """
+    cluster_numbers = [entry['n_clusters'] for entry in cluster_list]
+    davies_bouldin_scores = [entry['db_score'] for entry in cluster_list]
+
+    fig, ax = plt.subplots()
+    ax.plot(cluster_numbers, davies_bouldin_scores, marker='o')
+    ax.set_title('Number of Clusters vs Davies-Bouldin Index')
+    ax.set_xlabel('Number of Clusters')
+    ax.set_ylabel('Davies-Bouldin Index')
+    ax.grid(True)
+    fig.savefig(output_path+"/db_score.png")
+    plt.clf()
+    plt.cla()
+    plt.close()
