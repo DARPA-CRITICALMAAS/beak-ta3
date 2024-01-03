@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
 
 # Copy the environment files into the container
 COPY environment.yml .
-COPY requirements.txt .
+# COPY requirements.txt .
 
 # Update conda
 RUN conda update -n base -c defaults conda
@@ -34,7 +34,7 @@ SHELL ["conda", "run", "-n", "beak-ta3", "/bin/bash", "-c"]
 ENV CONDA_DEFAULT_ENV=beak-ta3
 
 # Install requirements
-RUN pip install -r requirements.txt
+# RUN pip install -r requirements.txt
 
 # Clean conda cache
 RUN conda clean --all -y
@@ -42,7 +42,7 @@ RUN pip cache purge
 
 # Delete environment-setup files
 RUN rm environment.yml
-RUN rm requirements.txt
+# RUN rm requirements.txt
 	
 # Set the working directory to /DIR
 WORKDIR /beak-ta3

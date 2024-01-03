@@ -346,8 +346,8 @@ class NxtSomCore(object):
             cols=pivotted.shape[1] 
             rows=pivotted.shape[0]
     
-            driver = gdal.GetDriverByName('GTiff')
-            outDs = driver.Create(dir+"/GeoTIFF/out_"+headers[len(som_data[0])-4+a]+".tif", cols, rows, 1, gdal.GDT_Float32)
+            driver = gdal.GetDriverByName('GTiff') #GTiff
+            outDs = driver.Create(dir+"/GeoTIFF/out_"+headers[len(som_data[0])-4+a], cols, rows, 1, gdal.GDT_Float32)
             if outDs is None:
                 print ("Could not create tif file")
                 sys.exit(1) 

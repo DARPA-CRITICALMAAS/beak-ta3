@@ -8,7 +8,9 @@ def run_SOM(args):
             som_dictionary = pickle.load(som_dictionary_file)
             args.initialcodebook=som_dictionary['codebook']
             args.initialization=None           
+    print('Load data')
     header = nxtsomcore.load_data(args.input_file) 
+    print('Run SOM')
     som = nxtsomcore.train(
         header['data'],
         args.som_x,
@@ -34,10 +36,13 @@ def run_SOM(args):
         som['clusters']=nxtsomcore.clusters(som,args.kmeans_min,args.kmeans_max,args.kmeans_init,output_folder)     
     
     if args.outgeofile is not None:
+        print('Save geo space results')
         nxtsomcore.save_geospace_result(args.outgeofile, header, som, output_folder, args.input_file, args.normalized, args.label) 
     
+    print('Save SOM space results')
     nxtsomcore.save_somspace_result(args.output_file_somspace, header, som, output_folder, args.normalized)  
     if(args.geotiff_input is not None):
+        print('Write GeoTIFF file')
         inputFileArray=args.geotiff_input.split(",")    
         #nxtsomcore.write_geotiff_out(args.output_folder, inputFileArray[0])
         nxtsomcore.write_geotiff_out(args.output_folder, args.output_file_geospace, args.output_file_somspace, inputFileArray[0])
