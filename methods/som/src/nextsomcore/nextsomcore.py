@@ -20,6 +20,7 @@ with warnings.catch_warnings():
     import xml.etree.ElementTree as ET
     from sklearn.metrics import davies_bouldin_score
     from decimal import Decimal
+    import os.path
     #import ast
 class NxtSomCore(object):
     """Class for training self-organizing map and saving results.
@@ -200,7 +201,7 @@ class NxtSomCore(object):
         header_line = '{} {} {} {}'.format(str(coord_cols['colnames']),
 										str(som_cols['colnames']),
 										str(data_cols['colnames']),'q_error').replace('[','').replace(']','').replace(',','').replace('\'','')
-        if(normalized=="True"):
+        if(normalized=="true"):
             data_cols["data"]=data_cols["data"].astype('float64')
             tree = ET.parse(output_folder+"/DataStats.xml")
             root = tree.getroot()
@@ -334,10 +335,10 @@ class NxtSomCore(object):
         with open(geodatafile) as gd:
             line = gd.readline()
             headers=line.split()
-        for a in range(0, len(som_data[0])-4): 
+        for a in range(0, som_data.shape[1]-4): 
             x=geo_data[:,0]
             y=geo_data[:,1]
-            z=geo_data[:,(len(som_data[0])-4+a)]
+            z=geo_data[:,(4+a)]
             df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
             df.columns = ['X_value','Y_value','Z_value']
             df['Z_value'] = pd.to_numeric(df['Z_value'])
@@ -347,7 +348,9 @@ class NxtSomCore(object):
             rows=pivotted.shape[0]
     
             driver = gdal.GetDriverByName('GTiff') #GTiff
-            outDs = driver.Create(dir+"/GeoTIFF/out_"+headers[len(som_data[0])-4+a], cols, rows, 1, gdal.GDT_Float32)
+            outName0 = dir+"/GeoTIFF/out_"+headers[len(som_data[0])-4+a]+".tif"
+            outName = dir+"/GeoTIFF/out_"+os.path.splitext(os.path.basename(headers[4+a]))[0]+".tif"
+            outDs = driver.Create(outName, cols, rows, 1, gdal.GDT_Float32)
             if outDs is None:
                 print ("Could not create tif file")
                 sys.exit(1) 

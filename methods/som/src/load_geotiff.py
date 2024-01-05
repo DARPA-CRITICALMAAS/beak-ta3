@@ -77,7 +77,7 @@ def load_geotiff_files(input_file_list):
         # Use np.concatenate to stack arrays
         returndata = np.concatenate([returndata, flat]) if returndata.size else flat
 
-        colnames.append(os.path.basename(geotiffpath))    
+        colnames.append(os.path.basename(geotiffpath))     
 
     # Reshape returndata to have each raster as a column
     returndata = returndata.reshape(-1, len(geotiff_list_2), order='F')
@@ -95,7 +95,7 @@ def load_geotiff_files(input_file_list):
 
 def delete_rows_with_no_data(geotiff_header):
     data = geotiff_header['data']
-    originaldata = geotiff_header['originaldata']
+    #originaldata = geotiff_header['originaldata']
     #noDataValue = geotiff_header['noDataValue']
 
     # Identify rows with noDataValue
@@ -108,7 +108,7 @@ def delete_rows_with_no_data(geotiff_header):
     rows = len(data_filtered)
 
     return {'rows': rows, 'cols': geotiff_header['cols'], 'colnames': geotiff_header['colnames'],
-            'headerlength': 0, 'data_all': geotiff_header['data'], 'data': data_filtered, 'filetype': 'geotiff', 'originaldata': originaldata,
+            'headerlength': 0, 'data_all': geotiff_header['data'], 'data': data_filtered, 'filetype': 'geotiff', 'originaldata': geotiff_header['originaldata'],
             'geotransform': geotiff_header['geotransform'], 'noDataValue': geotiff_header['noDataValue'], 'dataType': geotiff_header['dataType']
             }
 
@@ -116,12 +116,15 @@ def read_geotiff_coordinate_columns(geotiff_header):
     coordinates_x=[]
     coordinates_y=[]         
     data=geotiff_header['originaldata']
-    gt=geotiff_header['geotransform'] #gt[0], gt[1], gt[3] and gt[4] have all that is needed 
+    gt=geotiff_header['geotransform']   # gt[0]: x upper left, gt[1]: dx, gt[2]: row rotation (typically =0)
+                                        # gt[3]: y upper left, gt[4]: column rotation (typically =0), gt[5]: dy (negative value for a north-up image) 
+    
     for i in range(0,len(data)):
         for j in range(0,len(data[i])):
             coordinates_x.append(j*gt[1]+gt[0])
             coordinates_y.append(i*gt[5]+gt[3])
-    coordinates=np.column_stack((coordinates_x,coordinates_y)) #Coordinates are just indexes at this stage. TODO: use gt to tranform them back into real world values.
+    coordinates=np.column_stack((coordinates_x,coordinates_y))
+
     colnames = ['X', 'Y']
 
     if('data_all' in geotiff_header):
