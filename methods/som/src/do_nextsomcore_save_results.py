@@ -76,4 +76,4 @@ def run_SOM(args):
     with open(output_folder+'/som.dictionary', 'wb') as som_dictionary_file:
         pickle.dump(som, som_dictionary_file) #save som object to file.
     
-    print("noDataValue: ", header['noDataValue'])  
+    #print("noDataValue: ", header['noDataValue'])  

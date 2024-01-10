@@ -94,6 +94,7 @@ def load_geotiff_files(input_file_list):
             }   
 
 def delete_rows_with_no_data(geotiff_header):
+    
     data = geotiff_header['data']
     #originaldata = geotiff_header['originaldata']
     #noDataValue = geotiff_header['noDataValue']

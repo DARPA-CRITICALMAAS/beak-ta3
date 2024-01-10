@@ -325,16 +325,36 @@ class NxtSomCore(object):
     def write_geotiff_out(self, output_folder, geodatafile, somdatafile, input_file): 
         from osgeo import gdal
         import pandas as pd
+
+        print("     input file: ", input_file)
+
         dir=output_folder
         inDs=gdal.Open(input_file.split(',')[0])
-        #som_data= np.genfromtxt(dir+"/result_som.txt",skip_header=(1), delimiter=' ')
-        #geo_data=np.genfromtxt(dir+"/result_geo.txt",skip_header=(1), delimiter=' ') 
+        inBand=inDs.GetRasterBand(1)
+        gt = inDs.GetGeoTransform()
+
+        # Parameters for modifying X and Y values to match raster inDS
+        x_start_value = gt[0]  
+        x_step_size = gt[1]      
+        x_num_values = inDs.RasterXSize   
+
+        y_start_value = gt[3] 
+        y_step_size = gt[5]    
+        y_num_values = inDs.RasterYSize     
+
+        # Generate X and Y values according to inDS
+        out_x_values = np.arange(x_start_value, x_start_value + x_num_values * x_step_size, x_step_size)
+        out_y_values = np.arange(y_start_value, y_start_value + y_num_values * y_step_size, y_step_size)
+
+
         som_data= np.genfromtxt(somdatafile,skip_header=(1), delimiter=' ')
         geo_data=np.genfromtxt(geodatafile,skip_header=(1), delimiter=' ') 
         headers=[]
+
         with open(geodatafile) as gd:
             line = gd.readline()
             headers=line.split()
+
         for a in range(0, som_data.shape[1]-4): 
             x=geo_data[:,0]
             y=geo_data[:,1]
@@ -343,33 +363,55 @@ class NxtSomCore(object):
             df.columns = ['X_value','Y_value','Z_value']
             df['Z_value'] = pd.to_numeric(df['Z_value'])
             pivotted= df.pivot(index='Y_value',columns='X_value',values='Z_value')
-        
-            cols=pivotted.shape[1] 
-            rows=pivotted.shape[0]
+
+            # Select X and Y values from geo_data
+            x_values = pivotted.columns
+            y_values = pivotted.index
+
+            # Create an output DataFrame with modified X and Y values
+            out_pivotted = pd.DataFrame(index=out_y_values, columns=out_x_values)
+
+            # Fill the output DataFrame with the corresponding Z values
+            for col in out_pivotted.columns:
+                for index in out_pivotted.index:
+                    if col in x_values and index in y_values:
+                        out_pivotted.at[index, col] = pivotted.at[index, col]
+
+            cols=out_pivotted.shape[1]
+            rows=out_pivotted.shape[0]
     
-            driver = gdal.GetDriverByName('GTiff') #GTiff
-            outName0 = dir+"/GeoTIFF/out_"+headers[len(som_data[0])-4+a]+".tif"
-            outName = dir+"/GeoTIFF/out_"+os.path.splitext(os.path.basename(headers[4+a]))[0]+".tif"
+            if cols != inDs.RasterXSize or rows != inDs.RasterYSize:
+                print ("Warning: Raster size of output does not match raster size of input!")
+
+            driver = gdal.GetDriverByName('GTiff')
+    
+            # Create the output GeoTIFF
+            outName = dir + "/GeoTIFF/out_" + os.path.splitext(os.path.basename(headers[4 + a]))[0] + ".tif"
             outDs = driver.Create(outName, cols, rows, 1, gdal.GDT_Float32)
+
             if outDs is None:
                 print ("Could not create tif file")
                 sys.exit(1) 
     
             outBand = outDs.GetRasterBand(1)
-            outData = np.zeros((rows,cols), float)
-            pivotted_np=pivotted.to_numpy()
-            pivotted_np=np.flip(pivotted_np,0)
+            outData = out_pivotted.to_numpy()
+            #outData = np.flip(out_pivotted.to_numpy(), 0) 
 
-            for i in range(0, rows):
-                for j in range(0, cols):    
-                    outData[i,j] = pivotted_np[i,j]    
             outBand.WriteArray(outData, 0, 0)
             outBand.FlushCache()
-            outBand.SetNoDataValue(-99)
+            outBand.SetNoDataValue(inBand.GetNoDataValue())
+            #outBand.SetNoDataValue(-99)
+
+            # Use the geotransform and projection information from the input file
             outDs.SetGeoTransform(inDs.GetGeoTransform())
             outDs.SetProjection(inDs.GetProjection())
+
+            # check
+            print("     Name geoTIF output: ", outName)
+
+            # Flush and close the output dataset
             outDs.FlushCache()
-            outDs=None
+            outDs = None
             
         #q_error. output columns should probably be rearranged, so these could be handled in a single for loop again. or split main code into a different function
         x=geo_data[:,0]
@@ -380,28 +422,41 @@ class NxtSomCore(object):
         df['Z_value'] = pd.to_numeric(df['Z_value'])
         pivotted= df.pivot(index='Y_value',columns='X_value',values='Z_value')
     
-        cols=pivotted.shape[1] 
-        rows=pivotted.shape[0]
+        # Select X and Y values from geo_data
+        x_values = pivotted.columns
+        y_values = pivotted.index        
+        
+        # Create an output DataFrame with modified X and Y values
+        out_pivotted = pd.DataFrame(index=out_y_values, columns=out_x_values)        
+        
+        # Fill the output DataFrame with the corresponding Z values
+        for col in out_pivotted.columns:
+            for index in out_pivotted.index:
+                if col in x_values and index in y_values:
+                    out_pivotted.at[index, col] = pivotted.at[index, col]        
+        
+        cols=out_pivotted.shape[1]
+        rows=out_pivotted.shape[0]
 
         driver = gdal.GetDriverByName('GTiff')
-        outDs = driver.Create(dir+"/GeoTIFF/out_q_error.tif", cols, rows, 1, gdal.GDT_Float32)
+        outName = dir + "/GeoTIFF/out_q_error.tif"
+        outDs = driver.Create(outName, cols, rows, 1, gdal.GDT_Float32)
+
         if outDs is None:
             print ("Could not create tif file")
             sys.exit(1) 
 
         outBand = outDs.GetRasterBand(1)
-        outData = np.zeros((rows,cols), float)
-        pivotted_np=pivotted.to_numpy()
-        pivotted_np=np.flip(pivotted_np,0)
-
-        for i in range(0, rows):
-            for j in range(0, cols):    
-                outData[i,j] = pivotted_np[i,j]    
+        outData = out_pivotted.to_numpy()
+        #outData = np.flip(out_pivotted.to_numpy(), 0)  
+        
         outBand.WriteArray(outData, 0, 0)
         outBand.FlushCache()
-        outBand.SetNoDataValue(-99)
+        outBand.SetNoDataValue(inBand.GetNoDataValue())
+
         outDs.SetGeoTransform(inDs.GetGeoTransform())
         outDs.SetProjection(inDs.GetProjection())
+        
         outDs.FlushCache()
         inDs=None
         outDs=None
