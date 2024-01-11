@@ -219,7 +219,13 @@ class NxtSomCore(object):
         
         
         combined_cols = np.c_[coord_cols['data'], som_cols['data'], data_cols['data'], q_error]     
+        combined_cols_deleted = np.c_[coord_cols['data_deleted'], np.full((coord_cols['data_deleted'].shape[0],combined_cols.shape[1] - 2), np.nan)]
+
+        # Join the arrays
+        final_combined_cols = np.vstack((combined_cols, combined_cols_deleted))
+
         fmt_combined = '{} {} {} {}'.format(coord_cols['fmt'], som_cols['fmt'], data_cols['fmt'], '%.5f') 
+        
         if(labelIndex=="true"):
             data = np.loadtxt(
             input_file, 
@@ -232,14 +238,17 @@ class NxtSomCore(object):
                 if(data[0][i]=='label'):
                     labelcol=data[1:,i]
             combined_cols=np.c_[combined_cols,labelcol]
+            combined_cols_deleted=np.c_[combined_cols_deleted,np.full((coord_cols['data_deleted'].shape[0],1), np.nan)]
+            final_combined_cols = np.vstack((combined_cols, combined_cols_deleted))
             header_line= header_line+" label"            
-            np.savetxt(output_file, combined_cols,fmt='%s', header=header_line, delimiter=' ', comments='')
-            np.savetxt(output_file[:-3]+"csv", combined_cols,fmt='%s', header=header_line.replace(" ",","),delimiter=',', comments='')
+            np.savetxt(output_file, final_combined_cols,fmt='%s', header=header_line, delimiter=' ', comments='')
+            np.savetxt(output_file[:-3]+"csv", final_combined_cols,fmt='%s', header=header_line.replace(" ",","),delimiter=',', comments='')
 
         else:            
-            fmt_combined = '{} {} {} {}'.format(coord_cols['fmt'], som_cols['fmt'], data_cols['fmt'], '%.5f')#'%.5f')       
-            np.savetxt(output_file, combined_cols,fmt=fmt_combined, header=header_line, delimiter=' ', comments='')
-            np.savetxt(output_file[:-3]+"csv", combined_cols,fmt=fmt_combined.replace(" ",","), header=header_line.replace(" ",","), comments='')
+            #fmt_combined = '{} {} {} {}'.format(coord_cols['fmt'], som_cols['fmt'], data_cols['fmt'], '%.5f')#'%.5f')       
+            np.savetxt(output_file, final_combined_cols,fmt='%s', header=header_line, delimiter=' ', comments='')
+            #np.savetxt(output_file, final_combined_cols,fmt=fmt_combined, header=header_line, delimiter=' ', comments='')
+            np.savetxt(output_file[:-3]+"csv", final_combined_cols,fmt=fmt_combined.replace(" ",","), header=header_line.replace(" ",","), comments='')
 
     def save_somspace_result(self, output_file, header, som, output_folder, normalized=False):
         """Write SOM results with header line and input columns to disk in somspace.
@@ -333,55 +342,59 @@ class NxtSomCore(object):
         inBand=inDs.GetRasterBand(1)
         gt = inDs.GetGeoTransform()
 
-        # Parameters for modifying X and Y values to match raster inDS
-        x_start_value = gt[0]  
-        x_step_size = gt[1]      
-        x_num_values = inDs.RasterXSize   
-
-        y_start_value = gt[3] 
-        y_step_size = gt[5]    
-        y_num_values = inDs.RasterYSize     
-
-        # Generate X and Y values according to inDS
-        out_x_values = np.arange(x_start_value, x_start_value + x_num_values * x_step_size, x_step_size)
-        out_y_values = np.arange(y_start_value, y_start_value + y_num_values * y_step_size, y_step_size)
-
+        ## Parameters for modifying X and Y values to match raster inDS
+        #x_start_value = gt[0]  
+        #x_step_size = gt[1]      
+        #x_num_values = inDs.RasterXSize   
+#
+        #y_start_value = gt[3] 
+        #y_step_size = gt[5]    
+        #y_num_values = inDs.RasterYSize     
+#
+        ## Generate X and Y values according to inDS
+        #out_x_values = np.arange(x_start_value, x_start_value + x_num_values * x_step_size, x_step_size)
+        #out_y_values = np.arange(y_start_value, y_start_value + y_num_values * y_step_size, y_step_size)
 
         som_data= np.genfromtxt(somdatafile,skip_header=(1), delimiter=' ')
         geo_data=np.genfromtxt(geodatafile,skip_header=(1), delimiter=' ') 
         headers=[]
+
+        x=geo_data[:,0]
+        y=geo_data[:,1]
+
+        ## Create an output DataFrame with modified X and Y values
+        #out_pivotted = pd.DataFrame(index=out_y_values, columns=out_x_values)
+
+        #cols=out_pivotted.shape[1]
+        #rows=out_pivotted.shape[0]
+
+        #if cols != inDs.RasterXSize or rows != inDs.RasterYSize:
+        #    print ("Warning: Raster size of output does not match raster size of input!")
+
 
         with open(geodatafile) as gd:
             line = gd.readline()
             headers=line.split()
 
         for a in range(0, som_data.shape[1]-4): 
-            x=geo_data[:,0]
-            y=geo_data[:,1]
             z=geo_data[:,(4+a)]
             df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
             df.columns = ['X_value','Y_value','Z_value']
             df['Z_value'] = pd.to_numeric(df['Z_value'])
             pivotted= df.pivot(index='Y_value',columns='X_value',values='Z_value')
 
-            # Select X and Y values from geo_data
-            x_values = pivotted.columns
-            y_values = pivotted.index
+            cols=pivotted.shape[1]
+            rows=pivotted.shape[0]
 
-            # Create an output DataFrame with modified X and Y values
-            out_pivotted = pd.DataFrame(index=out_y_values, columns=out_x_values)
-
-            # Fill the output DataFrame with the corresponding Z values
-            for col in out_pivotted.columns:
-                for index in out_pivotted.index:
-                    if col in x_values and index in y_values:
-                        out_pivotted.at[index, col] = pivotted.at[index, col]
-
-            cols=out_pivotted.shape[1]
-            rows=out_pivotted.shape[0]
-    
-            if cols != inDs.RasterXSize or rows != inDs.RasterYSize:
-                print ("Warning: Raster size of output does not match raster size of input!")
+            ## Select X and Y values from geo_data
+            #x_values = pivotted.columns
+            #y_values = pivotted.index
+#
+            ## Fill the output DataFrame with the corresponding Z values
+            #for col in out_pivotted.columns:
+            #    for index in out_pivotted.index:
+            #        if col in x_values and index in y_values:
+            #            out_pivotted.at[index, col] = pivotted.at[index, col]
 
             driver = gdal.GetDriverByName('GTiff')
     
@@ -394,8 +407,8 @@ class NxtSomCore(object):
                 sys.exit(1) 
     
             outBand = outDs.GetRasterBand(1)
-            outData = out_pivotted.to_numpy()
-            #outData = np.flip(out_pivotted.to_numpy(), 0) 
+            #outData = pivotted.to_numpy()
+            outData = np.flip(pivotted.to_numpy(), 0) 
 
             outBand.WriteArray(outData, 0, 0)
             outBand.FlushCache()
@@ -414,29 +427,29 @@ class NxtSomCore(object):
             outDs = None
             
         #q_error. output columns should probably be rearranged, so these could be handled in a single for loop again. or split main code into a different function
-        x=geo_data[:,0]
-        y=geo_data[:,1]
+        #x=geo_data[:,0]
+        #y=geo_data[:,1]
         z=geo_data[:,(len(som_data[0])-5)*2 +5]
         df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
         df.columns = ['X_value','Y_value','Z_value']
         df['Z_value'] = pd.to_numeric(df['Z_value'])
         pivotted= df.pivot(index='Y_value',columns='X_value',values='Z_value')
     
-        # Select X and Y values from geo_data
-        x_values = pivotted.columns
-        y_values = pivotted.index        
+        ## Select X and Y values from geo_data
+        #x_values = pivotted.columns
+        #y_values = pivotted.index        
         
-        # Create an output DataFrame with modified X and Y values
-        out_pivotted = pd.DataFrame(index=out_y_values, columns=out_x_values)        
+        ## Create an output DataFrame with modified X and Y values
+        #out_pivotted = pd.DataFrame(index=out_y_values, columns=out_x_values)        
         
-        # Fill the output DataFrame with the corresponding Z values
-        for col in out_pivotted.columns:
-            for index in out_pivotted.index:
-                if col in x_values and index in y_values:
-                    out_pivotted.at[index, col] = pivotted.at[index, col]        
+        ## Fill the output DataFrame with the corresponding Z values
+        #for col in out_pivotted.columns:
+        #    for index in out_pivotted.index:
+        #        if col in x_values and index in y_values:
+        #            out_pivotted.at[index, col] = pivotted.at[index, col]        
         
-        cols=out_pivotted.shape[1]
-        rows=out_pivotted.shape[0]
+        #cols=out_pivotted.shape[1]
+        #rows=out_pivotted.shape[0]
 
         driver = gdal.GetDriverByName('GTiff')
         outName = dir + "/GeoTIFF/out_q_error.tif"
@@ -447,8 +460,8 @@ class NxtSomCore(object):
             sys.exit(1) 
 
         outBand = outDs.GetRasterBand(1)
-        outData = out_pivotted.to_numpy()
-        #outData = np.flip(out_pivotted.to_numpy(), 0)  
+        #outData = pivotted.to_numpy()
+        outData = np.flip(pivotted.to_numpy(), 0)  
         
         outBand.WriteArray(outData, 0, 0)
         outBand.FlushCache()

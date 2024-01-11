@@ -115,7 +115,8 @@ def delete_rows_with_no_data(geotiff_header):
 
 def read_geotiff_coordinate_columns(geotiff_header):
     coordinates_x=[]
-    coordinates_y=[]         
+    coordinates_y=[]
+    coordinates_deleted = []         
     data=geotiff_header['originaldata']
     gt=geotiff_header['geotransform']   # gt[0]: x upper left, gt[1]: dx, gt[2]: row rotation (typically =0)
                                         # gt[3]: y upper left, gt[4]: column rotation (typically =0), gt[5]: dy (negative value for a north-up image) 
@@ -124,18 +125,21 @@ def read_geotiff_coordinate_columns(geotiff_header):
         for j in range(0,len(data[i])):
             coordinates_x.append(j*gt[1]+gt[0])
             coordinates_y.append(i*gt[5]+gt[3])
-    coordinates=np.column_stack((coordinates_x,coordinates_y))
+    coordinates_all=np.column_stack((coordinates_x,coordinates_y))
 
     colnames = ['X', 'Y']
 
-    if('data_all' in geotiff_header):
+    if('data_all' in geotiff_header):        
         # Identify rows with noDataValue
         rows_to_delete = np.any(np.isnan(geotiff_header['data_all']), axis=1)
 
         # Delete rows with noDataValue
-        coordinates = coordinates[~rows_to_delete]
+        coordinates = coordinates_all[~rows_to_delete]
+        coordinates_deleted = coordinates_all[rows_to_delete]
+    else:  
+        coordinates = coordinates_all
 
-    return {'data': coordinates, 'colnames': colnames, 'fmt': '%f %f'} 
+    return {'data': coordinates, 'data_deleted': coordinates_deleted, 'data_all':coordinates_all,'colnames': colnames, 'fmt': '%f %f'} 
 
 def read_geotiff_data_columns(geotiff_header):
     return {'data': geotiff_header['data'], 'colnames': geotiff_header['colnames'], 'fmt': ('%f ' * geotiff_header['cols']).rstrip()} 
