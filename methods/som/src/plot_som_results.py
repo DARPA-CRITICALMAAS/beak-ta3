@@ -31,6 +31,86 @@ from matplotlib.ticker import FormatStrFormatter
 import math
 from matplotlib.lines import Line2D
 from .plotting_functions import plot_hexa
+import time
+
+"""
+Run plotting scripts
+"""    
+def run_plotting_script(argsP):
+    print("Setup figures")
+    start_time = time.time()
+
+    [geo_data, geo_headers, 
+     som_data, som_table, som_headers, som_dict,
+     grid, grid_type, annot_ticks, 
+     outgeofile, 
+     clusters, cluster_ticks, cluster_tick_labels, 
+     discrete_cmap, discrete_cmap_2, 
+     labelIndex
+     ] = basic_setup(
+        argsP.outsomfile, argsP.som_x, argsP.som_y, 
+        argsP.input_file, argsP.dir, 
+        argsP.grid_type, argsP.redraw, 
+        argsP.dataType, argsP.noDataValue, argsP.outgeofile)
+
+    end_time = time.time()
+    print(f"    Execution time: {end_time - start_time} seconds")
+
+    if argsP.outgeofile is not None: #if spatial, draw geo plots
+        print("Plot geo space results")
+        start_time = time.time()
+        if(argsP.dataType=='scatter'):
+            if(max(geo_data[:,(4)])>0): #if clusters
+                plot_geospace_clusters_scatter(geo_data, discrete_cmap_2, argsP.dir)
+            if(redraw!="false"):
+                plot_geospace_results_scatter(geo_data, geo_headers, som_data, argsP.dir)
+            #print("GeoSpace plots finished")
+        else:
+            if(max(geo_data[:,(4)])>0):#if clusters
+                plot_geospace_clusters_grid(geo_data, discrete_cmap, clusters,cluster_ticks, cluster_tick_labels, argsP.dir)
+            if(argsP.redraw!="false"):
+                plot_geospace_results_grid(geo_data, geo_headers, som_data, argsP.dir, argsP.noDataValue)
+            #print("GeoSpace plots finished")
+        end_time = time.time()
+        print(f"    Execution time: {end_time - start_time} seconds")
+
+    if(clusters>1): 
+        print("Plot Cluster result SOM space")
+        start_time = time.time()
+        #draw som cluster plot if there is more than 1 cluster
+        draw_som_clusters(som_data, som_table, annot_ticks, som_headers, discrete_cmap, discrete_cmap_2, argsP.dir, grid_type, clusters, cluster_ticks, cluster_tick_labels, labelIndex)
+        # Load cluster dictionary
+        loaded_cluster_list = load_cluster_dictionary(argsP.dir)
+        # Plot and save the Davies-Bouldin Index vs Number of Clusters
+        #print("Plot Davies Bouldin index")
+        plot_davies_bouldin(loaded_cluster_list, argsP.dir)
+
+        end_time = time.time()
+        print(f"    Execution time: {end_time - start_time} seconds")
+
+    print("Plot SOM space results")
+    start_time = time.time()
+
+    draw_umatrix(som_data, som_table, grid, grid_type, annot_ticks, som_headers, argsP.dir)
+    draw_number_of_hits(som_dict,argsP.som_x,argsP.som_y,clusters,grid,cluster_tick_labels,grid_type)
+    #in case the function was called for redrawing after selecting a different clustering result. so that we can skip stuff we don't have to redraw to speed things up. CURRENTLY NOT IN USE, ALWAYS TRUE.
+    #if(redraw!="false"):
+    draw_som_results(som_data, som_table,grid, grid_type, annot_ticks, som_headers, argsP.dir)
+
+    end_time = time.time()
+    print(f"    Execution time: {end_time - start_time} seconds")
+    
+    #print("SomSpace plots finshed")
+
+    if(som_dict['clusters'] is not None):
+        print("Plot Boxplots")
+        start_time = time.time()
+
+        draw_boxplots(som_dict,som_data,som_headers,discrete_cmap, cluster_tick_labels, argsP.dir)
+        #print("Boxplots finished")
+        end_time = time.time()
+        print(f"    Execution time: {end_time - start_time} seconds")
+
 
 
 def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, redraw, dataType, noDataValue, aOutgeofile):
@@ -226,59 +306,6 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, re
     #return {'var1': var1, 'var2':var2}
     return geo_data, geo_headers, som_data, som_table, som_headers, som_dict, grid, grid_type, annot_ticks, outgeofile, clusters, cluster_ticks, cluster_tick_labels, discrete_cmap, discrete_cmap_2, labelIndex
     #return {'geo_data': geo_data, 'geo_headers': geo_headers, 'som_data': som_data, 'som_table': som_table, 'som_headers': som_headers, 'som_dict': som_dict, 'grid': grid, 'annot_ticks': annot_ticks, 'outgeofile': outgeofile, 'clusters': clusters}
-
-
-"""
-Run plotting scripts
-"""    
-def run_plotting_script(argsP):
-
-    [geo_data, geo_headers, 
-     som_data, som_table, som_headers, som_dict,
-     grid, grid_type, annot_ticks, 
-     outgeofile, 
-     clusters, cluster_ticks, cluster_tick_labels, 
-     discrete_cmap, discrete_cmap_2, 
-     labelIndex
-     ] = basic_setup(
-        argsP.outsomfile, argsP.som_x, argsP.som_y, 
-        argsP.input_file, argsP.dir, 
-        argsP.grid_type, argsP.redraw, 
-        argsP.dataType, argsP.noDataValue, argsP.outgeofile)
-
-    if argsP.outgeofile is not None: #if spatial, draw geo plots
-        if(argsP.dataType=='scatter'):
-            if(max(geo_data[:,(4)])>0): #if clusters
-                plot_geospace_clusters_scatter(geo_data, discrete_cmap_2, argsP.dir)
-            if(redraw!="false"):
-                plot_geospace_results_scatter(geo_data, geo_headers, som_data, argsP.dir)
-            print("GeoSpace plots finished")
-        else:
-            if(max(geo_data[:,(4)])>0):#if clusters
-                plot_geospace_clusters_grid(geo_data, discrete_cmap, clusters,cluster_ticks, cluster_tick_labels, argsP.dir)
-            if(argsP.redraw!="false"):
-                plot_geospace_results_grid(geo_data, geo_headers, som_data, argsP.dir, argsP.noDataValue)
-            print("GeoSpace plots finished")
-    if(clusters>1): 
-        #draw som cluster plot if there is more than 1 cluster
-        draw_som_clusters(som_data, som_table, annot_ticks, som_headers, discrete_cmap, discrete_cmap_2, argsP.dir, grid_type, clusters, cluster_ticks, cluster_tick_labels, labelIndex)
-        # Load cluster dictionary
-        loaded_cluster_list = load_cluster_dictionary(argsP.dir)
-        # Plot and save the Davies-Bouldin Index vs Number of Clusters
-        plot_davies_bouldin(loaded_cluster_list, argsP.dir)
-
-    draw_umatrix(som_data, som_table, grid, grid_type, annot_ticks, som_headers, argsP.dir)
-    draw_number_of_hits(som_dict,argsP.som_x,argsP.som_y,clusters,grid,cluster_tick_labels,grid_type)
-    #in case the function was called for redrawing after selecting a different clustering result. so that we can skip stuff we don't have to redraw to speed things up. CURRENTLY NOT IN USE, ALWAYS TRUE.
-    #if(redraw!="false"):
-    draw_som_results(som_data, som_table,grid, grid_type, annot_ticks, som_headers, argsP.dir)
-
-    print("SomSpace plots finshed")
-
-    if(som_dict['clusters'] is not None):
-        draw_boxplots(som_dict,som_data,som_headers,discrete_cmap, cluster_tick_labels, argsP.dir)
-    print("Boxplots finished")
-
 
 
 """
@@ -613,19 +640,29 @@ Plot geospace clusters if input type is scatter
 """
 def plot_geospace_clusters_scatter(geo_data,discrete_cmap_2,working_dir):
     #global geo_data
-    z=geo_data[:,(4)]      
-    centers=[]     
-    for i in range(0, len(geo_data)):	
-        centers.append([geo_data[i][0],geo_data[i][1]])
-    grid={'centers':np.array(centers), 
-          'x':np.array([len(geo_data)]),
-          'y':np.array([len(geo_data)])}    
+    z=geo_data[:,(4)]  
+    centers = geo_data[:, :2]  # Directly create a NumPy array
+
+    #centers=[]     
+    #for i in range(0, len(geo_data)):	
+    #    centers.append([geo_data[i][0],geo_data[i][1]])
+
+    #grid={'centers':np.array(centers), 
+    #      'x':np.array([len(geo_data)]),
+    #      'y':np.array([len(geo_data)])}  
+    
+    grid = {'centers': centers,
+            'x': np.array([len(geo_data)]),
+            'y': np.array([len(geo_data)])}
+
     mpl.rcParams.update({'font.size': 30})
     ax = plot_hexa(somx,somy,clusters,grid,z,cluster_tick_labels=cluster_tick_labels, title="clusters",colmap=discrete_cmap_2, ptype='scatter')       
+
     ax.invert_yaxis()
     ax.set_title('cluster')
     plt.tight_layout()
     ax.figure.savefig(working_dir+'/geoplot_'+str(1)+'.png', dpi=300)
+
     plt.clf()
     plt.cla()
     plt.close()   
