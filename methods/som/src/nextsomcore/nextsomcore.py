@@ -191,9 +191,7 @@ class NxtSomCore(object):
             f.write("Quantization error: " + str(mean_q_error))
 
         xml_file = Path(output_folder+"/RunStats.xml")
-        #self._write_to_xml(xml_file, "q_error", mean_q_error)
 
-        #def _write_to_xml(self, xml_file, element_name, text):
         if xml_file.is_file():
             tree = ET.parse(xml_file)
             root = tree.getroot()
@@ -331,16 +329,6 @@ class NxtSomCore(object):
             combined_col_list = ['som_x', 'som_y'] + ['b_%s' % x for x in col_names] + ['umatrix', 'cluster']
             combined_fmt = ('%d %d ' + '%f ' * len(col_names)) +'%f %f'
         return {'data': combined_data, 'colnames':combined_col_list, 'fmt': combined_fmt}
-
-
-    #def _write_to_xml(self, xml_file, element_name, text):
-    #    if xml_file.is_file():
-    #        tree = ET.parse(xml_file)
-    #        root = tree.getroot()
-    #        q_error_mean = ET.Element(element_name)
-    #        q_error_mean.text = str(text)
-    #        root.append(q_error_mean)
-    #        tree.write(xml_file)
 
 
     def write_geotiff_out(self, output_folder, geodatafile, somdatafile, input_file): 
