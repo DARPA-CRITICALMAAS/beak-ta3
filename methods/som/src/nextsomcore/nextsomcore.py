@@ -158,7 +158,7 @@ class NxtSomCore(object):
             pickle.dump(cluster_list, cluster_dictionary_file)
         print("100% Clustering completed.")
         return smallest_3[0]["cluster"]     
-                
+
 
     def save_geospace_result(self, output_file, header, som, output_folder, input_file, normalized=False, labelIndex=-2):
         """Write SOM results with header line and input columns to disk in geospace
@@ -182,56 +182,58 @@ class NxtSomCore(object):
         coord_cols = read_coordinate_columns(header)
         data_cols = read_data_columns(header)
         som_cols = self._extract_som_cols_geospace(som, data_cols['colnames'])   
+
         q_cols = som_cols['data'][:,3:] - data_cols['data'] #calculate q error
         q_error=np.linalg.norm(q_cols,axis=1)               #calculate q error     
         mean_q_error=np.mean(q_error)                       #calculate mean q error
-        f=open(output_folder+"/RunStats.txt", "a+")         #write mean q error to runstats file
-        f.write("Quantization error: "+str(mean_q_error))   #write mean q error to runstats file     
-        f.close                                             #write mean q error to runstats file
+
+        with open(output_folder + "/RunStats.txt", "a+") as f:      #write mean q error to runstats file
+            f.write("Quantization error: " + str(mean_q_error))
+
         xml_file = Path(output_folder+"/RunStats.xml")
+        #self._write_to_xml(xml_file, "q_error", mean_q_error)
+
+        #def _write_to_xml(self, xml_file, element_name, text):
         if xml_file.is_file():
-            tree = ET.parse(output_folder+"/RunStats.xml")
+            tree = ET.parse(xml_file)
             root = tree.getroot()
             q_error_mean = ET.Element("q_error")
-            q_error_mean.text=str(mean_q_error)
+            q_error_mean.text = str(mean_q_error)
             root.append(q_error_mean)
-            tree.write(output_folder+"/RunStats.xml")
-
+            tree.write(xml_file)
         
         header_line = '{} {} {} {}'.format(str(coord_cols['colnames']),
 										str(som_cols['colnames']),
-										str(data_cols['colnames']),'q_error').replace('[','').replace(']','').replace(',','').replace('\'','')
-        if(normalized=="true"):
-            data_cols["data"]=data_cols["data"].astype('float64')
-            tree = ET.parse(output_folder+"/DataStats.xml")
+										str(data_cols['colnames']),'q_error'
+                                        ).replace('[','').replace(']','').replace(',','').replace('\'','')
+        
+        if normalized == "true":
+            data_cols["data"] = data_cols["data"].astype('float64')
+            tree = ET.parse(output_folder + "/DataStats.xml")
             root = tree.getroot()
-            for i in range(0,len(data_cols["data"][0])):
-                maxD=Decimal(tree.find(data_cols["colnames"][i]).find("max").text)
-                minD=Decimal(tree.find(data_cols["colnames"][i]).find("min").text)
-                minN=float(Decimal(tree.find(data_cols["colnames"][i]).find("scaleMin").text))
-                maxN=float(Decimal(tree.find(data_cols["colnames"][i]).find("scaleMax").text)) 
-                for j in range(0,len(data_cols["data"])):
-                        N=Decimal(data_cols["data"][j][i].item())                     
-                        data_cols["data"][j][i]=(maxD-minD)*(N-Decimal(minN))/(Decimal(maxN)-Decimal(minN))+minD
-                        N=Decimal(som_cols["data"][j][i+3].item())
-                        som_cols["data"][j][i+3]=(maxD-minD)*(N-Decimal(minN))/(Decimal(maxN)-Decimal(minN))+minD
-        
-        
+            for i in range(0, len(data_cols["data"][0])):
+                maxD = Decimal(tree.find(data_cols["colnames"][i]).find("max").text)
+                minD = Decimal(tree.find(data_cols["colnames"][i]).find("min").text)
+                minN = float(Decimal(tree.find(data_cols["colnames"][i]).find("scaleMin").text))
+                maxN = float(Decimal(tree.find(data_cols["colnames"][i]).find("scaleMax").text))
+                for j in range(0, len(data_cols["data"])):
+                    N = Decimal(data_cols["data"][j][i].item())
+                    data_cols["data"][j][i] = (maxD - minD) * (N - Decimal(minN)) / (Decimal(maxN) - Decimal(minN)) + minD
+                    N = Decimal(som_cols["data"][j][i + 3].item())
+                    som_cols["data"][j][i + 3] = (maxD - minD) * (N - Decimal(minN)) / (Decimal(maxN) - Decimal(minN)) + minD
         
         combined_cols = np.c_[coord_cols['data'], som_cols['data'], data_cols['data'], q_error]     
         combined_cols_deleted = np.c_[coord_cols['data_deleted'], np.full((coord_cols['data_deleted'].shape[0],combined_cols.shape[1] - 2), np.nan)]
 
         # Join the arrays
         final_combined_cols = np.vstack((combined_cols, combined_cols_deleted))
-
-        fmt_combined = '{} {} {} {}'.format(coord_cols['fmt'], som_cols['fmt'], data_cols['fmt'], '%.5f') 
         
         if(labelIndex=="true"):
             data = np.loadtxt(
-            input_file, 
-            dtype='str',
-            delimiter='\t',
-            skiprows=3
+                input_file, 
+                dtype='str',
+                delimiter='\t',
+                skiprows=3
             )
             labelcol=[]
             for i in range(0,len(data[0])):
@@ -243,12 +245,13 @@ class NxtSomCore(object):
             header_line= header_line+" label"            
             np.savetxt(output_file, final_combined_cols,fmt='%s', header=header_line, delimiter=' ', comments='')
             np.savetxt(output_file[:-3]+"csv", final_combined_cols,fmt='%s', header=header_line.replace(" ",","),delimiter=',', comments='')
-
+            #np.savetxt(output_file[:-3] + "csv", final_combined_cols, fmt=header_line.replace(" ", ","), delimiter=',', comments='')
         else:            
-            #fmt_combined = '{} {} {} {}'.format(coord_cols['fmt'], som_cols['fmt'], data_cols['fmt'], '%.5f')#'%.5f')       
-            np.savetxt(output_file, final_combined_cols,fmt='%s', header=header_line, delimiter=' ', comments='')
+            fmt_combined = '{} {} {} {}'.format(coord_cols['fmt'], som_cols['fmt'], data_cols['fmt'], '%.5f')#'%.5f')       
+            np.savetxt(output_file, final_combined_cols, fmt='%s', header=header_line, delimiter=' ', comments='')
             #np.savetxt(output_file, final_combined_cols,fmt=fmt_combined, header=header_line, delimiter=' ', comments='')
-            np.savetxt(output_file[:-3]+"csv", final_combined_cols,fmt=fmt_combined.replace(" ",","), header=header_line.replace(" ",","), comments='')
+            np.savetxt(output_file[:-3] + "csv", final_combined_cols, fmt=fmt_combined.replace(" ",","), header=header_line.replace(" ",","), comments='')
+            #np.savetxt(output_file[:-3] + "csv", final_combined_cols, fmt=header_line.replace(" ", ","), delimiter=',', comments='')
 
     def save_somspace_result(self, output_file, header, som, output_folder, normalized=False):
         """Write SOM results with header line and input columns to disk in somspace.
@@ -269,9 +272,11 @@ class NxtSomCore(object):
         col_names = read_data_columns(header)['colnames']
         som_cols = self._extract_som_cols_somspace(som, col_names)
         hits=np.zeros((som['n_columns'],som['n_rows']))
+
         for i in range(0,len(som["bmus"])):
              hits[som["bmus"][i][0]][som["bmus"][i][1]]+=1
         hits=hits.flatten()
+
         if(normalized=="True"):
             data_cols = read_data_columns(header)
             tree = ET.parse(output_folder+"/DataStats.xml")
@@ -282,7 +287,8 @@ class NxtSomCore(object):
                     maxN=float(Decimal(tree.find(data_cols["colnames"][i-2].replace("\"","")).find("scaleMax").text)) 
                     for j in range(0,len(som_cols["data"])):
                         N=Decimal(som_cols["data"][j][i].item())
-                        som_cols["data"][j][i]=(maxD-minD)*(N-Decimal(minN))/(Decimal(maxN)-Decimal(minN))+minD         
+                        som_cols["data"][j][i]=(maxD-minD)*(N-Decimal(minN))/(Decimal(maxN)-Decimal(minN))+minD   
+
         som_cols["data"]=np.hstack((som_cols["data"],hits.reshape(-1,1)))
         som_cols['fmt']=som_cols['fmt']+ " %f"
         header_line = '{}'.format(str(som_cols['colnames'])).replace('[','').replace(']','').replace(',','').replace('\'','')+" hits"#.translate(None, "[]',") replaced by a lower level solution that works in both 2.x and 3.x python
@@ -327,8 +333,14 @@ class NxtSomCore(object):
         return {'data': combined_data, 'colnames':combined_col_list, 'fmt': combined_fmt}
 
 
-
-
+    #def _write_to_xml(self, xml_file, element_name, text):
+    #    if xml_file.is_file():
+    #        tree = ET.parse(xml_file)
+    #        root = tree.getroot()
+    #        q_error_mean = ET.Element(element_name)
+    #        q_error_mean.text = str(text)
+    #        root.append(q_error_mean)
+    #        tree.write(xml_file)
 
 
     def write_geotiff_out(self, output_folder, geodatafile, somdatafile, input_file): 
@@ -342,59 +354,40 @@ class NxtSomCore(object):
         inBand=inDs.GetRasterBand(1)
         gt = inDs.GetGeoTransform()
 
-        ## Parameters for modifying X and Y values to match raster inDS
-        #x_start_value = gt[0]  
-        #x_step_size = gt[1]      
-        #x_num_values = inDs.RasterXSize   
-#
-        #y_start_value = gt[3] 
-        #y_step_size = gt[5]    
-        #y_num_values = inDs.RasterYSize     
-#
-        ## Generate X and Y values according to inDS
-        #out_x_values = np.arange(x_start_value, x_start_value + x_num_values * x_step_size, x_step_size)
-        #out_y_values = np.arange(y_start_value, y_start_value + y_num_values * y_step_size, y_step_size)
+        #print("     genfromtxt som_data")
+        #som_data= np.genfromtxt(somdatafile,skip_header=(1), delimiter=' ')
+        #print("     genfromtxt geo_data")
+        #geo_data=np.genfromtxt(geodatafile,skip_header=(1), delimiter=' ') 
+        #headers=[]
 
-        som_data= np.genfromtxt(somdatafile,skip_header=(1), delimiter=' ')
-        geo_data=np.genfromtxt(geodatafile,skip_header=(1), delimiter=' ') 
-        headers=[]
+        print("     read_csv som_data")
+        som_data = pd.read_csv(somdatafile, skiprows=1, delimiter=' ').values
+        print("     read_csv geo_data")
+        geo_data = pd.read_csv(geodatafile, skiprows=1, delimiter=' ').values
+        headers = pd.read_csv(geodatafile, nrows=0, delimiter=' ').columns.tolist()
 
         x=geo_data[:,0]
         y=geo_data[:,1]
 
-        ## Create an output DataFrame with modified X and Y values
-        #out_pivotted = pd.DataFrame(index=out_y_values, columns=out_x_values)
+        #print("     open(geodatafile)")
+        #
+        #with open(geodatafile) as gd:   # easier way using pandas?
+        #    line = gd.readline()
+        #    headers=line.split()
 
-        #cols=out_pivotted.shape[1]
-        #rows=out_pivotted.shape[0]
-
-        #if cols != inDs.RasterXSize or rows != inDs.RasterYSize:
-        #    print ("Warning: Raster size of output does not match raster size of input!")
-
-
-        with open(geodatafile) as gd:
-            line = gd.readline()
-            headers=line.split()
+        print("     Iterate over each geoTIF file:")
 
         for a in range(0, som_data.shape[1]-4): 
+            print("         ", os.path.splitext(os.path.basename(headers[4 + a]))[0])
+
             z=geo_data[:,(4+a)]
             df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
             df.columns = ['X_value','Y_value','Z_value']
             df['Z_value'] = pd.to_numeric(df['Z_value'])
             pivotted= df.pivot(index='Y_value',columns='X_value',values='Z_value')
 
-            cols=pivotted.shape[1]
-            rows=pivotted.shape[0]
-
-            ## Select X and Y values from geo_data
-            #x_values = pivotted.columns
-            #y_values = pivotted.index
-#
-            ## Fill the output DataFrame with the corresponding Z values
-            #for col in out_pivotted.columns:
-            #    for index in out_pivotted.index:
-            #        if col in x_values and index in y_values:
-            #            out_pivotted.at[index, col] = pivotted.at[index, col]
+            cols = pivotted.shape[1]
+            rows = pivotted.shape[0]
 
             driver = gdal.GetDriverByName('GTiff')
     
@@ -434,22 +427,6 @@ class NxtSomCore(object):
         df.columns = ['X_value','Y_value','Z_value']
         df['Z_value'] = pd.to_numeric(df['Z_value'])
         pivotted= df.pivot(index='Y_value',columns='X_value',values='Z_value')
-    
-        ## Select X and Y values from geo_data
-        #x_values = pivotted.columns
-        #y_values = pivotted.index        
-        
-        ## Create an output DataFrame with modified X and Y values
-        #out_pivotted = pd.DataFrame(index=out_y_values, columns=out_x_values)        
-        
-        ## Fill the output DataFrame with the corresponding Z values
-        #for col in out_pivotted.columns:
-        #    for index in out_pivotted.index:
-        #        if col in x_values and index in y_values:
-        #            out_pivotted.at[index, col] = pivotted.at[index, col]        
-        
-        #cols=out_pivotted.shape[1]
-        #rows=out_pivotted.shape[0]
 
         driver = gdal.GetDriverByName('GTiff')
         outName = dir + "/GeoTIFF/out_q_error.tif"

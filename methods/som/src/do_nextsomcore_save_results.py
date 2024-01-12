@@ -64,6 +64,13 @@ def run_SOM(args):
     end_time = time.time()
     print(f"    Execution time: {end_time - start_time} seconds")
     
+    print('Save SOM object to file')
+    start_time = time.time()
+    with open(output_folder+'/som.dictionary', 'wb') as som_dictionary_file:
+        pickle.dump(som, som_dictionary_file) #save som object to file.
+    end_time = time.time()
+    print(f"    Execution time: {end_time - start_time} seconds")
+
     if(args.geotiff_input is not None):
         print('Write GeoTIFF file')
         start_time = time.time()
@@ -72,8 +79,5 @@ def run_SOM(args):
         nxtsomcore.write_geotiff_out(args.output_folder, args.output_file_geospace, args.output_file_somspace, inputFileArray[0])
         end_time = time.time()
         print(f"    Execution time: {end_time - start_time} seconds")
-
-    with open(output_folder+'/som.dictionary', 'wb') as som_dictionary_file:
-        pickle.dump(som, som_dictionary_file) #save som object to file.
     
     #print("noDataValue: ", header['noDataValue'])  
