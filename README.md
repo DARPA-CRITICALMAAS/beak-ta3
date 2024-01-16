@@ -32,8 +32,8 @@ The repository is structured as following:
 │           ├── experiments/    # mineral systems and model configurations
 │               └── ...         
 │           ├── methods/        # code for respective ML methods
-│               └── bnn         
-│               └── hybrid         
+│               ├── bnn         
+│               ├── hybrid         
 │               └── som         
 │           └── utilities       # helper functions and modules       
 │   └── tests/              
