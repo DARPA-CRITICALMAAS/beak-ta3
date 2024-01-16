@@ -13,6 +13,8 @@ Last update: **17-01-2023**
 What's new?
 - MTRI packagetemplate integration
 
+A backup of the **older** version of the main branch can be found [here](https://github.com/DARPA-CRITICALMAAS/beak-ta3/tree/backups_main_01_before_package_template_integration).
+
 If you build the environment before **11-12-2023**, please rebuild with the current updates. 
 If you set-up the environment, please **always** use the main branch for the initial setup ❗
 
