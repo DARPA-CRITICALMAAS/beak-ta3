@@ -32,6 +32,7 @@ import math
 from matplotlib.lines import Line2D
 from .plotting_functions import plot_hexa
 import time
+import warnings
 
 """
 Run plotting scripts
@@ -146,7 +147,7 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, re
         #print(f"        Read geo data (genfromtxt):                 {time_A - time_1} seconds")
         geo_data = pd.read_csv(outgeofile, skiprows=1, delimiter=' ').values
         time_A = time.time()
-        print(f"        Read geo data (read_csv):                 {time_A - time_1} seconds")
+        #print(f"        Read geo data (read_csv):                 {time_A - time_1} seconds")
         #if spatial, draw geo plots
         geofile = open(outgeofile, "r")       
         header_line = geofile.readline() 
@@ -390,7 +391,8 @@ def plot_geospace_results_grid(geo_data, geo_headers, som_data, working_dir, noD
     mpl.rcParams.update({'font.size': 14})
 
     for i in range(0, len(som_data[0])-4): 
-        x=geo_data[:,0]
+        print(f"    geospace plot no. {i} from {len(som_data[0])-4}", end='\r')  
+        x=geo_data[:,0]      
         y=geo_data[:,1]
         z=geo_data[:,(5+i)]
 
@@ -441,9 +443,10 @@ def plot_geospace_results_grid(geo_data, geo_headers, som_data, working_dir, noD
         plt.clf()
         plt.cla()
         plt.close()
-        
+    print()    
         
     #q_error:
+    print(f"    q-error plot")
     x=geo_data[:,0]
     y=geo_data[:,1]
     z=geo_data[:,(len(som_data[0])-5)*2 +5] 
@@ -506,6 +509,7 @@ def plot_geospace_results_scatter(geo_data, geo_headers, som_data, working_dir):
           'y':np.array([len(geo_data)])}
 
     for i in range(0, len(som_data[0])-4):  
+        print(f"    geospace plot no. {i} from {len(som_data[0])-4}", end='\r')
         z=geo_data[:,(5+i)]   
         sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
         mpl.rcParams.update({'font.size': 30})
@@ -519,9 +523,10 @@ def plot_geospace_results_scatter(geo_data, geo_headers, som_data, working_dir):
         plt.cla()
         plt.close()
         mpl.rcParams.update({'font.size': 12})  
-       
+    print()
         
     #draw q_error:
+    print(f"    q-error plot")
     z=geo_data[:,(len(som_data[0])-5)*2 +5]   
     sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
     mpl.rcParams.update({'font.size': 30})
@@ -542,6 +547,7 @@ Draw Som result plots
 """
 def draw_som_results(som_data, som_table,grid, grid_type, annot_ticks, som_headers,working_dir):
     for j in range(2,len(som_data[0])-3):
+        print(f"    somspace plot no. {j} from {len(som_data[0])-3}", end='\r')
         if(grid_type.lower()=="rectangular"):
             for i in range(0,len(som_data)): 
                 som_table[int(som_data[i][0])][int(som_data[i][1])]=som_data[i][j] #som_table: somx*somy size
@@ -559,7 +565,7 @@ def draw_som_results(som_data, som_table,grid, grid_type, annot_ticks, som_heade
         plt.cla()
         plt.close()  
         mpl.rcParams.update({'font.size': 12})
-        
+    print()
         
 """
 Draw U-matrix plot
@@ -761,9 +767,13 @@ def draw_boxplots(som_dict,som_data,som_headers,discrete_cmap,cluster_tick_label
     for k in range(len(discrete_cmap)-1,-1,-1):
         if(k not in clusters_unique):
             discrete_cmap.pop(k)  
+    
     for i in range(2,len(som_data[0])-3): 
-        z=som_data[:,i]      
-        ax=sns.boxplot(x=cluster_nparray.astype(float), y=z.astype(float), hue=cluster_nparray.astype(float) ,dodge=False, palette=discrete_cmap)       
+        print(f"    boxplot no. {i} from {len(som_data[0])-3}", end='\r')
+        z=som_data[:,i]
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=FutureWarning)
+            ax=sns.boxplot(x=cluster_nparray.astype(float), y=z.astype(float), hue=cluster_nparray.astype(float) ,dodge=False, palette=discrete_cmap)       
         ax.set_title(som_headers[i])
         ax.xaxis.set_major_formatter(FormatStrFormatter('%.0f')) 
         custom_lines=[]#dummy handle
@@ -774,7 +784,8 @@ def draw_boxplots(som_dict,som_data,som_headers,discrete_cmap,cluster_tick_label
         ax.figure.savefig(working_dir+'/boxplot_' +str(i-1)+'.png')   
         plt.clf()
         plt.cla()
-        plt.close()        
+        plt.close()  
+    print()      
         
 
 """

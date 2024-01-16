@@ -401,7 +401,7 @@ class NxtSomCore(object):
             outDs.SetProjection(inDs.GetProjection())
 
             # check
-            print("     Name geoTIF output: ", outName)
+            #print("     Name geoTIF output: ", outName)
 
             # Flush and close the output dataset
             outDs.FlushCache()
