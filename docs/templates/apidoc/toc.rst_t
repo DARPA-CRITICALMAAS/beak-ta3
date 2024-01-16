@@ -1,0 +1,9 @@
+{{ header | heading }}
+
+.. toctree::
+   :includehidden:
+   :maxdepth: {{ maxdepth }}
+{% for docname in docnames %}
+   {{ docname }}
+{%- endfor %}
+

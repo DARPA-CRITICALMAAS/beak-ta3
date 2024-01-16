@@ -18,8 +18,11 @@ RUN apt-get update && apt-get install -y \
     python3-pip
 
 # Copy the environment files into the container
-COPY environment.yml .
-COPY requirements.txt .
+COPY environment.yml /tmp
+COPY requirements.txt /tmp
+
+# Set temporary working directory
+WORKDIR /tmp
 
 # Update conda
 RUN conda update -n base -c defaults conda
@@ -33,16 +36,15 @@ SHELL ["conda", "run", "-n", "beak-ta3", "/bin/bash", "-c"]
 # Set new environment to default
 ENV CONDA_DEFAULT_ENV=beak-ta3
 
-# Install requirements
+# Update pip and install additional requirements
+RUN pip install --upgrade pip
+RUN pip install wheel
 RUN pip install -r requirements.txt
 
-# Clean conda cache
+# Clean caches and temporary files
 RUN conda clean --all -y
 RUN pip cache purge	
+RUN apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Delete environment-setup files
-RUN rm environment.yml
-RUN rm requirements.txt
-	
-# Set the working directory to /DIR
+# Set working directory
 WORKDIR /beak-ta3

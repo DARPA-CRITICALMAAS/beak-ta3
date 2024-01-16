@@ -1,16 +1,17 @@
 import os
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Any
 
 import numpy as np
 import pandas as pd
+import multiprocessing as mp
 import rasterio
 from rasterio.crs import CRS
 from tqdm import tqdm
 
 
 def load_dataset(
-    file: Path, encoding_type: str = "ISO-8859-1", nrows: Optional[int] = None
+    file: Path, encoding_type: str = "ISO-8859-1", nrows: Optional[int] = None, **kwargs
 ) -> pd.DataFrame:
     """
     Load a text-based dataset from disk.
@@ -18,12 +19,13 @@ def load_dataset(
     Args:
         file (Path): Location of the file to be loaded.
         encoding_type (str): Text encoding of the input file. Defaults to "ISO-8859-1".
-        nrows (Optional[int]): Number of rows to be loaded. Defaults to None.
+        nrows (int, optional): Number of rows to be loaded. Defaults to None.
+        **kwargs: Additional keyword arguments to be passed to pd.read_csv().
 
     Returns:
         pd.DataFrame: Table with loaded data.
     """
-    return pd.read_csv(file, encoding=encoding_type, nrows=nrows)
+    return pd.read_csv(file, encoding=encoding_type, nrows=nrows, **kwargs)
 
 
 def load_raster(file: Path) -> rasterio.io.DatasetReader:
@@ -145,7 +147,20 @@ def create_file_folder_list(root_folder: Path) -> List[Path]:
             folder_list.append(Path(root) / folder)
 
         for file in files:
-            file_list.append(Path(root) / folder / file)
+            if dirs:
+                file_list.append(Path(root) / folder / file)
+            else:
+                file_path = Path(root) / file
+
+                # Ignore metadata files
+                if not file_path.suffix.lower() in [
+                    ".aux",
+                    ".xml",
+                    ".cpg",
+                    ".ovr",
+                    ".dbf",
+                ]:
+                    file_list.append(file_path)
 
     return folder_list, file_list
 
@@ -163,6 +178,8 @@ def check_path(folder: Path):
     if not os.path.exists(folder):
         os.makedirs(folder)
 
+    return folder
+
 
 def save_raster(
     path: Path,
@@ -171,7 +188,7 @@ def save_raster(
     height: int,
     width: int,
     nodata_value: np.number,
-    transform: dict,
+    transform: Any,
 ):
     """
     Save raster data to disk.
@@ -183,11 +200,14 @@ def save_raster(
         height (int): The height (number of rows) of the raster.
         width (int): The width (number of columns) of the raster.
         nodata_value (np.number): The nodata value of the raster.
-        transform (dict): The affine transformation matrix that maps pixel coordinates to CRS coordinates.
+        transform (affine.Affine): The affine transformation matrix that maps pixel coordinates to CRS coordinates.
 
     Returns:
         (None): None
     """
+    if array.ndim == 2:
+        array = np.expand_dims(array, axis=0)
+
     count = array.shape[0]
     dtype = array.dtype
 
@@ -207,3 +227,23 @@ def save_raster(
             dst.write(array[i].astype(dtype), i + 1)
 
         dst.close()
+
+
+def dataframe_to_feather(data: pd.DataFrame, file_path: Path):
+    threads = mp.cpu_count()
+    chunksize = np.ceil(len(data) / threads).astype(int)
+    data.to_feather(file_path, chunksize=chunksize)
+
+
+def load_feather(
+    file_path: Path,
+    columns: Optional[List] = None,
+    use_threads: bool = True,
+    storage_options: Optional[dict] = None,
+) -> pd.DataFrame:
+    return pd.read_feather(
+        file_path,
+        columns=columns,
+        use_threads=use_threads,
+        storage_options=storage_options,
+    )

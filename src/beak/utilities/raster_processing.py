@@ -8,13 +8,15 @@ import rasterio
 from rasterio import warp
 from tqdm import tqdm
 
-from io import (
+from utilities.io import (
     create_file_folder_list,
     create_file_list,
     check_path,
     load_raster,
     save_raster,
 )
+
+from utilities.misc import replace_invalid_characters
 
 # References
 # Some non-trivial functionalities were adapted from other sources.

@@ -1,6 +1,23 @@
 import os
+import re
 from pathlib import Path
 from typing import Optional
+
+
+def replace_invalid_characters(string: str) -> str:
+    """
+    Replace invalid characters in a string with an underscore.
+    Multiple consecutive underscores will be cropped to one.
+
+    Args:
+        string (str): Input string.
+
+    Returns:
+        str: String with replaced characters.
+    """
+    string = re.sub(r"[ /().,]", "_", string)
+    string = re.sub(r"(_+)", "_", string)
+    return string
 
 
 def create_tree(

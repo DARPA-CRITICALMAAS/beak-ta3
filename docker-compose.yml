@@ -10,4 +10,4 @@ services:
       - 8888:8888         # Ports for jupyter
     volumes:
       - ./:/beak-ta3/          # Mount the repo
-    container_name: beak-ta3-dev
+    container_name: beak-ta3

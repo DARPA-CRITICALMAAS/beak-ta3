@@ -6,8 +6,9 @@ from typing import List, Literal, Optional, Tuple, Union
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from preparation import create_encodings_from_dataframe, fill_nodata_with_mean
-from raster import check_path, replace_invalid_characters, save_raster
+from utilities.preparation import create_encodings_from_dataframe, fill_nodata_with_mean
+from utilities.raster_processing import check_path, save_raster
+from utilities.misc import replace_invalid_characters
 from rasterio import features, profiles, transform
 from rasterio.crs import CRS
 from rasterio.enums import MergeAlg
@@ -50,7 +51,9 @@ def transform_from_geometries(
     out_transform = transform.from_origin(min_x, max_y, resolution, resolution)
     return out_width, out_height, out_transform
 
+# endregion
 
+# region: Convert to geodataframe
 def create_geodataframe_from_polygons(
     data: pd.DataFrame,
     polygon_col: str,
@@ -80,9 +83,12 @@ def create_geodataframe_from_polygons(
     geodataframe = gpd.GeoDataFrame(
         data, geometry=polygon_col, crs=CRS.from_epsg(epsg_code)
     )
-    geodataframe["geometry"] = geodataframe.geometry
-    geodataframe.set_geometry("geometry", inplace=True)
-
+    
+    if polygon_col != "geometry":
+        geodataframe["geometry"] = geodataframe.geometry
+        geodataframe.set_geometry("geometry", inplace=True)
+        geodataframe.drop(columns=[polygon_col], inplace=True)
+        
     return geodataframe
 
 
