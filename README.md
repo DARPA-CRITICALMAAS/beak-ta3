@@ -170,10 +170,14 @@ function(arguments)
 
 Even better, **data** 💾 can be accessed by:
 ```python
+# Import
 from importlib.resources import files
 from 🦄 import load_function
 
+# Path
 file_path = str(files("beak.data") / "subfolder" / "file_name.ext")
+
+# Load data
 data = load_function(file_path)
 ```
 
