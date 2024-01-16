@@ -24,16 +24,6 @@ The repository is structured as following:
 
 ```
 ├── beak-ta3/
-<<<<<<< Updated upstream
-│   ├── docs/               # additional documentations
-│   ├── experiments/        # mineral systems (e.g. MVT-NAT, MVT-REG, ...) working on
-│   ├── local/              # stuff that's not being uploaded to GitHub
-│   └── methods/            # contains the code for the respective ML methods
-│       ├── bnn/
-│       ├── hybrid/
-│       └── som/
-│   └── utilities/          # helper functions, will be modularize in future releases   
-=======
 │   ├── docs/                   # documentations
 │   ├── local/                  # stuff that's not being uploaded to GitHub
 │   └── src/                
@@ -48,7 +38,6 @@ The repository is structured as following:
 │           └── utilities       # helper functions and modules       
 │   └── tests/              
 │       └── beak                # test functions  
->>>>>>> Stashed changes
 ```
 
 Since there is a function that links to the data folder to provide easy data access, **please save all data within the data folder** ❗ 
