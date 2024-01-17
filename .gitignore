@@ -161,7 +161,7 @@ cython_debug/
 
 # More to ignore
 data/
-local/
+# local/
 eis_toolkit/
 .obsidian/
 sync.ffs_db
