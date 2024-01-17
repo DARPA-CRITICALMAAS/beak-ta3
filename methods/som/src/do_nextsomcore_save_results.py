@@ -1,6 +1,7 @@
 from .nextsomcore.nextsomcore import NxtSomCore
 import pickle
 import time
+import numpy as np
 
 def run_SOM(args):
     nxtsomcore = NxtSomCore()
@@ -81,3 +82,25 @@ def run_SOM(args):
         print(f"    Execution time: {end_time - start_time} seconds")
     
     #print("noDataValue: ", header['noDataValue'])  
+
+
+    print('Count hits per SOM cell')
+    start_time = time.time()
+    som_data = np.genfromtxt(args.output_file_somspace,skip_header=(1), delimiter=' ')
+
+    clusters=int(max(som_data[:,len(som_data[0])-2])+1)
+
+    # Initialize a list to store hit counts for each cluster
+    cluster_hit_count = [0] * (clusters)  # Initialize with zeros
+
+    #labeling clusters in colorbar with format "cluster number:  number of data points in this cluster".
+    if(clusters>1):
+        cluster_array=som['clusters'].transpose()#TODO: figure out if this a problem elsewhere.
+        for i in range (clusters,0,-1):
+            for bmu in som['bmus']:
+                if (cluster_array[bmu[0]][bmu[1]])+1==i:
+                    cluster_hit_count[i-1]+=1
+            print(f"        Cluster hit count: {i-1} - {cluster_hit_count[i-1]}")
+    
+    end_time = time.time()
+    print(f"    Execution time: {end_time - start_time} seconds")

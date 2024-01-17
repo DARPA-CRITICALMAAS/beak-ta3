@@ -45,7 +45,7 @@ def run_plotting_script(argsP):
      som_data, som_table, som_headers, som_dict,
      grid, grid_type, annot_ticks, annot_strings, 
      outgeofile, 
-     clusters, cluster_ticks, cluster_tick_labels, 
+     clusters, cluster_ticks, cluster_tick_labels,
      discrete_cmap, discrete_cmap_2, 
      labelIndex
      ] = basic_setup(
@@ -67,7 +67,7 @@ def run_plotting_script(argsP):
                 plot_geospace_results_scatter(geo_data, geo_headers, som_data, argsP.dir)
             #print("GeoSpace plots finished")
         else:
-            if(max(geo_data[:,(4)])>0):#if clusters
+            if(clusters>1):#if clusters
                 plot_geospace_clusters_grid(geo_data, discrete_cmap, clusters,cluster_ticks, cluster_tick_labels, argsP.dir)
             if(argsP.redraw!="false"):
                 plot_geospace_results_grid(geo_data, geo_headers, som_data, argsP.dir, argsP.noDataValue)
@@ -93,7 +93,7 @@ def run_plotting_script(argsP):
     start_time = time.time()
 
     draw_umatrix(som_data, som_table, grid, grid_type, annot_ticks, som_headers, argsP.dir)
-    draw_number_of_hits(som_dict,argsP.som_x,argsP.som_y,clusters,grid,cluster_tick_labels,grid_type)
+    draw_number_of_hits(som_dict,som_data,argsP.som_x,argsP.som_y,clusters,grid,cluster_tick_labels,grid_type,argsP.dir)
     #in case the function was called for redrawing after selecting a different clustering result. so that we can skip stuff we don't have to redraw to speed things up. CURRENTLY NOT IN USE, ALWAYS TRUE.
     #if(redraw!="false"):
     draw_som_results(som_data, som_table,grid, grid_type, annot_ticks, som_headers, argsP.dir)
@@ -139,7 +139,7 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, re
     som_headers=pd.read_csv(outsomfile, delimiter=' ', header=None).iloc[0] 
 
     time_1 = time.time()
-    print(f"    Read som data execution time: {time_1 - time_0} seconds")
+    print(f"        Read som data execution time: {time_1 - time_0} seconds")
 
     if outgeofile is not None:
         #geo_data=np.genfromtxt(outgeofile, skip_header=(1), delimiter=' ')
@@ -155,7 +155,7 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, re
         geo_headers = geo_headers +header_line.split(" ")
 
         time_2 = time.time()
-        print(f"    Read geo data execution time: {time_2 - time_1} seconds")
+        print(f"        Read geo data execution time: {time_2 - time_1} seconds")
 
     som_table=np.zeros((somx,somy))#empty somx*somy sized table for som plots
 
@@ -163,56 +163,30 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, re
     clusters=int(max(som_data[:,len(som_data[0])-2])+1)
     discrete_cmap=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=False)
     discrete_cmap_2=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=True)
-    cluster_ticks = list(range(clusters)) #[]
-    cluster_tick_labels = [f"{i} {np.sum(som_dict['clusters'].transpose().ravel() == i)}" for i in range(clusters)] #[]
-    #cluster_hit_count=[]
 
+    # Define the maximum number of labels
+    max_labels = 10
 
-    ##labeling clusters in colorbar with format "cluster number:  number of data points in this cluster".
-    #if(clusters>1):
-    #    for i in range (clusters,0,-1):
-    #        cluster_array=som_dict['clusters'].transpose()#TODO: figure out if this a problem elsewhere.
-    #        cluster_ticks.append(i-1)   
-    #        count=0
-    #        for bmu in som_dict['bmus']:
-    #            if (cluster_array[bmu[0]][bmu[1]])+1==i:
-    #                count+=1
-    #        cluster_tick_labels.append(str(i-1)+ "   " +str(count)) 
+    # Calculate the label interval dynamically based on max_labels
+    label_interval = max(1, (clusters + max_labels - 1) // max_labels)
+    cluster_ticks = np.arange(0, clusters + 1, label_interval)
+    
+    # Create cluster_tick_labels with the dynamically calculated interval
+    #cluster_tick_labels = [f"{i} {cluster_hit_count[i]}" for i in range(0, clusters+1, label_interval)]
+    cluster_tick_labels = cluster_ticks
 
     palette=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=False)
     formatted_palette = [f'rgb({int(j*255)},{int(j*255)},{int(j*255)})' for i in palette for j in i] #[]
 
-    ##format color values to format rgb(x,y,x), where x y and z are values between 0 and 255. values before conversion are in format a,b,c where a b and c are values between 0 and 1
-    #for i in palette:
-    #    formatted_value='rgb('
-    #    for j in i:
-    #        formatted_value=formatted_value+str("{:.2f}".format(j*255))+','
-    #    formatted_value=formatted_value[:-1] #remove last comma 
-    #    formatted_value=formatted_value+')' 
-    #    formatted_palette.append(formatted_value)
-    #palette=formatted_palette
-
     #Format palette into colorscale. for example 10 clusters: (0,0.1,rgb_val), (0.1,0.2 rgb_val_2),...... ,(0.9,1,rgb_val_x) ((not always distance of 0.1)) so each cluster is assigned a specific color.
     clusterColorscale = [[i/clusters, formatted_palette[i]] for i in range(len(formatted_palette))] 
-    clusterColorscale = [item for sublist in zip(clusterColorscale[:-1], clusterColorscale[1:]) for item in sublist] #[]
-    #for i in range (0,clusters):
-    #    clusterColorscale.append([float(float(i)/float(clusters)),palette[i]])
-    #    clusterColorscale.append([float(float(i+1)/clusters),palette[i]])
+    clusterColorscale = [item for sublist in zip(clusterColorscale[:-1], clusterColorscale[1:]) for item in sublist]
 
 
     if(grid_type.lower()=="hexagonal"): #if grid shape is hexagonal, initialize corresponding variables for hexa plots
         x=somx
         y=somy
         centers = [(i + 1 + (0 if j % 2 == 0 else 0.5), (j + 1) * math.sqrt(3) / 2) for i in range(x) for j in range(y)] #is this correcly replacing the loops below?
-        #centers=[]
-        #base_y=math.sqrt(3)/2
-        #for i in range(0, x):	
-        #    for j in range(0, y):
-        #        if (j%2==0):
-        #            base_x=0
-        #        else:
-        #            base_x=0.5
-        #        centers.append([(i+1)+base_x,(j+1)*base_y])#+1 to convert from index to value
         grid={'centers':np.array(centers), 
             'x':np.array([float(x)]),
             'y':np.array([float(y)])}
@@ -391,7 +365,7 @@ def plot_geospace_results_grid(geo_data, geo_headers, som_data, working_dir, noD
     mpl.rcParams.update({'font.size': 14})
 
     for i in range(0, len(som_data[0])-4): 
-        print(f"    geospace plot no. {i} from {len(som_data[0])-4}", end='\r')  
+        print(f"    geospace plot no. {i+2} from {len(som_data[0])-2}", end='\r')  
         x=geo_data[:,0]      
         y=geo_data[:,1]
         z=geo_data[:,(5+i)]
@@ -509,7 +483,7 @@ def plot_geospace_results_scatter(geo_data, geo_headers, som_data, working_dir):
           'y':np.array([len(geo_data)])}
 
     for i in range(0, len(som_data[0])-4):  
-        print(f"    geospace plot no. {i} from {len(som_data[0])-4}", end='\r')
+        print(f"    geospace plot no. {i+2} from {len(som_data[0])-2}", end='\r')
         z=geo_data[:,(5+i)]   
         sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
         mpl.rcParams.update({'font.size': 30})
@@ -547,7 +521,7 @@ Draw Som result plots
 """
 def draw_som_results(som_data, som_table,grid, grid_type, annot_ticks, som_headers,working_dir):
     for j in range(2,len(som_data[0])-3):
-        print(f"    somspace plot no. {j} from {len(som_data[0])-3}", end='\r')
+        print(f"    somspace plot no. {j-1} from {len(som_data[0])-4}", end='\r')
         if(grid_type.lower()=="rectangular"):
             for i in range(0,len(som_data)): 
                 som_table[int(som_data[i][0])][int(som_data[i][1])]=som_data[i][j] #som_table: somx*somy size
@@ -769,17 +743,18 @@ def draw_boxplots(som_dict,som_data,som_headers,discrete_cmap,cluster_tick_label
             discrete_cmap.pop(k)  
     
     for i in range(2,len(som_data[0])-3): 
-        print(f"    boxplot no. {i} from {len(som_data[0])-3}", end='\r')
+        print(f"    boxplot no. {i-1} from {len(som_data[0])-3-1}", end='\r')
         z=som_data[:,i]
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=FutureWarning)
             ax=sns.boxplot(x=cluster_nparray.astype(float), y=z.astype(float), hue=cluster_nparray.astype(float) ,dodge=False, palette=discrete_cmap)       
         ax.set_title(som_headers[i])
         ax.xaxis.set_major_formatter(FormatStrFormatter('%.0f')) 
-        custom_lines=[]#dummy handle
-        for j in range(0,len(cluster_tick_labels)):
-            custom_lines.append(Line2D([0], [0], color='blue', lw=4))#only working way I found to make legened properly without handles, was to pass custom width 0 handles. 
-        ax.legend(custom_lines,cluster_tick_labels,bbox_to_anchor=(1.05, 1),loc=0,handlelength=0,fontsize=8,handletextpad=0 ,borderaxespad=0.)   
+        ax.legend_.remove()
+        #custom_lines=[]#dummy handle
+        #for j in range(0,len(cluster_tick_labels)):
+        #    custom_lines.append(Line2D([0], [0], color='blue', lw=4))#only working way I found to make legened properly without handles, was to pass custom width 0 handles. 
+        #ax.legend(custom_lines,cluster_tick_labels,bbox_to_anchor=(1.05, 1),loc=0,handlelength=0,fontsize=8,handletextpad=0 ,borderaxespad=0.)   
         plt.tight_layout()           
         ax.figure.savefig(working_dir+'/boxplot_' +str(i-1)+'.png')   
         plt.clf()
@@ -791,7 +766,7 @@ def draw_boxplots(som_dict,som_data,som_headers,discrete_cmap,cluster_tick_label
 """
 Draw number of hits
 """
-def draw_number_of_hits(som_dict,somx,somy,clusters,grid,cluster_tick_labels,grid_type):
+def draw_number_of_hits(som_dict,som_data,somx,somy,clusters,grid,cluster_tick_labels,grid_type,working_dir):
     mpl.rcParams.update({'font.size': 12}) 
     hits=np.zeros((somx,somy))   
     for i in range(0, len(som_dict['bmus'])):
@@ -811,7 +786,7 @@ def draw_number_of_hits(som_dict,somx,somy,clusters,grid,cluster_tick_labels,gri
         #ax.set_title("Number of hits per SOM cell")
  
         mpl.rcParams.update({'font.size': 30})  
-    #ax.figure.savefig(working_dir+'/somplot_' +str(len(som_data[0])-2)+'.png',bbox_inches='tight')
+    ax.figure.savefig(working_dir+'/somplot_' +str(len(som_data[0])-2)+'.png',bbox_inches='tight')
     mpl.rcParams.update({'font.size': 12})
     plt.clf()
     plt.cla()

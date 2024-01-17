@@ -335,7 +335,7 @@ class NxtSomCore(object):
         from osgeo import gdal
         import pandas as pd
 
-        print("     input file: ", input_file)
+        #print("     input file: ", input_file)
 
         dir=output_folder
         inDs=gdal.Open(input_file.split(',')[0])
