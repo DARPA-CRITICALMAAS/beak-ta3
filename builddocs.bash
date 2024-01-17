@@ -10,7 +10,7 @@ currentdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" #
 if [ ! -d docs/source ]; then
     mkdir -p docs/source
 fi
-cp -r $currentdir/staticdocs docs/source
+# cp -r $currentdir/staticdocs docs/source
 
 # remove pre-existing docs before rebuilding
 rm -rf docs/source/*.rst
@@ -51,4 +51,3 @@ proj_name=$(basename $currentdir) # Project name generated from the parent folde
      
 )
 #to open static site after build: firefox docs/build/html/index.html (any .html in this dir will work)
-
