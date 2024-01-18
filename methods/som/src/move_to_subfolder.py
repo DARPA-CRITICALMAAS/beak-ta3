@@ -31,7 +31,7 @@ def move_som_results(file_path, subfolder_name):
 
 def move_figures(file_path, subfolder_name):
 
-    file_patterns = ["geoplot_*.png", "somplot_*.png", "boxplot_*.png", "db_score.png"]
+    file_patterns = ["geoplot_*.png", "somplot_*.png", "boxplot_*.png", "db_score.png", "cluster_hit_count.png"]
     destination_path = file_path + "/" + subfolder_name + "/"
 
     # Lists to store matching files with their corresponding destination paths

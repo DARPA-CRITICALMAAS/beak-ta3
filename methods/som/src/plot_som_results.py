@@ -83,8 +83,10 @@ def run_plotting_script(argsP):
         # Load cluster dictionary
         loaded_cluster_list = load_cluster_dictionary(argsP.dir)
         # Plot and save the Davies-Bouldin Index vs Number of Clusters
-        #print("Plot Davies Bouldin index")
+        print("    Plot Davies Bouldin index")
         plot_davies_bouldin(loaded_cluster_list, argsP.dir)
+        print("    Plot cluster hit count")
+        plot_cluster_hit_count(argsP.dir+"/cluster_hit_count.txt", argsP.dir)
 
         end_time = time.time()
         print(f"    Execution time: {end_time - start_time} seconds")
@@ -824,6 +826,26 @@ def plot_davies_bouldin(cluster_list, output_path):
     ax.set_ylabel('Davies-Bouldin Index')
     ax.grid(True)
     fig.savefig(output_path+"/db_score.png")
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+
+"""
+Draw cluster_hit_count
+"""
+def plot_cluster_hit_count(txtFile, output_path):
+    # Load the cluster_hit_count.txt file
+    data = np.genfromtxt(txtFile, delimiter='\t', names=True)
+
+    fig, ax = plt.subplots()
+    ax.bar(data['ClusterNumber'], data['HitCount'])
+    ax.set_xlabel('Cluster Number')
+    ax.set_ylabel('Hit Count')
+    ax.set_title('Cluster Hit Count')
+    ax.grid(True)
+    #plt.show()
+    fig.savefig(output_path+"/cluster_hit_count.png")
     plt.clf()
     plt.cla()
     plt.close()

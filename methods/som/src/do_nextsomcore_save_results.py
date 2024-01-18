@@ -81,26 +81,34 @@ def run_SOM(args):
         end_time = time.time()
         print(f"    Execution time: {end_time - start_time} seconds")
     
-    #print("noDataValue: ", header['noDataValue'])  
-
-
+    
     print('Count hits per SOM cell')
     start_time = time.time()
-    som_data = np.genfromtxt(args.output_file_somspace,skip_header=(1), delimiter=' ')
+    
+    cluster_hit_count(som, args.output_file_somspace, args.output_folder)
+    
+    end_time = time.time()
+    print(f"    Execution time: {end_time - start_time} seconds")
 
+
+def cluster_hit_count(som, output_file_somspace, output_path):
+
+    som_data = np.genfromtxt(output_file_somspace, skip_header=(1), delimiter=' ')
     clusters=int(max(som_data[:,len(som_data[0])-2])+1)
 
     # Initialize a list to store hit counts for each cluster
     cluster_hit_count = [0] * (clusters)  # Initialize with zeros
 
-    #labeling clusters in colorbar with format "cluster number:  number of data points in this cluster".
     if(clusters>1):
-        cluster_array=som['clusters'].transpose()#TODO: figure out if this a problem elsewhere.
+        cluster_array=som['clusters'].transpose()
         for i in range (clusters,0,-1):
             for bmu in som['bmus']:
                 if (cluster_array[bmu[0]][bmu[1]])+1==i:
                     cluster_hit_count[i-1]+=1
             print(f"        Cluster hit count: {i-1} - {cluster_hit_count[i-1]}")
-    
-    end_time = time.time()
-    print(f"    Execution time: {end_time - start_time} seconds")
+
+    # Create a NumPy array with cluster numbers and hit counts
+    result_array = np.column_stack((np.arange(clusters), cluster_hit_count))
+
+    # Save the array to a text file
+    np.savetxt(output_path+"/cluster_hit_count.txt", result_array, fmt='%d', delimiter='\t', header='ClusterNumber\tHitCount', comments='')
