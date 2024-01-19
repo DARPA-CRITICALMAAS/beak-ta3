@@ -8,7 +8,7 @@ import numpy as np
 import rasterio
 from tqdm import tqdm
 
-from utilities.io import (
+from beak.utilities.io import (
     create_file_folder_list,
     create_file_list,
     check_path,

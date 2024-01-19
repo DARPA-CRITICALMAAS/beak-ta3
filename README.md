@@ -26,12 +26,15 @@ The repository is structured as following:
 
 ```
 ├── beak-ta3/
-│   ├── docs/                   # documentations
+│   └── docs/                   # documentations
+│		└── ...
+│   └── experiments             # mineral systems/model configurations and notebooks
+│		└── ...
 │   ├── local/                  # stuff that's not being uploaded to GitHub
+│		└── ...
 │   └── src/                
 │       └── beak/
-│           ├── data            # data folder
-│           ├── experiments/    # mineral systems and model configurations
+│           ├── data/           # data folder
 │               └── ...         
 │           ├── methods/        # code for respective ML methods
 │               ├── bnn         

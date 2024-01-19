@@ -88,12 +88,11 @@ setup(
         "Programming Language :: Python :: 3 :: Only",
     ],
 
-
     # When your source code is in a subdirectory under the project root, e.g.
     # `src/`, it is necessary to specify the `package_dir` argument.
     package_dir={"": "src"},  # Optional
     package_data={
-        "beak.data": ["*.npy"],
+        "beak.data": ["*"],
     },
     # Alternatively, to distribute a single Python file, use
     # the `py_modules` argument instead as follows, which will expect a file

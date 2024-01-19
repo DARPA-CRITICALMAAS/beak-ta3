@@ -1,14 +1,19 @@
 import multiprocessing as mp
 import time
+import os
 from pathlib import Path
 from typing import List, Literal, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from utilities.preparation import create_encodings_from_dataframe, fill_nodata_with_mean
-from utilities.raster_processing import check_path, save_raster
-from utilities.misc import replace_invalid_characters
+from beak.utilities.preparation import create_encodings_from_dataframe
+from beak.utilities.raster_processing import (
+    check_path,
+    save_raster,
+    fill_nodata_with_mean,
+)
+from beak.utilities.misc import replace_invalid_characters
 from rasterio import features, profiles, transform
 from rasterio.crs import CRS
 from rasterio.enums import MergeAlg
@@ -51,7 +56,9 @@ def transform_from_geometries(
     out_transform = transform.from_origin(min_x, max_y, resolution, resolution)
     return out_width, out_height, out_transform
 
+
 # endregion
+
 
 # region: Convert to geodataframe
 def create_geodataframe_from_polygons(
@@ -83,12 +90,12 @@ def create_geodataframe_from_polygons(
     geodataframe = gpd.GeoDataFrame(
         data, geometry=polygon_col, crs=CRS.from_epsg(epsg_code)
     )
-    
+
     if polygon_col != "geometry":
         geodataframe["geometry"] = geodataframe.geometry
         geodataframe.set_geometry("geometry", inplace=True)
         geodataframe.drop(columns=[polygon_col], inplace=True)
-        
+
     return geodataframe
 
 
@@ -225,6 +232,7 @@ def rasterize_vector(
     export_absent: bool = False,
     raster_save: bool = False,
     raster_save_folder: Optional[Path] = None,
+    raster_save_in_subfolders: bool = False,
     n_workers: int = mp.cpu_count(),
     chunksize: Optional[int] = None,
 ) -> Tuple[List, List, List]:
@@ -262,8 +270,16 @@ def rasterize_vector(
             "Provide either resolution or base_raster_profile, but not both."
         )
 
-    if raster_save == True and raster_save_folder is None:
-        raise ValueError("Expected raster_save_folder to be given.")
+    # Check saving options and special paths
+    if raster_save == True:
+        if raster_save_folder is None:
+            raise ValueError("Expected raster_save_folder to be given.")
+        if raster_save_in_subfolders == True and value_type == "categorical":
+            categorical_subfolders = value_columns
+            for value_column in value_columns:
+                check_path(raster_save_folder / value_column)
+        else:
+            check_path(raster_save_folder)
 
     # Special actions for categorical and ground_truth data
     if value_type == "categorical" or value_type == "ground_truth":
@@ -346,13 +362,19 @@ def rasterize_vector(
             out_rasters.append(raster)
             out_transforms.append(transform)
 
-            # Check column names and reduce underscores
-            column = replace_invalid_characters(column)
-            check_path(raster_save_folder)
+            # Super inefficient way but does the job for now
+            if raster_save_in_subfolders == True and value_type == "categorical":
+                for folder in categorical_subfolders:
+                    if folder in column:
+                        export_folder = Path(raster_save_folder) / folder
+                        break
+            else:
+                export_folder = Path(raster_save_folder)
 
+            export_name = replace_invalid_characters(column)
             if raster_save == True:
                 save_raster(
-                    path=Path(raster_save_folder) / f"{column}.tif",
+                    path=Path(export_folder) / f"{export_name}.tif",
                     array=raster,
                     nodata_value=nodata_value,
                     epsg_code=epsg_code,
