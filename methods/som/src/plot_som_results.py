@@ -97,8 +97,8 @@ def run_plotting_script(argsP):
     draw_umatrix(som_data, som_table, grid, grid_type, annot_ticks, som_headers, argsP.dir)
     draw_number_of_hits(som_dict,som_data,argsP.som_x,argsP.som_y,clusters,grid,cluster_tick_labels,grid_type,argsP.dir)
     #in case the function was called for redrawing after selecting a different clustering result. so that we can skip stuff we don't have to redraw to speed things up. CURRENTLY NOT IN USE, ALWAYS TRUE.
-    #if(redraw!="false"):
-    draw_som_results(som_data, som_table,grid, grid_type, annot_ticks, som_headers, argsP.dir)
+    if(redraw!="false"):
+        draw_som_results(som_data, som_table,grid, grid_type, annot_ticks, som_headers, argsP.dir)
 
     end_time = time.time()
     print(f"    Execution time: {end_time - start_time} seconds")
