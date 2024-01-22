@@ -13,4 +13,3 @@ PyQt5
 sphinx
 sphinx-rtd-theme
 myst_parser
-

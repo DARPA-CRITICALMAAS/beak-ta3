@@ -27,11 +27,11 @@ The repository is structured as following:
 ```
 ├── beak-ta3/
 │   └── docs/                   # documentations
-│		└── ...
+│       └── ...
 │   └── experiments             # mineral systems/model configurations and notebooks
-│		└── ...
+│       └── ...
 │   ├── local/                  # stuff that's not being uploaded to GitHub
-│		└── ...
+│       └── ...
 │   └── src/                
 │       └── beak/
 │           ├── data/           # data folder
@@ -163,6 +163,16 @@ python <path/to/your/file.py>
 To start with, open your IDE of choice and select the Python interpreter from the **beak-ta3** environment.
 
 ## 6. How to use
+Before you can use the code, you need to ensure that the repository behaves as a local package. Therefore,
+
+1. Navigate into the repository root folder on your local harddrive
+2. Active the created environment
+3. Execude `pip install -e .` 
+
+You can check the installation by executing `conda list` to see all installed environments.
+If the **beak** packge is listed, the installation was successfull.
+You only need to do this step **once** after the installation of the environment.
+
 Because the repository behaves as a **local** python package 🐍, all functions can be accessed like so:
 
 ```python
@@ -192,7 +202,7 @@ data = load_function(file_path)
 If you are a developer, you might want to update the package or modify it.
 Thanks to [MTRI](https://github.com/DARPA-CRITICALMAAS/mtri-packagetemplate), we can use the **repository code** like a **package**. To install everything from scratch, follow the instructions on the linked page, with some minor adjustments.
 
-Since this repository provides an already initialized package (named *beak*), **you do not need to execute the inital** `pip install -e .` **after cloning the repository**. Only consider the steps below if you change something in the setup, e.g. version numbers or other entries ❗
+If **necessarry**, execute the inital** `pip install -e .` **after setting up the environment**. Only consider the steps below if you change something in the setup, e.g. version numbers or other entries ❗
 
 ### Install
 There are some bottlenecks regarding the package requirements and channels they can installed from. For some of them, only pip works fine, for some, only conda, and others require previously installed packages and cannot installed with their prerequisites in one run. 
