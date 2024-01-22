@@ -458,32 +458,4 @@ def load_model(
 
 # region: Test code
 
-# Load models and related data
-from beak.models import mvt_nat
-from importlib_resources import files
-
-
-def test_load_models():
-    MODEL = "MVT_PREFERRED"
-    model = mvt_nat.models[MODEL]
-
-    BASE_PATH = (
-        files("beak.data")
-        / "LAWLEY22-EXPORT"
-        / "EPSG_4326_RES_0_05"
-        / "COMPLETE_DATASET"
-    )
-    PATH_NUMERICAL = BASE_PATH / "NUMERICAL"
-    PATH_CATEGORICAL = BASE_PATH / "CATEGORICAL"
-
-    model_dict, file_list, counts = load_model(
-        model=model,
-        folders=[PATH_NUMERICAL, PATH_CATEGORICAL],
-        file_extensions=[".tif", ".tiff"],
-        verbose=1,
-    )
-    
-
-# test_load_models()
-
 # endregion: Test code
