@@ -40,6 +40,7 @@ The repository is structured as following:
 │               ├── bnn         
 │               ├── hybrid         
 │               └── som         
+│           ├── models          # place for model definitions      
 │           └── utilities       # helper functions and modules       
 │   └── tests/              
 │       └── beak                # test functions  
