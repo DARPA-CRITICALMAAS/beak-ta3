@@ -135,7 +135,10 @@ def create_file_list(
     return file_list
 
 
-def create_file_folder_list(root_folder: Path) -> List[Path]:
+def create_file_folder_list(
+    root_folder: Path,
+    exclude_types: Sequence[str] = [".aux", ".xml", ".cpg", ".ovr", ".dbf"],
+) -> List[Path]:
     """
     Create a list of files and folders in a root folder (including subfolders).
 
@@ -159,13 +162,7 @@ def create_file_folder_list(root_folder: Path) -> List[Path]:
                 file_path = Path(root) / file
 
                 # Ignore metadata files
-                if not file_path.suffix.lower() in [
-                    ".aux",
-                    ".xml",
-                    ".cpg",
-                    ".ovr",
-                    ".dbf",
-                ]:
+                if not file_path.suffix.lower() in exclude_types:
                     file_list.append(file_path)
 
     return folder_list, file_list
@@ -327,11 +324,117 @@ def spatial_filter(
     return data
 
 
+# region: load files based on model definition
+
+# def load_model(
+#     model: dict,
+#     folders: Sequence[Path],
+#     file_extensions: Sequence[str] = [".tif", ".tiff"],
+#     exclude_files: Sequence[Union[Path, str]] = [],
+#     verbose: int = 1,
+# ):
+#     # Load evidence layers from model dictionary
+#     print("Loading model definition...")
+#     evidence_layers = []
+#     for layer, value in model.items():
+#         if value == True:
+#             evidence_layers.append(layer)
+
+#     if not evidence_layers:
+#         raise ValueError("No valid selection.")
+#     else:
+#         print(f"Selected {str(len(evidence_layers))} evidence layers.")
+#         if verbose == 1:
+#             [print(f"- {layer}") for layer in evidence_layers]
+
+#     # Create file list
+#     print("\nCreate file list...")
+#     file_list = []
+
+#     for folder in folders:
+#         for file in folder.rglob("*"):
+#             file = Path(file)
+
+#             if any(file.suffix.lower() == ext for ext in file_extensions):
+#                 file_list.append(file)
+
+#     if not file_list:
+#         raise ValueError("No files found.")
+#     else:
+#         print(f"Found {str(len(file_list))} files.")
+
+#     # Check if files exist
+#     print("\nSearching for corresponding files...")
+#     matching_list = []
+#     layers_list = []
+#     for layer in evidence_layers:
+#         for file in file_list:
+#             if layer in file.stem:
+#                 matching_list.append(file)
+#                 layers_list.append(layer)
+
+#     file_list = matching_list
+
+#     if not file_list:
+#         raise ValueError("No matching files found.")
+#     else:
+#         print(f"Found {str(len(file_list))} matching files.")
+#         if verbose == 1:
+#             [print(f"- {file}") for file in file_list]
+
+#     # Check if all layers have files
+#     print("\nEnsuring that all layers have matching files...")
+#     missing_layers = []
+#     for layer in evidence_layers:
+#         if not any(layer in file.stem for file in file_list):
+#             missing_layers.append(layer)
+
+#     if missing_layers:
+#         [print(f"ERROR: No file found for evidence layer '{layer}'.") for layer in missing_layers]
+#         raise ValueError("\nMissing files. Exit.")
+#     else:
+#         print("All layers have matching files.")
+
+#     # Count the occurrences of each filename
+#     print("\nChecking files for multiple occurences...")
+#     filename_counts = Counter([file.name for file in file_list])
+
+#     # Print the filenames that occur multiple times and their counts
+#     if max(filename_counts.values()) == 1:
+#         print("No duplicates found. All filenames occur only once.")
+#     else:
+#         if verbose == 1:
+#             for filename, count in filename_counts.items():
+#                 if count > 1:
+#                     print(f"- '{filename}' occurs {count} times")
+#         else:
+#             print(f"Some filenames occur multiple times. Please check with option verbose=1 to see which files are affected.")
+
+#     # Exclude files
+#     if exclude_files:
+#         print("\nExcluding files from provided list...")
+#         for i, file in enumerate(file_list):
+#             if str(file) in exclude_files:
+#                 print(f"- {file}")
+#                 file = Path(file)
+#                 file_list.remove(file)
+#                 layers_list.remove(layers_list[i])
+
+#     if len(evidence_layers) != len(file_list):
+#         print(f"\nWARNING: Number of evidence layers ({str(len(evidence_layers))}) does not match number of files found ({str(len(file_list))}).")
+#         print(f"Can be ignored if the model contains multiple files per layer, e.g. binary encoded categoricals.")
+#     if len(layers_list) != len(file_list):
+#         raise ValueError("Number of layers and does not match number of files found. Please check manually excluded files and file extensions.")
+
+#     layers_files = zip(layers_list, file_list)
+
+#     return evidence_layers, layers_files, filename_counts
+
+
 def load_model(
     model: dict,
     folders: Sequence[Path],
     file_extensions: Sequence[str] = [".tif", ".tiff"],
-    exclude_files: Sequence[Union[Path, str]] = [],
     verbose: int = 1,
 ):
     # Load evidence layers from model dictionary
@@ -348,110 +451,126 @@ def load_model(
         if verbose == 1:
             [print(f"- {layer}") for layer in evidence_layers]
 
-    # Create file list
-    print("\nCreate file list...")
+    # Create file list from provided folders
     file_list = []
+    folder_list = []
+    subfolders_list = []
 
-    for file in folders.rglob("*"):
-        file = Path(file)
+    print("\nSearching for files and folders in provided paths...")
+    for folder in folders:
+        subfolders = create_file_folder_list(folder, exclude_types=[])[0]
+        subfolders_list.extend(subfolders)
 
-        if any(file.suffix.lower() == ext for ext in file_extensions):
-            file_list.append(file)
+    folder_list = folders + subfolders_list
+    for folder in folder_list:
+        files = create_file_list(folder, file_extensions)
+        file_list.extend(files)
 
     if not file_list:
         raise ValueError("No files found.")
     else:
-        print(f"Found {str(len(file_list))} files.")
+        print(
+            f"Found {str(len(folders))} folders, {str(len(subfolders_list))} subfolders and {str(len(file_list))} files."
+        )
 
-    # Check if files exist
+    # Create model file dictionary
+    model_dict = {}
+    for evidence_layer, value in model.items():
+        if value is True:
+            model_dict[evidence_layer] = None
+
+    # Status
     print("\nSearching for corresponding files...")
-    matching_list = []
-    layers_list = []
-    for layer in evidence_layers:
+
+    # Make comparison based on lower case names
+    for layer in model_dict.keys():
+        file_names_from_layers = []    
+        for extension in file_extensions:
+            file_name_from_layer = layer + extension
+            file_names_from_layers.append(file_name_from_layer.lower())
+
+        matching_list = []
         for file in file_list:
-            if layer in file.stem:
+            if str(file.name).lower() in file_names_from_layers:
                 matching_list.append(file)
-                layers_list.append(layer)
+                
+        if not matching_list:
+            for folder in folder_list:
+                if layer.lower() == str(folder.name).lower():
+                    matching_list = create_file_list(folder, file_extensions)
+        
+        if matching_list:        
+            matching_list = sorted(matching_list, reverse=False)
+            model_dict[layer] = matching_list
 
-    file_list = matching_list
+    for layer, files in model_dict.items():
+        if files is None:
+            print(f"Searched for '{layer}' but no matching file was found.")
+        else:
+            print(f"Found '{layer}' in {str(len(files))} file(s).")
     
-    if not file_list:
-        raise ValueError("No matching files found.")
-    else:
-        print(f"Found {str(len(file_list))} matching files.")
-        if verbose == 1:
-            [print(f"- {file}") for file in file_list]
-
     # Check if all layers have files
     print("\nEnsuring that all layers have matching files...")
     missing_layers = []
-    for layer in evidence_layers:
-        if not any(layer in file.stem for file in file_list):
+    for layer in model_dict.keys():
+        if model_dict[layer] is None:
             missing_layers.append(layer)
-    
+            print(f"WARNING: No file found for evidence layer '{layer}'.")
+
     if missing_layers:
-        [print(f"ERROR: No file found for evidence layer '{layer}'.") for layer in missing_layers]
-        raise ValueError("\nMissing files. Exit.")
+        raise ValueError(f"ERROR: {str(len(missing_layers))} layers have no matching files.")
     else:
         print("All layers have matching files.")
-        
+
     # Count the occurrences of each filename
     print("\nChecking files for multiple occurences...")
+    file_list = [file for values in model_dict.values() for file in values]
     filename_counts = Counter([file.name for file in file_list])
 
     # Print the filenames that occur multiple times and their counts
     if max(filename_counts.values()) == 1:
         print("No duplicates found. All filenames occur only once.")
     else:
-        if verbose == 1:    
+        if verbose == 1:
             for filename, count in filename_counts.items():
                 if count > 1:
                     print(f"- '{filename}' occurs {count} times")
         else:
-            print(f"Some filenames occur multiple times. Please check with option verbose=1 to see which files are affected.")
+            print(
+                f"Some filenames occur multiple times. Please check with option verbose=1 to see which files are affected."
+            )
 
-    # Exclude files
-    if exclude_files:
-        print("\nExcluding files from provided list...")
-        for i, file in enumerate(file_list):
-            if str(file) in exclude_files:
-                print(f"- {file}")
-                file = Path(file)                
-                file_list.remove(file)
-                layers_list.remove(layers_list[i])
-        
-    if len(evidence_layers) != len(file_list):
-        print(f"\nWARNING: Number of evidence layers ({str(len(evidence_layers))}) does not match number of files found ({str(len(file_list))}).")
-        print(f"Can be ignored if the model contains multiple files per layer, e.g. binary encoded categoricals.")
-    if len(layers_list) != len(file_list):
-        raise ValueError("Number of layers and does not match number of files found. Please check manually excluded files and file extensions.")
-    
-    layers_files = zip(layers_list, file_list)
+    return model_dict, file_list, filename_counts
 
-    return evidence_layers, layers_files, filename_counts
+# endregion: load files based on model definition
 
 
 # region: Test code
+from beak.models import mvt_nat
+from importlib_resources import files
+
+
 def test_load_models():
-    folder = Path(
-        "paste_path_here"
+    MODEL = "MVT_PREFERRED"
+    model = mvt_nat.models[MODEL]
+
+    BASE_PATH = (
+        files("beak.data")
+        / "LAWLEY22-EXPORT"
+        / "EPSG_4326_RES_0_05"
+        / "COMPLETE_DATASET"
+    )
+    PATH_NUMERICAL = BASE_PATH / "NUMERICAL"
+    PATH_CATEGORICAL = BASE_PATH / "CATEGORICAL"
+
+    model_dict, file_list, counts = load_model(
+        model=model,
+        folders=[PATH_NUMERICAL, PATH_CATEGORICAL],
+        file_extensions=[".tif", ".tiff"],
+        verbose=1,
     )
     
-    model = { "dummy": False, "utils": True, "eda": True, "nat": True, "rolling_stone": False }
-    file_extensions = [".py", ".txt"]
-    exclude_files = ["paste_excluded_files_here"]
-    
-    layers, matches, counts = load_model(model,
-                                        folder,
-                                        file_extensions,
-                                        exclude_files,
-                                        )
-    
-    layers_matched, files_matched = zip(*list(matches))
- 
-    print(f"\nLayers: {layers}:")
-    for i, layer in enumerate(layers_matched):
-        if i < len(files_matched):
-            print(f"- {layer}: {files_matched[i]}")
-            
+
+# test_load_models()
+
 # endregion: Test code

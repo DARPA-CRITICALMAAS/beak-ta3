@@ -1,6 +1,10 @@
 import numpy as np
 import pandas as pd
-from typing import List, Tuple
+import geopandas as gpd
+
+from sklearn.impute import SimpleImputer
+from typing import List, Tuple, Union
+from numbers import Number
 
 
 def create_encodings_from_dataframe(
@@ -37,3 +41,13 @@ def create_encodings_from_dataframe(
         data_encoded = data_encoded[new_value_columns]
 
     return data_encoded, new_value_columns
+
+
+def impute_data(
+    data: Union[pd.DataFrame, gpd.GeoDataFrame], columns: List[str], strategy: str = "mean", fill_value: Union[Number, str] = None
+) -> Union[pd.DataFrame, gpd.GeoDataFrame]:
+    data_imputed = data.copy()
+    imputer = SimpleImputer(strategy=strategy, missing_values=np.nan, fill_value=fill_value)
+    data_imputed[columns] = imputer.fit_transform(data_imputed[columns])
+
+    return data_imputed
