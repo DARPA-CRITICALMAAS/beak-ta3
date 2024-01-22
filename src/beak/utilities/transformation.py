@@ -41,7 +41,7 @@ def _scale_raster_process(
 
     Returns:
         None
-    """
+    """        
     raster = load_raster(file)
     out_file = output_folder / file.relative_to(Path(input_folder))
     check_path(out_file.parent)
