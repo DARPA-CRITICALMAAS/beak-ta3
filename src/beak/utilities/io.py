@@ -326,6 +326,7 @@ def spatial_filter(
 
 # region: load files based on model definition
 
+
 def load_model(
     model: dict,
     folders: Sequence[Path],
@@ -395,7 +396,7 @@ def load_model(
 
     # Make comparison based on lower case names
     for layer in model_dict.keys():
-        file_names_from_layers = []    
+        file_names_from_layers = []
         for extension in file_extensions:
             file_name_from_layer = layer + extension
             file_names_from_layers.append(file_name_from_layer.lower())
@@ -404,13 +405,13 @@ def load_model(
         for file in file_list:
             if str(file.name).lower() in file_names_from_layers:
                 matching_list.append(file)
-                
+
         if not matching_list:
             for folder in folder_list:
                 if layer.lower() == str(folder.name).lower():
                     matching_list = create_file_list(folder, file_extensions)
-        
-        if matching_list:        
+
+        if matching_list:
             matching_list = sorted(matching_list, reverse=False)
             model_dict[layer] = matching_list
 
@@ -419,7 +420,7 @@ def load_model(
             print(f"Searched for '{layer}' but no matching file was found.")
         else:
             print(f"Found '{layer}' in {str(len(files))} file(s).")
-    
+
     # Check if all layers have files
     print("\nEnsuring that all layers have matching files...")
     missing_layers = []
@@ -429,7 +430,7 @@ def load_model(
             print(f"WARNING: No file found for evidence layer '{layer}'.")
 
     if missing_layers:
-        raise ValueError(f"ERROR: {str(len(missing_layers))} layers have no matching files.")
+        print(f"WARNING: {str(len(missing_layers))} layers have no matching files.")
     else:
         print("All layers have matching files.")
 
@@ -452,6 +453,7 @@ def load_model(
             )
 
     return model_dict, file_list, filename_counts
+
 
 # endregion: load files based on model definition
 
