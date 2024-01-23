@@ -9,6 +9,7 @@ mkdocstrings[python]==0.24
 mkdocs-material==9.4.14
 autoflake==2.2.1
 pyarrow==14.0.1
+ipyplot==1.0.5
 PyQt5
 sphinx
 sphinx-rtd-theme
