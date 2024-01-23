@@ -1,14 +1,19 @@
 import multiprocessing as mp
 import time
+import os
 import warnings
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union, Sequence, List
 
 import numpy as np
+import geopandas as gpd
 import scipy
 import rasterio
+from numbers import Number
 from rasterio import warp
+from rasterio.mask import mask
+from rasterio.windows import Window, from_bounds
 from tqdm import tqdm
 
 from beak.utilities.io import (
@@ -19,7 +24,8 @@ from beak.utilities.io import (
     save_raster,
 )
 
-from beak.utilities.misc import replace_invalid_characters
+from beak.utilities.io import load_raster, save_raster, copy_folder_structure
+
 
 # References
 # Some non-trivial functionalities were adapted from other sources.
@@ -97,26 +103,25 @@ def _reproject_raster_process(
         target_epsg (int): The target EPSG code for the reprojection.
         target_resolution (Optional[np.number]): The target resolution for the reprojection.
         resampling_method (warp.Resampling): The resampling method to use.
-
-    Returns:
-        None
     """
-    raster = load_raster(file)
     out_file = output_folder / file.relative_to(Path(input_folder))
-    check_path(out_file.parent)
-    out_array, out_meta = _reproject_raster_core(
-        raster, target_epsg, target_resolution, resampling_method
-    )
 
-    save_raster(
-        out_file,
-        out_array,
-        target_epsg,
-        out_meta["height"],
-        out_meta["width"],
-        raster.nodata,
-        out_meta["transform"],
-    )
+    if not os.path.exists(out_file):
+        raster = load_raster(file)
+        check_path(out_file.parent)
+        out_array, out_meta = _reproject_raster_core(
+            raster, target_epsg, target_resolution, resampling_method
+        )
+
+        save_raster(
+            out_file,
+            out_array,
+            target_epsg,
+            out_meta["height"],
+            out_meta["width"],
+            raster.nodata,
+            out_meta["transform"],
+        )
 
 
 def _reproject_raster_core(
@@ -234,11 +239,239 @@ def reproject_raster(
     ]
 
     # Run reprojection
-    with mp.Pool(n_workers) as pool:
-        with tqdm(total=len(args_list), desc="Processing files") as pbar:
-            for _ in pool.starmap(_reproject_raster_process, args_list):
-                pbar.update(1)
-                time.sleep(0.1)
+    if n_workers > 1:
+        with mp.Pool(n_workers) as pool:
+            print("Starting parallel processing...")
+            pool.starmap(_reproject_raster_process, args_list)
+    else:
+        print("Starting single processing...")
+        for args in tqdm(args_list, desc="Reprojecting rasters"):
+            _reproject_raster_process(*args)
 
+    print("Done!")
+
+
+# endregion
+
+
+def _clip_raster_with_coords(
+    input_raster: Union[str, Path],
+    output_raster: Union[str, Path],
+    bounds: Tuple[
+        Optional[Number], Optional[Number], Optional[Number], Optional[Number]
+    ],
+    write_result: bool = True,
+    return_result: bool = False,
+    intermediate_result: Optional[Tuple[np.ndarray, dict]] = None,
+) -> tuple[np.ndarray, dict]:
+    """Clips the input raster using the provided coordinates."""
+    if (
+        write_result is True and not os.path.exists(output_raster)
+    ) or return_result is True:
+        left = bounds[0] if bounds[0] is not None else input_raster.bounds.left
+        bottom = bounds[1] if bounds[1] is not None else input_raster.bounds.bottom
+        right = bounds[2] if bounds[2] is not None else input_raster.bounds.right
+        top = bounds[3] if bounds[3] is not None else input_raster.bounds.top
+
+        window = input_raster.window(left, bottom, right, top)            
+        row_start, col_start, row_stop, col_stop = map(
+            int,
+            (
+                window.row_off,
+                window.col_off,
+                window.row_off + window.height,
+                window.col_off + window.width,
+            ),
+        )
+
+        if intermediate_result is None:
+            clipped_data = input_raster.read()
+            clipped_meta = input_raster.meta.copy()
+            clipped_meta.update(
+                    {
+                        "transform": rasterio.windows.transform(window, input_raster.transform),
+                    }
+                )
+        else:
+            clipped_data = intermediate_result[0]
+            clipped_meta = intermediate_result[1].copy()
+
+        clipped_data = clipped_data[:, row_start:row_stop, col_start:col_stop]
+        clipped_meta.update(
+            {
+                "driver": "GTiff",
+                "height": clipped_data.shape[1],
+                "width": clipped_data.shape[2],
+            }
+        )
+        
+        
+        if write_result is True:
+            check_path(output_raster.parent)
+            with rasterio.open(output_raster, "w", **clipped_meta) as dst:
+                dst.write(clipped_data)
+
+        if return_result is True:
+            return clipped_data, clipped_meta
+
+
+def _clip_raster_with_shapefile(
+    input_raster: rasterio.io.DatasetReader,
+    output_raster: Union[str, Path],
+    shapefile: Union[str, Path],
+    query: Optional[str],
+    all_touched: bool,
+    write_result: bool = True,
+    return_result: bool = False,
+) -> tuple[np.ndarray, dict]:
+    """Clips a raster with a shapefile using the specified query."""
+    if (
+        write_result is True and not os.path.exists(output_raster)
+    ) or return_result is True:
+        gdf = gpd.read_file(shapefile)
+        gdf = gdf.query(query) if query is not None else gdf
+
+        clipped_data, clipped_transform = mask(
+            input_raster, gdf.geometry, crop=True, all_touched=all_touched
+        )
+
+        clipped_meta = input_raster.meta.copy()
+        clipped_meta.update(
+            {
+                "driver": "GTiff",
+                "height": clipped_data.shape[1],
+                "width": clipped_data.shape[2],
+                "transform": clipped_transform,
+            }
+        )
+
+        if write_result is True:
+            check_path(output_raster.parent)
+            with rasterio.open(output_raster, "w", **clipped_meta) as dst:
+                dst.write(clipped_data)
+
+        if return_result is True:
+            return clipped_data, clipped_meta
+
+
+
+def _clip_raster_process(
+    file: Path,
+    input_folder,
+    output_folder: Union[str, Path],
+    shapefile: Optional[Union[str, Path]],
+    query: Optional[str],
+    bounds: Optional[
+        Tuple[Optional[Number], Optional[Number], Optional[Number], Optional[Number]]
+    ] = None,
+    all_touched: bool = True,
+):
+    """
+    Clips a raster file based on either a shapefile or bounding coordinates.
+
+    Args:
+        file (Path): The path to the input raster file.
+        output_folder (Union[str, Path]): The folder where the clipped raster will be saved.
+        shapefile (Optional[Union[str, Path]]): The path to the shapefile used for clipping. If None, bounds must be provided.
+        query (Optional[str]): An optional query string to filter the shapefile features.
+        bounds (Optional[Tuple[Optional[Number], Optional[Number], Optional[Number], Optional[Number]]]): The bounding coordinates used for clipping. If None, shapefile must be provided.
+        all_touched (bool): Whether to include all pixels touched by the shapefile features. Defaults to True.
+
+    Raises:
+        ValueError: If neither shapefile nor bounds are provided.
+
+    """
+    relative_file = file.relative_to(input_folder)
+    output_raster = output_folder / relative_file
+
+    raster = rasterio.open(file)
+    if shapefile is not None and bounds is None:
+        _clip_raster_with_shapefile(
+            raster,
+            output_raster,
+            shapefile,
+            query,
+            all_touched,
+            write_result=True,
+            return_result=False,
+        )
+    elif shapefile is None and bounds is not None:
+        _clip_raster_with_coords(
+            raster, output_raster, bounds, write_result=True, return_result=False,
+        )
+    elif shapefile is not None and bounds is not None:
+        clipped_raster, clipped_meta = _clip_raster_with_shapefile(
+            raster,
+            output_raster,
+            shapefile,
+            query,
+            all_touched,
+            write_result=False,
+            return_result=True,
+        )
+        _clip_raster_with_coords(
+            raster,
+            output_raster,
+            bounds,
+            write_result=True,
+            return_result=False,
+            intermediate_result=(clipped_raster, clipped_meta),
+        )
+    else:
+        raise ValueError(
+            "Either shapefile or bounds must be provided for clipping."
+        )
+            
+
+def clip_raster(
+    input_folder: Union[str, Path],
+    output_folder: Union[str, Path],
+    shapefile: Optional[Union[str, Path]],
+    query: Optional[str],
+    bounds: Optional[
+        Tuple[Optional[Number], Optional[Number], Optional[Number], Optional[Number]]
+    ] = None,
+    raster_extensions: List[str] = [".tif", ".tiff"],
+    include_source: bool = True,
+    all_touched: bool = True,
+    n_workers: int = mp.cpu_count(),
+):
+   
+    folders, _ = create_file_folder_list(Path(input_folder))
+    if include_source is True:
+        folders.insert(0, input_folder)
+
+    file_list = []
+    for folder in folders:
+        folder_file_list = create_file_list(folder, raster_extensions)
+        file_list.extend(folder_file_list)
+
+    args_list = [
+        (
+            file,
+            input_folder,
+            output_folder,
+            shapefile,
+            query,
+            bounds,
+            all_touched,
+        )
+        for file in file_list
+    ]
+    
+    # Run clipping operation
+    if n_workers > 1:
+        with mp.Pool(n_workers) as pool:
+            print("Starting parallel processing...")
+            pool.starmap(_clip_raster_process, args_list)
+    else:
+        print("Starting single processing...")
+        for args in tqdm(args_list, desc="Clipping rasters"):
+            _clip_raster_process(*args)
+
+    print("Done!")
+
+
+# region: Test code
 
 # endregion

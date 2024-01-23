@@ -113,7 +113,7 @@ def get_filename_and_extension(file: Path) -> Tuple[str, str]:
 
 
 def create_file_list(
-    folder: Path, extensions: List[str] = [".tif", ".tiff"]
+    folder: Path, extensions: List[str] = [".tif", ".tiff"], recursive: bool = False,
 ) -> List[Path]:
     """
     Create a list of files in the specified folder with the given extensions.
@@ -127,7 +127,12 @@ def create_file_list(
     """
     file_list = []
 
-    for file in folder.glob("*"):
+    if recursive is True:
+        files = folder.rglob("*")
+    else:
+        files = folder.glob("*")
+        
+    for file in files:
         file = Path(file)
         if any(file.suffix.lower() == ext for ext in extensions):
             file_list.append(file)
@@ -179,7 +184,7 @@ def check_path(folder: Path):
         (None): None
     """
     if not os.path.exists(folder):
-        os.makedirs(folder)
+        folder.mkdir(parents=True, exist_ok=True)
 
     return folder
 
@@ -324,14 +329,11 @@ def spatial_filter(
     return data
 
 
-# region: load files based on model definition
-
-
 def load_model(
     model: dict,
     folders: Sequence[Path],
     file_extensions: Sequence[str] = [".tif", ".tiff"],
-    verbose: int = 1,
+    verbose: int = 0,
 ):
     """Load model from dictionary and search for corresponding files.
 
@@ -344,10 +346,11 @@ def load_model(
     Raises:
         ValueError: Raised if no valid selection is found.
         ValueError: Raised if no files are found.
-        ValueError: Raised if some layers have no matching files.
 
     Returns:
         dict: A dictionary containing the loaded model with corresponding files.
+        list: A list of all files found.
+        Counter: A counter containing the number of files for each evidence layer.
     """
     # Load evidence layers from model dictionary
     print("Loading model definition...")
@@ -455,9 +458,44 @@ def load_model(
     return model_dict, file_list, filename_counts
 
 
-# endregion: load files based on model definition
+def copy_folder_structure(
+    source_folder: Path, destination_folder: Path, include_source=True, verbose: int = 0
+):
+    """Copy folder structure from source folder to destination folder.
+
+    Args:
+        source_folder (Path): The source folder.
+        destination_folder (Path): The destination folder.
+        verbose (int, optional): The verbosity level. Defaults to 1.
+    """
+    # Get all folders in the root folder
+    folders, _ = create_file_folder_list(source_folder)
+    
+    if include_source is True:
+        folders.insert(0, source_folder)
+        
+    if verbose == 1:
+        print(f"Total of subfolders found: {len(folders)}")
+
+    # Create folder structure
+    for folder in folders:
+        new_folder = folder.relative_to(source_folder)
+        new_folder = destination_folder / new_folder
+        check_path(new_folder)
 
 
 # region: Test code
+from importlib_resources import files
+
+BASE_PATH = (
+        files("beak.data")
+        / "LAWLEY22-EXPORT"
+        / "EPSG_4326_RES_0_05"
+    )
+
+source_folder = BASE_PATH / "COMPLETE_DATASET"
+destination_folder = BASE_PATH / "COMPLETE_DATASET_COPY"
+
+# copy_folder_structure(source_folder, destination_folder)
 
 # endregion: Test code
