@@ -82,7 +82,7 @@ def run_SOM(args):
         print(f"    Execution time: {end_time - start_time} seconds")
     
     
-    print('Count hits per SOM cell')
+    print('Count cluster hit count')
     start_time = time.time()
     
     cluster_hit_count(som, args.output_file_somspace, args.output_folder)

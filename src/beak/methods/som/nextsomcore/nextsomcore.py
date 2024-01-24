@@ -220,12 +220,16 @@ class NxtSomCore(object):
                     N = Decimal(som_cols["data"][j][i + 3].item())
                     som_cols["data"][j][i + 3] = (maxD - minD) * (N - Decimal(minN)) / (Decimal(maxN) - Decimal(minN)) + minD
         
+        print("         combine data colums for output geo file (for large data arrays memory usage might be a concern)")
+
         combined_cols = np.c_[coord_cols['data'], som_cols['data'], data_cols['data'], q_error]     
         combined_cols_deleted = np.c_[coord_cols['data_deleted'], np.full((coord_cols['data_deleted'].shape[0],combined_cols.shape[1] - 2), np.nan)]
 
         # Join the arrays
         final_combined_cols = np.vstack((combined_cols, combined_cols_deleted))
         
+        print("         savetxt")
+
         if(labelIndex=="true"):
             data = np.loadtxt(
                 input_file, 
