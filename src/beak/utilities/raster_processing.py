@@ -273,7 +273,7 @@ def _clip_raster_with_coords(
         right = bounds[2] if bounds[2] is not None else input_raster.bounds.right
         top = bounds[3] if bounds[3] is not None else input_raster.bounds.top
 
-        window = input_raster.window(left, bottom, right, top)            
+        window = input_raster.window(left, bottom, right, top)
         row_start, col_start, row_stop, col_stop = map(
             int,
             (
@@ -288,10 +288,12 @@ def _clip_raster_with_coords(
             clipped_data = input_raster.read()
             clipped_meta = input_raster.meta.copy()
             clipped_meta.update(
-                    {
-                        "transform": rasterio.windows.transform(window, input_raster.transform),
-                    }
-                )
+                {
+                    "transform": rasterio.windows.transform(
+                        window, input_raster.transform
+                    ),
+                }
+            )
         else:
             clipped_data = intermediate_result[0]
             clipped_meta = intermediate_result[1].copy()
@@ -304,8 +306,7 @@ def _clip_raster_with_coords(
                 "width": clipped_data.shape[2],
             }
         )
-        
-        
+
         if write_result is True:
             check_path(output_raster.parent)
             with rasterio.open(output_raster, "w", **clipped_meta) as dst:
@@ -354,7 +355,6 @@ def _clip_raster_with_shapefile(
             return clipped_data, clipped_meta
 
 
-
 def _clip_raster_process(
     file: Path,
     input_folder,
@@ -397,7 +397,11 @@ def _clip_raster_process(
         )
     elif shapefile is None and bounds is not None:
         _clip_raster_with_coords(
-            raster, output_raster, bounds, write_result=True, return_result=False,
+            raster,
+            output_raster,
+            bounds,
+            write_result=True,
+            return_result=False,
         )
     elif shapefile is not None and bounds is not None:
         clipped_raster, clipped_meta = _clip_raster_with_shapefile(
@@ -418,10 +422,8 @@ def _clip_raster_process(
             intermediate_result=(clipped_raster, clipped_meta),
         )
     else:
-        raise ValueError(
-            "Either shapefile or bounds must be provided for clipping."
-        )
-            
+        raise ValueError("Either shapefile or bounds must be provided for clipping.")
+
 
 def clip_raster(
     input_folder: Union[str, Path],
@@ -436,7 +438,24 @@ def clip_raster(
     all_touched: bool = True,
     n_workers: int = mp.cpu_count(),
 ):
-   
+    """
+    Clips rasters within the specified input folder to the extent of a shapefile or a bounding box.
+
+    Args:
+        input_folder (Union[str, Path]): Path to the input folder containing the rasters.
+        output_folder (Union[str, Path]): Path to the output folder where the clipped rasters will be saved.
+        shapefile (Optional[Union[str, Path]]): Path to the shapefile used for clipping.
+            If None, the rasters will be clipped to the specified bounding box.
+        query (Optional[str]): Query string to filter the features in the shapefile.
+            Only features that satisfy the query will be used for clipping. Ignored if shapefile is None.
+        bounds (Optional[Tuple[Optional[Number], Optional[Number], Optional[Number], Optional[Number]]]):
+            Bounding box coordinates (minx, miny, maxx, maxy) used for clipping. Ignored if shapefile is not None.
+        raster_extensions (List[str]): List of file extensions to consider as rasters. Default is [".tif", ".tiff"].
+        include_source (bool): Flag indicating whether to include the input folder itself as a source for clipping. Default is True.
+        all_touched (bool): Flag indicating whether to include all pixels touched by the shapefile or bounding box. Default is True.
+        n_workers (int): Number of parallel workers to use for clipping. Default is the number of available CPU cores.
+    """
+
     folders, _ = create_file_folder_list(Path(input_folder))
     if include_source is True:
         folders.insert(0, input_folder)
@@ -458,7 +477,7 @@ def clip_raster(
         )
         for file in file_list
     ]
-    
+
     # Run clipping operation
     if n_workers > 1:
         with mp.Pool(n_workers) as pool:
