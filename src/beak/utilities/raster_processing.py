@@ -108,7 +108,7 @@ def _reproject_raster_process(
 
     if not os.path.exists(out_file):
         raster = load_raster(file)
-        check_path(out_file.parent)
+        check_path(os.path.dirname(out_file))
         out_array, out_meta = _reproject_raster_core(
             raster, target_epsg, target_resolution, resampling_method
         )
@@ -255,104 +255,76 @@ def reproject_raster(
 
 
 def _clip_raster_with_coords(
-    input_raster: Union[str, Path],
-    output_raster: Union[str, Path],
+    input_raster: rasterio.io.DatasetReader,
     bounds: Tuple[
         Optional[Number], Optional[Number], Optional[Number], Optional[Number]
     ],
-    write_result: bool = True,
-    return_result: bool = False,
     intermediate_result: Optional[Tuple[np.ndarray, dict]] = None,
 ) -> tuple[np.ndarray, dict]:
     """Clips the input raster using the provided coordinates."""
-    if (
-        write_result is True and not os.path.exists(output_raster)
-    ) or return_result is True:
-        left = bounds[0] if bounds[0] is not None else input_raster.bounds.left
-        bottom = bounds[1] if bounds[1] is not None else input_raster.bounds.bottom
-        right = bounds[2] if bounds[2] is not None else input_raster.bounds.right
-        top = bounds[3] if bounds[3] is not None else input_raster.bounds.top
+    left = bounds[0] if bounds[0] is not None else input_raster.bounds.left
+    bottom = bounds[1] if bounds[1] is not None else input_raster.bounds.bottom
+    right = bounds[2] if bounds[2] is not None else input_raster.bounds.right
+    top = bounds[3] if bounds[3] is not None else input_raster.bounds.top
 
-        window = input_raster.window(left, bottom, right, top)
-        row_start, col_start, row_stop, col_stop = map(
-            int,
-            (
-                window.row_off,
-                window.col_off,
-                window.row_off + window.height,
-                window.col_off + window.width,
-            ),
-        )
+    window = input_raster.window(left, bottom, right, top)
+    row_start, col_start, row_stop, col_stop = map(
+        int,
+        (
+            window.row_off,
+            window.col_off,
+            window.row_off + window.height,
+            window.col_off + window.width,
+        ),
+    )
 
-        if intermediate_result is None:
-            clipped_data = input_raster.read()
-            clipped_meta = input_raster.meta.copy()
-            clipped_meta.update(
-                {
-                    "transform": rasterio.windows.transform(
-                        window, input_raster.transform
-                    ),
-                }
-            )
-        else:
-            clipped_data = intermediate_result[0]
-            clipped_meta = intermediate_result[1].copy()
-
-        clipped_data = clipped_data[:, row_start:row_stop, col_start:col_stop]
+    if intermediate_result is None:
+        clipped_data = input_raster.read()
+        clipped_meta = input_raster.meta.copy()
         clipped_meta.update(
             {
-                "driver": "GTiff",
-                "height": clipped_data.shape[1],
-                "width": clipped_data.shape[2],
+                "transform": rasterio.windows.transform(window, input_raster.transform),
             }
         )
+    else:
+        clipped_data = intermediate_result[0]
+        clipped_meta = intermediate_result[1].copy()
 
-        if write_result is True:
-            check_path(output_raster.parent)
-            with rasterio.open(output_raster, "w", **clipped_meta) as dst:
-                dst.write(clipped_data)
-
-        if return_result is True:
-            return clipped_data, clipped_meta
+    clipped_data = clipped_data[:, row_start:row_stop, col_start:col_stop]
+    clipped_meta.update(
+        {
+            "driver": "GTiff",
+            "height": clipped_data.shape[1],
+            "width": clipped_data.shape[2],
+        }
+    )
+    return clipped_data, clipped_meta
 
 
 def _clip_raster_with_shapefile(
     input_raster: rasterio.io.DatasetReader,
-    output_raster: Union[str, Path],
     shapefile: Union[str, Path],
     query: Optional[str],
     all_touched: bool,
-    write_result: bool = True,
-    return_result: bool = False,
 ) -> tuple[np.ndarray, dict]:
     """Clips a raster with a shapefile using the specified query."""
-    if (
-        write_result is True and not os.path.exists(output_raster)
-    ) or return_result is True:
-        gdf = gpd.read_file(shapefile)
-        gdf = gdf.query(query) if query is not None else gdf
+    gdf = gpd.read_file(shapefile)
+    gdf = gdf.query(query) if query is not None else gdf
 
-        clipped_data, clipped_transform = mask(
-            input_raster, gdf.geometry, crop=True, all_touched=all_touched
-        )
+    clipped_data, clipped_transform = mask(
+        input_raster, gdf.geometry, crop=True, all_touched=all_touched
+    )
 
-        clipped_meta = input_raster.meta.copy()
-        clipped_meta.update(
-            {
-                "driver": "GTiff",
-                "height": clipped_data.shape[1],
-                "width": clipped_data.shape[2],
-                "transform": clipped_transform,
-            }
-        )
-
-        if write_result is True:
-            check_path(output_raster.parent)
-            with rasterio.open(output_raster, "w", **clipped_meta) as dst:
-                dst.write(clipped_data)
-
-        if return_result is True:
-            return clipped_data, clipped_meta
+    clipped_meta = input_raster.meta.copy()
+    clipped_meta.update(
+        {
+            "driver": "GTiff",
+            "height": clipped_data.shape[1],
+            "width": clipped_data.shape[2],
+            "transform": clipped_transform,
+        }
+    )
+    return clipped_data, clipped_meta
 
 
 def _clip_raster_process(
@@ -382,47 +354,46 @@ def _clip_raster_process(
 
     """
     relative_file = file.relative_to(input_folder)
-    output_raster = output_folder / relative_file
+    out_file = output_folder / relative_file
 
     raster = rasterio.open(file)
     if shapefile is not None and bounds is None:
-        _clip_raster_with_shapefile(
+        out_array, out_meta = _clip_raster_with_shapefile(
             raster,
-            output_raster,
             shapefile,
             query,
             all_touched,
-            write_result=True,
-            return_result=False,
         )
     elif shapefile is None and bounds is not None:
-        _clip_raster_with_coords(
+        out_array, out_meta = _clip_raster_with_coords(
             raster,
-            output_raster,
             bounds,
-            write_result=True,
-            return_result=False,
         )
     elif shapefile is not None and bounds is not None:
-        clipped_raster, clipped_meta = _clip_raster_with_shapefile(
+        out_array, out_meta = _clip_raster_with_shapefile(
             raster,
-            output_raster,
             shapefile,
             query,
             all_touched,
-            write_result=False,
-            return_result=True,
         )
-        _clip_raster_with_coords(
+        out_array, out_meta = _clip_raster_with_coords(
             raster,
-            output_raster,
             bounds,
-            write_result=True,
-            return_result=False,
-            intermediate_result=(clipped_raster, clipped_meta),
+            intermediate_result=(out_array, out_meta),
         )
     else:
         raise ValueError("Either shapefile or bounds must be provided for clipping.")
+
+    check_path(out_file.parent)
+    save_raster(
+                out_file,
+                out_array,
+                raster.crs.to_epsg(),
+                out_meta["height"],
+                out_meta["width"],
+                raster.nodata,
+                out_meta["transform"],
+                )
 
 
 def clip_raster(
