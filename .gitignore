@@ -164,5 +164,6 @@ cython_debug/
 data/
 local/
 eis_toolkit/
+probflow/
 .obsidian/
 sync.ffs_db
