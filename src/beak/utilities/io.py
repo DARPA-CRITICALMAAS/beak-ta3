@@ -113,7 +113,9 @@ def get_filename_and_extension(file: Path) -> Tuple[str, str]:
 
 
 def create_file_list(
-    folder: Path, extensions: List[str] = [".tif", ".tiff"], recursive: bool = False,
+    folder: Path,
+    extensions: List[str] = [".tif", ".tiff"],
+    recursive: bool = False,
 ) -> List[Path]:
     """
     Create a list of files in the specified folder with the given extensions.
@@ -131,7 +133,7 @@ def create_file_list(
         files = folder.rglob("*")
     else:
         files = folder.glob("*")
-        
+
     for file in files:
         file = Path(file)
         if any(file.suffix.lower() == ext for ext in extensions):
@@ -197,6 +199,8 @@ def save_raster(
     width: int,
     nodata_value: np.number,
     transform: Any,
+    compress_method: Optional[str] = "lzw",
+    compress_num_threads: Optional[Union[int, str]] = "all_cpus",
 ):
     """
     Save raster data to disk.
@@ -230,10 +234,9 @@ def save_raster(
         "transform": transform,
     }
 
-    with rasterio.open(path, "w", **meta) as dst:
+    with rasterio.open(path, "w", compress=compress_method, num_threads=compress_num_threads, **meta) as dst:
         for i in range(0, count):
             dst.write(array[i].astype(dtype), i + 1)
-
         dst.close()
 
 
@@ -470,10 +473,10 @@ def copy_folder_structure(
     """
     # Get all folders in the root folder
     folders, _ = create_file_folder_list(source_folder)
-    
+
     if include_source is True:
         folders.insert(0, source_folder)
-        
+
     if verbose == 1:
         print(f"Total of subfolders found: {len(folders)}")
 
@@ -487,11 +490,7 @@ def copy_folder_structure(
 # region: Test code
 from importlib_resources import files
 
-BASE_PATH = (
-        files("beak.data")
-        / "LAWLEY22-EXPORT"
-        / "EPSG_4326_RES_0_05"
-    )
+BASE_PATH = files("beak.data") / "LAWLEY22-EXPORT" / "EPSG_4326_RES_0_05"
 
 source_folder = BASE_PATH / "COMPLETE_DATASET"
 destination_folder = BASE_PATH / "COMPLETE_DATASET_COPY"
