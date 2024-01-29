@@ -1,6 +1,5 @@
 import multiprocessing as mp
 import time
-import os
 from pathlib import Path
 from typing import List, Literal, Optional, Tuple, Union
 
@@ -18,6 +17,7 @@ from rasterio import features, profiles, transform
 from rasterio.crs import CRS
 from rasterio.enums import MergeAlg
 from shapely.wkt import loads
+from shapely.geometry import Point
 from tqdm import tqdm
 
 # References
@@ -61,6 +61,25 @@ def transform_from_geometries(
 
 
 # region: Convert to geodataframe
+def create_geodataframe_centroids_from_polygons(
+    data: pd.DataFrame, geometry_column: str, epsg_code: Optional[int] = None
+) -> gpd.GeoDataFrame:
+    """
+    Create a GeoDataFrame containing the midpoints of the polygons in the input file.
+
+    Args:
+        data (pd.DataFrame): The input DataFrame containing the polygon geometries.
+        geometry_column (str): The name of the column in the DataFrame that contains the polygon geometries.
+
+    Returns:
+        gpd.GeoDataFrame: The resulting GeoDataFrame containing the midpoints.
+    """
+    crs = CRS.from_epsg(epsg_code) if epsg_code is not None else None
+    return gpd.GeoDataFrame(
+        data, geometry=data[geometry_column].apply(lambda x: Point(x.centroid)), crs=crs
+    )
+
+
 def create_geodataframe_from_polygons(
     data: pd.DataFrame,
     polygon_col: str,
@@ -82,14 +101,10 @@ def create_geodataframe_from_polygons(
         ValueError: If the `epsg_code` parameter is not provided.
 
     """
-    if epsg_code is None:
-        raise ValueError("Parameter epsg_code must be given.")
-
+    crs = CRS.from_epsg(epsg_code) if epsg_code is not None else None
     data[polygon_col] = data[polygon_col].apply(loads)
 
-    geodataframe = gpd.GeoDataFrame(
-        data, geometry=polygon_col, crs=CRS.from_epsg(epsg_code)
-    )
+    geodataframe = gpd.GeoDataFrame(data, geometry=polygon_col, crs=crs)
 
     if polygon_col != "geometry":
         geodataframe["geometry"] = geodataframe.geometry
@@ -121,13 +136,11 @@ def create_geodataframe_from_points(
     Raises:
         ValueError: If the epsg_code parameter is not provided.
     """
-    if epsg_code is None:
-        raise ValueError("Parameter epsg_code must be given.")
-
+    crs = CRS.from_epsg(epsg_code) if epsg_code is not None else None
     geodataframe = gpd.GeoDataFrame(
         data,
         geometry=gpd.points_from_xy(data.loc[:, long_col], data.loc[:, lat_col]),
-        crs=CRS.from_epsg(epsg_code),
+        crs=crs,
     )
     return geodataframe
 
@@ -233,6 +246,8 @@ def rasterize_vector(
     raster_save: bool = False,
     raster_save_folder: Optional[Path] = None,
     raster_save_in_subfolders: bool = False,
+    compress_method: Optional[str] = "lzw",
+    compress_num_threads: Optional[Union[str, int]] = "all_cpus",
     n_workers: int = mp.cpu_count(),
     chunksize: Optional[int] = None,
 ) -> Tuple[List, List, List]:
@@ -255,6 +270,8 @@ def rasterize_vector(
         export_absent (bool): Whether to export absent values as separate columns. Defaults to False.
         raster_save (bool): Whether to save the rasterized values as raster files. Defaults to False.
         raster_save_folder (Path): The folder to save the raster files. Defaults to None.
+        compress_method (Optional[str]): The compression method to use for saving the raster files. Defaults to "lzw".
+        compress_num_threads (Optional[Union[str, int]]): The number of threads to use for compression. Defaults to "all_cpus".
         n_workers (int): The number of worker processes to use for parallel rasterization. Defaults to mp.cpu_count().
         chunksize (Optional[int]): The number of value columns to process in each worker process. Defaults to None.
 
@@ -315,20 +332,23 @@ def rasterize_vector(
 
     # Set arguments for rasterization
     count = len(value_columns)
-    args = zip(
-        value_columns,
-        [geodataframe[column].values for column in value_columns],
-        [geometries] * count,
-        [height] * count,
-        [width] * count,
-        [nodata_value] * count,
-        [transform] * count,
-        [all_touched] * count,
-        [merge_strategy] * count,
-        [default_value] * count,
-        [dtype] * count,
-        [impute_nodata] * count,
-    )
+    args = [
+        (
+            column,
+            geodataframe[column].values,
+            geometries,
+            height,
+            width,
+            nodata_value,
+            transform,
+            all_touched,
+            merge_strategy,
+            default_value,
+            dtype,
+            impute_nodata,
+        )
+        for column in value_columns
+    ]
 
     # Initialize results list
     out_columns = []
@@ -381,6 +401,8 @@ def rasterize_vector(
                     height=raster.shape[1],
                     width=raster.shape[2],
                     transform=transform,
+                    compress_method=compress_method,
+                    compress_num_threads=compress_num_threads,
                 )
 
             # Short wait

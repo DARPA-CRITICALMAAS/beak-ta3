@@ -1,12 +1,12 @@
-ipykernel==6.26.0
-ipyplot==1.0.5
-notebook==7.0.3
+pyarrow==14.0.1
 tensorflow==2.13.1
 tensorflow_probability==0.21.0
 somoclu==1.7.6
+notebook==7.0.7
+ipykernel
+ipyplot
 pip-licenses==4.3.3
 autoflake==2.2.1
-pyarrow==14.0.1
 PyQt5
 sphinx
 sphinx-rtd-theme
