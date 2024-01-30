@@ -199,6 +199,7 @@ def save_raster(
     width: int,
     nodata_value: np.number,
     transform: Any,
+    dtype: Optional[np.dtype] = None,
     compress_method: Optional[str] = "lzw",
     compress_num_threads: Optional[Union[int, str]] = "all_cpus",
 ):
@@ -221,7 +222,7 @@ def save_raster(
         array = np.expand_dims(array, axis=0)
 
     count = array.shape[0]
-    dtype = array.dtype
+    dtype = array.dtype if dtype is None else dtype
 
     meta = {
         "driver": "GTiff",

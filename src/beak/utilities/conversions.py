@@ -331,7 +331,6 @@ def rasterize_vector(
     )
 
     # Set arguments for rasterization
-    count = len(value_columns)
     args = [
         (
             column,
@@ -383,16 +382,16 @@ def rasterize_vector(
             out_transforms.append(transform)
 
             # Super inefficient way but does the job for now
-            if raster_save_in_subfolders == True and value_type == "categorical":
-                for folder in categorical_subfolders:
-                    if folder in column:
-                        export_folder = Path(raster_save_folder) / folder
-                        break
-            else:
-                export_folder = Path(raster_save_folder)
-
-            export_name = replace_invalid_characters(column)
             if raster_save == True:
+                if raster_save_in_subfolders == True and value_type == "categorical":
+                    for folder in categorical_subfolders:
+                        if folder in column:
+                            export_folder = Path(raster_save_folder) / folder
+                            break
+                else:
+                    export_folder = Path(raster_save_folder)
+
+                export_name = replace_invalid_characters(column)
                 save_raster(
                     path=Path(export_folder) / f"{export_name}.tif",
                     array=raster,

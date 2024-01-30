@@ -68,8 +68,10 @@ def impute_data(
     imputer = SimpleImputer(
         strategy=strategy, missing_values=missing_values, fill_value=fill_value
     )
+    data_imputed = data
+
     if isinstance(data, np.ndarray):
-        data_imputed = imputer.fit_transform(data)
+        data_imputed = imputer.fit_transform(data_imputed)
     elif isinstance(data, pd.DataFrame) or isinstance(data, gpd.GeoDataFrame):
         data_imputed[columns] = imputer.fit_transform(data_imputed[columns])
     return data_imputed
