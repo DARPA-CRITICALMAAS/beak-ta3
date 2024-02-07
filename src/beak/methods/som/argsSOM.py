@@ -2,8 +2,7 @@ import os
 import glob
 
 class Args:
-    input_file: str            # Input file(*.lrn)
-    input_list_text=[]         # only for geotiff files: input_file= ",".join(input_list_text)
+    input_file: str            # Input file(*.lrn or list, separated with ",")
     output_folder: str         # Folder to save som dictionary and cluster dictionary
     output_file_somspace: str   # Text file that will contain calculated values: som_x som_y b_data1 b_data2 b_dataN umatrix cluster in geospace
     outgeofile: str             # file name of the geospace output
@@ -26,7 +25,6 @@ class Args:
     scaleN=0.01                 # Final learning rate
     initialization='random'     # Type of SOM initialization ("random", "pca")
     gridtype='rectangular'      # Type of SOM grid ("hexagonal", "rectangular")
-    #xmlfile="none"              # SOM inputs as an xml file
 
     kmeans="true"            # Run k-means clustering
     kmeans_init= 5           # Number of initializations
@@ -35,12 +33,13 @@ class Args:
 
     # Additional optional parameter:
 
-    output_file_geospace=None   # Text file that will contain calculated values: {X Y Z} data1 data2 dataN som_x som_y cluster b_data1 b_data2 b_dataN in geospace.
-    geotiff_input=None        # geotiff_input files, separated by komma
+    output_file_geospace=None   # Text file that will contain calculated values: {X Y Z} data1 data2 ... dataN som_x som_y cluster b_data1 b_data2 b_dataN in geospace.
+    geotiff_input=None        # geotiff_input files, separated by komma, to write GeoTIF out (only first line is used to get the geotransform and projection information to set output GeoFIT geotransform and projection)
     normalized="false"      # Whether the data has been normalized or not ("false", "true")
-    minN=0                  # Minimum value for normalization
-    maxN=1                  # Maximum value for normalization
+    #minN=0                  # Minimum value for normalization
+    #maxN=1                  # Maximum value for normalization
     label=None              # Whether data contains label column, true or false
+    label_geotiff_file = None       # geotiff_input file
 
     def __init__(self):
         """Constructor for the class
