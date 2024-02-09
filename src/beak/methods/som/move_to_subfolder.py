@@ -5,7 +5,7 @@ import glob
 
 def move_som_results(file_path, subfolder_name):
 
-    file_patterns = ["*som.*","*geo.*", "RunStats.txt","cluster.dictionary","db_score.png"]
+    file_patterns = ["*som.*","*geo.*", "RunStats.txt","cluster.dictionary","db_score.png","cluster_hit_count.txt"]
     destination_path = file_path + "/" + subfolder_name + "/"
 
     # Create the destination folder if it doesn't exist

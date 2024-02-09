@@ -111,7 +111,7 @@ models = {
         "Seismic_LAB_Hoggard": True,
         "Seismic_Moho": True,
     },
-    "MVT_PREFERRED_NO_GEOLOGY": {
+    "MVT_PREFERRED_NO_GEOLOGY_SOM": {
         # Geology
         "Geology_Lithology_Majority": False,
         "Geology_Lithology_Minority": False,
@@ -144,6 +144,56 @@ models = {
         "Gravity_Bouguer_UpCont30km_HGM": True,
         "Gravity_Bouguer_HGM_Worms_Proximity": True,
         "Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity": True,
+        # Magnetic
+        "Magnetic_HGM": True,
+        "Magnetic_LongWavelength_HGM": True,
+        "Magnetic_HGM_Worms_Proximity": True,
+        "Magnetic_LongWavelength_HGM_Worms_Proximity": True,
+        # Seismic
+        "Seismic_LAB_Priestley": False,
+        "Seismic_LAB_Hoggard": True,
+        "Seismic_Moho": True,
+    },
+    "MVT_PREFERRED_NUMERICAL_ISOGRAVITY_SOM": {
+        # Proximity
+        "Terrane_Proximity": True,
+        "Geology_PassiveMargin_Proximity": True,
+        "Geology_BlackShale_Proximity": True,
+        "Geology_Fault_Proximity": True,
+        # Paleogeography
+        "Geology_Paleolatitude_Period_Maximum": True,
+        "Geology_Paleolatitude_Period_Minimum": True,
+        # Gravity
+        "Gravity_GOCE_ShapeIndex": True,
+        "Gravity_Bouguer": False,
+        "Gravity_Bouguer_HGM": False,
+        "Gravity_Bouguer_UpCont30km_HGM": True,
+        "Gravity_Bouguer_HGM_Worms_Proximity": True,
+        "Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity": True,
+        # Isostatic Gravity
+        "US_IsostaticGravity_HGM_WGS84": True,
+        "US_IsostaticGravity_WGS84": True,
+        # Magnetic
+        "Magnetic_HGM": True,
+        "Magnetic_LongWavelength_HGM": True,
+        "Magnetic_HGM_Worms_Proximity": True,
+        "Magnetic_LongWavelength_HGM_Worms_Proximity": True,
+        # Seismic
+        "Seismic_LAB_Priestley": False,
+        "Seismic_LAB_Hoggard": True,
+        "Seismic_Moho": True,
+    },
+    "MVT_PREFERRED_GEOPHYSICS_SOM": {
+        # Gravity
+        "Gravity_GOCE_ShapeIndex": True,
+        "Gravity_Bouguer": False,
+        "Gravity_Bouguer_HGM": False,
+        "Gravity_Bouguer_UpCont30km_HGM": True,
+        "Gravity_Bouguer_HGM_Worms_Proximity": True,
+        "Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity": True,
+        # Isostatic Gravity
+        "US_IsostaticGravity_HGM_WGS84": True,
+        "US_IsostaticGravity_WGS84": True,
         # Magnetic
         "Magnetic_HGM": True,
         "Magnetic_LongWavelength_HGM": True,
