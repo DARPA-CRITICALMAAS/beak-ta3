@@ -4,16 +4,20 @@ import os
 import warnings
 
 from pathlib import Path
-from typing import Optional, Tuple, Union, Sequence, List
+from typing import Optional, Tuple, Union, Sequence, List, Literal
 
 import numpy as np
 import geopandas as gpd
 import scipy
 import rasterio
+import math
+
 from numbers import Number
 from rasterio import warp
 from rasterio.mask import mask
 from rasterio.windows import Window, from_bounds
+from rasterio.enums import Resampling
+from rasterio.crs import CRS
 from tqdm import tqdm
 
 from beak.utilities.io import (
@@ -93,6 +97,7 @@ def _reproject_raster_process(
     target_epsg: int,
     target_resolution: Optional[np.number],
     resampling_method: warp.Resampling,
+    resampling_mode: str,
 ):
     """Run reprojection process for a single raster file.
 
@@ -108,15 +113,15 @@ def _reproject_raster_process(
 
     if not os.path.exists(out_file):
         raster = load_raster(file)
-        check_path(os.path.dirname(out_file))
+        check_path(Path(os.path.dirname(out_file)))
         out_array, out_meta = _reproject_raster_core(
-            raster, target_epsg, target_resolution, resampling_method
+            raster, target_epsg, target_resolution, resampling_method, resampling_mode
         )
 
         save_raster(
             out_file,
             out_array,
-            target_epsg,
+            CRS.from_epsg(target_epsg),
             out_meta["height"],
             out_meta["width"],
             raster.nodata,
@@ -129,6 +134,7 @@ def _reproject_raster_core(
     target_crs: int,
     target_resolution: Optional[np.number],
     resampling_method: warp.Resampling,
+    resampling_mode: str,
 ) -> Tuple[np.ndarray, dict]:
     """
     Reproject a raster to a new coordinate reference system (CRS) and resolution.
@@ -161,6 +167,12 @@ def _reproject_raster_core(
     dst = np.empty((raster.count, dst_height, dst_width))
     dst.fill(raster.meta["nodata"])
 
+    if resampling_mode == "auto":
+        if np.issubdtype(src_arr.dtype, np.integer):
+            resampling_method = warp.Resampling.nearest
+        elif np.issubdtype(src_arr.dtype, np.floating):
+            resampling_method = warp.Resampling.bilinear
+
     out_image = warp.reproject(
         source=src_arr,
         src_transform=raster.transform,
@@ -187,11 +199,13 @@ def _reproject_raster_core(
 
 
 def reproject_raster(
-    input_folder: Path,
-    output_folder: Path,
+    input_folder: Union[str, Path],
+    output_folder: Union[str, Path],
     target_epsg: int,
     target_resolution: Optional[np.number] = None,
     resampling_method: warp.Resampling = warp.Resampling.nearest,
+    resampling_mode: Literal["manual", "auto"] = "manual",
+    include_source: bool = False,
     n_workers: int = mp.cpu_count(),
 ):
     """
@@ -203,15 +217,23 @@ def reproject_raster(
         target_epsg (int): The EPSG code of the target coordinate reference system (CRS).
         target_resolution (Optional[np.number]): The target resolution of the reprojected rasters. Defaults to None.
         resampling_method (warp.Resampling): The resampling method to use during reprojection. Defaults to warp.Resampling.nearest.
+        reampling_mode (Literal["manual", "auto"]): Uses "nearest" for integers and "bilinear" for floats.
+            Overwrites resampling_method if set to "auto". Defaults to "manual".
         n_workers (int): The number of worker processes to use for parallel processing. Defaults to the number of CPU cores.
     """
     # Show selected folder
+    input_folder = Path(input_folder)
+    output_folder = Path(output_folder)
+
     print(f"Selected folder: {input_folder}")
     print(f"Output folder: {output_folder}")
 
     # Get all folders in the root folder
     folders, _ = create_file_folder_list(Path(input_folder))
     print(f"Total of folders found: {len(folders)}")
+
+    if include_source is True:
+        folders.insert(0, input_folder)
 
     # Load rasters for each folder
     file_list = []
@@ -234,6 +256,7 @@ def reproject_raster(
             target_epsg,
             target_resolution,
             resampling_method,
+            resampling_mode,
         )
         for file in file_list
     ]
@@ -329,21 +352,21 @@ def _clip_raster_with_shapefile(
 
 def _clip_raster_process(
     file: Path,
-    input_folder,
-    output_folder: Union[str, Path],
+    input_folder: Path,
+    output_folder: Optional[Union[str, Path]],
     shapefile: Optional[Union[str, Path]],
     query: Optional[str],
     bounds: Optional[
         Tuple[Optional[Number], Optional[Number], Optional[Number], Optional[Number]]
-    ] = None,
-    all_touched: bool = True,
+    ],
+    all_touched: bool,
 ):
     """
     Clips a raster file based on either a shapefile or bounding coordinates.
 
     Args:
         file (Path): The path to the input raster file.
-        output_folder (Union[str, Path]): The folder where the clipped raster will be saved.
+        output_folder (Optional[Union[str, Path]]): The folder where the clipped raster will be saved.
         shapefile (Optional[Union[str, Path]]): The path to the shapefile used for clipping. If None, bounds must be provided.
         query (Optional[str]): An optional query string to filter the shapefile features.
         bounds (Optional[Tuple[Optional[Number], Optional[Number], Optional[Number], Optional[Number]]]): The bounding coordinates used for clipping. If None, shapefile must be provided.
@@ -353,9 +376,6 @@ def _clip_raster_process(
         ValueError: If neither shapefile nor bounds are provided.
 
     """
-    relative_file = file.relative_to(input_folder)
-    out_file = output_folder / relative_file
-
     raster = rasterio.open(file)
     if shapefile is not None and bounds is None:
         out_array, out_meta = _clip_raster_with_shapefile(
@@ -384,21 +404,26 @@ def _clip_raster_process(
     else:
         raise ValueError("Either shapefile or bounds must be provided for clipping.")
 
-    check_path(out_file.parent)
-    save_raster(
-                out_file,
-                out_array,
-                raster.crs.to_epsg(),
-                out_meta["height"],
-                out_meta["width"],
-                raster.nodata,
-                out_meta["transform"],
-                )
+    if output_folder is not None:
+        relative_file = file.relative_to(input_folder)
+        out_file = output_folder / relative_file
+
+        check_path(out_file.parent)
+        save_raster(
+            out_file,
+            out_array,
+            raster.crs,
+            out_meta["height"],
+            out_meta["width"],
+            raster.nodata,
+            out_meta["transform"],
+        )
+    return out_array, out_meta
 
 
 def clip_raster(
     input_folder: Union[str, Path],
-    output_folder: Union[str, Path],
+    output_folder: Optional[Union[str, Path]],
     shapefile: Optional[Union[str, Path]],
     query: Optional[str],
     bounds: Optional[
@@ -406,7 +431,8 @@ def clip_raster(
     ] = None,
     raster_extensions: List[str] = [".tif", ".tiff"],
     include_source: bool = True,
-    all_touched: bool = True,
+    recursive: bool = True,
+    all_touched: bool = False,
     n_workers: int = mp.cpu_count(),
 ):
     """
@@ -414,7 +440,7 @@ def clip_raster(
 
     Args:
         input_folder (Union[str, Path]): Path to the input folder containing the rasters.
-        output_folder (Union[str, Path]): Path to the output folder where the clipped rasters will be saved.
+        output_folder (Optional[Union[str, Path]]): Path to the output folder where the clipped rasters will be saved.
         shapefile (Optional[Union[str, Path]]): Path to the shapefile used for clipping.
             If None, the rasters will be clipped to the specified bounding box.
         query (Optional[str]): Query string to filter the features in the shapefile.
@@ -423,11 +449,20 @@ def clip_raster(
             Bounding box coordinates (minx, miny, maxx, maxy) used for clipping. Ignored if shapefile is not None.
         raster_extensions (List[str]): List of file extensions to consider as rasters. Default is [".tif", ".tiff"].
         include_source (bool): Flag indicating whether to include the input folder itself as a source for clipping. Default is True.
-        all_touched (bool): Flag indicating whether to include all pixels touched by the shapefile or bounding box. Default is True.
+        recursive (bool): Flag indicating whether to recursively search for rasters in subfolders. Default is True.
+        all_touched (bool): Flag indicating whether to include all pixels touched by the shapefile or bounding box. Default is Fals.
         n_workers (int): Number of parallel workers to use for clipping. Default is the number of available CPU cores.
     """
+    if recursive is False and include_source is False:
+        raise ValueError(
+            "Either recursive or include_source must be True to avoid an empty file list."
+        )
 
-    folders, _ = create_file_folder_list(Path(input_folder))
+    if recursive is True:
+        folders, _ = create_file_folder_list(Path(input_folder))
+    else:
+        folders = []
+
     if include_source is True:
         folders.insert(0, input_folder)
 
@@ -460,6 +495,270 @@ def clip_raster(
             _clip_raster_process(*args)
 
     print("Done!")
+
+
+def _unify_raster_grids(
+    base_raster: Union[Path, rasterio.io.DatasetReader],
+    raster_to_unify: Union[Path, rasterio.io.DatasetReader],
+    resampling_method: Resampling,
+    same_extent: bool,
+    same_shape: bool,
+) -> Tuple[np.ndarray, dict]:
+
+    if isinstance(base_raster, Path):
+        base_raster = rasterio.open(base_raster)
+    if isinstance(raster_to_unify, Path):
+        raster_to_unify = rasterio.open(raster_to_unify)
+        
+    dst_crs = base_raster.crs
+    dst_width = base_raster.width
+    dst_height = base_raster.height
+    dst_transform = base_raster.transform
+    dst_resolution = (base_raster.transform.a, abs(base_raster.transform.e))
+
+    out_meta = base_raster.meta.copy()
+    raster = raster_to_unify
+
+    if not same_extent:
+        dst_transform, dst_width, dst_height = warp.calculate_default_transform(
+            raster.crs,
+            dst_crs,
+            raster.width,
+            raster.height,
+            *raster.bounds,
+            resolution=dst_resolution,
+        )
+        # Snap the corner coordinates to the grid
+        x_distance_to_grid = dst_transform.c % dst_resolution[0]
+        y_distance_to_grid = dst_transform.f % dst_resolution[1]
+
+        if x_distance_to_grid > dst_resolution[0] / 2:  # Snap towards right
+            c = dst_transform.c - x_distance_to_grid + dst_resolution[0]
+        else:  # Snap towards left
+            c = dst_transform.c - x_distance_to_grid
+
+        if y_distance_to_grid > dst_resolution[1] / 2:  # Snap towards up
+            f = dst_transform.f - y_distance_to_grid + dst_resolution[1]
+        else:  # Snap towards bottom
+            f = dst_transform.f - y_distance_to_grid
+
+        # Create new transform with updated corner coordinates
+        dst_transform = warp.Affine(
+            dst_transform.a,  # Pixel size x
+            dst_transform.b,  # Shear parameter
+            c,  # Up-left corner x-coordinate
+            dst_transform.d,  # Shear parameter
+            dst_transform.e,  # Pixel size y
+            f,  # Up-left corner y-coordinate
+        )
+
+        out_meta["transform"] = dst_transform
+        out_meta["width"] = dst_width
+        out_meta["height"] = dst_height
+
+    dst_array = np.empty((base_raster.count, dst_height, dst_width))
+    dst_array.fill(base_raster.nodata)
+
+    src_array = raster.read()
+
+    out_array = warp.reproject(
+        source=src_array,
+        src_crs=raster.crs,
+        src_transform=raster.transform,
+        src_nodata=raster.nodata,
+        destination=dst_array,
+        dst_crs=dst_crs,
+        dst_transform=dst_transform,
+        dst_nodata=base_raster.nodata,
+        resampling=resampling_method,
+    )[0]
+
+    if same_shape is True:
+        base_array = base_raster.read()
+        out_array = np.where(
+            base_array == base_raster.nodata, base_raster.nodata, out_array
+        )
+
+    return out_array, out_meta
+
+
+def unify_raster_grids(
+    base_raster: Union[str, Path],
+    rasters_to_unify: Sequence[Union[str, Path]],
+    resampling_method: Resampling = Resampling.nearest,
+    same_extent: bool = False,
+    same_shape: bool = False,
+    n_workers: int = 1,
+    verbose: int = 0
+) -> List[Tuple[np.ndarray, dict]]:
+    """
+    Unifies the grids of multiple rasters to match the grid of a base raster.
+
+    Adapted core function from EIS Toolkit (main branch as of 29-01-2024).
+
+    Args:
+        base_raster (rasterio.io.DatasetReader): The base raster whose grid will be used as reference.
+        rasters_to_unify (Sequence[rasterio.io.DatasetReader]): The rasters to be unified.
+        resampling_method (Resampling, optional): The resampling method to be used. Defaults to Resampling.nearest.
+        same_extent (bool, optional): Whether to force all rasters to have the same extent as the base raster. Defaults to False.
+        same_shape (bool, optional): Whether to force all rasters to have the same shape as the base raster. Defaults to False.
+
+    Returns:
+        List[Tuple[np.ndarray, dict]]: A list of tuples containing the unified rasters as numpy arrays and their associated metadata.
+    """
+    unified_results = []
+
+    args_list = [
+        (
+            base_raster,
+            file,
+            resampling_method,
+            same_extent,
+            same_shape,
+        )
+        for file in rasters_to_unify
+    ]
+
+    if n_workers > 1:
+        if verbose == 1:
+            print("Starting parallel processing...")
+            
+        with mp.Pool(n_workers) as pool:
+            for result in pool.starmap(_unify_raster_grids, args_list):
+                unified_results.append(result)
+    else:
+        for file in rasters_to_unify:
+            out_array, out_meta = _unify_raster_grids(
+                base_raster,
+                file,
+                resampling_method,
+                same_extent,
+                same_shape,
+            )
+            unified_results.append((out_array, out_meta))
+    
+    if verbose == 1:
+        print("Done!")
+    
+    return unified_results
+
+
+def _snap_raster(
+    raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader
+) -> Tuple[np.ndarray, dict]:
+    raster_bounds = raster.bounds
+    snap_bounds = snap_raster.bounds
+    raster_pixel_size_x = raster.transform.a
+    raster_pixel_size_y = abs(raster.transform.e)
+    snap_pixel_size_x = snap_raster.transform.a
+    snap_pixel_size_y = abs(snap_raster.transform.e)
+
+    cells_added_x = math.ceil(snap_pixel_size_x / raster_pixel_size_x)
+    cells_added_y = math.ceil(snap_pixel_size_y / raster_pixel_size_y)
+
+    out_image = np.full(
+        (raster.count, raster.height + cells_added_y, raster.width + cells_added_x),
+        raster.nodata,
+    )
+    out_meta = raster.meta.copy()
+
+    # Coordinates for the snap raster boundaries
+    left_distance_in_pixels = (
+        raster_bounds.left - snap_bounds.left
+    ) // snap_pixel_size_x
+    left_snap_coordinate = (
+        snap_bounds.left + left_distance_in_pixels * snap_pixel_size_x
+    )
+
+    bottom_distance_in_pixels = (
+        raster_bounds.bottom - snap_bounds.bottom
+    ) // snap_pixel_size_y
+    bottom_snap_coordinate = (
+        snap_bounds.bottom + bottom_distance_in_pixels * snap_pixel_size_y
+    )
+    top_snap_coordinate = (
+        bottom_snap_coordinate + (raster.height + cells_added_y) * raster_pixel_size_y
+    )
+
+    # Distance and array indices of close cell corner in snapped raster to slot values
+    x_distance = (raster_bounds.left - left_snap_coordinate) % raster_pixel_size_x
+    x0 = int((raster_bounds.left - left_snap_coordinate) // raster_pixel_size_x)
+    x1 = x0 + raster.width
+
+    y_distance = (raster_bounds.bottom - bottom_snap_coordinate) % raster_pixel_size_y
+    y0 = int(
+        cells_added_y
+        - ((raster_bounds.bottom - bottom_snap_coordinate) // raster_pixel_size_y)
+    )
+    y1 = y0 + raster.height
+
+    # Find the closest corner of the snapped grid for shifting/slotting the original raster
+    if x_distance < raster_pixel_size_x / 2 and y_distance < raster_pixel_size_y / 2:
+        out_image[:, y0:y1, x0:x1] = raster.read()  # Snap values towards left-bottom
+    elif x_distance < raster_pixel_size_x / 2 and y_distance > raster_pixel_size_y / 2:
+        out_image[:, y0 - 1 : y1 - 1, x0:x1] = (
+            raster.read()
+        )  # Snap values towards left-top # noqa: E203
+    elif x_distance > raster_pixel_size_x / 2 and y_distance > raster_pixel_size_y / 2:
+        out_image[:, y0 - 1 : y1 - 1, x0 + 1 : x1 + 1] = (
+            raster.read()
+        )  # Snap values toward right-top # noqa: E203
+    else:
+        out_image[:, y0:y1, x0 + 1 : x1 + 1] = (
+            raster.read()
+        )  # Snap values towards right-bottom # noqa: E203
+
+    out_transform = rasterio.Affine(
+        raster.transform.a,
+        raster.transform.b,
+        left_snap_coordinate,
+        raster.transform.d,
+        raster.transform.e,
+        top_snap_coordinate,
+    )
+    out_meta.update(
+        {
+            "transform": out_transform,
+            "width": out_image.shape[-1],
+            "height": out_image.shape[-2],
+        }
+    )
+    return out_image, out_meta
+
+
+def snap_raster(
+    raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader
+) -> Tuple[np.ndarray, dict]:
+    """Snaps/aligns raster to given snap raster.
+
+    Raster is snapped from its left-bottom corner to nearest snap raster grid corner in left-bottom direction.
+    If rasters are aligned, simply returns input raster data and metadata.
+
+    Adapted core function from EIS Toolkit (main branch as of 29-01-2024).
+
+    Args:
+        raster: The raster to be clipped.
+        snap_raster: The snap raster i.e. reference grid raster.
+
+    Returns:
+        The snapped raster data.
+        The updated metadata.
+
+    Raises:
+        ValueError: Raster and and snap raster are not in the same CRS.
+        ValueError: Raster and and snap raster are not in the same CRS.
+    """
+    if not raster.crs == snap_raster.crs:
+        raise ValueError("Raster and and snap raster have different CRS.")
+
+    if (
+        snap_raster.bounds.bottom == raster.bounds.bottom
+        and snap_raster.bounds.left == raster.bounds.left
+    ):
+        raise ValueError("Raster grids are already aligned.")
+
+    out_image, out_meta = _snap_raster(raster, snap_raster)
+    return out_image, out_meta
 
 
 # region: Test code

@@ -144,8 +144,8 @@ def create_file_list(
 
 def create_file_folder_list(
     root_folder: Path,
-    exclude_types: Sequence[str] = [".aux", ".xml", ".cpg", ".ovr", ".dbf"],
-) -> List[Path]:
+    exclude_types: Optional[Sequence[str]] = None,
+) -> tuple[List[Path], List[Path]]:
     """
     Create a list of files and folders in a root folder (including subfolders).
 
@@ -157,6 +157,12 @@ def create_file_folder_list(
     """
     folder_list = []
     file_list = []
+
+    exclude_types = (
+        [".aux", ".xml", ".cpg", ".ovr", ".dbf", ".prj", ".sld", ".shp", ".shx", ".tfw"]
+        if exclude_types is None
+        else exclude_types
+    )
 
     for root, dirs, files in os.walk(root_folder):
         for folder in dirs:
@@ -186,6 +192,7 @@ def check_path(folder: Path):
         (None): None
     """
     if not os.path.exists(folder):
+        folder = Path(folder)
         folder.mkdir(parents=True, exist_ok=True)
 
     return folder
@@ -194,12 +201,13 @@ def check_path(folder: Path):
 def save_raster(
     path: Path,
     array: np.ndarray,
-    epsg_code: int,
-    height: int,
-    width: int,
-    nodata_value: np.number,
-    transform: Any,
+    crs: Optional[rasterio.crs.CRS] = None,
+    height: Optional[int] = None,
+    width: Optional[int] = None,
+    nodata_value: Optional[np.number] = None,
+    transform: Optional[rasterio.transform.Affine] = None,
     dtype: Optional[np.dtype] = None,
+    metadata: Optional[Dict] = None,
     compress_method: Optional[str] = "lzw",
     compress_num_threads: Optional[Union[int, str]] = "all_cpus",
 ):
@@ -209,11 +217,16 @@ def save_raster(
     Args:
         path (Path): The file path where the raster will be saved.
         array (np.ndarray): The raster data as a NumPy array.
-        epsg_code (int): The EPSG code specifying the coordinate reference system (CRS) of the raster.
-        height (int): The height (number of rows) of the raster.
-        width (int): The width (number of columns) of the raster.
-        nodata_value (np.number): The nodata value of the raster.
+        crs: (Optional[rasterio.crs.CRS]): The coordinate reference system of the raster.
+        height (Optional[int]): The height (number of rows) of the raster.
+        width (Optional[int]): The width (number of columns) of the raster.
+        nodata_value (Optional[np.number]): The nodata value of the raster.
         transform (affine.Affine): The affine transformation matrix that maps pixel coordinates to CRS coordinates.
+        dtype (Optional[np.dtype]): The data type of the raster. Defaults to None.
+        metadata (Optional[Dict]): Additional metadata to be included in the raster file. Defaults to None.
+            If provided, remaining metadata arguments will be ignored.
+        compress_method (Optional[str]): The compression method to use. Defaults to "lzw".
+        compress_num_threads (Optional[Union[int, str]]): The number of threads to use for compression. Defaults to "all_cpus".
 
     Returns:
         (None): None
@@ -223,19 +236,32 @@ def save_raster(
 
     count = array.shape[0]
     dtype = array.dtype if dtype is None else dtype
+    nodata_value = metadata["nodata"] if nodata_value is None else nodata_value
 
-    meta = {
-        "driver": "GTiff",
-        "dtype": str(dtype),
-        "nodata": nodata_value,
-        "width": width,
-        "height": height,
-        "count": count,
-        "crs": CRS.from_epsg(epsg_code),
-        "transform": transform,
-    }
+    if metadata is None:
+        if crs.is_epsg_code:
+            epsg_code = CRS.to_epsg(crs)
+            crs = CRS.from_epsg(epsg_code)
 
-    with rasterio.open(path, "w", compress=compress_method, num_threads=compress_num_threads, **meta) as dst:
+        meta = {
+            "driver": "GTiff",
+            "dtype": str(dtype),
+            "nodata": nodata_value,
+            "width": width,
+            "height": height,
+            "count": count,
+            "crs": crs,
+            "transform": transform,
+        }
+    else:
+        meta = metadata
+        meta.update({"count": count})
+        meta.update({"dtype": str(dtype)})
+        meta.update({"nodata": nodata_value})
+
+    with rasterio.open(
+        path, "w", compress=compress_method, num_threads=compress_num_threads, **meta
+    ) as dst:
         for i in range(0, count):
             dst.write(array[i].astype(dtype), i + 1)
         dst.close()
@@ -306,7 +332,6 @@ def spatial_filter(
         pd.DataFrame: Filtered dataframe.
     """
 
-    # df_copy = df_copy[df_copy[COL_LONGITUDE] < max_long]
     if longitude_column is not None:
         data = (
             data[data[longitude_column] >= longitude_min]
@@ -459,6 +484,7 @@ def load_model(
                 f"Some filenames occur multiple times. Please check with option verbose=1 to see which files are affected."
             )
 
+    print(f"Number of files in file list: {len(file_list)}")
     return model_dict, file_list, filename_counts
 
 
