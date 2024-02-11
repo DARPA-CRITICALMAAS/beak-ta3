@@ -1,5 +1,5 @@
 """
-This file contains the models used for the MVT_NAT experiment.
+This file contains the models used for the MVT_REG experiment.
 
 Currently, the models are:<br>
     `MVT_BASELINE`: The baseline model for MVT deposits from the Lawley et al. 2022 paper, containing only geophysical layers.<p>
