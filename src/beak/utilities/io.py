@@ -515,7 +515,12 @@ def copy_folder_structure(
 
 
 # region: Test code
-from importlib_resources import files
+import sys
+
+if sys.version_info < (3, 9):
+    from importlib_resources import files
+else:
+    from importlib.resources import files
 
 BASE_PATH = files("beak.data") / "LAWLEY22-EXPORT" / "EPSG_4326_RES_0_05"
 

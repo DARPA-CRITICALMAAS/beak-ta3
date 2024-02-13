@@ -14,10 +14,12 @@ import numpy as np
 from beak.math.normalKLDiv import normalKLDiv
 
 import sys
+
 if sys.version_info < (3, 9):
     from importlib_resources import files
 else:
     from importlib.resources import files
+
 
 # class normalKLDivTests:
 def test_syntaxSupport():
