@@ -11,7 +11,7 @@ gdal.DontUseExceptions()  # gdal.UseExceptions()  # Explicitly Use or Don't Use 
 import os
 import sys
 
-def load_geotiff_files(input_file_list):
+def load_geotiff_files(input_file_list, label_file=""):
     
     width_0 = None
     height_0 = None
@@ -20,7 +20,7 @@ def load_geotiff_files(input_file_list):
     path_0=None
     noDataValue_0 = None
     dataType_0 = None
-    geotiff_list_as_string=input_file_list # At this points the assumption is made that the coordinates of separate files are identical. So the coordinates can just be taken from any one of the individual files.
+    geotiff_list_as_string=input_file_list + label_file # At this points the assumption is made that the coordinates of separate files are identical. So the coordinates can just be taken from any one of the individual files.
     returndata = np.array([])  
     colnames=[]
 

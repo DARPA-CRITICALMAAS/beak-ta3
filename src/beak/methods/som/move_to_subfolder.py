@@ -29,6 +29,18 @@ def move_som_results(file_path, subfolder_name):
             shutil.move(source_file, destination_file_path)
 
 
+def remove_som_results(file_path):
+
+    file_patterns = ["*som.*","*geo.*", "RunStats.txt","cluster.dictionary","db_score.png","cluster_hit_count.txt"]
+
+    for file_pattern in file_patterns:
+        # Use glob to get all files with the specified pattern
+        matching_files = glob.glob(os.path.join(file_path, file_pattern))
+
+        for source_file in matching_files:
+            os.remove(source_file)
+
+
 def move_figures(file_path, subfolder_name):
 
     file_patterns = ["geoplot_*.png", "somplot_*.png", "boxplot_*.png", "db_score.png", "cluster_hit_count.png"]

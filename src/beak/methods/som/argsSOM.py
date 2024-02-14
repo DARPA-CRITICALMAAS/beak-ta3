@@ -75,3 +75,29 @@ class Args:
         input_file= ",".join(input_list_text)
 
         return input_file
+    
+    def create_list_from_file(self, file_path, file_path_label=""):
+
+        # Check if label file exists
+        if os.path.exists(file_path_label):
+            # Open the label file in read mode
+            with open(file_path_label, 'r') as label_file:
+                # Read the whole content from the label file
+                content_label = label_file.readlines()
+        else:
+            content_label = []  # If the label file doesn't exist, initialize an empty list
+
+        # Open the list file in read mode
+        with open(file_path, 'r') as file:
+            # Read all lines from the file into a list
+            content = file.readlines()
+
+        # Extend content with content_label if it exists
+        content.extend(content_label)
+
+        # Strip newline characters from each line
+        file_patterns = [line.strip() for line in content]
+
+        input_file = self.create_list_from_pattern("", file_patterns)
+
+        return input_file
