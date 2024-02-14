@@ -168,3 +168,6 @@ probflow/
 .obsidian/
 sync.ffs_db
 results/
+exports/
+logs/
+models/

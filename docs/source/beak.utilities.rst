@@ -15,6 +15,7 @@ Submodules
    :maxdepth: 4
    :glob:
 
+   beak.utilities.checks
    beak.utilities.conversions
    beak.utilities.eda
    beak.utilities.io

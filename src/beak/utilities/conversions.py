@@ -6,6 +6,9 @@ from typing import List, Literal, Optional, Tuple, Union
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import rasterio
+import os
+
 from beak.utilities.preparation import create_encodings_from_dataframe
 from beak.utilities.raster_processing import (
     check_path,
@@ -30,7 +33,8 @@ from tqdm import tqdm
 
 # region: General helper functions
 def transform_from_geometries(
-    geodataframe: gpd.GeoDataFrame, resolution: np.number
+    geodataframe: gpd.GeoDataFrame,
+    resolution: np.number,
 ) -> Tuple[np.number, np.number, transform.Affine]:
     """
     Calculate the transform parameters required to convert the input geometries
@@ -62,7 +66,11 @@ def transform_from_geometries(
 
 # region: Convert to geodataframe
 def create_geodataframe_centroids_from_polygons(
-    data: pd.DataFrame, geometry_column: str, epsg_code: Optional[int] = None
+    data: pd.DataFrame,
+    geometry_column: str,
+    epsg_code: Optional[int] = None,
+    crs: Optional[CRS] = None,
+    query: Optional[str] = None,
 ) -> gpd.GeoDataFrame:
     """
     Create a GeoDataFrame containing the midpoints of the polygons in the input file.
@@ -70,11 +78,22 @@ def create_geodataframe_centroids_from_polygons(
     Args:
         data (pd.DataFrame): The input DataFrame containing the polygon geometries.
         geometry_column (str): The name of the column in the DataFrame that contains the polygon geometries.
+        epsg_code (Optional[int]): The EPSG code specifying the coordinate reference system (CRS) of the geometries.
+        crs (Optional[CRS]): The coordinate reference system (CRS) of the data.
+            If provided, it will be used instead of the `epsg_code` parameter.
 
     Returns:
         gpd.GeoDataFrame: The resulting GeoDataFrame containing the midpoints.
     """
-    crs = CRS.from_epsg(epsg_code) if epsg_code is not None else None
+    if epsg_code is None and crs is None:
+        print("WARNING: No epsg_code or crs provided.")
+
+    if epsg_code is not None:
+        crs = CRS.from_epsg(epsg_code)
+
+    if query is not None:
+        data = data.query(query)
+
     return gpd.GeoDataFrame(
         data, geometry=data[geometry_column].apply(lambda x: Point(x.centroid)), crs=crs
     )
@@ -84,6 +103,8 @@ def create_geodataframe_from_polygons(
     data: pd.DataFrame,
     polygon_col: str,
     epsg_code: Optional[int] = None,
+    crs: Optional[CRS] = None,
+    query: Optional[str] = None,
 ) -> gpd.GeoDataFrame:
     """
     Create a GeoDataFrame from a DataFrame containing polygon geometries.
@@ -93,17 +114,22 @@ def create_geodataframe_from_polygons(
         polygon_col (str): The name of the column in the DataFrame that contains the polygon geometries.
         epsg_code (Optional[int]): The EPSG code specifying the coordinate reference system (CRS) of the geometries.
             If not provided, a ValueError will be raised.
+        crs (Optional[CRS]): The coordinate reference system (CRS) of the data.
+            If provided, it will be used instead of the `epsg_code` parameter.
 
     Returns:
         gpd.GeoDataFrame: The resulting GeoDataFrame with the polygon geometries.
-
-    Raises:
-        ValueError: If the `epsg_code` parameter is not provided.
-
     """
-    crs = CRS.from_epsg(epsg_code) if epsg_code is not None else None
-    data[polygon_col] = data[polygon_col].apply(loads)
+    if epsg_code is None and crs is None:
+        print("WARNING: No epsg_code or crs provided.")
 
+    if epsg_code is not None:
+        crs = CRS.from_epsg(epsg_code)
+
+    if query is not None:
+        data = data.query(query)
+
+    data[polygon_col] = data[polygon_col].apply(loads)
     geodataframe = gpd.GeoDataFrame(data, geometry=polygon_col, crs=crs)
 
     if polygon_col != "geometry":
@@ -119,6 +145,8 @@ def create_geodataframe_from_points(
     long_col: str,
     lat_col: str,
     epsg_code: Optional[int] = None,
+    crs: Optional[CRS] = None,
+    query: Optional[str] = None,
 ) -> gpd.GeoDataFrame:
     """
     Create a GeoDataFrame from a DataFrame.
@@ -129,14 +157,21 @@ def create_geodataframe_from_points(
         lat_col (str): The name of the column containing the latitude values.
         epsg_code (Optional[int]): The EPSG code specifying the coordinate reference system (CRS) of the data.
             If not provided, a ValueError will be raised.
+        crs (Optional[CRS]): The coordinate reference system (CRS) of the data.
+            If provided, it will be used instead of the `epsg_code` parameter.
 
     Returns:
         gpd.GeoDataFrame: The resulting GeoDataFrame.
-
-    Raises:
-        ValueError: If the epsg_code parameter is not provided.
     """
-    crs = CRS.from_epsg(epsg_code) if epsg_code is not None else None
+    if epsg_code is None and crs is None:
+        print("WARNING: No epsg_code or crs provided.")
+
+    if epsg_code is not None:
+        crs = CRS.from_epsg(epsg_code)
+
+    if query is not None:
+        data = data.query(query)
+
     geodataframe = gpd.GeoDataFrame(
         data,
         geometry=gpd.points_from_xy(data.loc[:, long_col], data.loc[:, lat_col]),
@@ -165,7 +200,7 @@ def _rasterize_vector_helper(args):
 
 # Helper function to func partial process
 def _rasterize_vector_process(
-    value_column: str,
+    value_column: Optional[str],
     values: np.ndarray,
     geometries: gpd.array.GeometryArray,
     height: int,
@@ -239,7 +274,7 @@ def rasterize_vector(
     epsg_code: Optional[int] = None,
     base_raster_profile: Optional[Union[profiles.Profile, dict]] = None,
     merge_strategy: str = "replace",
-    all_touched: bool = True,
+    all_touched: bool = False,
     dtype: Optional[np.dtype] = None,
     impute_nodata: bool = False,
     export_absent: bool = False,
@@ -396,7 +431,7 @@ def rasterize_vector(
                     path=Path(export_folder) / f"{export_name}.tif",
                     array=raster,
                     nodata_value=nodata_value,
-                    epsg_code=epsg_code,
+                    crs=CRS.from_epsg(epsg_code),
                     height=raster.shape[1],
                     width=raster.shape[2],
                     transform=transform,
@@ -410,5 +445,88 @@ def rasterize_vector(
 
     return out_columns, out_rasters, out_transforms
 
+    # endregion
 
-# endregion
+
+def create_binary_raster(
+    geodataframe: gpd.GeoDataFrame,
+    base_raster: Optional[rasterio.DatasetReader] = None,
+    resolution: Optional[np.number] = None,
+    nodata: Optional[int] = -99,
+    query: Optional[str] = None,
+    all_touched: bool = False,
+    fill_negatives: bool = True,
+    same_shape: bool = True,
+    out_file: Optional[Union[str, Path]] = None,
+) -> np.ndarray:
+    """
+    Creates a binary from a geodataframe by rasterizing its geometries.
+
+    Can be used for both creating training labels (provide a base raster recommended)
+    as well as base rasters (provide only resolution and nodata value).
+
+    Args:
+        geodataframe (gpd.GeoDataFrame): The geodataframe containing the geometries to rasterize.
+        base_raster (rasterio.DatasetReader): The base raster to rasterize the geometries onto.
+            Overwrites the resolution and nodata parameter if provided. Defaults to None.
+        resolution (Optional[np.number]): The resolution of the output raster. Defaults to None.
+        query (Optional[str]): An optional query to filter the geometries. Defaults to None.
+        all_touched (bool): Whether to consider all pixels touched by the geometries. Defaults to False.
+        fill_negatives (bool): Whether to fill negative values with 0. Defaults to True.
+        same_shape (bool): Whether to ensure the output array has the same shape as the base raster.
+            Defaults to True.
+        out_file (Optional[Union[str, Path]]): An optional output file path to save the rasterized labels.
+            Defaults to None.
+
+    Returns:
+        np.ndarray: The binary labels as a numpy array.
+    """
+    if base_raster is None and resolution is None:
+        raise ValueError("Provide either base_raster or resolution.")
+
+    gdf = geodataframe.query(query) if query is not None else geodataframe
+
+    if base_raster is not None:
+        width = base_raster.width
+        height = base_raster.height
+        transform = base_raster.transform
+        nodata = base_raster.nodata
+        crs = base_raster.crs
+    elif resolution is not None:
+        width, height, transform = transform_from_geometries(gdf, resolution)
+        crs = gdf.crs.to_string()
+        crs = CRS.from_string(crs)
+
+    fill_value = 0 if fill_negatives is True else nodata
+
+    values = np.ones(len(gdf))
+    geometries = gdf.geometry
+
+    out_array = features.rasterize(
+        shapes=list(zip(geometries, values)),
+        out_shape=(height, width),
+        fill=fill_value,
+        transform=transform,
+        all_touched=all_touched,
+        merge_alg=getattr(MergeAlg, "replace"),
+        default_value=0,
+    )
+
+    if base_raster is not None and same_shape is True:
+        out_array = np.where(base_raster.read() == nodata, nodata, out_array)
+
+    if out_file is not None:
+        out_path = os.path.dirname(out_file)
+        check_path(out_path)
+
+        save_raster(
+            out_file,
+            array=out_array,
+            crs=crs,
+            height=height,
+            width=width,
+            nodata_value=nodata,
+            transform=transform,
+        )
+
+    return out_array

@@ -1,10 +1,12 @@
 import multiprocessing as mp
 import time
 from pathlib import Path
-from typing import Tuple, Literal
+from typing import Literal, Optional, Sequence, Union
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 import numpy as np
+import pandas as pd
+import geopandas as gpd
 import rasterio
 from tqdm import tqdm
 
@@ -41,7 +43,7 @@ def _scale_raster_process(
 
     Returns:
         None
-    """        
+    """
     raster = load_raster(file)
     out_file = output_folder / file.relative_to(Path(input_folder))
     check_path(out_file.parent)
@@ -50,7 +52,7 @@ def _scale_raster_process(
     save_raster(
         out_file,
         out_array,
-        raster.crs.to_epsg(),
+        raster.crs,
         raster.height,
         raster.width,
         raster.nodata,
@@ -58,10 +60,38 @@ def _scale_raster_process(
     )
 
 
+def _scale_data(
+    data: Union[np.ndarray, pd.DataFrame, gpd.GeoDataFrame],
+    method: str,
+    columns: Optional[Sequence[str]] = None,
+) -> np.ndarray:
+    """
+    Scale an array to a new range.
+
+    Args:
+        data (np.ndarray): The input array to be scaled.
+        method (Literal[str]): The scaling method to be used. Options are "minmax" for min-max scaling and "standard" for standard scaling.
+
+    Returns:
+        np.ndarray: Numpy array of the rescaled data.
+    """
+    if method == "minmax":
+        scaler = MinMaxScaler()
+    elif method == "standard":
+        scaler = StandardScaler()
+    
+    if isinstance(data, np.ndarray):
+        out_data = scaler.fit_transform(data.reshape(-1, 1))
+    elif isinstance(data, pd.DataFrame):
+        out_data = data
+        out_data[columns] = scaler.fit_transform(out_data[columns])
+    return out_data
+
+
 def _scale_raster_core(
     raster: rasterio.io.DatasetReader,
     method: str,
-) -> Tuple[np.ndarray, dict]:
+) -> np.ndarray:
     """
     Scale a raster to a new range.
 
@@ -76,12 +106,7 @@ def _scale_raster_core(
     src_array = src_array.squeeze()
     src_array = np.where(src_array == raster.nodata, np.nan, src_array)
 
-    if method == "minmax":
-        scaler = MinMaxScaler()
-        out_array = scaler.fit_transform(src_array.reshape(-1, 1))
-    elif method == "standard":
-        scaler = StandardScaler()
-        out_array = scaler.fit_transform(src_array.reshape(-1, 1))
+    out_array = _scale_data(src_array, method)
 
     out_array = np.where(np.isnan(out_array), raster.nodata, out_array)
     out_array = np.reshape(out_array, src_array.shape)
@@ -92,6 +117,8 @@ def scale_raster(
     input_folder: Path,
     output_folder: Path,
     method: Literal["minmax", "standard"],
+    extensions: Optional[Sequence[str]] = [".tif", ".tiff"],
+    include_source: bool = True,
     n_workers: int = mp.cpu_count(),
 ):
     """
@@ -107,7 +134,16 @@ def scale_raster(
     print(f"Selected folder: {input_folder.resolve()}")
 
     # Get all folders in the root folder
-    folders, files = create_file_folder_list(Path(input_folder))
+    folders, _ = create_file_folder_list(Path(input_folder))
+
+    if include_source is True:
+        folders.insert(0, input_folder)
+
+    files = []
+    for folder in folders:
+        folder_files = create_file_list(folder, extensions=extensions)
+        files.extend(folder_files)
+
     print(f"Total of folders found: {len(folders)}")
 
     # Show results
