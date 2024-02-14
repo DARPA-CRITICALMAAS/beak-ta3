@@ -14,7 +14,10 @@ def run_SOM(args):
     print('Load data')
     # Record the start time
     start_time = time.time()
-    header = nxtsomcore.load_data(args.input_file) 
+    if (args.label == True):
+        header = nxtsomcore.load_data(args.input_file, args.label_geotiff_file) 
+    else: 
+        header = nxtsomcore.load_data(args.input_file) 
     # Record the end time
     end_time = time.time()
     # Print the elapsed time

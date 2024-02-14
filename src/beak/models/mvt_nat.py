@@ -204,6 +204,16 @@ models = {
         "Seismic_LAB_Hoggard": True,
         "Seismic_Moho": True,
     },
+    "TEST_RUN_SOM": {
+        # Igneous dictionaries
+        "Geology_Dictionary_Felsic": True,
+        "Geology_Dictionary_Intermediate": False,
+        "Geology_Dictionary_UltramaficMafic": False,
+        # Isostatic Gravity
+        "US_IsostaticGravity_WGS84": False,
+        # Magnetic
+        "Magnetic_HGM": True,
+    },
     "MVT_GROUND_TRUTH": {
         "Training_MVT_Deposit_Present": False,
         "Training_MVT_Occurrence_Present": False,
