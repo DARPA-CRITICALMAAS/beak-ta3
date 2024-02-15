@@ -111,9 +111,8 @@ models = {
         "NAMrad_U": True,
     },
     "TS_GROUND_TRUTH": {
-        "Training_MVT_Deposit_Present": False,
-        "Training_MVT_Occurrence_Present": False,
-        "Training_MVT_Present": True,
+        "TUNGSTEN_SKARN_EPSG_4326_RES_0_025_CLIPPED_USC": False,
+        "TUNGSTEN_SKARN_EPSG_4326_RES_0_025_COMPLETE_DATASET": False,
     },
 
 }
