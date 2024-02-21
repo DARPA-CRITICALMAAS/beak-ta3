@@ -171,3 +171,4 @@ results/
 exports/
 logs/
 models/
+sync.ffs_lock
