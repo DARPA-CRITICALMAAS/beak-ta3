@@ -161,7 +161,6 @@ cython_debug/
 #.idea/
 
 # More files to ignore
-.keras
 sync.ffs_lock
 sync.ffs_db
 
@@ -174,3 +173,5 @@ probflow/
 results/
 exports/
 logs/
+experiments/**/models/
+
