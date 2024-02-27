@@ -160,15 +160,17 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# More to ignore
+# More files to ignore
+.keras
+sync.ffs_lock
+sync.ffs_db
+
+# More folders to ignore
 data/
 local/
 eis_toolkit/
 probflow/
 .obsidian/
-sync.ffs_db
 results/
 exports/
 logs/
-models/
-sync.ffs_lock
