@@ -30,13 +30,13 @@ class NxtSomCore(object):
         """
         self.som = {}
 
-    def load_data(self, input_file):
+    def load_data(self, input_file, label_file = ""):
         """Load and return the input data as a dict containing numpy array and metadata
         :param input_file: The name of the file to be loaded.
         :type filename: str.
         :rtype: dict
         """
-        return load_input_file(input_file)
+        return load_input_file(input_file, label_file)
 
     def train(self, data, som_x, som_y , epochs=10, **kwargs):
         """Train the map and return results as a dict.

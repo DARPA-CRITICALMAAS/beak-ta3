@@ -691,6 +691,8 @@ def draw_number_of_hits(som_dict,som_data,somx,somy,clusters,grid,cluster_tick_l
     plt.clf()
     plt.cla()
     plt.close()
+    
+    
  
 
 """

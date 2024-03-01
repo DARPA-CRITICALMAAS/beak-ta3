@@ -17,7 +17,7 @@ eli lopulta vasta täällä tarvii olla checki inputfilen tyypistä
 
 
 #load input file
-def load_input_file(input_file):#input file in case of lrn, input file list in case of geoTiff
+def load_input_file(input_file, label_file=""):#input file in case of lrn, input file list in case of geoTiff
      if(input_file[-3:].lower()=="lrn"):#if input is lrn
         lrn_header=load_lrn_file(input_file)
         return lrn_header
@@ -25,7 +25,7 @@ def load_input_file(input_file):#input file in case of lrn, input file list in c
         csv_header=load_csv_file(input_file)
         return csv_header
      else: 
-        geotiff_header = load_geotiff_files(input_file)
+        geotiff_header = load_geotiff_files(input_file, label_file)
 
         # Delete rows with noDataValue
         geotiff_header = delete_rows_with_no_data(geotiff_header)
