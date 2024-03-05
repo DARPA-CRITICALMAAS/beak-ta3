@@ -4,9 +4,14 @@ import time
 import numpy as np
 
 def run_SOM(args):
+    """Load data, run SOM and k-means clustering, write output to file.
+
+    Args:
+        args (dict): Dictionary holding all parameters for SOM and k-means clustering.
+    """    
     nxtsomcore = NxtSomCore()
     if args.initialcodebook is not None: #if initial codebook was provided (in the form of som.dictionary), open the file, and load som codebook from it.
-        with open(initialcodebook, 'rb') as som_dictionary_file:
+        with open(args.initialcodebook, 'rb') as som_dictionary_file:
             som_dictionary = pickle.load(som_dictionary_file)
             args.initialcodebook=som_dictionary['codebook']
             args.initialization=None           
@@ -95,7 +100,13 @@ def run_SOM(args):
 
 
 def cluster_hit_count(som, output_file_somspace, output_path):
+    """Counts hits per cluster and creates a NumPy array with cluster numbers and hit counts. Saves the array to a text file.
 
+    Args:
+        som (dict): Dictionary holding the SOM codebook vectors, U-matrix, number of rows and columns, dimension and clusters.
+        output_file_somspace (str): full file path for txt file holding som space results
+        output_path (str): file path for writhing txt file
+    """
     som_data = np.genfromtxt(output_file_somspace, skip_header=(1), delimiter=' ')
     clusters=int(max(som_data[:,len(som_data[0])-2])+1)
 

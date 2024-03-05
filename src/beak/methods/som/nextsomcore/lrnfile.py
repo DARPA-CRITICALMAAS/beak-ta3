@@ -8,6 +8,14 @@ The module contains  functions to read lrn-files
 import numpy as np
 
 def load_lrn_file(input_file):
+    """Load files of lrn file format
+
+    Args:
+        input_file (str): input file path
+
+    Returns:
+        dict: dictionary holding the data as a ndarray and meta data such as numer of rows and column, column (data) names, file type
+    """    
     lrn_header = read_lrn_header(input_file)
     datacols = [i for i, x in enumerate(lrn_header['coltypes']) if x == 1]
     data = np.loadtxt(
@@ -20,6 +28,20 @@ def load_lrn_file(input_file):
     return lrn_header
 
 def read_lrn_header(input_file):
+    """read metadata from files of lrn file format
+
+    Args:
+        input_file (str): input file path
+
+    Raises:
+        Exception: Failed to obtain valid row count from lrn-file.
+        Exception: Failed to obtain valid column count from lrn-file.
+        Exception: Failed to convert column type values
+        Exception: Column names don't match with the column types.
+
+    Returns:
+        dict: dictionary holding meta data from input file, such as numer of rows and column, column (data) names, file type
+    """    
     linenum = 0
     with open(input_file) as fh:
         while True:
@@ -57,16 +79,45 @@ def read_lrn_header(input_file):
     return {'file': input_file, 'rows': rows, 'cols': cols, 'coltypes': colmap, 'colnames': colnames, 'headerlength': linenum, 'data': None, 'filetype': 'lrn'}
 
 def read_lrn_coordinate_columns(lrn_header):
+    """Read coordinate columns from dictionary 
+
+    Args:
+        lrn_header (dict): dictionary holding the data as a ndarray and meta data, such as numer of rows and column, column (data) names, file type
+
+    Returns:
+        dict: dictionary holding coordinates as a ndarray, column names and format
+    """    
     coord_cols = [i for i, x in enumerate(lrn_header['coltypes']) if x == 0 and lrn_header['colnames'][i].upper() in ['X', 'Y', 'Z']]
     fmt = ('%f ' * len(coord_cols)).rstrip()
     return _read_columns(lrn_header, coord_cols, fmt)
 
 def read_lrn_data_columns(lrn_header):
+    """Read data columns from dictionary
+
+    Args:
+        lrn_header (dict): dictionary holding the data including coordinates as a ndarray and meta data, such as numer of rows and column, column (data) names, file type
+
+    Returns:
+        dict: dictionary holding data columns as a ndarray, column names and format
+    """    
     data_cols = [i for i, x in enumerate(lrn_header['coltypes']) if x == 1]
     fmt = ('%f ' * len(data_cols)).rstrip()
     return _read_columns(lrn_header, data_cols, fmt)
 
 def _read_columns(lrn_header, columns, fmt=''):
+    """read columns from dictionary
+
+    Args:
+        lrn_header (dict): dictionary holding the data as a ndarray and meta data
+        columns (list[int]): list of columns to return
+        fmt (str, optional): format. Defaults to ''.
+
+    Raises:
+        TypeError: Invalid type: columns must be a list or tuple
+
+    Returns:
+        dict: dictionary holding selected data columns as a ndarray, column names and format
+    """    
     if not type(columns) in (list, tuple):
         raise TypeError('Invalid type: columns must be a list or tuple')
     colnames = ([lrn_header['colnames'][i] for i in columns])
