@@ -1,0 +1,1 @@
+s:\projekte\20230082_darpa_criticalmaas_ta3\bearbeitung\github\beak-ta3\src\beak\data\GEOLOGY_LITHOLOGIES\PROCESSED\EPSG_4326_RES_0_025\CLIPPED_USC\UNIFIED\SGMC_M_UM_Intrusive.tif

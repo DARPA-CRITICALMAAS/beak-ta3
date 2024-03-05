@@ -1,0 +1,8 @@
+s:\projekte\20230082_darpa_criticalmaas_ta3\bearbeitung\github\beak-ta3\src\beak\data\MCCAFFERTY23\PROCESSED\EPSG_4326_RES_0_025\CLIPPED_USC\GEOPHYSICS\LAB_HGM_cog.tif
+s:\projekte\20230082_darpa_criticalmaas_ta3\bearbeitung\github\beak-ta3\src\beak\data\MCCAFFERTY23\PROCESSED\EPSG_4326_RES_0_025\CLIPPED_USC\GEOPHYSICS\LAB_Worms_Proximity.tif
+s:\projekte\20230082_darpa_criticalmaas_ta3\bearbeitung\github\beak-ta3\src\beak\data\MCCAFFERTY23\PROCESSED\EPSG_4326_RES_0_025\CLIPPED_USC\GEOPHYSICS\Gravity_Up30km_HGM.tif
+s:\projekte\20230082_darpa_criticalmaas_ta3\bearbeitung\github\beak-ta3\src\beak\data\LAWLEY22\EXPORT\EPSG_4326_RES_0_025\CLIPPED_USC\NUMERICAL\Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity.tif
+s:\projekte\20230082_darpa_criticalmaas_ta3\bearbeitung\github\beak-ta3\src\beak\data\MCCAFFERTY23\PROCESSED\EPSG_4326_RES_0_025\CLIPPED_USC\GEOPHYSICS\MagRTP_HGMDeepSources.tif
+s:\projekte\20230082_darpa_criticalmaas_ta3\bearbeitung\github\beak-ta3\src\beak\data\LAWLEY22\EXPORT\EPSG_4326_RES_0_025\CLIPPED_USC\NUMERICAL\Magnetic_LongWavelength_HGM_Worms_Proximity.tif
+s:\projekte\20230082_darpa_criticalmaas_ta3\bearbeitung\github\beak-ta3\src\beak\data\MCCAFFERTY23\PROCESSED\EPSG_4326_RES_0_025\CLIPPED_USC\GEOPHYSICS\MagRTP_HGM.tif
+s:\projekte\20230082_darpa_criticalmaas_ta3\bearbeitung\github\beak-ta3\src\beak\data\LAWLEY22\EXPORT\EPSG_4326_RES_0_025\CLIPPED_USC\NUMERICAL\Magnetic_HGM_Worms_Proximity.tif

@@ -1,0 +1,1 @@
+s:\projekte\20230082_darpa_criticalmaas_ta3\bearbeitung\github\beak-ta3\src\beak\data\TRAINING_LABELS\MAGMATIC_NICKEL_NAT\MAGMATIC_NICKEL_EPSG_4326_RES_0_025_CLIPPED_USC.tif

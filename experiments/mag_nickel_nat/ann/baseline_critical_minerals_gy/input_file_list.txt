@@ -1,0 +1,4 @@
+s:\projekte\20230082_darpa_criticalmaas_ta3\bearbeitung\github\beak-ta3\src\beak\data\GEOLOGY_LITHOLOGIES\PROCESSED\EPSG_4326_RES_0_025\CLIPPED_USC\UNIFIED\US_Ultramafics.tif
+s:\projekte\20230082_darpa_criticalmaas_ta3\bearbeitung\github\beak-ta3\src\beak\data\GEOPHYSICS_ISOGRAVITY\PROCESSED\EPSG_4326_RES_0_025\CLIPPED_USC\UNIFIED\US_IsostaticGravity_WGS84.tif
+s:\projekte\20230082_darpa_criticalmaas_ta3\bearbeitung\github\beak-ta3\src\beak\data\MCCAFFERTY23\PROCESSED\EPSG_4326_RES_0_025\CLIPPED_USC\GEOPHYSICS\MagRTP_HGM.tif
+s:\projekte\20230082_darpa_criticalmaas_ta3\bearbeitung\github\beak-ta3\src\beak\data\GEOPHYSICS_MAGNETOTELLURICS\PROCESSED\CONUS_2023\EPSG_4326_RES_0_025\CLIPPED_USC\UNIFIED\CONUS_MT2023_30km_cog.tif
