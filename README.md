@@ -8,9 +8,12 @@ The provided code can run on Windows, Mac and Linux machines, if correctly set u
 
 This repository is still in development. Documentation will grow over time.
 
-Last update: **17-01-2023**
+Last update: **03-04-2024**
 
 What's new?
+- SOM integration to main branch
+- Updated utilities
+- Notebooks f models (NN) from hackathon 6 month event
 - MTRI packagetemplate integration
 
 A backup of the **older** version of the main branch can be found [here](https://github.com/DARPA-CRITICALMAAS/beak-ta3/tree/backup_main_2024-01-16_last_before_package_template_integration).
