@@ -13,21 +13,20 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.colors import ListedColormap
-"""
-Define text color to be black/white to give maximum contrast and visibility
-"""
+
 def contrasting_text_color(hex_array):
+    """Define text color to be black/white to give maximum contrast and visibility
+
+    Args:
+        hex_array (array): _description_
+
+    Returns:
+        array: black/white text color
+    """    
     (r, g, b) = (hex_array[0], hex_array[1], hex_array[2])
     return [0,0,0,1] if 1 - (int(r) * 0.299 + int(g) * 0.587 + int(b) * 0.114)< 0.5 else [1,1,1,1] #Photometric/digital ITU BT.709:: 0.2126 R + 0.7152 G + 0.0722 B    or Digital ITU BT.601 (gives more weight to the R and B components):  0.299 R + 0.587 G + 0.114 B
 
 
-
-
-"""
-Function for plotting hexagonal heatmaps.
-Based on an excellent stackoverflow post by Fernando Ferreira 
-https://stackoverflow.com/questions/23726564/matplotlib-regularpolygon-collection-location-on-the-canvas/23811383#23811383
-"""
 
 def plot_hexa(somx,
             somy,
@@ -43,6 +42,28 @@ def plot_hexa(somx,
             ptype='scatter', 
             labelIndex="-2"
             ):
+    """Function for plotting hexagonal heatmaps.
+        Based on an excellent stackoverflow post by Fernando Ferreira 
+        https://stackoverflow.com/questions/23726564/matplotlib-regularpolygon-collection-location-on-the-canvas/23811383#23811383  
+
+    Args:
+        somx (int): size of som grid in x
+        somy (int): size of som grid in y
+        clusters (int): number of clusters
+        grid (dict): dictionary holding x, y and center point information if grid type is hexagonal
+        d_matrix (_type_): array contaning the distances between each neuron
+        annot_ticks (ndarray, optional): annotation ticks. Defaults to None.
+        cluster_tick_labels (ndarray, optional): array with tick labels for clusters
+        w (int, optional): width of the map in inches. Defaults to 1080.
+        dpi (int, optional): dpi. Defaults to 72..
+        title (str, optional): title. Defaults to 'SOM Hit map'.
+        colmap (str, optional): colormap. Defaults to 'jet'.
+        ptype (str, optional): data type. Defaults to 'scatter'.
+        labelIndex (str, optional): label index. Defaults to "-2".
+
+    Returns:
+        Axes: figure
+    """    
     
     discrete_cmap=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=False)
     n_centers = grid['centers']
@@ -151,42 +172,4 @@ def plot_hexa(somx,
     plt.gca().invert_yaxis()
     ax.set_title(title)
 
-    return ax
-
-
-def dash_draw_scatter(geo_data,som_data,palette,cluster_ticks,cluster_tick_labels,title,outputColumn,somx,somy,clusters): 
-    centers=[]     
-    for i in range(0, len(geo_data)):	
-        centers.append([geo_data[i][0],geo_data[i][1]])
-    grid={'centers':np.array(centers), 
-          'x':np.array([len(geo_data)]),
-          'y':np.array([len(geo_data)])}
-    
-    
-    
-    if(outputColumn==0):
-        z=geo_data[:,(4)] 
-    else:
-        z=geo_data[:,int(len(som_data[0])-1+outputColumn)]
-    sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
-    if(clusters>15):
-        mpl.rcParams.update({'font.size': 18})  
-    else:
-        mpl.rcParams.update({'font.size': 30})
-        
-        
-    if(outputColumn==0):
-        ax = plot_hexa(somx,somy,clusters,grid, z,annot_ticks=cluster_ticks,cluster_tick_labels=cluster_tick_labels,title="Clusters",colmap=ListedColormap(palette), ptype='scatter')   
-    else:
-        z = np.ma.array (z, mask=np.isnan(z))
-        cmap = mpl.cm.jet
-        cmap.set_bad('white',1.)
-        ax = plot_hexa(somx,somy,clusters,grid, z,annot_ticks=cluster_ticks,cluster_tick_labels=cluster_tick_labels,title=title,colmap="jet", ptype='scatter')   
-    plt.yticks(rotation=90)
-    plt.yticks(ha='right')
-    plt.yticks(va='bottom')
-    plt.xticks(rotation=0)
-    plt.xticks(ha='left')
-    ax.invert_yaxis()
-    plt.tight_layout()
     return ax

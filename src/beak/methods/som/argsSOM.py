@@ -2,6 +2,8 @@ import os
 import glob
 
 class Args:
+    """Arguments for SOM and k-means clustering
+    """    
     input_file: str            # Input file(*.lrn or list, separated with ",")
     output_folder: str         # Folder to save som dictionary and cluster dictionary
     output_file_somspace: str   # Text file that will contain calculated values: som_x som_y b_data1 b_data2 b_dataN umatrix cluster in geospace
@@ -47,12 +49,14 @@ class Args:
 
     def create_list_from_pattern(self, file_path, file_patterns):
         """Create a list of full file names from files matching the given file_patterns within the file_path
-        :param file_path: The name of the file path for files to be added to the input list.
-        :type filename: str.
-        :param file_patterns: One or more patterns for file names to be added to the input list.
-        :type filename: str.
-        :rtype: list of strings
-        """
+
+        Args:
+            file_path (str): The name of the file path for files to be added to the input list.
+            file_patterns (str): One or more patterns for file names to be added to the input list.
+
+        Returns:
+            LiteralString: list of full file names, separated by ","
+        """        
 
         #-- Lists to store matching files with their corresponding destination paths
         input_list_text = []
@@ -77,7 +81,15 @@ class Args:
         return input_file
     
     def create_list_from_file(self, file_path, file_path_label=""):
+        """create a list of input file names and path
 
+        Args:
+            file_path (str): file path to TXT file holding a list of GeoTIF file paths
+            file_path_label (str, optional): file path to TXT file holding a list of label data. Defaults to "".
+
+        Returns:
+            LiteralString: a list of full file names from files matching the given files in txt file. Separated by ",".
+        """
         # Check if label file exists
         if os.path.exists(file_path_label):
             # Open the label file in read mode

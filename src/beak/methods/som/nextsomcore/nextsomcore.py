@@ -336,6 +336,14 @@ class NxtSomCore(object):
 
 
     def write_geotiff_out(self, output_folder, geodatafile, somdatafile, input_file): 
+        """Write geotiff to file using gdal.
+
+        Args:
+            output_folder (str): folder path where to write geotiff file
+            geodatafile (str): path and name for text file that contains som results in geospace
+            somdatafile (str): path and name for text file that contains som results in somspace
+            input_file (LiteralStringstr): list of input files, separated by komma (only first line is used to get the geotransform and projection information to set output GeoFIT geotransform and projection)
+        """        
         from osgeo import gdal
         import pandas as pd
 

@@ -12,7 +12,15 @@ import os
 import sys
 
 def load_geotiff_files(input_file_list, label_file=""):
-    
+    """Load data and meta data of geotiff files using gdal
+
+    Args:
+        input_file_list (LiteralString): input file paths, separated by komma
+        label_file (LiteralString, optional): label file paths, separated by komma. Defaults to "".
+
+    Returns:
+        dict: dictionary holding the data as a stacked ndarray and meta data such as geo transform, numer of rows and column, no data value, column (data) names
+    """    
     width_0 = None
     height_0 = None
     gt_0 = None
@@ -94,7 +102,14 @@ def load_geotiff_files(input_file_list, label_file=""):
             }   
 
 def delete_rows_with_no_data(geotiff_header):
-    
+    """Delete rows from ndarray that contain noData values. Data and rows count of ndarray is updated and returned as a dictionary with same format as input dictionary.
+
+    Args:
+        geotiff_header (dict): dictionary holding the data as a stacked ndarray and meta data such as geo transform, numer of rows and column, no data value, column (data) names
+
+    Returns:
+        dict: dictionary holding the data as a stacked ndarray and meta data such as geo transform, numer of rows and column, no data value, column (data) names
+    """    
     data = geotiff_header['data']
     #originaldata = geotiff_header['originaldata']
     #noDataValue = geotiff_header['noDataValue']
@@ -114,6 +129,14 @@ def delete_rows_with_no_data(geotiff_header):
             }
 
 def read_geotiff_coordinate_columns(geotiff_header):
+    """Read coordinate columns from dictionary
+
+    Args:
+        geotiff_header (dict): dictionary holding the data as a ndarray and meta data, such as numer of rows and column, column (data) names, file type
+
+    Returns:
+        dict: dictionary holding coordinates as a ndarray, column names and format
+    """    
     coordinates_x=[]
     coordinates_y=[]
     coordinates_deleted = []         
@@ -142,6 +165,14 @@ def read_geotiff_coordinate_columns(geotiff_header):
     return {'data': coordinates, 'data_deleted': coordinates_deleted, 'data_all':coordinates_all,'colnames': colnames, 'fmt': '%f %f'} 
 
 def read_geotiff_data_columns(geotiff_header):
+    """Read data columns from dictionary
+
+    Args:
+        geotiff_header (dict): dictionary holding the data as a stacked ndarray and meta data such as geo transform, numer of rows and column, no data value, column (data) names
+
+    Returns:
+        dict: dictionary holding data columns as a ndarray, column names and format
+    """    
     return {'data': geotiff_header['data'], 'colnames': geotiff_header['colnames'], 'fmt': ('%f ' * geotiff_header['cols']).rstrip()} 
 
 
