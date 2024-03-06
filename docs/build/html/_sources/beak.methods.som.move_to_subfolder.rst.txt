@@ -1,0 +1,8 @@
+beak.methods.som.move\_to\_subfolder module
+===========================================
+
+.. automodule:: beak.methods.som.move_to_subfolder
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

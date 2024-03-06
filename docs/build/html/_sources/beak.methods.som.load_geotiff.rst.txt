@@ -1,0 +1,8 @@
+beak.methods.som.load\_geotiff module
+=====================================
+
+.. automodule:: beak.methods.som.load_geotiff
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

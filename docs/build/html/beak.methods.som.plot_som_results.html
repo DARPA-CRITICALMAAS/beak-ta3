@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>beak.methods.som.plot_som_results module &mdash; beak-ta3 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=29a6c3e3"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="beak.methods.som.plotting_functions module" href="beak.methods.som.plotting_functions.html" />
+    <link rel="prev" title="beak.methods.som.move_to_subfolder module" href="beak.methods.som.move_to_subfolder.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            beak-ta3
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="beak.html">beak package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="beak.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="beak.data.html">beak.data package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="beak.methods.html">beak.methods package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="beak.methods.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="beak.utilities.html">beak.utilities package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="beak.utilities.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">beak-ta3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="beak.html">beak package</a></li>
+          <li class="breadcrumb-item"><a href="beak.methods.html">beak.methods package</a></li>
+          <li class="breadcrumb-item"><a href="beak.methods.som.html">beak.methods.som package</a></li>
+      <li class="breadcrumb-item active">beak.methods.som.plot_som_results module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/beak.methods.som.plot_som_results.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-beak.methods.som.plot_som_results">
+<span id="beak-methods-som-plot-som-results-module"></span><h1>beak.methods.som.plot_som_results module<a class="headerlink" href="#module-beak.methods.som.plot_som_results" title="Link to this heading"></a></h1>
+<p>Created on Thu Mar 14 14:54:21 2019</p>
+<p>&#64;author: Sakari Hautala, Joonas Haikonen</p>
+<p>Python script to visualize SOM calculation results &amp; original data. Draws heatmaps based on som and geospace results, and boxplots of data distribution per cluster</p>
+<p>Inputs:
+1) Somspace results file
+2) Som x dimension
+3) Som y dimension
+4) Geospace results file
+5) Input file used for som calculation
+6) Index of easting column
+7) Index of northing column
+8) Index of label column
+8) Output folder
+9) Grid type (rectangular or hexagonal)
+10) Redraw (boolean) - whether to calculate all plots or only those that deal with clustering</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.methods.som.plot_som_results.run_plotting_script">
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">run_plotting_script</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argsP</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#run_plotting_script"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.run_plotting_script" title="Link to this definition"></a></dt>
+<dd><p>Run the basic set up of figures and plot som space results, geo space results, draw som clusters, plot Davies-Bouldin index, cluster hit count, U-matrix and box-plots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argsP</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary holding agruments: file path to som results, size of som space, input file string, grid type, no data value, working directory</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.methods.som.plot_som_results.basic_setup">
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">basic_setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outsomfile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noDataValue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aOutgeofile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#basic_setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.basic_setup" title="Link to this definition"></a></dt>
+<dd><p>Load input parameters &amp; do basic setup, Initialize variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>outsomfile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – somspace output text file</p></li>
+<li><p><strong>som_x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – som x dimension</p></li>
+<li><p><strong>som_y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – som y dimension</p></li>
+<li><p><strong>input_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Input file (list)</p></li>
+<li><p><strong>working_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – directory where SOM output dictionary is saved</p></li>
+<li><p><strong>grid_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – grid type (rectangular or hexagonal)</p></li>
+<li><p><strong>noDataValue</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – noData value</p></li>
+<li><p><strong>aOutgeofile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – som geospace results txt file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionary containing initialized variables</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.methods.som.plot_som_results.plot_geospace_results_grid">
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">plot_geospace_results_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geo_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geo_headers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noDataValue</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#plot_geospace_results_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.plot_geospace_results_grid" title="Link to this definition"></a></dt>
+<dd><p>Plot geo space results &amp; q-error if type is grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geo_data</strong> (<em>ndarray</em>) – array holding geo space results</p></li>
+<li><p><strong>geo_headers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>]</em>) – list of strings holding names of feature layers to set figure titles</p></li>
+<li><p><strong>som_data</strong> (<em>ndarray</em>) – array holding som space results</p></li>
+<li><p><strong>working_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – working directory where to save figures</p></li>
+<li><p><strong>noDataValue</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – no data value in geo space som results</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.methods.som.plot_som_results.plot_geospace_results_scatter">
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">plot_geospace_results_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geo_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geo_headers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#plot_geospace_results_scatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.plot_geospace_results_scatter" title="Link to this definition"></a></dt>
+<dd><p>Plot geo space results &amp; q-error if type is scatter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geo_data</strong> (<em>ndarray</em>) – array holding geo space results</p></li>
+<li><p><strong>geo_headers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>]</em>) – one-dimensional array of strings holding names of feature layers to set figure titles</p></li>
+<li><p><strong>som_data</strong> (<em>ndarray</em>) – array holding som space results</p></li>
+<li><p><strong>working_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – working directory where to save figures</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.methods.som.plot_som_results.draw_som_results">
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">draw_som_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argsP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annot_ticks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_headers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_tick_labels</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#draw_som_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.draw_som_results" title="Link to this definition"></a></dt>
+<dd><p>Draw results in som space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>argsP</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary holding agruments: file path to som results, size of som space, input file string, grid type, no data value, working directory</p></li>
+<li><p><strong>som_data</strong> (<em>ndarray</em>) – array holding som space results</p></li>
+<li><p><strong>som_table</strong> (<em>ndarray</em>) – empty som_x*som_y sized table for som plots</p></li>
+<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – dictionary holding x, y and center point information if grid type is hexagonal</p></li>
+<li><p><strong>annot_ticks</strong> (<em>ndarray</em>) – annotation ticks for labeled data</p></li>
+<li><p><strong>som_headers</strong> (<em>Series</em>) – one-dimensional array of strings in header line of som reslult txt file naming the containing data colums</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.methods.som.plot_som_results.draw_umatrix">
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">draw_umatrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">som_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annot_ticks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_headers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#draw_umatrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.draw_umatrix" title="Link to this definition"></a></dt>
+<dd><p>Draw U-matrix in geo space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>som_data</strong> (<em>ndarray</em>) – array holding som space results</p></li>
+<li><p><strong>som_table</strong> (<em>ndarray</em>) – empty som_x*som_y sized table for som plots</p></li>
+<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – dictionary holding x, y and center point information if grid type is hexagonal</p></li>
+<li><p><strong>grid_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – type of grid (rectangular or hexagonal)</p></li>
+<li><p><strong>annot_ticks</strong> (<em>ndarray</em>) – annotation ticks for labeled data</p></li>
+<li><p><strong>som_headers</strong> (<em>Series</em>) – one-dimensional array of strings in header line of som reslult txt file naming the containing data colums</p></li>
+<li><p><strong>working_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – working directory where to save figures</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.methods.som.plot_som_results.draw_som_clusters">
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">draw_som_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argsP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annot_ticks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_headers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discrete_cmap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discrete_cmap_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_ticks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_tick_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelIndex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annot_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annot_strings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#draw_som_clusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.draw_som_clusters" title="Link to this definition"></a></dt>
+<dd><p>Draw Som Cluster plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>argsP</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary holding agruments: file path to som results, size of som space, input file string, grid type, no data value, working directory</p></li>
+<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – dictionary holding x, y and center point information if grid type is hexagonal</p></li>
+<li><p><strong>som_data</strong> (<em>ndarray</em>) – array holding som space results</p></li>
+<li><p><strong>som_table</strong> (<em>ndarray</em>) – empty som_x*som_y sized table for som plots</p></li>
+<li><p><strong>annot_ticks</strong> (<em>ndarray</em>) – annotation ticks for labeled data</p></li>
+<li><p><strong>som_headers</strong> (<em>Series</em>) – one-dimensional array of strings in header line of som reslult txt file, names for the containing data colums</p></li>
+<li><p><strong>discrete_cmap</strong> (<em>_RGBColorPalette</em>) – color palette for cluster plot if grid type is rectangular</p></li>
+<li><p><strong>discrete_cmap_2</strong> (<em>ListedColormap</em>) – color palette for cluster plot if grid type is hexagonal</p></li>
+<li><p><strong>clusters</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – number of clusters</p></li>
+<li><p><strong>cluster_ticks</strong> (<em>ndarray</em>) – array with cluster ticks</p></li>
+<li><p><strong>cluster_tick_labels</strong> (<em>ndarray</em>) – array with tick labels for clusters</p></li>
+<li><p><strong>labelIndex</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – laben index</p></li>
+<li><p><strong>annot_strings</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – annotation strings</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.methods.som.plot_som_results.plot_geospace_clusters_grid">
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">plot_geospace_clusters_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geo_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discrete_cmap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_ticks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_tick_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#plot_geospace_clusters_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.plot_geospace_clusters_grid" title="Link to this definition"></a></dt>
+<dd><p>Plot geospace clusters, if there is more than 1 cluster and input type is grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geo_data</strong> (<em>ndarray</em>) – array holding geo space results</p></li>
+<li><p><strong>discrete_cmap</strong> (<em>_RGBColorPalette</em>) – color palette for cluster plot if grid type is rectangular</p></li>
+<li><p><strong>clusters</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – number of clusters</p></li>
+<li><p><strong>cluster_ticks</strong> (<em>ndarray</em>) – array with cluster ticks</p></li>
+<li><p><strong>cluster_tick_labels</strong> (<em>ndarray</em>) – array with tick labels for clusters</p></li>
+<li><p><strong>working_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – working directory where to save figures</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.methods.som.plot_som_results.plot_geospace_clusters_scatter">
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">plot_geospace_clusters_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geo_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discrete_cmap_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#plot_geospace_clusters_scatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.plot_geospace_clusters_scatter" title="Link to this definition"></a></dt>
+<dd><p>Plot geospace clusters if input type is scatter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>geo_data</strong> (<em>ndarray</em>) – array holding geo space results</p></li>
+<li><p><strong>discrete_cmap_2</strong> (<em>ListedColormap</em>) – color palette for cluster plot if input type is scatter</p></li>
+<li><p><strong>working_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – working directory where to save figures</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.methods.som.plot_som_results.draw_boxplots">
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">draw_boxplots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">som_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_headers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discrete_cmap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_tick_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#draw_boxplots"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.draw_boxplots" title="Link to this definition"></a></dt>
+<dd><p>Plot boxplots using som data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>som_data</strong> (<em>ndarray</em>) – array holding som space results</p></li>
+<li><p><strong>som_headers</strong> (<em>Series</em>) – one-dimensional array of strings in header line of som reslult txt file, names for the containing data colums</p></li>
+<li><p><strong>discrete_cmap</strong> (<em>_RGBColorPalette</em>) – color palette for cluster plot if grid type is rectangular</p></li>
+<li><p><strong>cluster_tick_labels</strong> (<em>ndarray</em>) – array with tick labels for clusters</p></li>
+<li><p><strong>working_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – working directory where to save figures</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.methods.som.plot_som_results.draw_number_of_hits">
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">draw_number_of_hits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argsP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_tick_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annot_ticks</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#draw_number_of_hits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.draw_number_of_hits" title="Link to this definition"></a></dt>
+<dd><p>Draw number of hits for each som cell</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>argsP</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary holding agruments: file path to som results, size of som space, input file string, grid type, no data value, working directory</p></li>
+<li><p><strong>som_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – dictionary holding som results</p></li>
+<li><p><strong>som_data</strong> (<em>ndarray</em>) – array holding som space results</p></li>
+<li><p><strong>clusters</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – number of clusters</p></li>
+<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – dictionary holding x, y and center point information if grid type is hexagonal</p></li>
+<li><p><strong>cluster_tick_labels</strong> (<em>ndarray</em>) – array with tick labels for clusters</p></li>
+<li><p><strong>annot_ticks</strong> (<em>ndarray</em>) – annotation ticks for labeled data</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.methods.som.plot_som_results.load_cluster_dictionary">
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">load_cluster_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#load_cluster_dictionary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.load_cluster_dictionary" title="Link to this definition"></a></dt>
+<dd><p>Load the clustering dictionary from the specified file path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The path to the ‘cluster.dictionary’ file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List containing clustering information.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.methods.som.plot_som_results.plot_davies_bouldin">
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">plot_davies_bouldin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cluster_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#plot_davies_bouldin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.plot_davies_bouldin" title="Link to this definition"></a></dt>
+<dd><p>Plot the number of clusters against the Davies-Bouldin Index and save the plot to a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cluster_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a>) – List containing clustering information.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The path to save the plot as a PNG file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.methods.som.plot_som_results.plot_cluster_hit_count">
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">plot_cluster_hit_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">txtFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#plot_cluster_hit_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.plot_cluster_hit_count" title="Link to this definition"></a></dt>
+<dd><p>Draw cluster_hit_count</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>txtFile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – txt file path holding cluster numbers and hit count</p></li>
+<li><p><strong>output_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – destination folder where to save figure</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="beak.methods.som.move_to_subfolder.html" class="btn btn-neutral float-left" title="beak.methods.som.move_to_subfolder module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="beak.methods.som.plotting_functions.html" class="btn btn-neutral float-right" title="beak.methods.som.plotting_functions module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

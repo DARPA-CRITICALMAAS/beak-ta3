@@ -1,0 +1,20 @@
+beak.methods.som.nextsomcore package
+====================================
+
+.. automodule:: beak.methods.som.nextsomcore
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+Submodules
+----------
+
+.. toctree::
+   :includehidden:
+   :maxdepth: 4
+   :glob:
+
+   beak.methods.som.nextsomcore.loadfile
+   beak.methods.som.nextsomcore.lrnfile
+   beak.methods.som.nextsomcore.nextsomcore

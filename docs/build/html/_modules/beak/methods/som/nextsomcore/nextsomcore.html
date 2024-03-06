@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>beak.methods.som.nextsomcore.nextsomcore &mdash; beak-ta3 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=29a6c3e3"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            beak-ta3
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../beak.html">beak package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../beak.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../beak.data.html">beak.data package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../beak.methods.html">beak.methods package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../beak.methods.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../beak.utilities.html">beak.utilities package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../beak.utilities.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">beak-ta3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">beak.methods.som.nextsomcore.nextsomcore</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for beak.methods.som.nextsomcore.nextsomcore</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The module contains the NxtSomCore class that is used to train self-organizing</span>
+<span class="sd">maps and write results to the disk. NxtSomCore depends on somoclu package written</span>
+<span class="sd">by Peter Wittek to perform actual SOM calculations.</span>
+
+<span class="sd">@author: Janne Kallunki, Sakari Hautala</span>
+<span class="sd">modyfied by Ina Storch, 2024</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">KMeans</span>
+    <span class="kn">import</span> <span class="nn">somoclu</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="c1">#from .lrnfile import load_lrn_file, read_coordidate_columns, read_data_columns</span>
+    <span class="kn">from</span> <span class="nn">.loadfile</span> <span class="kn">import</span> <span class="n">load_input_file</span><span class="p">,</span> <span class="n">read_coordinate_columns</span><span class="p">,</span> <span class="n">read_data_columns</span>
+    <span class="kn">import</span> <span class="nn">heapq</span>
+    <span class="kn">import</span> <span class="nn">pickle</span>
+    <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+    <span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ET</span>
+    <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">davies_bouldin_score</span>
+    <span class="kn">from</span> <span class="nn">decimal</span> <span class="kn">import</span> <span class="n">Decimal</span>
+    <span class="kn">import</span> <span class="nn">os.path</span>
+    <span class="c1">#import ast</span>
+<div class="viewcode-block" id="NxtSomCore">
+<a class="viewcode-back" href="../../../../../beak.methods.som.nextsomcore.nextsomcore.html#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore">[docs]</a>
+<span class="k">class</span> <span class="nc">NxtSomCore</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for training self-organizing map and saving results.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="NxtSomCore.__init__">
+<a class="viewcode-back" href="../../../../../beak.methods.som.nextsomcore.nextsomcore.html#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore.__init__">[docs]</a>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for the class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">som</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+
+<div class="viewcode-block" id="NxtSomCore.load_data">
+<a class="viewcode-back" href="../../../../../beak.methods.som.nextsomcore.nextsomcore.html#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore.load_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_file</span><span class="p">,</span> <span class="n">label_file</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load and return the input data as a dict containing numpy array and metadata</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            input_file (str): The name of the file to be loaded.</span>
+<span class="sd">            label_file (str, optional): The name of the label file to be loaded. Defaults to &quot;&quot;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary holding de model data as a ndarray and meta data such as numer of rows and column, column (data) names, file type. </span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+
+        <span class="k">return</span> <span class="n">load_input_file</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">label_file</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NxtSomCore.train">
+<a class="viewcode-back" href="../../../../../beak.methods.som.nextsomcore.nextsomcore.html#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore.train">[docs]</a>
+    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">som_x</span><span class="p">,</span> <span class="n">som_y</span> <span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Train the map and return results as a dict.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (nparray): Training data used in SOM.</span>
+<span class="sd">            som_x (int): X-size of the map.</span>
+<span class="sd">            som_y (int): Y-size of the map.</span>
+<span class="sd">            epochs (int, optional):  Number of rounds the training is performed. Defaults to 10.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary holding SOM results, umatrix and meta data like number of columns and rows.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">som</span> <span class="o">=</span> <span class="n">somoclu</span><span class="o">.</span><span class="n">Somoclu</span><span class="p">(</span><span class="n">som_x</span><span class="p">,</span> <span class="n">som_y</span><span class="p">,</span> 
+            <span class="n">kerneltype</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;kerneltype&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> 
+  			<span class="n">verbose</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;verbose&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+  			<span class="n">neighborhood</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;neighborhood&quot;</span><span class="p">,</span> <span class="s2">&quot;gaussian&quot;</span><span class="p">),</span> 
+  			<span class="n">std_coeff</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;std_coeff&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span>  
+            <span class="n">maptype</span><span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;maptype&quot;</span><span class="p">,</span> <span class="s2">&quot;toroid&quot;</span><span class="p">),</span> 
+            <span class="n">initialcodebook</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;initialcodebook&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> 
+            <span class="n">initialization</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;initialization&quot;</span><span class="p">,</span> <span class="s1">&#39;random&#39;</span><span class="p">),</span> 
+            <span class="n">gridtype</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;gridtype&quot;</span><span class="p">,</span><span class="s2">&quot;rectangular&quot;</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">som</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span>
+			<span class="n">radius0</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;radius0&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+			<span class="n">radiusN</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;radiusN&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+			<span class="n">radiuscooling</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;radiuscooling&quot;</span><span class="p">,</span> <span class="s2">&quot;linear&quot;</span><span class="p">),</span>
+			<span class="n">scale0</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;scale0&quot;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">),</span>
+			<span class="n">scaleN</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;scaleN&quot;</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">),</span>
+			<span class="n">scalecooling</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;scalecooling&quot;</span><span class="p">,</span> <span class="s2">&quot;linear&quot;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;codebook&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">som</span><span class="o">.</span><span class="n">codebook</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="s1">&#39;bmus&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">som</span><span class="o">.</span><span class="n">bmus</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="s1">&#39;umatrix&#39;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">som</span><span class="o">.</span><span class="n">umatrix</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="s1">&#39;n_columns&#39;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">som</span><span class="o">.</span><span class="n">_n_columns</span><span class="p">,</span>
+            <span class="s1">&#39;n_rows&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">som</span><span class="o">.</span><span class="n">_n_rows</span><span class="p">,</span>
+            <span class="s1">&#39;n_dim&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">som</span><span class="o">.</span><span class="n">n_dim</span><span class="p">,</span>
+            <span class="s1">&#39;clusters&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="NxtSomCore.cluster">
+<a class="viewcode-back" href="../../../../../beak.methods.som.nextsomcore.nextsomcore.html#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore.cluster">[docs]</a>
+    <span class="k">def</span> <span class="nf">cluster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">som</span><span class="p">,</span> <span class="n">cluster_count</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cluster the codebook and return clustering results as a 2d numpy array. Code taken from</span>
+<span class="sd">         somoclu&#39;s train.py and changed to operate on input parameters only</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            som (dict): SOM-related data obtained from training(codebook, dimensions, etc..)</span>
+<span class="sd">            cluster_count (int): Number of clusters used in clustering</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            nparray: Cluster result.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+
+        <span class="n">algorithm</span> <span class="o">=</span> <span class="n">KMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">cluster_count</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span> <span class="c1"># n_init=&#39;auto&#39;</span>
+        <span class="n">original_shape</span> <span class="o">=</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;codebook&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">som</span><span class="p">[</span><span class="s1">&#39;codebook&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">som</span><span class="p">[</span><span class="s1">&#39;n_columns&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;n_rows&#39;</span><span class="p">],</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;n_dim&#39;</span><span class="p">])</span>
+        <span class="n">linear_clusters</span> <span class="o">=</span> <span class="n">algorithm</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">som</span><span class="p">[</span><span class="s1">&#39;codebook&#39;</span><span class="p">])</span>
+        <span class="n">som</span><span class="p">[</span><span class="s1">&#39;codebook&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">original_shape</span>
+        <span class="n">clusters</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">som</span><span class="p">[</span><span class="s1">&#39;n_rows&#39;</span><span class="p">],</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;n_columns&#39;</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">linear_clusters</span><span class="p">):</span>
+            <span class="n">clusters</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;n_columns&#39;</span><span class="p">],</span> <span class="n">i</span> <span class="o">%</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;n_columns&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">c</span>
+        <span class="n">som</span><span class="p">[</span><span class="s1">&#39;clusters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clusters</span>
+        <span class="k">return</span> <span class="n">clusters</span></div>
+
+
+
+<div class="viewcode-block" id="NxtSomCore.clusters">
+<a class="viewcode-back" href="../../../../../beak.methods.som.nextsomcore.nextsomcore.html#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore.clusters">[docs]</a>
+    <span class="k">def</span> <span class="nf">clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">som</span><span class="p">,</span> <span class="n">cluster_min</span><span class="p">,</span> <span class="n">cluster_max</span><span class="p">,</span> <span class="n">cluster_init</span><span class="p">,</span><span class="n">working_dir</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cluster the codebook and return clustering results as a 2d numpy array. Code taken from</span>
+<span class="sd">         somoclu&#39;s train.py and changed to operate on input parameters only.</span>
+<span class="sd">         Calculates clusters multiple times and selects the best result by lowest Davies-Bouldin score. </span>
+<span class="sd">         Returns the best clustering, and writes the best clustering results for each number of clusters to a binary file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            som (dict): SOM-related data obtained from training(codebook, dimensions, etc..)</span>
+<span class="sd">            cluster_min (int): Minimum number of clusters used in clustering</span>
+<span class="sd">            cluster_max (int): Maximum number of clusters used in clustering</span>
+<span class="sd">            cluster_init (int): Number of initializations used in clustering</span>
+<span class="sd">            working_dir (str): Destination folder to be used for saving the result.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            nparray: Cluster result with smalles db-score.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+             
+        <span class="nb">min</span><span class="o">=</span><span class="mi">2</span> 
+        <span class="n">algorithm</span> <span class="o">=</span> <span class="n">KMeans</span><span class="p">()</span>
+        <span class="n">original_shape</span> <span class="o">=</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;codebook&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>       
+        <span class="k">if</span> <span class="p">(</span><span class="n">cluster_init</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">cluster_init</span><span class="o">=</span><span class="mi">1</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">cluster_min</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">):</span>
+            <span class="n">cluster_min</span><span class="o">=</span><span class="mi">2</span>   
+        <span class="k">if</span><span class="p">(</span><span class="n">cluster_max</span><span class="o">&lt;</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">cluster_max</span><span class="o">=</span><span class="mi">3</span>
+        <span class="n">cluster_list</span><span class="o">=</span><span class="p">[]</span>    
+        <span class="n">total</span><span class="o">=</span><span class="p">(</span><span class="n">cluster_max</span><span class="o">-</span><span class="n">cluster_min</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">cluster_init</span> 
+        <span class="n">value</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">total</span><span class="o">&gt;</span><span class="mi">20</span><span class="p">):</span>
+            <span class="n">interval</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">total</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">interval</span><span class="o">=</span><span class="mi">1</span>      
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Clustering progress:&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cluster_min</span><span class="p">,</span> <span class="n">cluster_max</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>                                   
+            <span class="nb">min</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+            <span class="n">min_dict</span><span class="o">=</span><span class="p">{}</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cluster_init</span><span class="p">):</span>
+                <span class="n">algorithm</span> <span class="o">=</span> <span class="n">KMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">a</span><span class="p">,</span><span class="n">init</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+                <span class="n">som</span><span class="p">[</span><span class="s1">&#39;codebook&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">som</span><span class="p">[</span><span class="s1">&#39;n_columns&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;n_rows&#39;</span><span class="p">],</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;n_dim&#39;</span><span class="p">])</span>  
+                <span class="n">linear_clusters</span><span class="o">=</span><span class="n">algorithm</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">som</span><span class="p">[</span><span class="s1">&#39;codebook&#39;</span><span class="p">])</span>       
+                <span class="n">current</span><span class="o">=</span><span class="n">davies_bouldin_score</span><span class="p">(</span><span class="n">som</span><span class="p">[</span><span class="s1">&#39;codebook&#39;</span><span class="p">],</span> <span class="n">linear_clusters</span><span class="p">)</span>
+                <span class="n">clusters</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">som</span><span class="p">[</span><span class="s1">&#39;n_rows&#39;</span><span class="p">],</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;n_columns&#39;</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">linear_clusters</span><span class="p">):</span>
+                    <span class="n">clusters</span><span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;n_columns&#39;</span><span class="p">],</span> <span class="n">i</span> <span class="o">%</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;n_columns&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">c</span>
+                <span class="n">som</span><span class="p">[</span><span class="s1">&#39;codebook&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">original_shape</span>
+                <span class="nb">dict</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;db_score&#39;</span><span class="p">:</span> <span class="n">current</span><span class="p">,</span> <span class="s1">&#39;n_clusters&#39;</span> <span class="p">:</span> <span class="n">a</span><span class="p">,</span> <span class="s1">&#39;cluster&#39;</span> <span class="p">:</span> <span class="n">clusters</span><span class="p">}</span>
+                
+                <span class="n">value</span><span class="o">=</span><span class="p">((</span><span class="n">a</span><span class="o">-</span><span class="n">cluster_min</span><span class="p">)</span><span class="o">*</span><span class="n">cluster_init</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">value</span><span class="o">%</span><span class="n">interval</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">((</span><span class="n">value</span><span class="o">/</span><span class="n">total</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="p">))</span><span class="o">+</span><span class="s2">&quot;%&quot;</span><span class="p">)</span>
+                <span class="k">if</span><span class="p">(</span><span class="nb">min</span><span class="o">&gt;</span><span class="n">current</span><span class="p">):</span>
+                    <span class="nb">min</span><span class="o">=</span><span class="n">current</span>
+                    <span class="c1">#min_clusters=clusters</span>
+                    <span class="n">min_dict</span><span class="o">=</span><span class="nb">dict</span>
+            <span class="n">cluster_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">min_dict</span><span class="p">)</span>
+        <span class="n">smallest_3</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">smallest_3</span><span class="o">=</span><span class="n">heapq</span><span class="o">.</span><span class="n">nsmallest</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">cluster_list</span><span class="p">,</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">k</span><span class="p">[</span><span class="s1">&#39;db_score&#39;</span><span class="p">])</span>    
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">working_dir</span><span class="o">+</span><span class="s1">&#39;/cluster.dictionary&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cluster_dictionary_file</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">cluster_list</span><span class="p">,</span> <span class="n">cluster_dictionary_file</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;100% Clustering completed.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">smallest_3</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;cluster&quot;</span><span class="p">]</span>     </div>
+
+
+
+<div class="viewcode-block" id="NxtSomCore.save_geospace_result">
+<a class="viewcode-back" href="../../../../../beak.methods.som.nextsomcore.nextsomcore.html#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore.save_geospace_result">[docs]</a>
+    <span class="k">def</span> <span class="nf">save_geospace_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">som</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">,</span> <span class="n">input_file</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelIndex</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write SOM results with header line and input columns to disk in geospace.</span>
+
+<span class="sd">        Output file columns:</span>
+<span class="sd">        X, Y, Z - Coordinates in the input file (if present in input file)</span>
+<span class="sd">        data1, data2, dataN, ... - Original columns in input file</span>
+<span class="sd">        som_x, som_y - X Y indices in the map</span>
+<span class="sd">        cluster - Cluster group number</span>
+<span class="sd">        b_data1, bdata2, bdataN, ... - SOM results</span>
+<span class="sd">        q_error= Q-error, difference between som results and original columns</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            output_file (str): Filename to be used for saving the result.</span>
+<span class="sd">            header (dict): Dictionary holding header data ((load_data(...)).</span>
+<span class="sd">            som (dict): Dictionary holding SOM results (train(...)).</span>
+<span class="sd">            output_folder (str): Destination folder to be used for saving the result.</span>
+<span class="sd">            input_file (LiteralStringstr): list of input files, separated by komma (only first line is used to get the geotransform and projection information to set output GeoFIT geotransform and projection)</span>
+<span class="sd">            normalized (bool, optional): Whether data is normalized or not. Defaults to False.</span>
+<span class="sd">            labelIndex (bool, optional): Whether input data has label data column. Defaults to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        
+        <span class="n">coord_cols</span> <span class="o">=</span> <span class="n">read_coordinate_columns</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="n">data_cols</span> <span class="o">=</span> <span class="n">read_data_columns</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="n">som_cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_som_cols_geospace</span><span class="p">(</span><span class="n">som</span><span class="p">,</span> <span class="n">data_cols</span><span class="p">[</span><span class="s1">&#39;colnames&#39;</span><span class="p">])</span>   
+
+        <span class="n">q_cols</span> <span class="o">=</span> <span class="n">som_cols</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][:,</span><span class="mi">3</span><span class="p">:]</span> <span class="o">-</span> <span class="n">data_cols</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="c1">#calculate q error</span>
+        <span class="n">q_error</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">q_cols</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>               <span class="c1">#calculate q error     </span>
+        <span class="n">mean_q_error</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">q_error</span><span class="p">)</span>                       <span class="c1">#calculate mean q error</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_folder</span> <span class="o">+</span> <span class="s2">&quot;/RunStats.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;a+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>      <span class="c1">#write mean q error to runstats file</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Quantization error: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">mean_q_error</span><span class="p">))</span>
+
+        <span class="n">xml_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output_folder</span><span class="o">+</span><span class="s2">&quot;/RunStats.xml&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">xml_file</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="n">tree</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">xml_file</span><span class="p">)</span>
+            <span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+            <span class="n">q_error_mean</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;q_error&quot;</span><span class="p">)</span>
+            <span class="n">q_error_mean</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mean_q_error</span><span class="p">)</span>
+            <span class="n">root</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">q_error_mean</span><span class="p">)</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">xml_file</span><span class="p">)</span>
+        
+        <span class="n">header_line</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">coord_cols</span><span class="p">[</span><span class="s1">&#39;colnames&#39;</span><span class="p">]),</span>
+										<span class="nb">str</span><span class="p">(</span><span class="n">som_cols</span><span class="p">[</span><span class="s1">&#39;colnames&#39;</span><span class="p">]),</span>
+										<span class="nb">str</span><span class="p">(</span><span class="n">data_cols</span><span class="p">[</span><span class="s1">&#39;colnames&#39;</span><span class="p">]),</span><span class="s1">&#39;q_error&#39;</span>
+                                        <span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;]&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">normalized</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span><span class="p">:</span>
+            <span class="n">data_cols</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_cols</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+            <span class="n">tree</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">output_folder</span> <span class="o">+</span> <span class="s2">&quot;/DataStats.xml&quot;</span><span class="p">)</span>
+            <span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_cols</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])):</span>
+                <span class="n">maxD</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">data_cols</span><span class="p">[</span><span class="s2">&quot;colnames&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;max&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                <span class="n">minD</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">data_cols</span><span class="p">[</span><span class="s2">&quot;colnames&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;min&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                <span class="n">minN</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">data_cols</span><span class="p">[</span><span class="s2">&quot;colnames&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;scaleMin&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">))</span>
+                <span class="n">maxN</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">data_cols</span><span class="p">[</span><span class="s2">&quot;colnames&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;scaleMax&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_cols</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">])):</span>
+                    <span class="n">N</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">data_cols</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+                    <span class="n">data_cols</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">maxD</span> <span class="o">-</span> <span class="n">minD</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">N</span> <span class="o">-</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">minN</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="n">maxN</span><span class="p">)</span> <span class="o">-</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">minN</span><span class="p">))</span> <span class="o">+</span> <span class="n">minD</span>
+                    <span class="n">N</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">som_cols</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+                    <span class="n">som_cols</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">maxD</span> <span class="o">-</span> <span class="n">minD</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">N</span> <span class="o">-</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">minN</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="n">maxN</span><span class="p">)</span> <span class="o">-</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">minN</span><span class="p">))</span> <span class="o">+</span> <span class="n">minD</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;         combine data colums for output geo file (for large data arrays memory usage might be a concern)&quot;</span><span class="p">)</span>
+
+        <span class="n">combined_cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">coord_cols</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">som_cols</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">data_cols</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">q_error</span><span class="p">]</span>     
+        <span class="n">combined_cols_deleted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">coord_cols</span><span class="p">[</span><span class="s1">&#39;data_deleted&#39;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">coord_cols</span><span class="p">[</span><span class="s1">&#39;data_deleted&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">combined_cols</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)]</span>
+
+        <span class="c1"># Join the arrays</span>
+        <span class="n">final_combined_cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">combined_cols</span><span class="p">,</span> <span class="n">combined_cols_deleted</span><span class="p">))</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;         savetxt&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">labelIndex</span><span class="o">==</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span>
+                <span class="n">input_file</span><span class="p">,</span> 
+                <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;str&#39;</span><span class="p">,</span>
+                <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="n">skiprows</span><span class="o">=</span><span class="mi">3</span>
+            <span class="p">)</span>
+            <span class="n">labelcol</span><span class="o">=</span><span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;label&#39;</span><span class="p">):</span>
+                    <span class="n">labelcol</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">combined_cols</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">combined_cols</span><span class="p">,</span><span class="n">labelcol</span><span class="p">]</span>
+            <span class="n">combined_cols_deleted</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">combined_cols_deleted</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">coord_cols</span><span class="p">[</span><span class="s1">&#39;data_deleted&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)]</span>
+            <span class="n">final_combined_cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">combined_cols</span><span class="p">,</span> <span class="n">combined_cols_deleted</span><span class="p">))</span>
+            <span class="n">header_line</span><span class="o">=</span> <span class="n">header_line</span><span class="o">+</span><span class="s2">&quot; label&quot;</span>            
+            <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="n">final_combined_cols</span><span class="p">,</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">header_line</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">comments</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">output_file</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;csv&quot;</span><span class="p">,</span> <span class="n">final_combined_cols</span><span class="p">,</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">header_line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span><span class="s2">&quot;,&quot;</span><span class="p">),</span><span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">comments</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="c1">#np.savetxt(output_file[:-3] + &quot;csv&quot;, final_combined_cols, fmt=header_line.replace(&quot; &quot;, &quot;,&quot;), delimiter=&#39;,&#39;, comments=&#39;&#39;)</span>
+        <span class="k">else</span><span class="p">:</span>            
+            <span class="n">fmt_combined</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">coord_cols</span><span class="p">[</span><span class="s1">&#39;fmt&#39;</span><span class="p">],</span> <span class="n">som_cols</span><span class="p">[</span><span class="s1">&#39;fmt&#39;</span><span class="p">],</span> <span class="n">data_cols</span><span class="p">[</span><span class="s1">&#39;fmt&#39;</span><span class="p">],</span> <span class="s1">&#39;</span><span class="si">%.5f</span><span class="s1">&#39;</span><span class="p">)</span><span class="c1">#&#39;%.5f&#39;)       </span>
+            <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="n">final_combined_cols</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">header_line</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">comments</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="c1">#np.savetxt(output_file, final_combined_cols,fmt=fmt_combined, header=header_line, delimiter=&#39; &#39;, comments=&#39;&#39;)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">output_file</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;csv&quot;</span><span class="p">,</span> <span class="n">final_combined_cols</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="n">fmt_combined</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span><span class="s2">&quot;,&quot;</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="n">header_line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span><span class="s2">&quot;,&quot;</span><span class="p">),</span> <span class="n">comments</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+            <span class="c1">#np.savetxt(output_file[:-3] + &quot;csv&quot;, final_combined_cols, fmt=header_line.replace(&quot; &quot;, &quot;,&quot;), delimiter=&#39;,&#39;, comments=&#39;&#39;)</span>
+
+<div class="viewcode-block" id="NxtSomCore.save_somspace_result">
+<a class="viewcode-back" href="../../../../../beak.methods.som.nextsomcore.nextsomcore.html#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore.save_somspace_result">[docs]</a>
+    <span class="k">def</span> <span class="nf">save_somspace_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">som</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write SOM results with header line and input columns to disk in somspace.</span>
+
+<span class="sd">        Output file columns:</span>
+<span class="sd">        som_x, som_y - X Y indices in the map</span>
+<span class="sd">        b_data1, bdata2, bdataN, ... - SOM results</span>
+<span class="sd">        umatrix - U-matrix</span>
+<span class="sd">        cluster - Cluster group number</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            output_file (str): Filename to be used for saving the result.</span>
+<span class="sd">            header (dict): Dictionary holding header data ((load_data(...)).</span>
+<span class="sd">            som (dict): Dictionary holding SOM results (train(...)).</span>
+<span class="sd">            output_folder (str): Destination folder to be used for saving the result.</span>
+<span class="sd">            normalized (bool, optional): Whether data is normalized or not. Defaults to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+
+        <span class="n">col_names</span> <span class="o">=</span> <span class="n">read_data_columns</span><span class="p">(</span><span class="n">header</span><span class="p">)[</span><span class="s1">&#39;colnames&#39;</span><span class="p">]</span>
+        <span class="n">som_cols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_som_cols_somspace</span><span class="p">(</span><span class="n">som</span><span class="p">,</span> <span class="n">col_names</span><span class="p">)</span>
+        <span class="n">hits</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">som</span><span class="p">[</span><span class="s1">&#39;n_columns&#39;</span><span class="p">],</span><span class="n">som</span><span class="p">[</span><span class="s1">&#39;n_rows&#39;</span><span class="p">]))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">som</span><span class="p">[</span><span class="s2">&quot;bmus&quot;</span><span class="p">])):</span>
+             <span class="n">hits</span><span class="p">[</span><span class="n">som</span><span class="p">[</span><span class="s2">&quot;bmus&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]][</span><span class="n">som</span><span class="p">[</span><span class="s2">&quot;bmus&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="n">hits</span><span class="o">=</span><span class="n">hits</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">normalized</span><span class="o">==</span><span class="s2">&quot;True&quot;</span><span class="p">):</span>
+            <span class="n">data_cols</span> <span class="o">=</span> <span class="n">read_data_columns</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+            <span class="n">tree</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">output_folder</span><span class="o">+</span><span class="s2">&quot;/DataStats.xml&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">som_cols</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">2</span><span class="p">):</span>               	
+                    <span class="n">maxD</span><span class="o">=</span><span class="n">Decimal</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">data_cols</span><span class="p">[</span><span class="s2">&quot;colnames&quot;</span><span class="p">][</span><span class="n">i</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;max&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                    <span class="n">minD</span><span class="o">=</span><span class="n">Decimal</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">data_cols</span><span class="p">[</span><span class="s2">&quot;colnames&quot;</span><span class="p">][</span><span class="n">i</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;min&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>        
+                    <span class="n">minN</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">data_cols</span><span class="p">[</span><span class="s2">&quot;colnames&quot;</span><span class="p">][</span><span class="n">i</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;scaleMin&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">))</span>
+                    <span class="n">maxN</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">data_cols</span><span class="p">[</span><span class="s2">&quot;colnames&quot;</span><span class="p">][</span><span class="n">i</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;scaleMax&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">))</span> 
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">som_cols</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">])):</span>
+                        <span class="n">N</span><span class="o">=</span><span class="n">Decimal</span><span class="p">(</span><span class="n">som_cols</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+                        <span class="n">som_cols</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">maxD</span><span class="o">-</span><span class="n">minD</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="n">Decimal</span><span class="p">(</span><span class="n">minN</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="n">Decimal</span><span class="p">(</span><span class="n">maxN</span><span class="p">)</span><span class="o">-</span><span class="n">Decimal</span><span class="p">(</span><span class="n">minN</span><span class="p">))</span><span class="o">+</span><span class="n">minD</span>   
+
+        <span class="n">som_cols</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">som_cols</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span><span class="n">hits</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)))</span>
+        <span class="n">som_cols</span><span class="p">[</span><span class="s1">&#39;fmt&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">som_cols</span><span class="p">[</span><span class="s1">&#39;fmt&#39;</span><span class="p">]</span><span class="o">+</span> <span class="s2">&quot; </span><span class="si">%f</span><span class="s2">&quot;</span>
+        <span class="n">header_line</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">som_cols</span><span class="p">[</span><span class="s1">&#39;colnames&#39;</span><span class="p">]))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;]&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; hits&quot;</span><span class="c1">#.translate(None, &quot;[]&#39;,&quot;) replaced by a lower level solution that works in both 2.x and 3.x python</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="n">som_cols</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">fmt</span><span class="o">=</span><span class="n">som_cols</span><span class="p">[</span><span class="s1">&#39;fmt&#39;</span><span class="p">],</span> <span class="n">header</span><span class="o">=</span><span class="n">header_line</span><span class="p">,</span> <span class="n">comments</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">output_file</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;csv&quot;</span><span class="p">,</span> <span class="n">som_cols</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="n">fmt</span><span class="o">=</span><span class="n">som_cols</span><span class="p">[</span><span class="s1">&#39;fmt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span><span class="s2">&quot;,&quot;</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="n">header_line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span><span class="s2">&quot;,&quot;</span><span class="p">),</span> <span class="n">comments</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NxtSomCore._extract_som_cols_geospace">
+<a class="viewcode-back" href="../../../../../beak.methods.som.nextsomcore.nextsomcore.html#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore._extract_som_cols_geospace">[docs]</a>
+    <span class="k">def</span> <span class="nf">_extract_som_cols_geospace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">som</span><span class="p">,</span> <span class="n">col_names</span><span class="p">):</span>
+        <span class="n">x_col</span> <span class="o">=</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;bmus&#39;</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">y_col</span> <span class="o">=</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;bmus&#39;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">]</span>    
+        <span class="n">data</span> <span class="o">=</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;codebook&#39;</span><span class="p">][</span><span class="n">x_col</span><span class="p">,</span> <span class="n">y_col</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">som</span><span class="p">[</span><span class="s1">&#39;clusters&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>            
+            <span class="n">clusters</span> <span class="o">=</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;clusters&#39;</span><span class="p">][</span><span class="n">x_col</span><span class="p">,</span> <span class="n">y_col</span><span class="p">]</span>
+            <span class="n">combined_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">y_col</span><span class="p">,</span> <span class="n">x_col</span><span class="p">,</span> <span class="n">clusters</span><span class="p">,</span> <span class="n">data</span><span class="p">]</span>
+            <span class="n">combined_col_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;som_x&#39;</span><span class="p">,</span> <span class="s1">&#39;som_y&#39;</span><span class="p">,</span> <span class="s1">&#39;cluster&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;b_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">col_names</span><span class="p">]</span>
+            <span class="n">combined_fmt</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1"> &#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%5f</span><span class="s1"> &#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">col_names</span><span class="p">))</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">clusters</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_col</span><span class="p">)))</span>
+            <span class="n">combined_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">y_col</span><span class="p">,</span> <span class="n">x_col</span><span class="p">,</span> <span class="n">clusters</span><span class="p">,</span> <span class="n">data</span><span class="p">]</span>
+            <span class="n">combined_col_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;som_x&#39;</span><span class="p">,</span> <span class="s1">&#39;som_y&#39;</span><span class="p">,</span> <span class="s1">&#39;cluster&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;b_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">col_names</span><span class="p">]</span>
+            <span class="n">combined_fmt</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="s1"> &#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%.5f</span><span class="s1"> &#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">col_names</span><span class="p">))</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">combined_data</span><span class="p">,</span> <span class="s1">&#39;colnames&#39;</span><span class="p">:</span><span class="n">combined_col_list</span><span class="p">,</span> <span class="s1">&#39;fmt&#39;</span><span class="p">:</span> <span class="n">combined_fmt</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="NxtSomCore._extract_som_cols_somspace">
+<a class="viewcode-back" href="../../../../../beak.methods.som.nextsomcore.nextsomcore.html#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore._extract_som_cols_somspace">[docs]</a>
+    <span class="k">def</span> <span class="nf">_extract_som_cols_somspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">som</span><span class="p">,</span> <span class="n">col_names</span><span class="p">):</span>  
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;codebook&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;codebook&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">som_x_y_cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">cols</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">rows</span><span class="p">)))</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">som_x_y_cols</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="n">som_x_y_cols</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;codebook&#39;</span><span class="p">][</span><span class="n">col</span><span class="p">,</span> <span class="n">row</span><span class="p">]</span><span class="c1">#col=x, row=y</span>
+        <span class="n">umatrix</span> <span class="o">=</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;umatrix&#39;</span><span class="p">][</span><span class="n">col</span><span class="p">,</span> <span class="n">row</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">som</span><span class="p">[</span><span class="s1">&#39;clusters&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">clusters</span> <span class="o">=</span> <span class="n">som</span><span class="p">[</span><span class="s1">&#39;clusters&#39;</span><span class="p">][</span><span class="n">col</span><span class="p">,</span> <span class="n">row</span><span class="p">]</span>
+            <span class="n">combined_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">som_x_y_cols</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">umatrix</span><span class="p">,</span> <span class="n">clusters</span><span class="p">]</span>
+            <span class="n">combined_col_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;som_x&#39;</span><span class="p">,</span> <span class="s1">&#39;som_y&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;b_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">col_names</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;umatrix&#39;</span><span class="p">,</span> <span class="s1">&#39;cluster&#39;</span><span class="p">]</span>
+            <span class="n">combined_fmt</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="s1"> &#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%f</span><span class="s1"> &#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">col_names</span><span class="p">))</span> <span class="o">+</span><span class="s1">&#39;</span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1">&#39;</span>
+        <span class="k">else</span><span class="p">:</span>           
+            <span class="n">clusters</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">umatrix</span><span class="p">)))</span>
+            <span class="n">combined_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">som_x_y_cols</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">umatrix</span><span class="p">,</span> <span class="n">clusters</span><span class="p">]</span>
+            <span class="n">combined_col_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;som_x&#39;</span><span class="p">,</span> <span class="s1">&#39;som_y&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;b_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">col_names</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;umatrix&#39;</span><span class="p">,</span> <span class="s1">&#39;cluster&#39;</span><span class="p">]</span>
+            <span class="n">combined_fmt</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> </span><span class="si">%d</span><span class="s1"> &#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">%f</span><span class="s1"> &#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">col_names</span><span class="p">))</span> <span class="o">+</span><span class="s1">&#39;</span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">combined_data</span><span class="p">,</span> <span class="s1">&#39;colnames&#39;</span><span class="p">:</span><span class="n">combined_col_list</span><span class="p">,</span> <span class="s1">&#39;fmt&#39;</span><span class="p">:</span> <span class="n">combined_fmt</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="NxtSomCore.write_geotiff_out">
+<a class="viewcode-back" href="../../../../../beak.methods.som.nextsomcore.nextsomcore.html#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore.write_geotiff_out">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_geotiff_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">,</span> <span class="n">geodatafile</span><span class="p">,</span> <span class="n">somdatafile</span><span class="p">,</span> <span class="n">input_file</span><span class="p">):</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write geotiff to file using gdal.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            output_folder (str): folder path where to write geotiff file</span>
+<span class="sd">            geodatafile (str): path and name for text file that contains som results in geospace</span>
+<span class="sd">            somdatafile (str): path and name for text file that contains som results in somspace</span>
+<span class="sd">            input_file (LiteralStringstr): list of input files, separated by komma (only first line is used to get the geotransform and projection information to set output GeoFIT geotransform and projection)</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="kn">from</span> <span class="nn">osgeo</span> <span class="kn">import</span> <span class="n">gdal</span>
+        <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+        <span class="c1">#print(&quot;     input file: &quot;, input_file)</span>
+
+        <span class="n">inDs</span><span class="o">=</span><span class="n">gdal</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">input_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">inBand</span><span class="o">=</span><span class="n">inDs</span><span class="o">.</span><span class="n">GetRasterBand</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">gt</span> <span class="o">=</span> <span class="n">inDs</span><span class="o">.</span><span class="n">GetGeoTransform</span><span class="p">()</span>
+
+        <span class="c1">#print(&quot;     genfromtxt som_data&quot;)</span>
+        <span class="c1">#som_data= np.genfromtxt(somdatafile,skip_header=(1), delimiter=&#39; &#39;)</span>
+        <span class="c1">#print(&quot;     genfromtxt geo_data&quot;)</span>
+        <span class="c1">#geo_data=np.genfromtxt(geodatafile,skip_header=(1), delimiter=&#39; &#39;) </span>
+        <span class="c1">#headers=[]</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;     read_csv som_data&quot;</span><span class="p">)</span>
+        <span class="n">som_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">somdatafile</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;     read_csv geo_data&quot;</span><span class="p">)</span>
+        <span class="n">geo_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">geodatafile</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">geodatafile</span><span class="p">,</span> <span class="n">nrows</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="n">x</span><span class="o">=</span><span class="n">geo_data</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">geo_data</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Create the destination folder if it doesn&#39;t exist</span>
+        <span class="n">destination_path</span> <span class="o">=</span> <span class="n">output_folder</span> <span class="o">+</span> <span class="s2">&quot;/GeoTIFF&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">destination_path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">destination_path</span><span class="p">)</span>
+
+        <span class="c1">#print(&quot;     open(geodatafile)&quot;)</span>
+        <span class="c1">#</span>
+        <span class="c1">#with open(geodatafile) as gd:   # easier way using pandas?</span>
+        <span class="c1">#    line = gd.readline()</span>
+        <span class="c1">#    headers=line.split()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;     Iterate over each geoTIF file:&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">som_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">4</span><span class="p">):</span> 
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;         &quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">headers</span><span class="p">[</span><span class="mi">4</span> <span class="o">+</span> <span class="n">a</span><span class="p">]))[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="n">z</span><span class="o">=</span><span class="n">geo_data</span><span class="p">[:,(</span><span class="mi">4</span><span class="o">+</span><span class="n">a</span><span class="p">)]</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;X_value&#39;</span><span class="p">,</span><span class="s1">&#39;Y_value&#39;</span><span class="p">,</span><span class="s1">&#39;Z_value&#39;</span><span class="p">]</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Z_value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Z_value&#39;</span><span class="p">])</span>
+            <span class="n">pivotted</span><span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;Y_value&#39;</span><span class="p">,</span><span class="n">columns</span><span class="o">=</span><span class="s1">&#39;X_value&#39;</span><span class="p">,</span><span class="n">values</span><span class="o">=</span><span class="s1">&#39;Z_value&#39;</span><span class="p">)</span>
+
+            <span class="n">cols</span> <span class="o">=</span> <span class="n">pivotted</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="n">pivotted</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">driver</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">GetDriverByName</span><span class="p">(</span><span class="s1">&#39;GTiff&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Create the output GeoTIFF</span>
+            <span class="n">outName</span> <span class="o">=</span> <span class="n">destination_path</span> <span class="o">+</span> <span class="s2">&quot;/out_&quot;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">headers</span><span class="p">[</span><span class="mi">4</span> <span class="o">+</span> <span class="n">a</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.tif&quot;</span>
+            <span class="n">outDs</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="n">outName</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">gdal</span><span class="o">.</span><span class="n">GDT_Float32</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">outDs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Could not create tif file&quot;</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> 
+    
+            <span class="n">outBand</span> <span class="o">=</span> <span class="n">outDs</span><span class="o">.</span><span class="n">GetRasterBand</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1">#outData = pivotted.to_numpy()</span>
+            <span class="n">outData</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">pivotted</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="mi">0</span><span class="p">)</span> 
+
+            <span class="n">outBand</span><span class="o">.</span><span class="n">WriteArray</span><span class="p">(</span><span class="n">outData</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">outBand</span><span class="o">.</span><span class="n">FlushCache</span><span class="p">()</span>
+            <span class="n">outBand</span><span class="o">.</span><span class="n">SetNoDataValue</span><span class="p">(</span><span class="n">inBand</span><span class="o">.</span><span class="n">GetNoDataValue</span><span class="p">())</span>
+            <span class="c1">#outBand.SetNoDataValue(-99)</span>
+
+            <span class="c1"># Use the geotransform and projection information from the input file</span>
+            <span class="n">outDs</span><span class="o">.</span><span class="n">SetGeoTransform</span><span class="p">(</span><span class="n">inDs</span><span class="o">.</span><span class="n">GetGeoTransform</span><span class="p">())</span>
+            <span class="n">outDs</span><span class="o">.</span><span class="n">SetProjection</span><span class="p">(</span><span class="n">inDs</span><span class="o">.</span><span class="n">GetProjection</span><span class="p">())</span>
+
+            <span class="c1"># check</span>
+            <span class="c1">#print(&quot;     Name geoTIF output: &quot;, outName)</span>
+
+            <span class="c1"># Flush and close the output dataset</span>
+            <span class="n">outDs</span><span class="o">.</span><span class="n">FlushCache</span><span class="p">()</span>
+            <span class="n">outDs</span> <span class="o">=</span> <span class="kc">None</span>
+            
+        <span class="c1">#q_error. output columns should probably be rearranged, so these could be handled in a single for loop again. or split main code into a different function</span>
+        <span class="c1">#x=geo_data[:,0]</span>
+        <span class="c1">#y=geo_data[:,1]</span>
+        <span class="n">z</span><span class="o">=</span><span class="n">geo_data</span><span class="p">[:,(</span><span class="nb">len</span><span class="p">(</span><span class="n">som_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span> <span class="o">+</span><span class="mi">5</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;X_value&#39;</span><span class="p">,</span><span class="s1">&#39;Y_value&#39;</span><span class="p">,</span><span class="s1">&#39;Z_value&#39;</span><span class="p">]</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;Z_value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;Z_value&#39;</span><span class="p">])</span>
+        <span class="n">pivotted</span><span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;Y_value&#39;</span><span class="p">,</span><span class="n">columns</span><span class="o">=</span><span class="s1">&#39;X_value&#39;</span><span class="p">,</span><span class="n">values</span><span class="o">=</span><span class="s1">&#39;Z_value&#39;</span><span class="p">)</span>
+
+        <span class="n">driver</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">GetDriverByName</span><span class="p">(</span><span class="s1">&#39;GTiff&#39;</span><span class="p">)</span>
+        <span class="n">outName</span> <span class="o">=</span> <span class="n">destination_path</span> <span class="o">+</span> <span class="s2">&quot;/out_q_error.tif&quot;</span>
+        <span class="n">outDs</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="n">outName</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">gdal</span><span class="o">.</span><span class="n">GDT_Float32</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">outDs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Could not create tif file&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> 
+
+        <span class="n">outBand</span> <span class="o">=</span> <span class="n">outDs</span><span class="o">.</span><span class="n">GetRasterBand</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1">#outData = pivotted.to_numpy()</span>
+        <span class="n">outData</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">pivotted</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="mi">0</span><span class="p">)</span>  
+        
+        <span class="n">outBand</span><span class="o">.</span><span class="n">WriteArray</span><span class="p">(</span><span class="n">outData</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">outBand</span><span class="o">.</span><span class="n">FlushCache</span><span class="p">()</span>
+        <span class="n">outBand</span><span class="o">.</span><span class="n">SetNoDataValue</span><span class="p">(</span><span class="n">inBand</span><span class="o">.</span><span class="n">GetNoDataValue</span><span class="p">())</span>
+
+        <span class="n">outDs</span><span class="o">.</span><span class="n">SetGeoTransform</span><span class="p">(</span><span class="n">inDs</span><span class="o">.</span><span class="n">GetGeoTransform</span><span class="p">())</span>
+        <span class="n">outDs</span><span class="o">.</span><span class="n">SetProjection</span><span class="p">(</span><span class="n">inDs</span><span class="o">.</span><span class="n">GetProjection</span><span class="p">())</span>
+        
+        <span class="n">outDs</span><span class="o">.</span><span class="n">FlushCache</span><span class="p">()</span>
+        <span class="n">inDs</span><span class="o">=</span><span class="kc">None</span>
+        <span class="n">outDs</span><span class="o">=</span><span class="kc">None</span></div>
+</div>
+
+            
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

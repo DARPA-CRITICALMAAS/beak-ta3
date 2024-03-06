@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>beak.methods.som.nextsomcore.loadfile &mdash; beak-ta3 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=29a6c3e3"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            beak-ta3
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../beak.html">beak package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../../beak.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../beak.data.html">beak.data package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../beak.methods.html">beak.methods package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../beak.methods.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../beak.utilities.html">beak.utilities package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../beak.utilities.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">beak-ta3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">beak.methods.som.nextsomcore.loadfile</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for beak.methods.som.nextsomcore.loadfile</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Fri Jul  5 14:10:46 2019</span>
+
+<span class="sd">Script that servers as launch point to loading geotiff, csv or lrn files. Possibly more filetypes in the future</span>
+
+<span class="sd">@author: shautala</span>
+
+<span class="sd">Modyfied by Ina Storch, 2024</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">.lrnfile</span> <span class="kn">import</span> <span class="n">load_lrn_file</span><span class="p">,</span> <span class="n">read_lrn_coordinate_columns</span><span class="p">,</span> <span class="n">read_lrn_data_columns</span>
+<span class="kn">from</span> <span class="nn">..load_geotiff</span> <span class="kn">import</span> <span class="n">load_geotiff_files</span><span class="p">,</span> <span class="n">delete_rows_with_no_data</span><span class="p">,</span> <span class="n">read_geotiff_coordinate_columns</span><span class="p">,</span> <span class="n">read_geotiff_data_columns</span>
+<span class="kn">from</span> <span class="nn">..load_csv</span> <span class="kn">import</span> <span class="n">load_csv_file</span><span class="p">,</span> <span class="n">read_csv_coordinate_columns</span><span class="p">,</span><span class="n">read_csv_data_columns</span>
+
+
+<div class="viewcode-block" id="load_input_file">
+<a class="viewcode-back" href="../../../../../beak.methods.som.nextsomcore.loadfile.html#beak.methods.som.nextsomcore.loadfile.load_input_file">[docs]</a>
+<span class="k">def</span> <span class="nf">load_input_file</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">label_file</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span><span class="c1">#input file in case of lrn, input file list in case of geoTiff</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;load input file of type lrn, csv or geotiff</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_file (LiteralString): input file paths, separated by komma</span>
+<span class="sd">        label_file (LiteralString, optional): label file paths. Defaults to &quot;&quot;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: dictionary holding the data as a stacked ndarray and meta data such as geo transform, numer of rows and column, no data value, column (data) names</span>
+<span class="sd">    &quot;&quot;&quot;</span>     
+    <span class="k">if</span><span class="p">(</span><span class="n">input_file</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s2">&quot;lrn&quot;</span><span class="p">):</span><span class="c1">#if input is lrn</span>
+        <span class="n">lrn_header</span><span class="o">=</span><span class="n">load_lrn_file</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">lrn_header</span>
+    
+    <span class="k">elif</span><span class="p">(</span><span class="n">input_file</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s2">&quot;csv&quot;</span><span class="p">):</span>
+        <span class="n">csv_header</span><span class="o">=</span><span class="n">load_csv_file</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">csv_header</span>
+    <span class="k">else</span><span class="p">:</span> 
+        <span class="n">geotiff_header</span> <span class="o">=</span> <span class="n">load_geotiff_files</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">label_file</span><span class="p">)</span>
+
+        <span class="c1"># Delete rows with noDataValue</span>
+        <span class="n">geotiff_header</span> <span class="o">=</span> <span class="n">delete_rows_with_no_data</span><span class="p">(</span><span class="n">geotiff_header</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">geotiff_header</span></div>
+
+    
+
+<div class="viewcode-block" id="read_coordinate_columns">
+<a class="viewcode-back" href="../../../../../beak.methods.som.nextsomcore.loadfile.html#beak.methods.som.nextsomcore.loadfile.read_coordinate_columns">[docs]</a>
+<span class="k">def</span> <span class="nf">read_coordinate_columns</span><span class="p">(</span><span class="n">header</span><span class="p">):</span> 
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;read coordinate columns for file types lrn, csv and geotiff</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        header (dict): dictionary holding the data as a stacked ndarray and meta data such as geo transform, numer of rows and column, no data value, column (data) names</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: dictionary holding x and y coordinates as a column stack (ndarray), coordinates of rows with no data values that are skipped in load_input_file(), column names </span>
+<span class="sd">    &quot;&quot;&quot;</span>      
+    <span class="k">if</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;filetype&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;lrn&#39;</span><span class="p">):</span>
+        <span class="n">coords</span><span class="o">=</span><span class="n">read_lrn_coordinate_columns</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>    
+        <span class="k">return</span> <span class="n">coords</span>
+    <span class="k">elif</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;filetype&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;csv&#39;</span><span class="p">):</span>
+        <span class="n">coords</span><span class="o">=</span><span class="n">read_csv_coordinate_columns</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">coords</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">coords</span><span class="o">=</span><span class="n">read_geotiff_coordinate_columns</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">coords</span></div>
+
+
+
+<div class="viewcode-block" id="read_data_columns">
+<a class="viewcode-back" href="../../../../../beak.methods.som.nextsomcore.loadfile.html#beak.methods.som.nextsomcore.loadfile.read_data_columns">[docs]</a>
+<span class="k">def</span> <span class="nf">read_data_columns</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;read data columns for file types lrn, csv and geotiff</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        header (dict): dictionary holding the data as a stacked ndarray and meta data such as geo transform, numer of rows and column, no data value, column (data) names</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: dictionary holding the data as a stacked ndarray and column (data) names</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">if</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;filetype&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;lrn&#39;</span><span class="p">):</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">read_lrn_data_columns</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+    <span class="k">elif</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;filetype&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;csv&#39;</span><span class="p">):</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">read_csv_data_columns</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">read_geotiff_data_columns</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

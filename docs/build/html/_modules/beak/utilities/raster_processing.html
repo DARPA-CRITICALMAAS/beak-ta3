@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>beak.utilities.raster_processing &mdash; beak-ta3 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=29a6c3e3"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            beak-ta3
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../beak.html">beak package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../beak.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.data.html">beak.data package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.methods.html">beak.methods package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.methods.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.utilities.html">beak.utilities package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.utilities.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">beak-ta3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">beak.utilities.raster_processing</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for beak.utilities.raster_processing</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">import</span> <span class="nn">rasterio</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Number</span>
+<span class="kn">from</span> <span class="nn">rasterio</span> <span class="kn">import</span> <span class="n">warp</span>
+<span class="kn">from</span> <span class="nn">rasterio.mask</span> <span class="kn">import</span> <span class="n">mask</span>
+<span class="kn">from</span> <span class="nn">rasterio.windows</span> <span class="kn">import</span> <span class="n">Window</span><span class="p">,</span> <span class="n">from_bounds</span>
+<span class="kn">from</span> <span class="nn">rasterio.enums</span> <span class="kn">import</span> <span class="n">Resampling</span>
+<span class="kn">from</span> <span class="nn">rasterio.crs</span> <span class="kn">import</span> <span class="n">CRS</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">from</span> <span class="nn">beak.utilities.io</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">create_file_folder_list</span><span class="p">,</span>
+    <span class="n">create_file_list</span><span class="p">,</span>
+    <span class="n">check_path</span><span class="p">,</span>
+    <span class="n">load_raster</span><span class="p">,</span>
+    <span class="n">save_raster</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">beak.utilities.io</span> <span class="kn">import</span> <span class="n">load_raster</span><span class="p">,</span> <span class="n">save_raster</span><span class="p">,</span> <span class="n">copy_folder_structure</span>
+
+
+<span class="c1"># References</span>
+<span class="c1"># Some non-trivial functionalities were adapted from other sources.</span>
+<span class="c1"># The original sources are listed below and referenced in the code as well.</span>
+<span class="c1">#</span>
+<span class="c1"># EIS toolkit:</span>
+<span class="c1"># GitHub repository https://github.com/GispoCoding/eis_toolkit under EUPL-1.2 license.</span>
+
+
+<div class="viewcode-block" id="fill_nodata_with_mean">
+<a class="viewcode-back" href="../../../beak.utilities.raster_processing.html#beak.utilities.raster_processing.fill_nodata_with_mean">[docs]</a>
+<span class="k">def</span> <span class="nf">fill_nodata_with_mean</span><span class="p">(</span>
+    <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">nodata_value</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>
+    <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">num_nan_max</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fill nodata values with the mean from surrounding cells.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array (np.ndarray): Input array with nodata values.</span>
+<span class="sd">        nodata_value (np.number): Value representing nodata in the array.</span>
+<span class="sd">        size (int): Size of the kernel used for calculating the mean. Defaults to 3.</span>
+<span class="sd">        num_nan_max (int): Maximum number of nodata cells allowed in the kernel neighborhood for mean calculation. Defaults to 4.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Array with nodata values imputed by the mean from surrounding cells.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Set kernel size</span>
+    <span class="n">kernel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">size</span><span class="p">,</span> <span class="n">size</span><span class="p">))</span>
+
+    <span class="c1"># Create mask for nodata values and convert to int</span>
+    <span class="n">nan_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">nodata_value</span><span class="p">)</span>
+
+    <span class="c1"># Create array for sum of np.nan values in kernel neighborhood</span>
+    <span class="n">nan_sum</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">generic_filter</span><span class="p">(</span>
+        <span class="n">nan_mask</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span> <span class="n">footprint</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span> <span class="n">cval</span><span class="o">=</span><span class="mi">0</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Create combined masked with certain amount of nodata cells allowed for mean calculation</span>
+    <span class="n">nan_sum_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">nan_mask</span><span class="p">,</span> <span class="n">nan_sum</span> <span class="o">&lt;=</span> <span class="n">num_nan_max</span><span class="p">)</span>
+
+    <span class="c1"># Initialize output array</span>
+    <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">nan_mask</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span>
+
+    <span class="c1"># Calculate mean for each cell in kernel neighborhood based on nan_sum_mask</span>
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">RuntimeWarning</span><span class="p">)</span>
+
+        <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">nan_sum_mask</span><span class="p">,</span>
+            <span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">generic_filter</span><span class="p">(</span>
+                <span class="n">out_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">,</span> <span class="n">footprint</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;reflect&quot;</span>
+            <span class="p">),</span>
+            <span class="n">out_array</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">out_array</span><span class="p">),</span> <span class="n">nodata_value</span><span class="p">,</span> <span class="n">out_array</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># region: reproject raster data</span>
+<div class="viewcode-block" id="_reproject_raster_process">
+<a class="viewcode-back" href="../../../beak.utilities.raster_processing.html#beak.utilities.raster_processing._reproject_raster_process">[docs]</a>
+<span class="k">def</span> <span class="nf">_reproject_raster_process</span><span class="p">(</span>
+    <span class="n">file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">input_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">output_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">target_epsg</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">target_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">],</span>
+    <span class="n">resampling_method</span><span class="p">:</span> <span class="n">warp</span><span class="o">.</span><span class="n">Resampling</span><span class="p">,</span>
+    <span class="n">resampling_mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run reprojection process for a single raster file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file (Path): The path to the input raster file.</span>
+<span class="sd">        input_folder (Path): The path to the input folder.</span>
+<span class="sd">        output_folder (Path): The path to the output folder.</span>
+<span class="sd">        target_epsg (int): The target EPSG code for the reprojection.</span>
+<span class="sd">        target_resolution (Optional[np.number]): The target resolution for the reprojection.</span>
+<span class="sd">        resampling_method (warp.Resampling): The resampling method to use.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">output_folder</span> <span class="o">/</span> <span class="n">file</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">input_folder</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">out_file</span><span class="p">):</span>
+        <span class="n">raster</span> <span class="o">=</span> <span class="n">load_raster</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="n">check_path</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">out_file</span><span class="p">)))</span>
+        <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">_reproject_raster_core</span><span class="p">(</span>
+            <span class="n">raster</span><span class="p">,</span> <span class="n">target_epsg</span><span class="p">,</span> <span class="n">target_resolution</span><span class="p">,</span> <span class="n">resampling_method</span><span class="p">,</span> <span class="n">resampling_mode</span>
+        <span class="p">)</span>
+
+        <span class="n">save_raster</span><span class="p">(</span>
+            <span class="n">out_file</span><span class="p">,</span>
+            <span class="n">out_array</span><span class="p">,</span>
+            <span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">target_epsg</span><span class="p">),</span>
+            <span class="n">out_meta</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">],</span>
+            <span class="n">out_meta</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">],</span>
+            <span class="n">raster</span><span class="o">.</span><span class="n">nodata</span><span class="p">,</span>
+            <span class="n">out_meta</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">],</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="_reproject_raster_core">
+<a class="viewcode-back" href="../../../beak.utilities.raster_processing.html#beak.utilities.raster_processing._reproject_raster_core">[docs]</a>
+<span class="k">def</span> <span class="nf">_reproject_raster_core</span><span class="p">(</span>
+    <span class="n">raster</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span>
+    <span class="n">target_crs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">target_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">],</span>
+    <span class="n">resampling_method</span><span class="p">:</span> <span class="n">warp</span><span class="o">.</span><span class="n">Resampling</span><span class="p">,</span>
+    <span class="n">resampling_mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reproject a raster to a new coordinate reference system (CRS) and resolution.</span>
+
+<span class="sd">    Adapted function from EIS Toolkit (main branch as of 2023-11-17).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        raster (rasterio.io.DatasetReader): The input raster to be reprojected.</span>
+<span class="sd">        target_crs (int): The EPSG code of the target CRS.</span>
+<span class="sd">        target_resolution (Optional[np.number]): The target resolution of the reprojected raster.</span>
+<span class="sd">        resampling_method (warp.Resampling): The resampling method to be used during reprojection.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[np.ndarray, dict]: A tuple containing the reprojected image as a NumPy array and the metadata of the reprojected raster.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">src_arr</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="n">dst_crs</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">target_crs</span><span class="p">)</span>
+
+    <span class="n">dst_transform</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span> <span class="o">=</span> <span class="n">warp</span><span class="o">.</span><span class="n">calculate_default_transform</span><span class="p">(</span>
+        <span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+        <span class="n">dst_crs</span><span class="p">,</span>
+        <span class="n">raster</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+        <span class="n">raster</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="o">=</span><span class="n">target_resolution</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Initialize output raster</span>
+    <span class="n">dst</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">raster</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">))</span>
+    <span class="n">dst</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">raster</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;nodata&quot;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">resampling_mode</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">src_arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
+            <span class="n">resampling_method</span> <span class="o">=</span> <span class="n">warp</span><span class="o">.</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">src_arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">):</span>
+            <span class="n">resampling_method</span> <span class="o">=</span> <span class="n">warp</span><span class="o">.</span><span class="n">Resampling</span><span class="o">.</span><span class="n">bilinear</span>
+
+    <span class="n">out_image</span> <span class="o">=</span> <span class="n">warp</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
+        <span class="n">source</span><span class="o">=</span><span class="n">src_arr</span><span class="p">,</span>
+        <span class="n">src_transform</span><span class="o">=</span><span class="n">raster</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span>
+        <span class="n">src_crs</span><span class="o">=</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+        <span class="n">destination</span><span class="o">=</span><span class="n">dst</span><span class="p">,</span>
+        <span class="n">dst_transform</span><span class="o">=</span><span class="n">dst_transform</span><span class="p">,</span>
+        <span class="n">dst_crs</span><span class="o">=</span><span class="n">dst_crs</span><span class="p">,</span>
+        <span class="n">src_nodata</span><span class="o">=</span><span class="n">raster</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;nodata&quot;</span><span class="p">],</span>
+        <span class="n">dst_nodata</span><span class="o">=</span><span class="n">raster</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;nodata&quot;</span><span class="p">],</span>
+        <span class="n">resampling</span><span class="o">=</span><span class="n">resampling_method</span><span class="p">,</span>
+    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">out_meta</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">out_meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;crs&quot;</span><span class="p">:</span> <span class="n">dst_crs</span><span class="p">,</span>
+            <span class="s2">&quot;transform&quot;</span><span class="p">:</span> <span class="n">dst_transform</span><span class="p">,</span>
+            <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="n">dst_width</span><span class="p">,</span>
+            <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">dst_height</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out_image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">src_arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span> <span class="n">out_meta</span></div>
+
+
+
+<div class="viewcode-block" id="reproject_raster">
+<a class="viewcode-back" href="../../../beak.utilities.raster_processing.html#beak.utilities.raster_processing.reproject_raster">[docs]</a>
+<span class="k">def</span> <span class="nf">reproject_raster</span><span class="p">(</span>
+    <span class="n">input_folder</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">output_folder</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">target_epsg</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">target_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">resampling_method</span><span class="p">:</span> <span class="n">warp</span><span class="o">.</span><span class="n">Resampling</span> <span class="o">=</span> <span class="n">warp</span><span class="o">.</span><span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span>
+    <span class="n">resampling_mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;manual&quot;</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;manual&quot;</span><span class="p">,</span>
+    <span class="n">include_source</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">n_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">(),</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reprojects rasters from the input folder to the output folder using the specified target EPSG code.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_folder (Path): The path to the input folder containing the rasters.</span>
+<span class="sd">        output_folder (Path): The path to the output folder where the reprojected rasters will be saved.</span>
+<span class="sd">        target_epsg (int): The EPSG code of the target coordinate reference system (CRS).</span>
+<span class="sd">        target_resolution (Optional[np.number]): The target resolution of the reprojected rasters. Defaults to None.</span>
+<span class="sd">        resampling_method (warp.Resampling): The resampling method to use during reprojection. Defaults to warp.Resampling.nearest.</span>
+<span class="sd">        reampling_mode (Literal[&quot;manual&quot;, &quot;auto&quot;]): Uses &quot;nearest&quot; for integers and &quot;bilinear&quot; for floats.</span>
+<span class="sd">            Overwrites resampling_method if set to &quot;auto&quot;. Defaults to &quot;manual&quot;.</span>
+<span class="sd">        n_workers (int): The number of worker processes to use for parallel processing. Defaults to the number of CPU cores.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Show selected folder</span>
+    <span class="n">input_folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">input_folder</span><span class="p">)</span>
+    <span class="n">output_folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output_folder</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Selected folder: </span><span class="si">{</span><span class="n">input_folder</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Output folder: </span><span class="si">{</span><span class="n">output_folder</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Get all folders in the root folder</span>
+    <span class="n">folders</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">create_file_folder_list</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">input_folder</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total of folders found: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">folders</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">include_source</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">folders</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">input_folder</span><span class="p">)</span>
+
+    <span class="c1"># Load rasters for each folder</span>
+    <span class="n">file_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">n_workers</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">create_file_list</span><span class="p">,</span> <span class="n">folders</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+        <span class="n">file_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+    <span class="c1"># Show results</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Files loaded: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Set args list</span>
+    <span class="n">args_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span>
+            <span class="n">file</span><span class="p">,</span>
+            <span class="n">input_folder</span><span class="p">,</span>
+            <span class="n">output_folder</span><span class="p">,</span>
+            <span class="n">target_epsg</span><span class="p">,</span>
+            <span class="n">target_resolution</span><span class="p">,</span>
+            <span class="n">resampling_method</span><span class="p">,</span>
+            <span class="n">resampling_mode</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Run reprojection</span>
+    <span class="k">if</span> <span class="n">n_workers</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">n_workers</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting parallel processing...&quot;</span><span class="p">)</span>
+            <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">_reproject_raster_process</span><span class="p">,</span> <span class="n">args_list</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting single processing...&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">args</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">args_list</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Reprojecting rasters&quot;</span><span class="p">):</span>
+            <span class="n">_reproject_raster_process</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># endregion</span>
+
+
+<div class="viewcode-block" id="_clip_raster_with_coords">
+<a class="viewcode-back" href="../../../beak.utilities.raster_processing.html#beak.utilities.raster_processing._clip_raster_with_coords">[docs]</a>
+<span class="k">def</span> <span class="nf">_clip_raster_with_coords</span><span class="p">(</span>
+    <span class="n">input_raster</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span>
+    <span class="n">bounds</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span>
+        <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span>
+    <span class="p">],</span>
+    <span class="n">intermediate_result</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Clips the input raster using the provided coordinates.&quot;&quot;&quot;</span>
+    <span class="n">left</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">input_raster</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">left</span>
+    <span class="n">bottom</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">input_raster</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">bottom</span>
+    <span class="n">right</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">input_raster</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">right</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">if</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">input_raster</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">top</span>
+
+    <span class="n">window</span> <span class="o">=</span> <span class="n">input_raster</span><span class="o">.</span><span class="n">window</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span><span class="p">)</span>
+    <span class="n">row_start</span><span class="p">,</span> <span class="n">col_start</span><span class="p">,</span> <span class="n">row_stop</span><span class="p">,</span> <span class="n">col_stop</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span>
+        <span class="nb">int</span><span class="p">,</span>
+        <span class="p">(</span>
+            <span class="n">window</span><span class="o">.</span><span class="n">row_off</span><span class="p">,</span>
+            <span class="n">window</span><span class="o">.</span><span class="n">col_off</span><span class="p">,</span>
+            <span class="n">window</span><span class="o">.</span><span class="n">row_off</span> <span class="o">+</span> <span class="n">window</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+            <span class="n">window</span><span class="o">.</span><span class="n">col_off</span> <span class="o">+</span> <span class="n">window</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">intermediate_result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">clipped_data</span> <span class="o">=</span> <span class="n">input_raster</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">clipped_meta</span> <span class="o">=</span> <span class="n">input_raster</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">clipped_meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;transform&quot;</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">windows</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">input_raster</span><span class="o">.</span><span class="n">transform</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">clipped_data</span> <span class="o">=</span> <span class="n">intermediate_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">clipped_meta</span> <span class="o">=</span> <span class="n">intermediate_result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">clipped_data</span> <span class="o">=</span> <span class="n">clipped_data</span><span class="p">[:,</span> <span class="n">row_start</span><span class="p">:</span><span class="n">row_stop</span><span class="p">,</span> <span class="n">col_start</span><span class="p">:</span><span class="n">col_stop</span><span class="p">]</span>
+    <span class="n">clipped_meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;driver&quot;</span><span class="p">:</span> <span class="s2">&quot;GTiff&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">clipped_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="n">clipped_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">clipped_data</span><span class="p">,</span> <span class="n">clipped_meta</span></div>
+
+
+
+<div class="viewcode-block" id="_clip_raster_with_shapefile">
+<a class="viewcode-back" href="../../../beak.utilities.raster_processing.html#beak.utilities.raster_processing._clip_raster_with_shapefile">[docs]</a>
+<span class="k">def</span> <span class="nf">_clip_raster_with_shapefile</span><span class="p">(</span>
+    <span class="n">input_raster</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span>
+    <span class="n">shapefile</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">query</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">all_touched</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Clips a raster with a shapefile using the specified query.&quot;&quot;&quot;</span>
+    <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">shapefile</span><span class="p">)</span>
+    <span class="n">gdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span> <span class="k">if</span> <span class="n">query</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">gdf</span>
+
+    <span class="n">clipped_data</span><span class="p">,</span> <span class="n">clipped_transform</span> <span class="o">=</span> <span class="n">mask</span><span class="p">(</span>
+        <span class="n">input_raster</span><span class="p">,</span> <span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">crop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="n">all_touched</span>
+    <span class="p">)</span>
+
+    <span class="n">clipped_meta</span> <span class="o">=</span> <span class="n">input_raster</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">clipped_meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;driver&quot;</span><span class="p">:</span> <span class="s2">&quot;GTiff&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">clipped_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="n">clipped_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+            <span class="s2">&quot;transform&quot;</span><span class="p">:</span> <span class="n">clipped_transform</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">clipped_data</span><span class="p">,</span> <span class="n">clipped_meta</span></div>
+
+
+
+<div class="viewcode-block" id="_clip_raster_process">
+<a class="viewcode-back" href="../../../beak.utilities.raster_processing.html#beak.utilities.raster_processing._clip_raster_process">[docs]</a>
+<span class="k">def</span> <span class="nf">_clip_raster_process</span><span class="p">(</span>
+    <span class="n">file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">input_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">output_folder</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]],</span>
+    <span class="n">shapefile</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]],</span>
+    <span class="n">query</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">bounds</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span>
+        <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]]</span>
+    <span class="p">],</span>
+    <span class="n">all_touched</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Clips a raster file based on either a shapefile or bounding coordinates.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file (Path): The path to the input raster file.</span>
+<span class="sd">        output_folder (Optional[Union[str, Path]]): The folder where the clipped raster will be saved.</span>
+<span class="sd">        shapefile (Optional[Union[str, Path]]): The path to the shapefile used for clipping. If None, bounds must be provided.</span>
+<span class="sd">        query (Optional[str]): An optional query string to filter the shapefile features.</span>
+<span class="sd">        bounds (Optional[Tuple[Optional[Number], Optional[Number], Optional[Number], Optional[Number]]]): The bounding coordinates used for clipping. If None, shapefile must be provided.</span>
+<span class="sd">        all_touched (bool): Whether to include all pixels touched by the shapefile features. Defaults to True.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If neither shapefile nor bounds are provided.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">raster</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">shapefile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">_clip_raster_with_shapefile</span><span class="p">(</span>
+            <span class="n">raster</span><span class="p">,</span>
+            <span class="n">shapefile</span><span class="p">,</span>
+            <span class="n">query</span><span class="p">,</span>
+            <span class="n">all_touched</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">shapefile</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">_clip_raster_with_coords</span><span class="p">(</span>
+            <span class="n">raster</span><span class="p">,</span>
+            <span class="n">bounds</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">shapefile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">_clip_raster_with_shapefile</span><span class="p">(</span>
+            <span class="n">raster</span><span class="p">,</span>
+            <span class="n">shapefile</span><span class="p">,</span>
+            <span class="n">query</span><span class="p">,</span>
+            <span class="n">all_touched</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">_clip_raster_with_coords</span><span class="p">(</span>
+            <span class="n">raster</span><span class="p">,</span>
+            <span class="n">bounds</span><span class="p">,</span>
+            <span class="n">intermediate_result</span><span class="o">=</span><span class="p">(</span><span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either shapefile or bounds must be provided for clipping.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">output_folder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">relative_file</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">input_folder</span><span class="p">)</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">output_folder</span> <span class="o">/</span> <span class="n">relative_file</span>
+
+        <span class="n">check_path</span><span class="p">(</span><span class="n">out_file</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">save_raster</span><span class="p">(</span>
+            <span class="n">out_file</span><span class="p">,</span>
+            <span class="n">out_array</span><span class="p">,</span>
+            <span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+            <span class="n">out_meta</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">],</span>
+            <span class="n">out_meta</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">],</span>
+            <span class="n">raster</span><span class="o">.</span><span class="n">nodata</span><span class="p">,</span>
+            <span class="n">out_meta</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span></div>
+
+
+
+<div class="viewcode-block" id="clip_raster">
+<a class="viewcode-back" href="../../../beak.utilities.raster_processing.html#beak.utilities.raster_processing.clip_raster">[docs]</a>
+<span class="k">def</span> <span class="nf">clip_raster</span><span class="p">(</span>
+    <span class="n">input_folder</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">output_folder</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]],</span>
+    <span class="n">shapefile</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]],</span>
+    <span class="n">query</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">bounds</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span>
+        <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]]</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">raster_extensions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;.tif&quot;</span><span class="p">,</span> <span class="s2">&quot;.tiff&quot;</span><span class="p">],</span>
+    <span class="n">include_source</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">all_touched</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">n_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">(),</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Clips rasters within the specified input folder to the extent of a shapefile or a bounding box.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_folder (Union[str, Path]): Path to the input folder containing the rasters.</span>
+<span class="sd">        output_folder (Optional[Union[str, Path]]): Path to the output folder where the clipped rasters will be saved.</span>
+<span class="sd">        shapefile (Optional[Union[str, Path]]): Path to the shapefile used for clipping.</span>
+<span class="sd">            If None, the rasters will be clipped to the specified bounding box.</span>
+<span class="sd">        query (Optional[str]): Query string to filter the features in the shapefile.</span>
+<span class="sd">            Only features that satisfy the query will be used for clipping. Ignored if shapefile is None.</span>
+<span class="sd">        bounds (Optional[Tuple[Optional[Number], Optional[Number], Optional[Number], Optional[Number]]]):</span>
+<span class="sd">            Bounding box coordinates (minx, miny, maxx, maxy) used for clipping. Ignored if shapefile is not None.</span>
+<span class="sd">        raster_extensions (List[str]): List of file extensions to consider as rasters. Default is [&quot;.tif&quot;, &quot;.tiff&quot;].</span>
+<span class="sd">        include_source (bool): Flag indicating whether to include the input folder itself as a source for clipping. Default is True.</span>
+<span class="sd">        recursive (bool): Flag indicating whether to recursively search for rasters in subfolders. Default is True.</span>
+<span class="sd">        all_touched (bool): Flag indicating whether to include all pixels touched by the shapefile or bounding box. Default is Fals.</span>
+<span class="sd">        n_workers (int): Number of parallel workers to use for clipping. Default is the number of available CPU cores.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">recursive</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">include_source</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Either recursive or include_source must be True to avoid an empty file list.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">recursive</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">folders</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">create_file_folder_list</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">input_folder</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">folders</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">include_source</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">folders</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">input_folder</span><span class="p">)</span>
+
+    <span class="n">file_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">folders</span><span class="p">:</span>
+        <span class="n">folder_file_list</span> <span class="o">=</span> <span class="n">create_file_list</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">raster_extensions</span><span class="p">)</span>
+        <span class="n">file_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">folder_file_list</span><span class="p">)</span>
+
+    <span class="n">args_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span>
+            <span class="n">file</span><span class="p">,</span>
+            <span class="n">input_folder</span><span class="p">,</span>
+            <span class="n">output_folder</span><span class="p">,</span>
+            <span class="n">shapefile</span><span class="p">,</span>
+            <span class="n">query</span><span class="p">,</span>
+            <span class="n">bounds</span><span class="p">,</span>
+            <span class="n">all_touched</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Run clipping operation</span>
+    <span class="k">if</span> <span class="n">n_workers</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">n_workers</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting parallel processing...&quot;</span><span class="p">)</span>
+            <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">_clip_raster_process</span><span class="p">,</span> <span class="n">args_list</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting single processing...&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">args</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">args_list</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Clipping rasters&quot;</span><span class="p">):</span>
+            <span class="n">_clip_raster_process</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="_unify_raster_grids">
+<a class="viewcode-back" href="../../../beak.utilities.raster_processing.html#beak.utilities.raster_processing._unify_raster_grids">[docs]</a>
+<span class="k">def</span> <span class="nf">_unify_raster_grids</span><span class="p">(</span>
+    <span class="n">base_raster</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">],</span>
+    <span class="n">raster_to_unify</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">],</span>
+    <span class="n">resampling_method</span><span class="p">:</span> <span class="n">Resampling</span><span class="p">,</span>
+    <span class="n">same_extent</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">same_shape</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">base_raster</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="n">base_raster</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">base_raster</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raster_to_unify</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="n">raster_to_unify</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">raster_to_unify</span><span class="p">)</span>
+        
+    <span class="n">dst_crs</span> <span class="o">=</span> <span class="n">base_raster</span><span class="o">.</span><span class="n">crs</span>
+    <span class="n">dst_width</span> <span class="o">=</span> <span class="n">base_raster</span><span class="o">.</span><span class="n">width</span>
+    <span class="n">dst_height</span> <span class="o">=</span> <span class="n">base_raster</span><span class="o">.</span><span class="n">height</span>
+    <span class="n">dst_transform</span> <span class="o">=</span> <span class="n">base_raster</span><span class="o">.</span><span class="n">transform</span>
+    <span class="n">dst_resolution</span> <span class="o">=</span> <span class="p">(</span><span class="n">base_raster</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">base_raster</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">e</span><span class="p">))</span>
+
+    <span class="n">out_meta</span> <span class="o">=</span> <span class="n">base_raster</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">raster</span> <span class="o">=</span> <span class="n">raster_to_unify</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">same_extent</span><span class="p">:</span>
+        <span class="n">dst_transform</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">,</span> <span class="n">dst_height</span> <span class="o">=</span> <span class="n">warp</span><span class="o">.</span><span class="n">calculate_default_transform</span><span class="p">(</span>
+            <span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+            <span class="n">dst_crs</span><span class="p">,</span>
+            <span class="n">raster</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+            <span class="n">raster</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">dst_resolution</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># Snap the corner coordinates to the grid</span>
+        <span class="n">x_distance_to_grid</span> <span class="o">=</span> <span class="n">dst_transform</span><span class="o">.</span><span class="n">c</span> <span class="o">%</span> <span class="n">dst_resolution</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">y_distance_to_grid</span> <span class="o">=</span> <span class="n">dst_transform</span><span class="o">.</span><span class="n">f</span> <span class="o">%</span> <span class="n">dst_resolution</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">x_distance_to_grid</span> <span class="o">&gt;</span> <span class="n">dst_resolution</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># Snap towards right</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">dst_transform</span><span class="o">.</span><span class="n">c</span> <span class="o">-</span> <span class="n">x_distance_to_grid</span> <span class="o">+</span> <span class="n">dst_resolution</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># Snap towards left</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">dst_transform</span><span class="o">.</span><span class="n">c</span> <span class="o">-</span> <span class="n">x_distance_to_grid</span>
+
+        <span class="k">if</span> <span class="n">y_distance_to_grid</span> <span class="o">&gt;</span> <span class="n">dst_resolution</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># Snap towards up</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">dst_transform</span><span class="o">.</span><span class="n">f</span> <span class="o">-</span> <span class="n">y_distance_to_grid</span> <span class="o">+</span> <span class="n">dst_resolution</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># Snap towards bottom</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">dst_transform</span><span class="o">.</span><span class="n">f</span> <span class="o">-</span> <span class="n">y_distance_to_grid</span>
+
+        <span class="c1"># Create new transform with updated corner coordinates</span>
+        <span class="n">dst_transform</span> <span class="o">=</span> <span class="n">warp</span><span class="o">.</span><span class="n">Affine</span><span class="p">(</span>
+            <span class="n">dst_transform</span><span class="o">.</span><span class="n">a</span><span class="p">,</span>  <span class="c1"># Pixel size x</span>
+            <span class="n">dst_transform</span><span class="o">.</span><span class="n">b</span><span class="p">,</span>  <span class="c1"># Shear parameter</span>
+            <span class="n">c</span><span class="p">,</span>  <span class="c1"># Up-left corner x-coordinate</span>
+            <span class="n">dst_transform</span><span class="o">.</span><span class="n">d</span><span class="p">,</span>  <span class="c1"># Shear parameter</span>
+            <span class="n">dst_transform</span><span class="o">.</span><span class="n">e</span><span class="p">,</span>  <span class="c1"># Pixel size y</span>
+            <span class="n">f</span><span class="p">,</span>  <span class="c1"># Up-left corner y-coordinate</span>
+        <span class="p">)</span>
+
+        <span class="n">out_meta</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dst_transform</span>
+        <span class="n">out_meta</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dst_width</span>
+        <span class="n">out_meta</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dst_height</span>
+
+    <span class="n">dst_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">base_raster</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">dst_height</span><span class="p">,</span> <span class="n">dst_width</span><span class="p">))</span>
+    <span class="n">dst_array</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">base_raster</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span>
+
+    <span class="n">src_array</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="n">out_array</span> <span class="o">=</span> <span class="n">warp</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
+        <span class="n">source</span><span class="o">=</span><span class="n">src_array</span><span class="p">,</span>
+        <span class="n">src_crs</span><span class="o">=</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+        <span class="n">src_transform</span><span class="o">=</span><span class="n">raster</span><span class="o">.</span><span class="n">transform</span><span class="p">,</span>
+        <span class="n">src_nodata</span><span class="o">=</span><span class="n">raster</span><span class="o">.</span><span class="n">nodata</span><span class="p">,</span>
+        <span class="n">destination</span><span class="o">=</span><span class="n">dst_array</span><span class="p">,</span>
+        <span class="n">dst_crs</span><span class="o">=</span><span class="n">dst_crs</span><span class="p">,</span>
+        <span class="n">dst_transform</span><span class="o">=</span><span class="n">dst_transform</span><span class="p">,</span>
+        <span class="n">dst_nodata</span><span class="o">=</span><span class="n">base_raster</span><span class="o">.</span><span class="n">nodata</span><span class="p">,</span>
+        <span class="n">resampling</span><span class="o">=</span><span class="n">resampling_method</span><span class="p">,</span>
+    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">same_shape</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">base_array</span> <span class="o">=</span> <span class="n">base_raster</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">base_array</span> <span class="o">==</span> <span class="n">base_raster</span><span class="o">.</span><span class="n">nodata</span><span class="p">,</span> <span class="n">base_raster</span><span class="o">.</span><span class="n">nodata</span><span class="p">,</span> <span class="n">out_array</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span></div>
+
+
+
+<div class="viewcode-block" id="unify_raster_grids">
+<a class="viewcode-back" href="../../../beak.utilities.raster_processing.html#beak.utilities.raster_processing.unify_raster_grids">[docs]</a>
+<span class="k">def</span> <span class="nf">unify_raster_grids</span><span class="p">(</span>
+    <span class="n">base_raster</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">rasters_to_unify</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]],</span>
+    <span class="n">resampling_method</span><span class="p">:</span> <span class="n">Resampling</span> <span class="o">=</span> <span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span>
+    <span class="n">same_extent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">same_shape</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">n_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Unifies the grids of multiple rasters to match the grid of a base raster.</span>
+
+<span class="sd">    Adapted core function from EIS Toolkit (main branch as of 29-01-2024).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        base_raster (rasterio.io.DatasetReader): The base raster whose grid will be used as reference.</span>
+<span class="sd">        rasters_to_unify (Sequence[rasterio.io.DatasetReader]): The rasters to be unified.</span>
+<span class="sd">        resampling_method (Resampling, optional): The resampling method to be used. Defaults to Resampling.nearest.</span>
+<span class="sd">        same_extent (bool, optional): Whether to force all rasters to have the same extent as the base raster. Defaults to False.</span>
+<span class="sd">        same_shape (bool, optional): Whether to force all rasters to have the same shape as the base raster. Defaults to False.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[Tuple[np.ndarray, dict]]: A list of tuples containing the unified rasters as numpy arrays and their associated metadata.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">unified_results</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">args_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span>
+            <span class="n">base_raster</span><span class="p">,</span>
+            <span class="n">file</span><span class="p">,</span>
+            <span class="n">resampling_method</span><span class="p">,</span>
+            <span class="n">same_extent</span><span class="p">,</span>
+            <span class="n">same_shape</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">rasters_to_unify</span>
+    <span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">n_workers</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting parallel processing...&quot;</span><span class="p">)</span>
+            
+        <span class="k">with</span> <span class="n">mp</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">n_workers</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">_unify_raster_grids</span><span class="p">,</span> <span class="n">args_list</span><span class="p">):</span>
+                <span class="n">unified_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">rasters_to_unify</span><span class="p">:</span>
+            <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">_unify_raster_grids</span><span class="p">(</span>
+                <span class="n">base_raster</span><span class="p">,</span>
+                <span class="n">file</span><span class="p">,</span>
+                <span class="n">resampling_method</span><span class="p">,</span>
+                <span class="n">same_extent</span><span class="p">,</span>
+                <span class="n">same_shape</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">unified_results</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">unified_results</span></div>
+
+
+
+<div class="viewcode-block" id="_snap_raster">
+<a class="viewcode-back" href="../../../beak.utilities.raster_processing.html#beak.utilities.raster_processing._snap_raster">[docs]</a>
+<span class="k">def</span> <span class="nf">_snap_raster</span><span class="p">(</span>
+    <span class="n">raster</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span> <span class="n">snap_raster</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">DatasetReader</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+    <span class="n">raster_bounds</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">bounds</span>
+    <span class="n">snap_bounds</span> <span class="o">=</span> <span class="n">snap_raster</span><span class="o">.</span><span class="n">bounds</span>
+    <span class="n">raster_pixel_size_x</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">a</span>
+    <span class="n">raster_pixel_size_y</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">raster</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">e</span><span class="p">)</span>
+    <span class="n">snap_pixel_size_x</span> <span class="o">=</span> <span class="n">snap_raster</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">a</span>
+    <span class="n">snap_pixel_size_y</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">snap_raster</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="n">cells_added_x</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">snap_pixel_size_x</span> <span class="o">/</span> <span class="n">raster_pixel_size_x</span><span class="p">)</span>
+    <span class="n">cells_added_y</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">snap_pixel_size_y</span> <span class="o">/</span> <span class="n">raster_pixel_size_y</span><span class="p">)</span>
+
+    <span class="n">out_image</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">raster</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">raster</span><span class="o">.</span><span class="n">height</span> <span class="o">+</span> <span class="n">cells_added_y</span><span class="p">,</span> <span class="n">raster</span><span class="o">.</span><span class="n">width</span> <span class="o">+</span> <span class="n">cells_added_x</span><span class="p">),</span>
+        <span class="n">raster</span><span class="o">.</span><span class="n">nodata</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">out_meta</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Coordinates for the snap raster boundaries</span>
+    <span class="n">left_distance_in_pixels</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">raster_bounds</span><span class="o">.</span><span class="n">left</span> <span class="o">-</span> <span class="n">snap_bounds</span><span class="o">.</span><span class="n">left</span>
+    <span class="p">)</span> <span class="o">//</span> <span class="n">snap_pixel_size_x</span>
+    <span class="n">left_snap_coordinate</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">snap_bounds</span><span class="o">.</span><span class="n">left</span> <span class="o">+</span> <span class="n">left_distance_in_pixels</span> <span class="o">*</span> <span class="n">snap_pixel_size_x</span>
+    <span class="p">)</span>
+
+    <span class="n">bottom_distance_in_pixels</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">raster_bounds</span><span class="o">.</span><span class="n">bottom</span> <span class="o">-</span> <span class="n">snap_bounds</span><span class="o">.</span><span class="n">bottom</span>
+    <span class="p">)</span> <span class="o">//</span> <span class="n">snap_pixel_size_y</span>
+    <span class="n">bottom_snap_coordinate</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">snap_bounds</span><span class="o">.</span><span class="n">bottom</span> <span class="o">+</span> <span class="n">bottom_distance_in_pixels</span> <span class="o">*</span> <span class="n">snap_pixel_size_y</span>
+    <span class="p">)</span>
+    <span class="n">top_snap_coordinate</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">bottom_snap_coordinate</span> <span class="o">+</span> <span class="p">(</span><span class="n">raster</span><span class="o">.</span><span class="n">height</span> <span class="o">+</span> <span class="n">cells_added_y</span><span class="p">)</span> <span class="o">*</span> <span class="n">raster_pixel_size_y</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Distance and array indices of close cell corner in snapped raster to slot values</span>
+    <span class="n">x_distance</span> <span class="o">=</span> <span class="p">(</span><span class="n">raster_bounds</span><span class="o">.</span><span class="n">left</span> <span class="o">-</span> <span class="n">left_snap_coordinate</span><span class="p">)</span> <span class="o">%</span> <span class="n">raster_pixel_size_x</span>
+    <span class="n">x0</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">raster_bounds</span><span class="o">.</span><span class="n">left</span> <span class="o">-</span> <span class="n">left_snap_coordinate</span><span class="p">)</span> <span class="o">//</span> <span class="n">raster_pixel_size_x</span><span class="p">)</span>
+    <span class="n">x1</span> <span class="o">=</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">raster</span><span class="o">.</span><span class="n">width</span>
+
+    <span class="n">y_distance</span> <span class="o">=</span> <span class="p">(</span><span class="n">raster_bounds</span><span class="o">.</span><span class="n">bottom</span> <span class="o">-</span> <span class="n">bottom_snap_coordinate</span><span class="p">)</span> <span class="o">%</span> <span class="n">raster_pixel_size_y</span>
+    <span class="n">y0</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+        <span class="n">cells_added_y</span>
+        <span class="o">-</span> <span class="p">((</span><span class="n">raster_bounds</span><span class="o">.</span><span class="n">bottom</span> <span class="o">-</span> <span class="n">bottom_snap_coordinate</span><span class="p">)</span> <span class="o">//</span> <span class="n">raster_pixel_size_y</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">y1</span> <span class="o">=</span> <span class="n">y0</span> <span class="o">+</span> <span class="n">raster</span><span class="o">.</span><span class="n">height</span>
+
+    <span class="c1"># Find the closest corner of the snapped grid for shifting/slotting the original raster</span>
+    <span class="k">if</span> <span class="n">x_distance</span> <span class="o">&lt;</span> <span class="n">raster_pixel_size_x</span> <span class="o">/</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">y_distance</span> <span class="o">&lt;</span> <span class="n">raster_pixel_size_y</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">out_image</span><span class="p">[:,</span> <span class="n">y0</span><span class="p">:</span><span class="n">y1</span><span class="p">,</span> <span class="n">x0</span><span class="p">:</span><span class="n">x1</span><span class="p">]</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  <span class="c1"># Snap values towards left-bottom</span>
+    <span class="k">elif</span> <span class="n">x_distance</span> <span class="o">&lt;</span> <span class="n">raster_pixel_size_x</span> <span class="o">/</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">y_distance</span> <span class="o">&gt;</span> <span class="n">raster_pixel_size_y</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">out_image</span><span class="p">[:,</span> <span class="n">y0</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">y1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x0</span><span class="p">:</span><span class="n">x1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">raster</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="p">)</span>  <span class="c1"># Snap values towards left-top # noqa: E203</span>
+    <span class="k">elif</span> <span class="n">x_distance</span> <span class="o">&gt;</span> <span class="n">raster_pixel_size_x</span> <span class="o">/</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">y_distance</span> <span class="o">&gt;</span> <span class="n">raster_pixel_size_y</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">out_image</span><span class="p">[:,</span> <span class="n">y0</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">y1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x0</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">x1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">raster</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="p">)</span>  <span class="c1"># Snap values toward right-top # noqa: E203</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">out_image</span><span class="p">[:,</span> <span class="n">y0</span><span class="p">:</span><span class="n">y1</span><span class="p">,</span> <span class="n">x0</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">x1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">raster</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="p">)</span>  <span class="c1"># Snap values towards right-bottom # noqa: E203</span>
+
+    <span class="n">out_transform</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">Affine</span><span class="p">(</span>
+        <span class="n">raster</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">a</span><span class="p">,</span>
+        <span class="n">raster</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">b</span><span class="p">,</span>
+        <span class="n">left_snap_coordinate</span><span class="p">,</span>
+        <span class="n">raster</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">d</span><span class="p">,</span>
+        <span class="n">raster</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">e</span><span class="p">,</span>
+        <span class="n">top_snap_coordinate</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">out_meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;transform&quot;</span><span class="p">:</span> <span class="n">out_transform</span><span class="p">,</span>
+            <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="n">out_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">out_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">out_image</span><span class="p">,</span> <span class="n">out_meta</span></div>
+
+
+
+<div class="viewcode-block" id="snap_raster">
+<a class="viewcode-back" href="../../../beak.utilities.raster_processing.html#beak.utilities.raster_processing.snap_raster">[docs]</a>
+<span class="k">def</span> <span class="nf">snap_raster</span><span class="p">(</span>
+    <span class="n">raster</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span> <span class="n">snap_raster</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">DatasetReader</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Snaps/aligns raster to given snap raster.</span>
+
+<span class="sd">    Raster is snapped from its left-bottom corner to nearest snap raster grid corner in left-bottom direction.</span>
+<span class="sd">    If rasters are aligned, simply returns input raster data and metadata.</span>
+
+<span class="sd">    Adapted core function from EIS Toolkit (main branch as of 29-01-2024).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        raster: The raster to be clipped.</span>
+<span class="sd">        snap_raster: The snap raster i.e. reference grid raster.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The snapped raster data.</span>
+<span class="sd">        The updated metadata.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: Raster and and snap raster are not in the same CRS.</span>
+<span class="sd">        ValueError: Raster and and snap raster are not in the same CRS.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">raster</span><span class="o">.</span><span class="n">crs</span> <span class="o">==</span> <span class="n">snap_raster</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Raster and and snap raster have different CRS.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">snap_raster</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">bottom</span> <span class="o">==</span> <span class="n">raster</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">bottom</span>
+        <span class="ow">and</span> <span class="n">snap_raster</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">left</span> <span class="o">==</span> <span class="n">raster</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">left</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Raster grids are already aligned.&quot;</span><span class="p">)</span>
+
+    <span class="n">out_image</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">_snap_raster</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span> <span class="n">snap_raster</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out_image</span><span class="p">,</span> <span class="n">out_meta</span></div>
+
+
+
+<span class="c1"># region: Test code</span>
+
+<span class="c1"># endregion</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

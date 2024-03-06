@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>beak.methods.som.argsPlot &mdash; beak-ta3 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=29a6c3e3"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            beak-ta3
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../beak.html">beak package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../beak.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../beak.data.html">beak.data package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../beak.methods.html">beak.methods package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../beak.methods.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../beak.utilities.html">beak.utilities package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../beak.utilities.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">beak-ta3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">beak.methods.som.argsPlot</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for beak.methods.som.argsPlot</h1><div class="highlight"><pre>
+<div class="viewcode-block" id="Args">
+<a class="viewcode-back" href="../../../../beak.methods.som.argsPlot.html#beak.methods.som.argsPlot.Args">[docs]</a>
+<span></span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>  
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Arguments for drawing plots from SOM results.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        outsomfile (str): SOM calculation somspace output text file.</span>
+<span class="sd">        som_x (int): SOM x dimension.</span>
+<span class="sd">        som_y (int): SOM y dimension.</span>
+<span class="sd">        input_file (str): Input file (&quot;.lrn&quot;).</span>
+<span class="sd">        dir (str): Input file (&quot;.lrn&quot;).</span>
+<span class="sd">        grid_type (str): Grid type (&quot;rectangular&quot; or &quot;hexagonal&quot;).</span>
+<span class="sd">        redraw (bool): Whether to draw all plots, or only those required for clustering.</span>
+<span class="sd">            &quot;True&quot;: draw all. &quot;False&quot;: draw only for clustering.</span>
+<span class="sd">        outgeofile (str): SOM geospace results txt file.</span>
+<span class="sd">        dataType (str): Data type (&quot;scatter&quot; or &quot;grid&quot;).</span>
+<span class="sd">        noDataValue (str): Nodata value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">outsomfile</span><span class="p">:</span> <span class="nb">str</span>         <span class="c1"># SOM calculation somspace output text file</span>
+    <span class="n">som_x</span><span class="p">:</span> <span class="nb">int</span>              <span class="c1"># SOM x dimension</span>
+    <span class="n">som_y</span><span class="p">:</span><span class="nb">int</span>               <span class="c1"># SOM y dimension</span>
+    <span class="n">input_file</span><span class="p">:</span> <span class="nb">str</span>         <span class="c1"># Input file(*.lrn)</span>
+    <span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span>                <span class="c1"># Input file(*.lrn)</span>
+    <span class="n">grid_type</span><span class="o">=</span><span class="s1">&#39;rectangular&#39;</span> <span class="c1"># Grid type (rectangular or hexagonal)</span>
+    <span class="n">redraw</span><span class="o">=</span><span class="kc">True</span>             <span class="c1"># Whether to draw all plots, or only those required for clustering (True: draw all. False:draw only for clustering).</span>
+    <span class="n">outgeofile</span><span class="o">=</span><span class="kc">None</span>         <span class="c1"># SOM geospace results txt file</span>
+    <span class="n">dataType</span><span class="o">=</span><span class="kc">None</span>           <span class="c1"># Data type (scatter or grid)</span>
+    <span class="n">noDataValue</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span>        <span class="c1"># Nodata value</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

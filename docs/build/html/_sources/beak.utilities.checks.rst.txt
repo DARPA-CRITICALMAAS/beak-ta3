@@ -1,0 +1,8 @@
+beak.utilities.checks module
+============================
+
+.. automodule:: beak.utilities.checks
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

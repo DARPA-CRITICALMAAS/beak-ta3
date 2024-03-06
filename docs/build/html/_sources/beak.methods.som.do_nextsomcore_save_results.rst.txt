@@ -1,0 +1,8 @@
+beak.methods.som.do\_nextsomcore\_save\_results module
+======================================================
+
+.. automodule:: beak.methods.som.do_nextsomcore_save_results
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
