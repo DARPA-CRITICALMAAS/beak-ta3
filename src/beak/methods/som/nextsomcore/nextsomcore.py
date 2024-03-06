@@ -5,6 +5,7 @@ maps and write results to the disk. NxtSomCore depends on somoclu package writte
 by Peter Wittek to perform actual SOM calculations.
 
 @author: Janne Kallunki, Sakari Hautala
+modyfied by Ina Storch, 2024
 """
 import warnings
 with warnings.catch_warnings():
@@ -32,24 +33,30 @@ class NxtSomCore(object):
 
     def load_data(self, input_file, label_file = ""):
         """Load and return the input data as a dict containing numpy array and metadata
-        :param input_file: The name of the file to be loaded.
-        :type filename: str.
-        :rtype: dict
-        """
+
+        Args:
+            input_file (str): The name of the file to be loaded.
+            label_file (str, optional): The name of the label file to be loaded. Defaults to "".
+
+        Returns:
+            dict: Dictionary holding de model data as a ndarray and meta data such as numer of rows and column, column (data) names, file type. 
+        """        
+
         return load_input_file(input_file, label_file)
 
     def train(self, data, som_x, som_y , epochs=10, **kwargs):
         """Train the map and return results as a dict.
-        :param data: Training data used in SOM.
-        :type data: 2D numpy.array of float32.
-        :param som_x: X-size of the map.
-        :type som_x: int.
-        :param som_y: Y-size of the map.
-        :type som_y: int.
-        :param epochs: Number of rounds the training is performed.
-        :type epochs: int.
-        :rtype: dict
-        """
+
+        Args:
+            data (nparray): Training data used in SOM.
+            som_x (int): X-size of the map.
+            som_y (int): Y-size of the map.
+            epochs (int, optional):  Number of rounds the training is performed. Defaults to 10.
+
+        Returns:
+            dict: Dictionary holding SOM results, umatrix and meta data like number of columns and rows.
+        """        
+        
         self.som = somoclu.Somoclu(som_x, som_y, 
             kerneltype = kwargs.pop("kerneltype", 0), 
   			verbose = kwargs.pop("verbose", 2),
@@ -78,12 +85,15 @@ class NxtSomCore(object):
     def cluster(self, som, cluster_count):
         """Cluster the codebook and return clustering results as a 2d numpy array. Code taken from
          somoclu's train.py and changed to operate on input parameters only
-        :param som: SOM-related data obtained from training(codebook, dimensions, etc..)
-        :type som: dictionary
-        :param cluster_count: Number of clusters used in clustering
-        :type cluster_count: int.
-        :rtype: numpy.array
-        """
+
+        Args:
+            som (dict): SOM-related data obtained from training(codebook, dimensions, etc..)
+            cluster_count (int): Number of clusters used in clustering
+
+        Returns:
+            nparray: Cluster result.
+        """        
+
         algorithm = KMeans(n_clusters=cluster_count, init='random', n_init=10) # n_init='auto'
         original_shape = som['codebook'].shape
         som['codebook'].shape = (som['n_columns'] * som['n_rows'], som['n_dim'])
@@ -101,17 +111,18 @@ class NxtSomCore(object):
          somoclu's train.py and changed to operate on input parameters only.
          Calculates clusters multiple times and selects the best result by lowest Davies-Bouldin score. 
          Returns the best clustering, and writes the best clustering results for each number of clusters to a binary file.
-        :param som: SOM-related data obtained from training(codebook, dimensions, etc..)
-        :type som: dictionary
-        :param cluster_min: Minimum number of clusters used in clustering
-        :type cluster_min: int.
-        :param cluster_max: Maximum number of clusters used in clustering
-        :type cluster_max: int.
-        :param cluster_init: Minimum number of clusters used in clustering
-        :type cluster_min: int.
-        :rtype: numpy.array                       
-        
-        """               
+
+        Args:
+            som (dict): SOM-related data obtained from training(codebook, dimensions, etc..)
+            cluster_min (int): Minimum number of clusters used in clustering
+            cluster_max (int): Maximum number of clusters used in clustering
+            cluster_init (int): Number of initializations used in clustering
+            working_dir (str): Destination folder to be used for saving the result.
+
+        Returns:
+            nparray: Cluster result with smalles db-score.
+        """        
+             
         min=2 
         algorithm = KMeans()
         original_shape = som['codebook'].shape       
@@ -160,8 +171,8 @@ class NxtSomCore(object):
         return smallest_3[0]["cluster"]     
 
 
-    def save_geospace_result(self, output_file, header, som, output_folder, input_file, normalized=False, labelIndex=-2):
-        """Write SOM results with header line and input columns to disk in geospace
+    def save_geospace_result(self, output_file, header, som, output_folder, input_file, normalized=False, labelIndex=False):
+        """Write SOM results with header line and input columns to disk in geospace.
 
         Output file columns:
         X, Y, Z - Coordinates in the input file (if present in input file)
@@ -171,13 +182,15 @@ class NxtSomCore(object):
         b_data1, bdata2, bdataN, ... - SOM results
         q_error= Q-error, difference between som results and original columns
 
-        :param output_file: Filename to be used for saving the result.
-        :type output_file: str.
-        :param header: Dictionary holding header data ((load_data(...)).
-        :type header: dictionary.
-        :param som: Dictionary holding SOM results (train(...)).
-        :type som: dictionary.
-        """
+        Args:
+            output_file (str): Filename to be used for saving the result.
+            header (dict): Dictionary holding header data ((load_data(...)).
+            som (dict): Dictionary holding SOM results (train(...)).
+            output_folder (str): Destination folder to be used for saving the result.
+            input_file (LiteralStringstr): list of input files, separated by komma (only first line is used to get the geotransform and projection information to set output GeoFIT geotransform and projection)
+            normalized (bool, optional): Whether data is normalized or not. Defaults to False.
+            labelIndex (bool, optional): Whether input data has label data column. Defaults to False.
+        """        
         
         coord_cols = read_coordinate_columns(header)
         data_cols = read_data_columns(header)
@@ -230,7 +243,7 @@ class NxtSomCore(object):
         
         print("         savetxt")
 
-        if(labelIndex=="true"):
+        if(labelIndex==True):
             data = np.loadtxt(
                 input_file, 
                 dtype='str',
@@ -264,13 +277,14 @@ class NxtSomCore(object):
         umatrix - U-matrix
         cluster - Cluster group number
 
-        :param output_file: Filename to be used for saving the result.
-        :type output_file: str.
-        :param header: Dictionary holding header data ((load_data(...)).
-        :type header: dictionary.
-        :param som: Dictionary holding SOM results (train(...)).
-        :type som: dictionary.
-        """
+        Args:
+            output_file (str): Filename to be used for saving the result.
+            header (dict): Dictionary holding header data ((load_data(...)).
+            som (dict): Dictionary holding SOM results (train(...)).
+            output_folder (str): Destination folder to be used for saving the result.
+            normalized (bool, optional): Whether data is normalized or not. Defaults to False.
+        """        
+
         col_names = read_data_columns(header)['colnames']
         som_cols = self._extract_som_cols_somspace(som, col_names)
         hits=np.zeros((som['n_columns'],som['n_rows']))
