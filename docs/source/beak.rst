@@ -16,5 +16,5 @@ Subpackages
    :glob:
 
    beak.data
-   beak.math
+   beak.methods
    beak.utilities

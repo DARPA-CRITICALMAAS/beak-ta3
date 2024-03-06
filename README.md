@@ -241,7 +241,7 @@ Here is how to solve common `command not found` or `encoding` issues (Windows, L
 2. `export PATH=$PATH:/beak-ta3/`
 
 **How to solve the `/bin/bash^M: bad interpreter: No such file or directory` error:**
-1. Use a text editor like [Notepad++](https://notepad-plus-plus.org/)
+1. Use a text editor like [Notepad++](https://notepad-plus-plus.org/) or even VSCode
 2. Change the line ending to **Unix (LF)**
 3. Save the file
 
