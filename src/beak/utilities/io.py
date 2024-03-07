@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import rasterio
 import shutil
+import zipfile
 from rasterio.crs import CRS
 
 import os
@@ -515,7 +516,9 @@ def copy_folder_structure(
         check_path(new_folder)
 
 
-def save_input_file_list(file_path: Path, file_list: Sequence[Union[Path, str]], only_existing: bool = True):
+def save_input_file_list(
+    file_path: Path, file_list: Sequence[Union[Path, str]], only_existing: bool = True
+):
     """
     Save a list of input files to a text file.
 
@@ -528,7 +531,7 @@ def save_input_file_list(file_path: Path, file_list: Sequence[Union[Path, str]],
     """
     if only_existing is True:
         file_list = [file for file in file_list if Path(file).exists()]
-        
+
     with open(file_path, "w") as file:
         file.writelines(f"{element}\n" for element in file_list)
         file.close()
@@ -572,19 +575,24 @@ def copy_files(
                 shutil.copy2(file_path, new_destination)
 
 
+def compress_to_zip(file_path: Path, method: int = zipfile.ZIP_LZMA, level: int = 5):
+    """
+    Compresses a file to a zip archive in the same location.
+
+    Args:
+        file_path (Path): The path to the file to be compressed.
+
+    Returns:
+        None
+    """
+    zip_file_path = file_path.with_suffix(".zip")
+    with zipfile.ZipFile(zip_file_path, "w") as zip_file:
+        zip_file.write(
+            file_path, file_path.name, compress_type=method, compresslevel=level
+        )
+
+
 # region: Test code
-import sys
 
-if sys.version_info < (3, 9):
-    from importlib_resources import files
-else:
-    from importlib.resources import files
-
-BASE_PATH = files("beak.data") / "LAWLEY22-EXPORT" / "EPSG_4326_RES_0_05"
-
-source_folder = BASE_PATH / "COMPLETE_DATASET"
-destination_folder = BASE_PATH / "COMPLETE_DATASET_COPY"
-
-# copy_folder_structure(source_folder, destination_folder)
 
 # endregion: Test code
