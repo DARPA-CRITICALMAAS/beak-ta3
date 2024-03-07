@@ -239,34 +239,41 @@ class NxtSomCore(object):
         combined_cols_deleted = np.c_[coord_cols['data_deleted'], np.full((coord_cols['data_deleted'].shape[0],combined_cols.shape[1] - 2), np.nan)]
 
         # Join the arrays
-        final_combined_cols = np.vstack((combined_cols, combined_cols_deleted))
+        combined_cols_all = np.vstack((combined_cols, combined_cols_deleted))
         
         print("         savetxt")
 
         if(labelIndex==True):
-            data = np.loadtxt(
-                input_file, 
-                dtype='str',
-                delimiter='\t',
-                skiprows=3
-            )
-            labelcol=[]
-            for i in range(0,len(data[0])):
-                if(data[0][i]=='label'):
-                    labelcol=data[1:,i]
-            combined_cols=np.c_[combined_cols,labelcol]
-            combined_cols_deleted=np.c_[combined_cols_deleted,np.full((coord_cols['data_deleted'].shape[0],1), np.nan)]
-            final_combined_cols = np.vstack((combined_cols, combined_cols_deleted))
+            #-- when input format is lrn file:
+            #data = np.loadtxt(
+            #    input_file, 
+            #    dtype='str',
+            #    delimiter='\t',
+            #    skiprows=3
+            #)
+            #labelcol=[]
+            #for i in range(0,len(data[0])):
+            #    if(data[0][i]=='label'):
+            #        labelcol=data[1:,i]
+
+            #-- when input format is geotiff file:
+            labelcol = header['labeldata']
+            labelcol_deleted = np.c_[np.full((coord_cols['data_deleted'].shape[0],labelcol.shape[1]), np.nan)]
+            labelcol_all = np.vstack((labelcol, labelcol_deleted))
+
+            combined_cols_all=np.c_[combined_cols_all,labelcol_all]
+            #combined_cols_deleted=np.c_[combined_cols_deleted,np.full((coord_cols['data_deleted'].shape[0],1), np.nan)]
+
             header_line= header_line+" label"            
-            np.savetxt(output_file, final_combined_cols,fmt='%s', header=header_line, delimiter=' ', comments='')
-            np.savetxt(output_file[:-3]+"csv", final_combined_cols,fmt='%s', header=header_line.replace(" ",","),delimiter=',', comments='')
+            np.savetxt(output_file, combined_cols_all, fmt='%s', header=header_line, delimiter=' ', comments='')
+            np.savetxt(output_file[:-3] + "csv", combined_cols_all, fmt='%s', header=header_line.replace(" ",","),delimiter=',', comments='')
             #np.savetxt(output_file[:-3] + "csv", final_combined_cols, fmt=header_line.replace(" ", ","), delimiter=',', comments='')
         else:            
             fmt_combined = '{} {} {} {}'.format(coord_cols['fmt'], som_cols['fmt'], data_cols['fmt'], '%.5f')#'%.5f')       
-            np.savetxt(output_file, final_combined_cols, fmt='%s', header=header_line, delimiter=' ', comments='')
-            #np.savetxt(output_file, final_combined_cols,fmt=fmt_combined, header=header_line, delimiter=' ', comments='')
-            np.savetxt(output_file[:-3] + "csv", final_combined_cols, fmt=fmt_combined.replace(" ",","), header=header_line.replace(" ",","), comments='')
-            #np.savetxt(output_file[:-3] + "csv", final_combined_cols, fmt=header_line.replace(" ", ","), delimiter=',', comments='')
+            np.savetxt(output_file, combined_cols_all, fmt='%s', header=header_line, delimiter=' ', comments='')
+            #np.savetxt(output_file, combined_cols_all,fmt=fmt_combined, header=header_line, delimiter=' ', comments='')
+            np.savetxt(output_file[:-3] + "csv", combined_cols_all, fmt=fmt_combined.replace(" ",","), header=header_line.replace(" ",","), comments='')
+            #np.savetxt(output_file[:-3] + "csv", combined_cols_all, fmt=header_line.replace(" ", ","), delimiter=',', comments='')
 
     def save_somspace_result(self, output_file, header, som, output_folder, normalized=False):
         """Write SOM results with header line and input columns to disk in somspace.

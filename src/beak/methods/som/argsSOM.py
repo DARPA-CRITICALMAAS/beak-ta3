@@ -28,7 +28,7 @@ class Args:
     initialization='random'     # Type of SOM initialization ("random", "pca")
     gridtype='rectangular'      # Type of SOM grid ("hexagonal", "rectangular")
 
-    kmeans="true"            # Run k-means clustering
+    kmeans=True              # Run k-means clustering
     kmeans_init= 5           # Number of initializations
     kmeans_min= 2            # Minimum number of k-mean clusters
     kmeans_max= 25           # Maximum number of k-mean clusters

@@ -54,7 +54,7 @@ def run_SOM(args):
     else:
         output_folder=args.output_folder
     #print(args.output_folder)
-    if(args.kmeans.lower()=="true"):
+    if(args.kmeans==True):
         start_time = time.time()
         som['clusters']=nxtsomcore.clusters(som,args.kmeans_min,args.kmeans_max,args.kmeans_init,output_folder)     
         end_time = time.time()

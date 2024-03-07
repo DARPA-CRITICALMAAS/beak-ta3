@@ -28,16 +28,22 @@ def load_geotiff_files(input_file_list, label_file=""):
     path_0=None
     noDataValue_0 = None
     dataType_0 = None
-    geotiff_list_as_string=input_file_list + label_file # At this points the assumption is made that the coordinates of separate files are identical. So the coordinates can just be taken from any one of the individual files.
-    returndata = np.array([])  
+    returndata = np.array([]) 
+    labeldata = np.array([]) 
+    label = False
     colnames=[]
+    colnames_label = []
+    geotiff_list_as_string=input_file_list # At this points the assumption is made that the coordinates of separate files are identical. So the coordinates can just be taken from any one of the individual files.
 
-    if("," in geotiff_list_as_string):
-        geotiff_list_2=geotiff_list_as_string.split(",")#geotiff_list is str. geotiff_list_2 is array #maybe change the parameter name...?
-    else:
-        geotiff_list_2=[geotiff_list_as_string]
+    geotiff_array=geotiff_list_as_string.split(",")    #geotiff_list is str. geotiff_list_2 is array #maybe change the parameter name...?
+    layer_count = len(geotiff_array)
 
-    for geotiffpath in geotiff_list_2:   
+    # if file with label data is provided, add to list
+    if(label_file!=""):
+        label = True
+        geotiff_array += label_file.split(",")
+
+    for geotiffpath in geotiff_array:   
         src_ds = gdal.Open(geotiffpath, gdal.GA_ReadOnly)
         band=src_ds.GetRasterBand(1)
         noDataValue = band.GetNoDataValue()
@@ -82,21 +88,24 @@ def load_geotiff_files(input_file_list, label_file=""):
 
         flat=raster_array.flatten(order='C')
         
-        # Use np.concatenate to stack arrays
-        returndata = np.concatenate([returndata, flat]) if returndata.size else flat
 
-        colnames.append(os.path.basename(geotiffpath))     
+        if(len(colnames) < layer_count):
+            # Use np.concatenate to stack arrays
+            returndata = np.concatenate([returndata, flat]) if returndata.size else flat
+            colnames.append(os.path.basename(geotiffpath))     
+        else:
+            # Use np.concatenate to stack arrays
+            labeldata = np.concatenate([labeldata, flat]) if labeldata.size else flat
+            #colnames.append("label")
+            colnames_label.append("label_" + os.path.basename(geotiffpath))
 
     # Reshape returndata to have each raster as a column
-    returndata = returndata.reshape(-1, len(geotiff_list_2), order='F')
+    returndata = returndata.reshape(-1, layer_count, order='F')
+    labeldata = labeldata.reshape(-1, len(geotiff_array) - layer_count, order='F')
     rows=len(returndata) 
+    cols=len(returndata[0])              
 
-    if("," in geotiff_list_as_string):
-        cols=len(returndata[0])    
-    else:
-        cols=1            
-
-    return {'rows': rows, 'cols': cols, 'colnames': colnames, 
+    return {'rows': rows, 'cols': cols, 'colnames': colnames, 'label': label, 'labeldata': labeldata, 'colnames_label': colnames_label,
             'headerlength': 0, 'data': returndata, 'filetype': 'geotiff','originaldata':raster_array, 
             'geotransform':gt, 'noDataValue':np.nan, 'dataType':dataType
             }   
@@ -111,19 +120,22 @@ def delete_rows_with_no_data(geotiff_header):
         dict: dictionary holding the data as a stacked ndarray and meta data such as geo transform, numer of rows and column, no data value, column (data) names
     """    
     data = geotiff_header['data']
-    #originaldata = geotiff_header['originaldata']
-    #noDataValue = geotiff_header['noDataValue']
+    labeldata = geotiff_header['labeldata']
 
     # Identify rows with noDataValue
     rows_to_delete = np.any(np.isnan(data), axis=1)
 
     # Delete rows with noDataValue
     data_filtered = data[~rows_to_delete]
+    if(geotiff_header['label']==True): 
+        labeldata_filtered = labeldata[~rows_to_delete]
+    else:
+        labeldata_filtered = None
 
     # Update the rows count
     rows = len(data_filtered)
 
-    return {'rows': rows, 'cols': geotiff_header['cols'], 'colnames': geotiff_header['colnames'],
+    return {'rows': rows, 'cols': geotiff_header['cols'], 'colnames': geotiff_header['colnames'], 'label': geotiff_header['label'], 'labeldata_all': geotiff_header['labeldata'],'labeldata': labeldata_filtered, 'colnames_label': geotiff_header['colnames_label'],
             'headerlength': 0, 'data_all': geotiff_header['data'], 'data': data_filtered, 'filetype': 'geotiff', 'originaldata': geotiff_header['originaldata'],
             'geotransform': geotiff_header['geotransform'], 'noDataValue': geotiff_header['noDataValue'], 'dataType': geotiff_header['dataType']
             }
