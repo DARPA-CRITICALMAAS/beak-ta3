@@ -191,10 +191,10 @@ def check_path(folder: Path):
         folder (Path): The path to check and create if necessary.
 
     Returns:
-        (None): None
+        The input path as Path object.
     """
+    folder = Path(folder)
     if not os.path.exists(folder):
-        folder = Path(folder)
         folder.mkdir(parents=True, exist_ok=True)
 
     return folder

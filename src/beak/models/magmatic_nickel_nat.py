@@ -45,7 +45,7 @@ models = {
         # Magnetic from ScienceBase
         "MagRTP_HGM": True,
         "MagRTP_HGMDeepSources": True,
-        # Gravity Worms from Datacube
+        # Magnetic Worms from Datacube
         "Magnetic_HGM_Worms_Proximity": True,
         "Magnetic_LongWavelength_HGM_Worms_Proximity": True,
         # Seismic from ScienceBase
