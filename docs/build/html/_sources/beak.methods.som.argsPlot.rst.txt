@@ -1,0 +1,8 @@
+beak.methods.som.argsPlot module
+================================
+
+.. automodule:: beak.methods.som.argsPlot
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

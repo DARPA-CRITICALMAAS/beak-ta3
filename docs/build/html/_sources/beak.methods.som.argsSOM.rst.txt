@@ -1,0 +1,8 @@
+beak.methods.som.argsSOM module
+===============================
+
+.. automodule:: beak.methods.som.argsSOM
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

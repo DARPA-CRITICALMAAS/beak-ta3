@@ -1,0 +1,8 @@
+beak.methods.som.nextsomcore.loadfile module
+============================================
+
+.. automodule:: beak.methods.som.nextsomcore.loadfile
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

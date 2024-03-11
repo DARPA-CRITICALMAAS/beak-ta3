@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>beak.utilities.preparation &mdash; beak-ta3 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=29a6c3e3"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            beak-ta3
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../beak.html">beak package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../beak.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.data.html">beak.data package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.methods.html">beak.methods package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.methods.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.utilities.html">beak.utilities package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.utilities.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">beak-ta3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">beak.utilities.preparation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for beak.utilities.preparation</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.impute</span> <span class="kn">import</span> <span class="n">SimpleImputer</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Number</span>
+
+
+<div class="viewcode-block" id="create_encodings_from_dataframe">
+<a class="viewcode-back" href="../../../beak.utilities.preparation.html#beak.utilities.preparation.create_encodings_from_dataframe">[docs]</a>
+<span class="k">def</span> <span class="nf">create_encodings_from_dataframe</span><span class="p">(</span>
+    <span class="n">value_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">export_absent</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create encodings for categorical data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value_columns (List[str]): List of column names containing categorical values.</span>
+<span class="sd">        data (pd.DataFrame): Input data frame.</span>
+<span class="sd">        export_absent (bool): Flag indicating whether to export &quot;Absent&quot; columns.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Encoded data frame.</span>
+<span class="sd">        List[str]: List of new column names.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create binary encodings</span>
+    <span class="n">data_encoded</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">value_columns</span><span class="p">],</span> <span class="n">prefix</span><span class="o">=</span><span class="n">value_columns</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">uint8</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Get new column names</span>
+    <span class="n">new_value_columns</span> <span class="o">=</span> <span class="n">data_encoded</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">export_absent</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="c1"># Get rid of the &quot;Absent&quot; columns since they are not needed in binary encoding</span>
+        <span class="n">new_value_columns</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">column</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">new_value_columns</span> <span class="k">if</span> <span class="s2">&quot;Absent&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">column</span>
+        <span class="p">]</span>
+        <span class="n">data_encoded</span> <span class="o">=</span> <span class="n">data_encoded</span><span class="p">[</span><span class="n">new_value_columns</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">data_encoded</span><span class="p">,</span> <span class="n">new_value_columns</span></div>
+
+
+
+<div class="viewcode-block" id="impute_data">
+<a class="viewcode-back" href="../../../beak.utilities.preparation.html#beak.utilities.preparation.impute_data">[docs]</a>
+<span class="k">def</span> <span class="nf">impute_data</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">],</span>
+    <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">strategy</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+    <span class="n">fill_value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Number</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">missing_values</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Imputes missing values in the given data using the specified strategy.</span>
+
+<span class="sd">    For arrays, the data needs to be in the shape (rows, columns), e.g. 3 layers with 5 entries each: (5, 3).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (Union[np.ndarray, pd.DataFrame, gpd.GeoDataFrame]): The data to be imputed.</span>
+<span class="sd">        columns (List[str]): The columns to be imputed.</span>
+<span class="sd">        strategy (str, optional): The imputation strategy. Defaults to &quot;mean&quot;.</span>
+<span class="sd">        fill_value (Union[Number, str], optional): The value to fill missing values with. Defaults to None.</span>
+<span class="sd">        missing_values (Optional[Number], optional): The value to be treated as missing. Defaults to np.nan.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Union[np.ndarray, pd.DataFrame, gpd.GeoDataFrame]: The imputed data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">imputer</span> <span class="o">=</span> <span class="n">SimpleImputer</span><span class="p">(</span>
+        <span class="n">strategy</span><span class="o">=</span><span class="n">strategy</span><span class="p">,</span> <span class="n">missing_values</span><span class="o">=</span><span class="n">missing_values</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span>
+    <span class="p">)</span>
+    <span class="n">data_imputed</span> <span class="o">=</span> <span class="n">data</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">nan_count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">data_imputed</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">nan_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">data_shape</span> <span class="o">=</span> <span class="n">data_imputed</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">data_imputed</span> <span class="o">=</span> <span class="n">data_imputed</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">data_imputed</span> <span class="o">=</span> <span class="n">imputer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data_imputed</span><span class="p">)</span>
+            <span class="n">data_imputed</span> <span class="o">=</span> <span class="n">data_imputed</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">data_shape</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data_imputed</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
+        <span class="n">data_imputed</span><span class="p">[</span><span class="n">columns</span><span class="p">]</span> <span class="o">=</span> <span class="n">imputer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data_imputed</span><span class="p">[</span><span class="n">columns</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">data_imputed</span></div>
+
+
+
+<div class="viewcode-block" id="create_nan_buffer">
+<a class="viewcode-back" href="../../../beak.utilities.preparation.html#beak.utilities.preparation.create_nan_buffer">[docs]</a>
+<span class="k">def</span> <span class="nf">create_nan_buffer</span><span class="p">(</span>
+    <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">target_value</span><span class="p">:</span> <span class="n">Number</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a buffer of NaN values around the selected value in a given array.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array (np.ndarray): The array to be buffered.</span>
+<span class="sd">        target_value (Number): The value to be buffered. Defaults to 1.</span>
+<span class="sd">        radius (int): Number of cells (distance) to the targeted value to be changed.</span>
+<span class="sd">            Defaults to 1. E.g. radius of 1 will change the 8 cells around the targeted value.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: The buffered array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">target_locations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">array</span> <span class="o">==</span> <span class="n">target_value</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float16</span><span class="p">)</span>
+
+    <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">target_locations</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">target_locations</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">row_range</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="n">radius</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span> <span class="o">+</span> <span class="n">radius</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">col_range</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="n">radius</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">y</span> <span class="o">+</span> <span class="n">radius</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">out_array</span><span class="p">[</span><span class="n">row_range</span><span class="p">,</span> <span class="n">col_range</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">array</span> <span class="o">==</span> <span class="n">target_value</span><span class="p">,</span> <span class="n">target_value</span><span class="p">,</span> <span class="n">out_array</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="delete_nan_elements">
+<a class="viewcode-back" href="../../../beak.utilities.preparation.html#beak.utilities.preparation.delete_nan_elements">[docs]</a>
+<span class="k">def</span> <span class="nf">delete_nan_elements</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">transpose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">target_locations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">array</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">out_array</span> <span class="o">=</span> <span class="n">array</span><span class="p">[:,</span> <span class="o">~</span><span class="n">target_locations</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">transpose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">out_array</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out_array</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

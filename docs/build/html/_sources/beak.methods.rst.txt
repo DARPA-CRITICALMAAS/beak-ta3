@@ -1,0 +1,18 @@
+beak.methods package
+====================
+
+.. automodule:: beak.methods
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+Subpackages
+-----------
+
+.. toctree::
+   :includehidden:
+   :maxdepth: 4
+   :glob:
+
+   beak.methods.som

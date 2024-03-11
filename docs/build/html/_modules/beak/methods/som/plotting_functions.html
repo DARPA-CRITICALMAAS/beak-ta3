@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>beak.methods.som.plotting_functions &mdash; beak-ta3 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=29a6c3e3"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            beak-ta3
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../beak.html">beak package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../beak.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../beak.data.html">beak.data package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../beak.methods.html">beak.methods package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../beak.methods.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../beak.utilities.html">beak.utilities package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../beak.utilities.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">beak-ta3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">beak.methods.som.plotting_functions</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for beak.methods.som.plotting_functions</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Wed Aug 18 13:10:28 2021</span>
+
+<span class="sd">Functions for creating plots.</span>
+<span class="sd">@author: shautala</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1</span> <span class="kn">import</span> <span class="n">make_axes_locatable</span>
+<span class="kn">from</span> <span class="nn">matplotlib.collections</span> <span class="kn">import</span> <span class="n">RegularPolyCollection</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">ListedColormap</span>
+
+<div class="viewcode-block" id="contrasting_text_color">
+<a class="viewcode-back" href="../../../../beak.methods.som.plotting_functions.html#beak.methods.som.plotting_functions.contrasting_text_color">[docs]</a>
+<span class="k">def</span> <span class="nf">contrasting_text_color</span><span class="p">(</span><span class="n">hex_array</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define text color to be black/white to give maximum contrast and visibility</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        hex_array (array): _description_</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        array: black/white text color</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="n">hex_array</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">hex_array</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">hex_array</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.299</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.587</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.114</span><span class="p">)</span><span class="o">&lt;</span> <span class="mf">0.5</span> <span class="k">else</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="c1">#Photometric/digital ITU BT.709:: 0.2126 R + 0.7152 G + 0.0722 B    or Digital ITU BT.601 (gives more weight to the R and B components):  0.299 R + 0.587 G + 0.114 B</span></div>
+
+
+
+
+<div class="viewcode-block" id="plot_hexa">
+<a class="viewcode-back" href="../../../../beak.methods.som.plotting_functions.html#beak.methods.som.plotting_functions.plot_hexa">[docs]</a>
+<span class="k">def</span> <span class="nf">plot_hexa</span><span class="p">(</span><span class="n">somx</span><span class="p">,</span>
+            <span class="n">somy</span><span class="p">,</span>
+            <span class="n">clusters</span><span class="p">,</span>
+            <span class="n">grid</span><span class="p">,</span>
+            <span class="n">d_matrix</span><span class="p">,</span>
+            <span class="n">annot_ticks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">cluster_tick_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>         
+             <span class="n">w</span><span class="o">=</span><span class="mi">1080</span><span class="p">,</span>
+            <span class="n">dpi</span><span class="o">=</span><span class="mf">72.</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="s1">&#39;SOM Hit map&#39;</span><span class="p">,</span>
+            <span class="n">colmap</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">,</span>
+            <span class="n">ptype</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">,</span> 
+            <span class="n">labelIndex</span><span class="o">=</span><span class="s2">&quot;-2&quot;</span>
+            <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function for plotting hexagonal heatmaps.</span>
+<span class="sd">        Based on an excellent stackoverflow post by Fernando Ferreira </span>
+<span class="sd">        https://stackoverflow.com/questions/23726564/matplotlib-regularpolygon-collection-location-on-the-canvas/23811383#23811383  </span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        somx (int): size of som grid in x</span>
+<span class="sd">        somy (int): size of som grid in y</span>
+<span class="sd">        clusters (int): number of clusters</span>
+<span class="sd">        grid (dict): dictionary holding x, y and center point information if grid type is hexagonal</span>
+<span class="sd">        d_matrix (_type_): array contaning the distances between each neuron</span>
+<span class="sd">        annot_ticks (ndarray, optional): annotation ticks. Defaults to None.</span>
+<span class="sd">        cluster_tick_labels (ndarray, optional): array with tick labels for clusters</span>
+<span class="sd">        w (int, optional): width of the map in inches. Defaults to 1080.</span>
+<span class="sd">        dpi (int, optional): dpi. Defaults to 72..</span>
+<span class="sd">        title (str, optional): title. Defaults to &#39;SOM Hit map&#39;.</span>
+<span class="sd">        colmap (str, optional): colormap. Defaults to &#39;jet&#39;.</span>
+<span class="sd">        ptype (str, optional): data type. Defaults to &#39;scatter&#39;.</span>
+<span class="sd">        labelIndex (str, optional): label index. Defaults to &quot;-2&quot;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Axes: figure</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    
+    <span class="n">discrete_cmap</span><span class="o">=</span><span class="n">sns</span><span class="o">.</span><span class="n">cubehelix_palette</span><span class="p">(</span><span class="n">n_colors</span><span class="o">=</span><span class="n">clusters</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">rot</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">light</span><span class="o">=</span><span class="mf">0.77</span><span class="p">,</span> <span class="n">dark</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">as_cmap</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">n_centers</span> <span class="o">=</span> <span class="n">grid</span><span class="p">[</span><span class="s1">&#39;centers&#39;</span><span class="p">]</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">grid</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">grid</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">somx</span><span class="o">&lt;</span><span class="n">somy</span><span class="p">):</span>
+        <span class="n">xinch</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">w</span> <span class="o">/</span> <span class="n">y</span><span class="p">)</span> <span class="o">/</span> <span class="n">dpi</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xinch</span><span class="o">=</span><span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="n">w</span> <span class="o">/</span> <span class="n">y</span><span class="p">)</span> <span class="o">/</span> <span class="n">dpi</span>
+    <span class="n">yinch</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="n">w</span> <span class="o">/</span> <span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">dpi</span>
+
+
+    
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">xinch</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">yinch</span><span class="p">)),</span> <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+    
+    <span class="n">xpoints</span> <span class="o">=</span> <span class="n">n_centers</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">ypoints</span> <span class="o">=</span> <span class="n">n_centers</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="c1">#problem block</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">xpoints</span><span class="p">,</span> <span class="n">ypoints</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="nb">min</span><span class="p">(</span><span class="n">xpoints</span><span class="p">)</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">xpoints</span><span class="p">)</span><span class="o">+</span><span class="mf">1.</span><span class="p">,</span>
+             <span class="nb">max</span><span class="p">(</span><span class="n">ypoints</span><span class="p">)</span><span class="o">+</span><span class="mf">1.</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">ypoints</span><span class="p">)</span><span class="o">-</span><span class="mf">1.</span><span class="p">])</span>
+    <span class="n">xy_pixels</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">transData</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">xpoints</span><span class="p">,</span> <span class="n">ypoints</span><span class="p">])</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">xpix</span><span class="p">,</span> <span class="n">ypix</span> <span class="o">=</span> <span class="n">xy_pixels</span><span class="o">.</span><span class="n">T</span>
+    
+    <span class="c1"># In matplotlib, 0,0 is the lower left corner, whereas it&#39;s usually the</span>
+    <span class="c1"># upper right for most image software, so we&#39;ll flip the y-coords</span>
+    <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">get_width_height</span><span class="p">()</span>
+    <span class="n">ypix</span> <span class="o">=</span> <span class="n">height</span> <span class="o">-</span> <span class="n">ypix</span>
+    <span class="c1">###problem block</span>
+    
+    <span class="k">if</span><span class="p">(</span><span class="n">ptype</span><span class="o">==</span><span class="s1">&#39;scatter&#39;</span><span class="p">):</span> <span class="c1">#if the data type is csv with gaps</span>
+        <span class="n">apothem_x</span><span class="o">=</span><span class="p">(</span><span class="n">xpix</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">xpix</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> 
+        <span class="n">apothem_y</span><span class="o">=</span><span class="p">(</span><span class="n">ypix</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ypix</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> 
+        <span class="n">area_inner_circle</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">apothem_x</span><span class="p">),</span><span class="nb">abs</span><span class="p">(</span><span class="n">apothem_y</span><span class="p">),</span><span class="mi">4</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">area_inner_circle</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">apothem</span><span class="o">=</span><span class="p">(</span><span class="n">ypix</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ypix</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> 
+            <span class="n">area_inner_circle</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">apothem</span><span class="p">)</span> 
+        <span class="n">collection_bg</span> <span class="o">=</span> <span class="n">RegularPolyCollection</span><span class="p">(</span>
+            <span class="n">numsides</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>  
+            <span class="n">rotation</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
+            <span class="n">sizes</span><span class="o">=</span><span class="p">(</span><span class="n">area_inner_circle</span><span class="p">,),</span>
+            <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
+            <span class="n">array</span><span class="o">=</span> <span class="n">d_matrix</span><span class="p">,</span>
+            <span class="n">cmap</span> <span class="o">=</span> <span class="n">colmap</span><span class="p">,</span>
+            <span class="n">offsets</span> <span class="o">=</span> <span class="n">n_centers</span><span class="p">,</span>
+            <span class="n">transOffset</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">transData</span><span class="p">,</span>
+        <span class="p">)</span>
+        
+    <span class="k">else</span><span class="p">:</span> <span class="c1">#regular hexa plot</span>
+        <span class="n">apothem</span> <span class="o">=</span> <span class="mf">1.8</span> <span class="o">*</span> <span class="p">(</span><span class="n">xpix</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">xpix</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">area_inner_circle</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">apothem</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">collection_bg</span> <span class="o">=</span> <span class="n">RegularPolyCollection</span><span class="p">(</span>
+            <span class="n">numsides</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> 
+            <span class="n">rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">sizes</span><span class="o">=</span><span class="p">(</span><span class="n">area_inner_circle</span><span class="p">,),</span>
+            <span class="n">edgecolors</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">array</span><span class="o">=</span> <span class="n">d_matrix</span><span class="p">,</span>
+            <span class="n">cmap</span> <span class="o">=</span> <span class="n">colmap</span><span class="p">,</span>
+            <span class="n">offsets</span> <span class="o">=</span> <span class="n">n_centers</span><span class="p">,</span>
+            <span class="n">transOffset</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">transData</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">add_collection</span><span class="p">(</span><span class="n">collection_bg</span><span class="p">,</span> <span class="n">autolim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
+    <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">autoscale_view</span><span class="p">()</span>
+    <span class="n">divider</span> <span class="o">=</span> <span class="n">make_axes_locatable</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+    
+    <span class="k">if</span><span class="p">(</span><span class="n">colmap</span><span class="o">==</span><span class="s1">&#39;jet&#39;</span><span class="p">):</span>
+        <span class="n">cax</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s2">&quot;5%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+        <span class="n">cbar</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">collection_bg</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">,</span><span class="n">ticklocation</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">spacing</span><span class="o">=</span><span class="s1">&#39;proportional&#39;</span><span class="p">)</span>
+        <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+        <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="k">elif</span><span class="p">(</span><span class="n">colmap</span><span class="o">==</span><span class="s1">&#39;binary&#39;</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">x</span><span class="o">&lt;</span><span class="n">y</span><span class="p">):</span>
+            <span class="n">cax</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s2">&quot;5%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+            <span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.size&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">((</span><span class="n">y</span><span class="o">/</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="mi">32</span><span class="p">)})</span>  
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mf">.98</span><span class="p">,</span><span class="mf">.124</span><span class="p">,</span><span class="mf">.04</span><span class="p">,</span><span class="mf">.754</span><span class="p">])</span>
+        <span class="n">cbar</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">collection_bg</span><span class="p">,</span> <span class="n">cax</span><span class="o">=</span><span class="n">cax</span><span class="p">,</span><span class="n">ticklocation</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">spacing</span><span class="o">=</span><span class="s1">&#39;proportional&#39;</span><span class="p">)</span>
+        <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+        <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">x</span><span class="o">&gt;</span><span class="n">y</span> <span class="ow">and</span> <span class="n">clusters</span><span class="o">&gt;</span><span class="mi">15</span><span class="p">):</span>
+            <span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.size&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">((</span><span class="n">y</span><span class="o">/</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="mi">32</span><span class="p">)})</span>  
+        <span class="n">colmap2</span><span class="o">=</span><span class="n">colmap</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">labelIndex</span><span class="p">)</span><span class="o">!=</span><span class="s2">&quot;-2&quot;</span><span class="p">):</span>
+            <span class="n">ticks_flattened</span><span class="o">=</span><span class="n">annot_ticks</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">n_centers</span><span class="p">)):</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">ticks_flattened</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="p">(</span><span class="n">n_centers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_centers</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span><span class="n">color</span><span class="o">=</span><span class="n">contrasting_text_color</span><span class="p">(</span><span class="n">discrete_cmap</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">d_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">])]),</span><span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">39</span><span class="o">-</span><span class="p">(</span><span class="n">somy</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">somx</span><span class="o">/</span><span class="n">somy</span><span class="p">),</span><span class="mi">10</span><span class="p">))</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">clusters</span><span class="p">,</span> <span class="n">clusters</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">bounds2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">clusters</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">clusters</span><span class="p">)</span><span class="c1">#clusters+0.5 in case of som cell selection?</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">BoundaryNorm</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">colmap2</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">ptype</span><span class="o">==</span><span class="s1">&#39;scatter&#39;</span><span class="p">):</span>
+            <span class="n">cb_ax</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s2">&quot;5%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">x</span><span class="o">&lt;</span><span class="n">y</span><span class="p">):</span>
+                <span class="n">cb_ax</span> <span class="o">=</span> <span class="n">divider</span><span class="o">.</span><span class="n">append_axes</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s2">&quot;5%&quot;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cb_ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mf">.98</span><span class="p">,</span><span class="mf">.124</span><span class="p">,</span><span class="mf">.04</span><span class="p">,</span><span class="mf">.754</span><span class="p">])</span>
+                   
+        <span class="n">cbar</span><span class="o">=</span><span class="n">mpl</span><span class="o">.</span><span class="n">colorbar</span><span class="o">.</span><span class="n">ColorbarBase</span><span class="p">(</span><span class="n">cb_ax</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">colmap2</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">,</span><span class="n">spacing</span><span class="o">=</span><span class="s1">&#39;uniform&#39;</span><span class="p">,</span><span class="n">ticklocation</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">ticks</span><span class="o">=</span><span class="n">bounds2</span><span class="p">,</span> <span class="n">boundaries</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%1i</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>   
+        <span class="n">cbar</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+        <span class="n">ticks_reverse</span><span class="o">=</span><span class="n">cluster_tick_labels</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">ticks_reverse</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="n">cbar</span><span class="o">.</span><span class="n">set_ticklabels</span><span class="p">(</span><span class="n">ticks_reverse</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ax</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

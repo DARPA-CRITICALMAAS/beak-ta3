@@ -1,0 +1,8 @@
+beak.methods.som.plot\_som\_results module
+==========================================
+
+.. automodule:: beak.methods.som.plot_som_results
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

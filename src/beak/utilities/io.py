@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import rasterio
+import shutil
+import zipfile
 from rasterio.crs import CRS
 
 import os
@@ -189,10 +191,10 @@ def check_path(folder: Path):
         folder (Path): The path to check and create if necessary.
 
     Returns:
-        (None): None
+        The input path as Path object.
     """
+    folder = Path(folder)
     if not os.path.exists(folder):
-        folder = Path(folder)
         folder.mkdir(parents=True, exist_ok=True)
 
     return folder
@@ -514,19 +516,83 @@ def copy_folder_structure(
         check_path(new_folder)
 
 
+def save_input_file_list(
+    file_path: Path, file_list: Sequence[Union[Path, str]], only_existing: bool = True
+):
+    """
+    Save a list of input files to a text file.
+
+    Args:
+        file_path (Path): The path to the output text file.
+        file_list (List[Union[Path, str]]): The list of input files to be saved.
+
+    Returns:
+        None
+    """
+    if only_existing is True:
+        file_list = [file for file in file_list if Path(file).exists()]
+
+    with open(file_path, "w") as file:
+        file.writelines(f"{element}\n" for element in file_list)
+        file.close()
+
+
+def copy_files(
+    file_paths: Sequence[Path],
+    old_base_path: Path,
+    new_base_path: Path,
+    keep_folder_structure: bool = True,
+):
+    """
+    Copies files from a list of paths to a new location, maintaining their relative folder structure.
+
+    Args:
+      file_paths: A list of absolute file paths.
+      old_base_path: The directory to replace in the original paths.
+      new_base_path: The new base directory to save the files to.
+      keep_folder_structure: Whether to keep the original folder structure (default: True)
+
+    Returns:
+        None
+    """
+    for file_path in file_paths:
+        file_path = Path(file_path)
+
+        if not file_path.exists():
+            print(f"File not found: {file_path}")
+        else:
+            if keep_folder_structure is True:
+                relative_path = file_path.relative_to(
+                    Path(file_path.parent, old_base_path)
+                )
+                new_destination = Path(new_base_path) / relative_path
+                new_destination.parent.mkdir(parents=True, exist_ok=True)
+            else:
+                new_destination = new_base_path
+                check_path(new_base_path)
+
+            if not new_destination.exists():
+                shutil.copy2(file_path, new_destination)
+
+
+def compress_to_zip(file_path: Path, method: int = zipfile.ZIP_LZMA, level: int = 5):
+    """
+    Compresses a file to a zip archive in the same location.
+
+    Args:
+        file_path (Path): The path to the file to be compressed.
+
+    Returns:
+        None
+    """
+    zip_file_path = file_path.with_suffix(".zip")
+    with zipfile.ZipFile(zip_file_path, "w") as zip_file:
+        zip_file.write(
+            file_path, file_path.name, compress_type=method, compresslevel=level
+        )
+
+
 # region: Test code
-import sys
 
-if sys.version_info < (3, 9):
-    from importlib_resources import files
-else:
-    from importlib.resources import files
-
-BASE_PATH = files("beak.data") / "LAWLEY22-EXPORT" / "EPSG_4326_RES_0_05"
-
-source_folder = BASE_PATH / "COMPLETE_DATASET"
-destination_folder = BASE_PATH / "COMPLETE_DATASET_COPY"
-
-# copy_folder_structure(source_folder, destination_folder)
 
 # endregion: Test code

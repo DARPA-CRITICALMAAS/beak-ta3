@@ -2,7 +2,47 @@ import os
 import glob
 
 class Args:
-    """Arguments for SOM and k-means clustering
+    """Arguments for SOM and k-means clustering.
+
+    Args:
+        input_file (str): Input file(".lrn " or list, separated with ",").
+        output_folder (str): Folder to save SOM dictionary and cluster dictionary.
+        output_file_somspace (str): Text file that will contain calculated values.
+            Parameters: som_x som_y b_data1 b_data2 b_dataN umatrix cluster in geospace.
+        outgeofile (str): File name of the geospace output.
+        
+        som_x (int): X dimension of generated SOM.
+        som_y (int): Y dimension of generated SOM.
+        epochs (int): Number of epochs to run.
+        maptype (str): Type of SOM ("sheet", "toroid").
+        initialcodebook (Optional[str]): File path of initial codebook,
+            2D numpy array of float32.
+        neighborhood (str): Shape of the neighborhood function. gaussian or bubble.
+        std_coeff (float): Coefficient in the Gaussian neighborhood function.
+        radius0 (float): Initial size of the neighborhood.
+        radiusN (float): Final size of the neighborhood.
+        radiuscooling (str): Function that defines the decrease in the neighborhood 
+            size as the training proceeds ("linear", "exponential").
+        scalecooling (str): Function that defines the decrease in the learning scale 
+            as the training proceeds ("linear", "exponential").
+        scale0 (float): Initial learning rate.
+        scaleN (float): Final learning rate.
+        initialization (str): Type of SOM initialization ("random", "pca").
+        gridtype (str): Type of SOM grid ("hexagonal", "rectangular").
+        
+        kmeans (str): Run k-means clustering ("true" or "false").
+        kmeans_init (int): Number of initializations.
+        kmeans_min (int): Minimum number of k-mean clusters.
+        kmeans_max (int): Maximum number of k-mean clusters.
+        
+        output_file_geospace (Optional[str]): Text file that will contain calculated values.
+            Parameters: {X Y Z} data1 data2 ... dataN som_x som_y cluster b_data1 b_data2 b_dataN in geospace.
+        geotiff_input (Optional[str]): Geotiff_input files, separated by comma, to write GeoTIF out 
+            (only first line is used to get the geotransform and projection information to 
+            set output GeoFIT geotransform and projection)
+        normalized (str): Whether the data has been normalized or not ("true" or "false").
+        label (Optional[str]): Whether data contains label column ("true" or "false").
+        label_geotiff_file (Optional[str]): Geotiff_input file.
     """    
     input_file: str            # Input file(*.lrn or list, separated with ",")
     output_folder: str         # Folder to save som dictionary and cluster dictionary

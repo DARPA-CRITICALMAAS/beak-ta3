@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>beak.methods.som.load_geotiff &mdash; beak-ta3 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=29a6c3e3"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            beak-ta3
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../beak.html">beak package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../beak.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../beak.data.html">beak.data package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../beak.methods.html">beak.methods package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../beak.methods.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../beak.utilities.html">beak.utilities package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../beak.utilities.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">beak-ta3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">beak.methods.som.load_geotiff</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for beak.methods.som.load_geotiff</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Fri Jul  5 09:46:21 2019</span>
+<span class="sd">Script for reading geotiff input data files.</span>
+<span class="sd">@author: shautala</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">osgeo</span> <span class="kn">import</span> <span class="n">gdal</span>
+<span class="n">gdal</span><span class="o">.</span><span class="n">DontUseExceptions</span><span class="p">()</span>  <span class="c1"># gdal.UseExceptions()  # Explicitly Use or Don&#39;t Use Exceptions</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<div class="viewcode-block" id="load_geotiff_files">
+<a class="viewcode-back" href="../../../../beak.methods.som.load_geotiff.html#beak.methods.som.load_geotiff.load_geotiff_files">[docs]</a>
+<span class="k">def</span> <span class="nf">load_geotiff_files</span><span class="p">(</span><span class="n">input_file_list</span><span class="p">,</span> <span class="n">label_file</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load data and meta data of geotiff files using gdal</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_file_list (LiteralString): input file paths, separated by komma</span>
+<span class="sd">        label_file (LiteralString, optional): label file paths, separated by komma. Defaults to &quot;&quot;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: dictionary holding the data as a stacked ndarray and meta data such as geo transform, numer of rows and column, no data value, column (data) names</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">width_0</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">height_0</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">gt_0</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">prj_0</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">path_0</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">noDataValue_0</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">dataType_0</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">geotiff_list_as_string</span><span class="o">=</span><span class="n">input_file_list</span> <span class="o">+</span> <span class="n">label_file</span> <span class="c1"># At this points the assumption is made that the coordinates of separate files are identical. So the coordinates can just be taken from any one of the individual files.</span>
+    <span class="n">returndata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>  
+    <span class="n">colnames</span><span class="o">=</span><span class="p">[]</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="s2">&quot;,&quot;</span> <span class="ow">in</span> <span class="n">geotiff_list_as_string</span><span class="p">):</span>
+        <span class="n">geotiff_list_2</span><span class="o">=</span><span class="n">geotiff_list_as_string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span><span class="c1">#geotiff_list is str. geotiff_list_2 is array #maybe change the parameter name...?</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">geotiff_list_2</span><span class="o">=</span><span class="p">[</span><span class="n">geotiff_list_as_string</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">geotiffpath</span> <span class="ow">in</span> <span class="n">geotiff_list_2</span><span class="p">:</span>   
+        <span class="n">src_ds</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">geotiffpath</span><span class="p">,</span> <span class="n">gdal</span><span class="o">.</span><span class="n">GA_ReadOnly</span><span class="p">)</span>
+        <span class="n">band</span><span class="o">=</span><span class="n">src_ds</span><span class="o">.</span><span class="n">GetRasterBand</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">noDataValue</span> <span class="o">=</span> <span class="n">band</span><span class="o">.</span><span class="n">GetNoDataValue</span><span class="p">()</span>
+        <span class="n">dataType</span> <span class="o">=</span> <span class="n">band</span><span class="o">.</span><span class="n">DataType</span>  
+        <span class="n">width</span> <span class="o">=</span> <span class="n">src_ds</span><span class="o">.</span><span class="n">RasterXSize</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="n">src_ds</span><span class="o">.</span><span class="n">RasterYSize</span>
+        <span class="n">gt</span> <span class="o">=</span> <span class="n">src_ds</span><span class="o">.</span><span class="n">GetGeoTransform</span><span class="p">()</span>
+        <span class="n">prj</span><span class="o">=</span><span class="n">src_ds</span><span class="o">.</span><span class="n">GetProjection</span><span class="p">()</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">width_0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>        <span class="c1">#stash baseline values on first loop, for checking that projection etc. match for all files</span>
+            <span class="n">width_0</span> <span class="o">=</span> <span class="n">width</span>
+            <span class="n">height_0</span> <span class="o">=</span> <span class="n">height</span>
+            <span class="n">gt_0</span> <span class="o">=</span> <span class="n">gt</span>
+            <span class="n">prj_0</span><span class="o">=</span><span class="n">prj</span>
+            <span class="n">path_0</span><span class="o">=</span><span class="n">geotiffpath</span>
+            <span class="n">noDataValue_0</span> <span class="o">=</span> <span class="n">noDataValue</span>
+            <span class="n">dataType_0</span> <span class="o">=</span> <span class="n">dataType</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">gt</span><span class="o">!=</span><span class="n">gt_0</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Geotransform of &quot;</span><span class="o">+</span><span class="n">geotiffpath</span><span class="o">+</span><span class="s2">&quot; does not match with &quot;</span><span class="o">+</span><span class="n">path_0</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">prj</span><span class="o">!=</span><span class="n">prj_0</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Projection of &quot;</span><span class="o">+</span><span class="n">geotiffpath</span><span class="o">+</span><span class="s2">&quot; does not match with &quot;</span><span class="o">+</span><span class="n">path_0</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">width</span><span class="o">!=</span><span class="n">width_0</span> <span class="ow">or</span> <span class="n">height</span><span class="o">!=</span><span class="n">height_0</span><span class="p">):</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Error: Grid of &quot;</span><span class="o">+</span><span class="n">geotiffpath</span><span class="o">+</span><span class="s2">&quot; does not match.&quot;</span><span class="o">+</span><span class="n">path_0</span><span class="p">)</span>
+        <span class="c1">#if noDataValue != noDataValue_0:</span>
+        <span class="c1">#    print(&quot;Warning: noDataValue of &quot; + geotiffpath + &quot; does not match with &quot; + path_0)</span>
+        <span class="c1">#if dataType != dataType_0:</span>
+        <span class="c1">#    print(&quot;Warning: dataType of &quot; + geotiffpath + &quot; does not match with &quot; + path_0)</span>
+
+    	<span class="c1"># Read the raster data as a NumPy array</span>
+        <span class="n">raster_array</span> <span class="o">=</span> <span class="n">src_ds</span><span class="o">.</span><span class="n">ReadAsArray</span><span class="p">()</span>
+
+        <span class="c1"># Set NoData values to np.nan</span>
+        <span class="n">raster_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">raster_array</span> <span class="o">==</span> <span class="n">noDataValue</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">raster_array</span><span class="p">)</span>
+
+        <span class="c1"># Check if data type is integer and convert to np.float32</span>
+        <span class="k">if</span> <span class="n">raster_array</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;i&#39;</span><span class="p">:</span>
+            <span class="n">raster_array</span> <span class="o">=</span> <span class="n">raster_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="c1"># Close the dataset</span>
+        <span class="n">src_ds</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">flat</span><span class="o">=</span><span class="n">raster_array</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Use np.concatenate to stack arrays</span>
+        <span class="n">returndata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">returndata</span><span class="p">,</span> <span class="n">flat</span><span class="p">])</span> <span class="k">if</span> <span class="n">returndata</span><span class="o">.</span><span class="n">size</span> <span class="k">else</span> <span class="n">flat</span>
+
+        <span class="n">colnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">geotiffpath</span><span class="p">))</span>     
+
+    <span class="c1"># Reshape returndata to have each raster as a column</span>
+    <span class="n">returndata</span> <span class="o">=</span> <span class="n">returndata</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">geotiff_list_2</span><span class="p">),</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+    <span class="n">rows</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">returndata</span><span class="p">)</span> 
+
+    <span class="k">if</span><span class="p">(</span><span class="s2">&quot;,&quot;</span> <span class="ow">in</span> <span class="n">geotiff_list_as_string</span><span class="p">):</span>
+        <span class="n">cols</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">returndata</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cols</span><span class="o">=</span><span class="mi">1</span>            
+
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;rows&#39;</span><span class="p">:</span> <span class="n">rows</span><span class="p">,</span> <span class="s1">&#39;cols&#39;</span><span class="p">:</span> <span class="n">cols</span><span class="p">,</span> <span class="s1">&#39;colnames&#39;</span><span class="p">:</span> <span class="n">colnames</span><span class="p">,</span> 
+            <span class="s1">&#39;headerlength&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">returndata</span><span class="p">,</span> <span class="s1">&#39;filetype&#39;</span><span class="p">:</span> <span class="s1">&#39;geotiff&#39;</span><span class="p">,</span><span class="s1">&#39;originaldata&#39;</span><span class="p">:</span><span class="n">raster_array</span><span class="p">,</span> 
+            <span class="s1">&#39;geotransform&#39;</span><span class="p">:</span><span class="n">gt</span><span class="p">,</span> <span class="s1">&#39;noDataValue&#39;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="s1">&#39;dataType&#39;</span><span class="p">:</span><span class="n">dataType</span>
+            <span class="p">}</span>   </div>
+
+
+<div class="viewcode-block" id="delete_rows_with_no_data">
+<a class="viewcode-back" href="../../../../beak.methods.som.load_geotiff.html#beak.methods.som.load_geotiff.delete_rows_with_no_data">[docs]</a>
+<span class="k">def</span> <span class="nf">delete_rows_with_no_data</span><span class="p">(</span><span class="n">geotiff_header</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Delete rows from ndarray that contain noData values. Data and rows count of ndarray is updated and returned as a dictionary with same format as input dictionary.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        geotiff_header (dict): dictionary holding the data as a stacked ndarray and meta data such as geo transform, numer of rows and column, no data value, column (data) names</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: dictionary holding the data as a stacked ndarray and meta data such as geo transform, numer of rows and column, no data value, column (data) names</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">data</span> <span class="o">=</span> <span class="n">geotiff_header</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
+    <span class="c1">#originaldata = geotiff_header[&#39;originaldata&#39;]</span>
+    <span class="c1">#noDataValue = geotiff_header[&#39;noDataValue&#39;]</span>
+
+    <span class="c1"># Identify rows with noDataValue</span>
+    <span class="n">rows_to_delete</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Delete rows with noDataValue</span>
+    <span class="n">data_filtered</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="o">~</span><span class="n">rows_to_delete</span><span class="p">]</span>
+
+    <span class="c1"># Update the rows count</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_filtered</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;rows&#39;</span><span class="p">:</span> <span class="n">rows</span><span class="p">,</span> <span class="s1">&#39;cols&#39;</span><span class="p">:</span> <span class="n">geotiff_header</span><span class="p">[</span><span class="s1">&#39;cols&#39;</span><span class="p">],</span> <span class="s1">&#39;colnames&#39;</span><span class="p">:</span> <span class="n">geotiff_header</span><span class="p">[</span><span class="s1">&#39;colnames&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;headerlength&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;data_all&#39;</span><span class="p">:</span> <span class="n">geotiff_header</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data_filtered</span><span class="p">,</span> <span class="s1">&#39;filetype&#39;</span><span class="p">:</span> <span class="s1">&#39;geotiff&#39;</span><span class="p">,</span> <span class="s1">&#39;originaldata&#39;</span><span class="p">:</span> <span class="n">geotiff_header</span><span class="p">[</span><span class="s1">&#39;originaldata&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;geotransform&#39;</span><span class="p">:</span> <span class="n">geotiff_header</span><span class="p">[</span><span class="s1">&#39;geotransform&#39;</span><span class="p">],</span> <span class="s1">&#39;noDataValue&#39;</span><span class="p">:</span> <span class="n">geotiff_header</span><span class="p">[</span><span class="s1">&#39;noDataValue&#39;</span><span class="p">],</span> <span class="s1">&#39;dataType&#39;</span><span class="p">:</span> <span class="n">geotiff_header</span><span class="p">[</span><span class="s1">&#39;dataType&#39;</span><span class="p">]</span>
+            <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="read_geotiff_coordinate_columns">
+<a class="viewcode-back" href="../../../../beak.methods.som.load_geotiff.html#beak.methods.som.load_geotiff.read_geotiff_coordinate_columns">[docs]</a>
+<span class="k">def</span> <span class="nf">read_geotiff_coordinate_columns</span><span class="p">(</span><span class="n">geotiff_header</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read coordinate columns from dictionary</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        geotiff_header (dict): dictionary holding the data as a ndarray and meta data, such as numer of rows and column, column (data) names, file type</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: dictionary holding coordinates as a ndarray, column names and format</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="n">coordinates_x</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">coordinates_y</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">coordinates_deleted</span> <span class="o">=</span> <span class="p">[]</span>         
+    <span class="n">data</span><span class="o">=</span><span class="n">geotiff_header</span><span class="p">[</span><span class="s1">&#39;originaldata&#39;</span><span class="p">]</span>
+    <span class="n">gt</span><span class="o">=</span><span class="n">geotiff_header</span><span class="p">[</span><span class="s1">&#39;geotransform&#39;</span><span class="p">]</span>   <span class="c1"># gt[0]: x upper left, gt[1]: dx, gt[2]: row rotation (typically =0)</span>
+                                        <span class="c1"># gt[3]: y upper left, gt[4]: column rotation (typically =0), gt[5]: dy (negative value for a north-up image) </span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
+            <span class="n">coordinates_x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="o">*</span><span class="n">gt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">gt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">coordinates_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">gt</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="n">gt</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">coordinates_all</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">coordinates_x</span><span class="p">,</span><span class="n">coordinates_y</span><span class="p">))</span>
+
+    <span class="n">colnames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="s1">&#39;data_all&#39;</span> <span class="ow">in</span> <span class="n">geotiff_header</span><span class="p">):</span>        
+        <span class="c1"># Identify rows with noDataValue</span>
+        <span class="n">rows_to_delete</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">geotiff_header</span><span class="p">[</span><span class="s1">&#39;data_all&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Delete rows with noDataValue</span>
+        <span class="n">coordinates</span> <span class="o">=</span> <span class="n">coordinates_all</span><span class="p">[</span><span class="o">~</span><span class="n">rows_to_delete</span><span class="p">]</span>
+        <span class="n">coordinates_deleted</span> <span class="o">=</span> <span class="n">coordinates_all</span><span class="p">[</span><span class="n">rows_to_delete</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>  
+        <span class="n">coordinates</span> <span class="o">=</span> <span class="n">coordinates_all</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">coordinates</span><span class="p">,</span> <span class="s1">&#39;data_deleted&#39;</span><span class="p">:</span> <span class="n">coordinates_deleted</span><span class="p">,</span> <span class="s1">&#39;data_all&#39;</span><span class="p">:</span><span class="n">coordinates_all</span><span class="p">,</span><span class="s1">&#39;colnames&#39;</span><span class="p">:</span> <span class="n">colnames</span><span class="p">,</span> <span class="s1">&#39;fmt&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">}</span> </div>
+
+
+<div class="viewcode-block" id="read_geotiff_data_columns">
+<a class="viewcode-back" href="../../../../beak.methods.som.load_geotiff.html#beak.methods.som.load_geotiff.read_geotiff_data_columns">[docs]</a>
+<span class="k">def</span> <span class="nf">read_geotiff_data_columns</span><span class="p">(</span><span class="n">geotiff_header</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read data columns from dictionary</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        geotiff_header (dict): dictionary holding the data as a stacked ndarray and meta data such as geo transform, numer of rows and column, no data value, column (data) names</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: dictionary holding data columns as a ndarray, column names and format</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">geotiff_header</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="s1">&#39;colnames&#39;</span><span class="p">:</span> <span class="n">geotiff_header</span><span class="p">[</span><span class="s1">&#39;colnames&#39;</span><span class="p">],</span> <span class="s1">&#39;fmt&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%f</span><span class="s1"> &#39;</span> <span class="o">*</span> <span class="n">geotiff_header</span><span class="p">[</span><span class="s1">&#39;cols&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()}</span> </div>
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

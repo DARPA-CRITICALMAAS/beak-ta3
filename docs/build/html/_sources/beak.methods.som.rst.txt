@@ -1,0 +1,35 @@
+beak.methods.som package
+========================
+
+.. automodule:: beak.methods.som
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+Subpackages
+-----------
+
+.. toctree::
+   :includehidden:
+   :maxdepth: 4
+   :glob:
+
+   beak.methods.som.nextsomcore
+
+Submodules
+----------
+
+.. toctree::
+   :includehidden:
+   :maxdepth: 4
+   :glob:
+
+   beak.methods.som.argsPlot
+   beak.methods.som.argsSOM
+   beak.methods.som.do_nextsomcore_save_results
+   beak.methods.som.load_csv
+   beak.methods.som.load_geotiff
+   beak.methods.som.move_to_subfolder
+   beak.methods.som.plot_som_results
+   beak.methods.som.plotting_functions

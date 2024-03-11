@@ -1,0 +1,8 @@
+beak.methods.som.plotting\_functions module
+===========================================
+
+.. automodule:: beak.methods.som.plotting_functions
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

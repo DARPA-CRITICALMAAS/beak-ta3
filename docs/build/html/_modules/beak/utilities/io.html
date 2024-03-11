@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>beak.utilities.io &mdash; beak-ta3 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=29a6c3e3"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            beak-ta3
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../beak.html">beak package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../beak.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.data.html">beak.data package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.methods.html">beak.methods package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.methods.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.utilities.html">beak.utilities package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.utilities.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">beak-ta3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">beak.utilities.io</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for beak.utilities.io</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">rasterio</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">rasterio.crs</span> <span class="kn">import</span> <span class="n">CRS</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Number</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+
+<div class="viewcode-block" id="load_dataset">
+<a class="viewcode-back" href="../../../beak.utilities.io.html#beak.utilities.io.load_dataset">[docs]</a>
+<span class="k">def</span> <span class="nf">load_dataset</span><span class="p">(</span>
+    <span class="n">file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">encoding_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ISO-8859-1&quot;</span><span class="p">,</span>
+    <span class="n">nrows</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load a text-based dataset from disk.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file (Path): Location of the file to be loaded.</span>
+<span class="sd">        encoding_type (str): Text encoding of the input file. Defaults to &quot;ISO-8859-1&quot;.</span>
+<span class="sd">        nrows (int, optional): Number of rows to be loaded. Defaults to None.</span>
+<span class="sd">        **kwargs: Additional keyword arguments to be passed to pd.read_csv().</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Table with loaded data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding_type</span><span class="p">,</span> <span class="n">nrows</span><span class="o">=</span><span class="n">nrows</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="load_raster">
+<a class="viewcode-back" href="../../../beak.utilities.io.html#beak.utilities.io.load_raster">[docs]</a>
+<span class="k">def</span> <span class="nf">load_raster</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load a single raster file using rasterio.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file (Path): The path to the raster file.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        rasterio.io.DatasetReader: The opened raster dataset.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="load_rasters">
+<a class="viewcode-back" href="../../../beak.utilities.io.html#beak.utilities.io.load_rasters">[docs]</a>
+<span class="k">def</span> <span class="nf">load_rasters</span><span class="p">(</span>
+    <span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">extensions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;.tif&quot;</span><span class="p">,</span> <span class="s2">&quot;.tiff&quot;</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load raster files of a given type from a folder.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        folder (Path): The folder path where the raster files are located.</span>
+<span class="sd">        extensions (List[str]): List of file extensions to consider. Defaults to [&quot;.tif&quot;, &quot;.tiff&quot;].</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[List[Path], List[rasterio.io.DatasetReader]]: A tuple containing the list of file paths and the loaded raster datasets.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_list</span> <span class="o">=</span> <span class="n">create_file_list</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">extensions</span><span class="p">)</span>
+    <span class="n">loaded_rasters</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">file_list</span><span class="p">):</span>
+        <span class="n">loaded_raster</span> <span class="o">=</span> <span class="n">load_raster</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="n">loaded_rasters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loaded_raster</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">file_list</span><span class="p">,</span> <span class="n">loaded_rasters</span></div>
+
+
+
+<div class="viewcode-block" id="read_raster">
+<a class="viewcode-back" href="../../../beak.utilities.io.html#beak.utilities.io.read_raster">[docs]</a>
+<span class="k">def</span> <span class="nf">read_raster</span><span class="p">(</span><span class="n">raster</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read a raster single-band raster dataset.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        raster (rasterio.io.DatasetReader): The raster dataset to read.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: The raster data as a NumPy array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">raster</span><span class="o">.</span><span class="n">band_count</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">raster</span><span class="o">.</span><span class="n">read</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="read_rasters">
+<a class="viewcode-back" href="../../../beak.utilities.io.html#beak.utilities.io.read_rasters">[docs]</a>
+<span class="k">def</span> <span class="nf">read_rasters</span><span class="p">(</span><span class="n">raster_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read multiple rasters and return them as a list of NumPy arrays.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        raster_list (List[rasterio.io.DatasetReader]): A list of rasterio dataset readers.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[np.ndarray]: A list of NumPy arrays representing the read rasters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">read_raster</span><span class="p">(</span><span class="n">raster</span><span class="p">)</span> <span class="k">for</span> <span class="n">raster</span> <span class="ow">in</span> <span class="n">raster_list</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="get_filename_and_extension">
+<a class="viewcode-back" href="../../../beak.utilities.io.html#beak.utilities.io.get_filename_and_extension">[docs]</a>
+<span class="k">def</span> <span class="nf">get_filename_and_extension</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the filename and extension from a given file path.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file (Path): The path to the file.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[str, str]: A tuple containing the filename and extension.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">file</span><span class="o">.</span><span class="n">stem</span><span class="p">,</span> <span class="n">file</span><span class="o">.</span><span class="n">suffix</span></div>
+
+
+
+<div class="viewcode-block" id="create_file_list">
+<a class="viewcode-back" href="../../../beak.utilities.io.html#beak.utilities.io.create_file_list">[docs]</a>
+<span class="k">def</span> <span class="nf">create_file_list</span><span class="p">(</span>
+    <span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">extensions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;.tif&quot;</span><span class="p">,</span> <span class="s2">&quot;.tiff&quot;</span><span class="p">],</span>
+    <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a list of files in the specified folder with the given extensions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        folder (Path): The folder path to search for files.</span>
+<span class="sd">        extensions (List[str]): The list of file extensions to include. Defaults to [&quot;.tif&quot;, &quot;.tiff&quot;].</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[Path]: A list of Path objects representing the files found.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">recursive</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">folder</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">folder</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">ext</span> <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">extensions</span><span class="p">):</span>
+            <span class="n">file_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">file_list</span></div>
+
+
+
+<div class="viewcode-block" id="create_file_folder_list">
+<a class="viewcode-back" href="../../../beak.utilities.io.html#beak.utilities.io.create_file_folder_list">[docs]</a>
+<span class="k">def</span> <span class="nf">create_file_folder_list</span><span class="p">(</span>
+    <span class="n">root_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">exclude_types</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a list of files and folders in a root folder (including subfolders).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        root_folder (Path): The root folder to search for folders.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[List[Path], List[Path]]: A tuple containing two lists - the list of folders and the list of files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">folder_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">file_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">exclude_types</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">[</span><span class="s2">&quot;.aux&quot;</span><span class="p">,</span> <span class="s2">&quot;.xml&quot;</span><span class="p">,</span> <span class="s2">&quot;.cpg&quot;</span><span class="p">,</span> <span class="s2">&quot;.ovr&quot;</span><span class="p">,</span> <span class="s2">&quot;.dbf&quot;</span><span class="p">,</span> <span class="s2">&quot;.prj&quot;</span><span class="p">,</span> <span class="s2">&quot;.sld&quot;</span><span class="p">,</span> <span class="s2">&quot;.shp&quot;</span><span class="p">,</span> <span class="s2">&quot;.shx&quot;</span><span class="p">,</span> <span class="s2">&quot;.tfw&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">exclude_types</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="n">exclude_types</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">root_folder</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">dirs</span><span class="p">:</span>
+            <span class="n">folder_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span> <span class="o">/</span> <span class="n">folder</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dirs</span><span class="p">:</span>
+                <span class="n">file_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span> <span class="o">/</span> <span class="n">folder</span> <span class="o">/</span> <span class="n">file</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">file_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span> <span class="o">/</span> <span class="n">file</span>
+
+                <span class="c1"># Ignore metadata files</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">file_path</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">exclude_types</span><span class="p">:</span>
+                    <span class="n">file_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">folder_list</span><span class="p">,</span> <span class="n">file_list</span></div>
+
+
+
+<div class="viewcode-block" id="check_path">
+<a class="viewcode-back" href="../../../beak.utilities.io.html#beak.utilities.io.check_path">[docs]</a>
+<span class="k">def</span> <span class="nf">check_path</span><span class="p">(</span><span class="n">folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if path exists and create if not.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        folder (Path): The path to check and create if necessary.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (None): None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
+        <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+        <span class="n">folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">folder</span></div>
+
+
+
+<div class="viewcode-block" id="save_raster">
+<a class="viewcode-back" href="../../../beak.utilities.io.html#beak.utilities.io.save_raster">[docs]</a>
+<span class="k">def</span> <span class="nf">save_raster</span><span class="p">(</span>
+    <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">nodata_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">transform</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">Affine</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">compress_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;lzw&quot;</span><span class="p">,</span>
+    <span class="n">compress_num_threads</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s2">&quot;all_cpus&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save raster data to disk.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        path (Path): The file path where the raster will be saved.</span>
+<span class="sd">        array (np.ndarray): The raster data as a NumPy array.</span>
+<span class="sd">        crs: (Optional[rasterio.crs.CRS]): The coordinate reference system of the raster.</span>
+<span class="sd">        height (Optional[int]): The height (number of rows) of the raster.</span>
+<span class="sd">        width (Optional[int]): The width (number of columns) of the raster.</span>
+<span class="sd">        nodata_value (Optional[np.number]): The nodata value of the raster.</span>
+<span class="sd">        transform (affine.Affine): The affine transformation matrix that maps pixel coordinates to CRS coordinates.</span>
+<span class="sd">        dtype (Optional[np.dtype]): The data type of the raster. Defaults to None.</span>
+<span class="sd">        metadata (Optional[Dict]): Additional metadata to be included in the raster file. Defaults to None.</span>
+<span class="sd">            If provided, remaining metadata arguments will be ignored.</span>
+<span class="sd">        compress_method (Optional[str]): The compression method to use. Defaults to &quot;lzw&quot;.</span>
+<span class="sd">        compress_num_threads (Optional[Union[int, str]]): The number of threads to use for compression. Defaults to &quot;all_cpus&quot;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (None): None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">count</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">dtype</span> <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dtype</span>
+    <span class="n">nodata_value</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;nodata&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">nodata_value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">nodata_value</span>
+
+    <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">crs</span><span class="o">.</span><span class="n">is_epsg_code</span><span class="p">:</span>
+            <span class="n">epsg_code</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+            <span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_epsg</span><span class="p">(</span><span class="n">epsg_code</span><span class="p">)</span>
+
+        <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;driver&quot;</span><span class="p">:</span> <span class="s2">&quot;GTiff&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">),</span>
+            <span class="s2">&quot;nodata&quot;</span><span class="p">:</span> <span class="n">nodata_value</span><span class="p">,</span>
+            <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="n">width</span><span class="p">,</span>
+            <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">height</span><span class="p">,</span>
+            <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">count</span><span class="p">,</span>
+            <span class="s2">&quot;crs&quot;</span><span class="p">:</span> <span class="n">crs</span><span class="p">,</span>
+            <span class="s2">&quot;transform&quot;</span><span class="p">:</span> <span class="n">transform</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">metadata</span>
+        <span class="n">meta</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">count</span><span class="p">})</span>
+        <span class="n">meta</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">)})</span>
+        <span class="n">meta</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;nodata&quot;</span><span class="p">:</span> <span class="n">nodata_value</span><span class="p">})</span>
+
+    <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span>
+        <span class="n">path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="n">compress_method</span><span class="p">,</span> <span class="n">num_threads</span><span class="o">=</span><span class="n">compress_num_threads</span><span class="p">,</span> <span class="o">**</span><span class="n">meta</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">dst</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span>
+            <span class="n">dst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">),</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">dst</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="dataframe_to_feather">
+<a class="viewcode-back" href="../../../beak.utilities.io.html#beak.utilities.io.dataframe_to_feather">[docs]</a>
+<span class="k">def</span> <span class="nf">dataframe_to_feather</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert dataframe to feather format.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (pd.DataFrame): Input dataframe.</span>
+<span class="sd">        file_path (Path): Output feather file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">threads</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+    <span class="n">chunksize</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">/</span> <span class="n">threads</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">to_feather</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="n">chunksize</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="load_feather">
+<a class="viewcode-back" href="../../../beak.utilities.io.html#beak.utilities.io.load_feather">[docs]</a>
+<span class="k">def</span> <span class="nf">load_feather</span><span class="p">(</span>
+    <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">use_threads</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">storage_options</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">nrows</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load data from a feather file into a pandas DataFrame.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file_path (Path): The path to the feather file.</span>
+<span class="sd">        columns (Optional[List], optional): A list of column names to load. Defaults to None.</span>
+<span class="sd">        use_threads (bool, optional): Whether to use multiple threads for reading. Defaults to True.</span>
+<span class="sd">        storage_options (Optional[dict], optional): Additional options for storage. Defaults to None.</span>
+<span class="sd">        nrows (Optional[int], optional): The number of rows to load. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: The loaded data as a pandas DataFrame.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_feather</span><span class="p">(</span>
+        <span class="n">file_path</span><span class="p">,</span>
+        <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span>
+        <span class="n">use_threads</span><span class="o">=</span><span class="n">use_threads</span><span class="p">,</span>
+        <span class="n">storage_options</span><span class="o">=</span><span class="n">storage_options</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">nrows</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="n">nrows</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+
+<div class="viewcode-block" id="spatial_filter">
+<a class="viewcode-back" href="../../../beak.utilities.io.html#beak.utilities.io.spatial_filter">[docs]</a>
+<span class="k">def</span> <span class="nf">spatial_filter</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">longitude_column</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">latitude_column</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">longitude_min</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">longitude_max</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">latitude_min</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">latitude_max</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter data by spatial extent.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (pd.DataFrame): Input dataframe.</span>
+<span class="sd">        longitude_min (Number): Minimum longitude.</span>
+<span class="sd">        longitude_max (Number): Maximum longitude.</span>
+<span class="sd">        latitude_min (Number): Minimum latitude.</span>
+<span class="sd">        latitude_max (Number): Maximum latitude.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Filtered dataframe.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">longitude_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">longitude_column</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">longitude_min</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">longitude_min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">data</span>
+        <span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">longitude_column</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">longitude_max</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">longitude_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">data</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">latitude_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">latitude_column</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">latitude_min</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">latitude_min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">data</span>
+        <span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">latitude_column</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">latitude_max</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">latitude_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">data</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+
+<div class="viewcode-block" id="load_model">
+<a class="viewcode-back" href="../../../beak.utilities.io.html#beak.utilities.io.load_model">[docs]</a>
+<span class="k">def</span> <span class="nf">load_model</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">folders</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">file_extensions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;.tif&quot;</span><span class="p">,</span> <span class="s2">&quot;.tiff&quot;</span><span class="p">],</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load model from dictionary and search for corresponding files.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (dict): The model dictionary containing evidence layers.</span>
+<span class="sd">        folders (Sequence[Path]): The list of folders to search for files.</span>
+<span class="sd">        file_extensions (Sequence[str], optional): The file extensions to consider. Defaults to [&quot;.tif&quot;, &quot;.tiff&quot;].</span>
+<span class="sd">        verbose (int, optional): The verbosity level. Defaults to 1.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: Raised if no valid selection is found.</span>
+<span class="sd">        ValueError: Raised if no files are found.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A dictionary containing the loaded model with corresponding files.</span>
+<span class="sd">        list: A list of all files found.</span>
+<span class="sd">        Counter: A counter containing the number of files for each evidence layer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Load evidence layers from model dictionary</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading model definition...&quot;</span><span class="p">)</span>
+    <span class="n">evidence_layers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">layer</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">evidence_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">evidence_layers</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No valid selection.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Selected </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">evidence_layers</span><span class="p">))</span><span class="si">}</span><span class="s2"> evidence layers.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="p">[</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">layer</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">evidence_layers</span><span class="p">]</span>
+
+    <span class="c1"># Create file list from provided folders</span>
+    <span class="n">file_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">folder_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">subfolders_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Searching for files and folders in provided paths...&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">folders</span><span class="p">:</span>
+        <span class="n">subfolders</span> <span class="o">=</span> <span class="n">create_file_folder_list</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">exclude_types</span><span class="o">=</span><span class="p">[])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">subfolders_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">subfolders</span><span class="p">)</span>
+
+    <span class="n">folder_list</span> <span class="o">=</span> <span class="n">folders</span> <span class="o">+</span> <span class="n">subfolders_list</span>
+    <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">folder_list</span><span class="p">:</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">create_file_list</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file_extensions</span><span class="p">)</span>
+        <span class="n">file_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">file_list</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No files found.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">folders</span><span class="p">))</span><span class="si">}</span><span class="s2"> folders, </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subfolders_list</span><span class="p">))</span><span class="si">}</span><span class="s2"> subfolders and </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">))</span><span class="si">}</span><span class="s2"> files.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Create model file dictionary</span>
+    <span class="n">model_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">evidence_layer</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">model_dict</span><span class="p">[</span><span class="n">evidence_layer</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Status</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Searching for corresponding files...&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Make comparison based on lower case names</span>
+    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">model_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">file_names_from_layers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">file_extensions</span><span class="p">:</span>
+            <span class="n">file_name_from_layer</span> <span class="o">=</span> <span class="n">layer</span> <span class="o">+</span> <span class="n">extension</span>
+            <span class="n">file_names_from_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_name_from_layer</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+
+        <span class="n">matching_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">file_names_from_layers</span><span class="p">:</span>
+                <span class="n">matching_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">matching_list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">folder_list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">layer</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">folder</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                    <span class="n">matching_list</span> <span class="o">=</span> <span class="n">create_file_list</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">file_extensions</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">matching_list</span><span class="p">:</span>
+            <span class="n">matching_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">matching_list</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">model_dict</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span> <span class="o">=</span> <span class="n">matching_list</span>
+
+    <span class="k">for</span> <span class="n">layer</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">model_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">files</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Searched for &#39;</span><span class="si">{</span><span class="n">layer</span><span class="si">}</span><span class="s2">&#39; but no matching file was found.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found &#39;</span><span class="si">{</span><span class="n">layer</span><span class="si">}</span><span class="s2">&#39; in </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">))</span><span class="si">}</span><span class="s2"> file(s).&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check if all layers have files</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Ensuring that all layers have matching files...&quot;</span><span class="p">)</span>
+    <span class="n">missing_layers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">model_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">model_dict</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">missing_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WARNING: No file found for evidence layer &#39;</span><span class="si">{</span><span class="n">layer</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">missing_layers</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WARNING: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">missing_layers</span><span class="p">))</span><span class="si">}</span><span class="s2"> layers have no matching files.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;All layers have matching files.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Count the occurrences of each filename</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Checking files for multiple occurences...&quot;</span><span class="p">)</span>
+    <span class="n">file_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">file</span> <span class="k">for</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">model_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">values</span><span class="p">]</span>
+    <span class="n">filename_counts</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">([</span><span class="n">file</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span><span class="p">])</span>
+
+    <span class="c1"># Print the filenames that occur multiple times and their counts</span>
+    <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">filename_counts</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No duplicates found. All filenames occur only once.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">filename</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">filename_counts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- &#39;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&#39; occurs </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2"> times&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Some filenames occur multiple times. Please check with option verbose=1 to see which files are affected.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of files in file list: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model_dict</span><span class="p">,</span> <span class="n">file_list</span><span class="p">,</span> <span class="n">filename_counts</span></div>
+
+
+
+<div class="viewcode-block" id="copy_folder_structure">
+<a class="viewcode-back" href="../../../beak.utilities.io.html#beak.utilities.io.copy_folder_structure">[docs]</a>
+<span class="k">def</span> <span class="nf">copy_folder_structure</span><span class="p">(</span>
+    <span class="n">source_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">destination_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">include_source</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Copy folder structure from source folder to destination folder.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        source_folder (Path): The source folder.</span>
+<span class="sd">        destination_folder (Path): The destination folder.</span>
+<span class="sd">        verbose (int, optional): The verbosity level. Defaults to 1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get all folders in the root folder</span>
+    <span class="n">folders</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">create_file_folder_list</span><span class="p">(</span><span class="n">source_folder</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">include_source</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">folders</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">source_folder</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total of subfolders found: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">folders</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Create folder structure</span>
+    <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">folders</span><span class="p">:</span>
+        <span class="n">new_folder</span> <span class="o">=</span> <span class="n">folder</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">source_folder</span><span class="p">)</span>
+        <span class="n">new_folder</span> <span class="o">=</span> <span class="n">destination_folder</span> <span class="o">/</span> <span class="n">new_folder</span>
+        <span class="n">check_path</span><span class="p">(</span><span class="n">new_folder</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="save_input_file_list">
+<a class="viewcode-back" href="../../../beak.utilities.io.html#beak.utilities.io.save_input_file_list">[docs]</a>
+<span class="k">def</span> <span class="nf">save_input_file_list</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">file_list</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span> <span class="n">only_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save a list of input files to a text file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file_path (Path): The path to the output text file.</span>
+<span class="sd">        file_list (List[Union[Path, str]]): The list of input files to be saved.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">only_existing</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">file_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">file</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span> <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()]</span>
+        
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">element</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">file_list</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="copy_files">
+<a class="viewcode-back" href="../../../beak.utilities.io.html#beak.utilities.io.copy_files">[docs]</a>
+<span class="k">def</span> <span class="nf">copy_files</span><span class="p">(</span>
+    <span class="n">file_paths</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">old_base_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">new_base_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">keep_folder_structure</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Copies files from a list of paths to a new location, maintaining their relative folder structure.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      file_paths: A list of absolute file paths.</span>
+<span class="sd">      old_base_path: The directory to replace in the original paths.</span>
+<span class="sd">      new_base_path: The new base directory to save the files to.</span>
+<span class="sd">      keep_folder_structure: Whether to keep the original folder structure (default: True)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">file_paths</span><span class="p">:</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File not found: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">keep_folder_structure</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">relative_path</span> <span class="o">=</span> <span class="n">file_path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span>
+                    <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">old_base_path</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">new_destination</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">new_base_path</span><span class="p">)</span> <span class="o">/</span> <span class="n">relative_path</span>
+                <span class="n">new_destination</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_destination</span> <span class="o">=</span> <span class="n">new_base_path</span>
+                <span class="n">check_path</span><span class="p">(</span><span class="n">new_base_path</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">new_destination</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">new_destination</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># region: Test code</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">importlib_resources</span> <span class="kn">import</span> <span class="n">files</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">importlib.resources</span> <span class="kn">import</span> <span class="n">files</span>
+
+<span class="n">BASE_PATH</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;beak.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;LAWLEY22-EXPORT&quot;</span> <span class="o">/</span> <span class="s2">&quot;EPSG_4326_RES_0_05&quot;</span>
+
+<span class="n">source_folder</span> <span class="o">=</span> <span class="n">BASE_PATH</span> <span class="o">/</span> <span class="s2">&quot;COMPLETE_DATASET&quot;</span>
+<span class="n">destination_folder</span> <span class="o">=</span> <span class="n">BASE_PATH</span> <span class="o">/</span> <span class="s2">&quot;COMPLETE_DATASET_COPY&quot;</span>
+
+<span class="c1"># copy_folder_structure(source_folder, destination_folder)</span>
+
+<span class="c1"># endregion: Test code</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
