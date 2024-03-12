@@ -222,139 +222,69 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, no
     #labelIndex = colnames.index('label') if 'label' in colnames else None
 
     # Process label data
-    annot_ticks = np.empty([somx, somy], dtype='<U32')
+    annot_ticks = np.empty([somx, somy], dtype='<U32' if 'label' in colnames else '<U')
+    #annot_ticks = np.empty([somx, somy], dtype='<U32')
     annot_ticks.fill("")
 
-    #annot_strings = {}
-    #annot_data = []
-#
-    #if 'label' in colnames:
-    #    labelIndex = colnames.index('label')
-    #    bmus = som_dict["bmus"]
-    #    #---outfile = data[...] -> label_data
-    #    data = np.loadtxt(data_file, dtype='str', delimiter=' ' if outgeofile is not None else '\t',
-    #                      skiprows=0 if outgeofile is not None else 3)
-#
-    #    for i in range(0,len(data[0])):    # for i in range(1,len(data[0])):
-    #        if data[i][labelIndex] not in ['', "nan", "NA", "NULL", "Null", "NoData", noDataValue]:
-    #            tick = annot_ticks[bmus[i][0]][bmus[i][1]]
-    #            counter = len(annot_strings) + 1
-#
-    #            if tick == '':
-    #                annot_ticks[bmus[i][0]][bmus[i][1]] = str(counter)
-    #                annot_strings[str(counter)] = [data[i][labelIndex]]
-    #                annot_data.append([f"{counter}: {data[i][labelIndex]}", f"{bmus[i][0]}{bmus[i][1]}",
-    #                                   f"{geo_data[i][0]}, {geo_data[i][1]}" if outgeofile is not None else None])
-    #            else:
-    #                annot_strings[tick].append(data[i][labelIndex])
-    #                annot_data.append([f"{tick}: {data[i][labelIndex]}", f"{bmus[i][0]}{bmus[i][1]}",
-    #                                   f"{geo_data[i][0]}, {geo_data[i][1]}" if outgeofile is not None else None])
-#
-    #    # Merge duplicates within a labeling group
-    #    for i, j in itertools.combinations(range(1, counter + 1), 2):
-    #        if annot_strings.get(str(i)) == annot_strings.get(str(j)):
-    #            annot_strings.pop(str(j), None)
-    #            for a, b in itertools.product(range(len(annot_ticks)), range(len(annot_ticks[0]))):
-    #                if annot_ticks[a][b] == str(j):
-    #                    annot_ticks[a][b] = str(i)
-#
-    #    # Remove gaps in index numbers
-    #    counter = 0
-    #    for i in range(1, counter + 1):
-    #        if str(i) in annot_strings:
-    #            counter += 1
-    #            annot_strings[str(counter)] = annot_strings.pop(str(i))
-    #            for a, b in itertools.product(range(len(annot_ticks)), range(len(annot_ticks[0]))):
-    #                if annot_ticks[a][b] == str(i):
-    #                    annot_ticks[a][b] = str(counter)
-#
-    #    # Format ticks
-    #    for i in range(1, len(annot_strings) + 1):
-    #        annot_strings[str(i)] = f"{i}: {','.join(annot_strings[str(i)])}"
-    
-    #-----label old start
-    
-    if('label' in colnames):
-        labelIndex=colnames.index('label')
-        #if     (labelIndex!="-2"):#eli tän checkin sijaan pitäs kattoa onko input filessä 'label' nimistä columnia hedereissä.
-        annot_strings={}
+    annot_strings = {}
+    annot_data = []
+
+    if 'label' in colnames:
         annot_strings_for_dict={}
-        annot_data=[]
+        # "best matching unit" in som space for each data containing grid point in geo space
+        bmus = som_dict["bmus"]
         data = np.loadtxt(data_file, dtype='str', delimiter=' ' if outgeofile is not None else '\t',
-                          skiprows=0 if outgeofile is not None else 3)
-        outfile=[]
+                          skiprows=1 if outgeofile is not None else 3)
+        
+        labelIndex = colnames.index('label')
+        data_label=data[:,labelIndex]
 
-        #So. the current label format is the one that should be written to file, as it preserves all data. But for the plots, the new labeling system
-        #should be changed so, that differences in count are not taken into account, i.e. A A B = A B B, both are reduced to A B. should clean up the legend by
-        #quite a bit
+        for i in range(0,len(data_label)):    
+            if data_label[i] not in ['0.0', '', "nan", "NA", "NULL", "Null", "NoData", noDataValue]:
+                tick = annot_ticks[bmus[i][0]][bmus[i][1]]
+                counter = len(annot_strings) + 1
 
-        #for i in range(0,len(data[0])):
-        #    if(data[0][i].replace("\"","")=='label'):
-        #        outfile=data[1:,i]
-        outfile=data[1:,labelIndex]    
-        annot_ticks=np.empty([somx, somy], dtype="<U32")
-        bmus=som_dict["bmus"]
-        counter=1
-        for i in range(0,len(outfile)):   #AA. eli jos nonspatial: -2 sekoittaa. luultavasti ainakin tän takia. veikkaanpa että spatiaalilla on ton takia 2:n ekan skippi.      # ticks are added to list. annot_strings_for_dict stores them in a list, so that they can be sorted and reliably checked for duplicates including ones that are in different order.
-            if outfile[i] not in ['0.0', '', "nan", "NA", "NULL", "Null", "NoData", noDataValue, ]:
-                tick=annot_ticks[bmus[i][0]][bmus[i][1]]
-                if (tick==''): 
-                    annot_ticks[bmus[i][0]][bmus[i][1]]=str(counter)    
-                    annot_strings[str(counter)]=[outfile[i]]
-                    annot_strings_for_dict[str(counter)]=[outfile[i]]
-                    if outgeofile is not None:
-                        annot_data.append([(str(counter) + ": " + outfile[i]),(str(bmus[i][0]) + str(bmus[i][1])),(str(geo_data[i][0]) + ", " + str(geo_data[i][1]))]) 
-                    else:
-                        annot_data.append([(str(counter) + ": " + outfile[i]),(str(bmus[i][0]) + str(bmus[i][1]))])          
-                    counter=counter+1
-                else:   
-                    annot_strings[tick].append(outfile[i])
-                    annot_strings_for_dict[tick].append(outfile[i])
-                    if outgeofile is not None:
-                        annot_data.append([(str(tick) + ": " + outfile[i]),(str(bmus[i][0]) + str(bmus[i][1])),(str(geo_data[i][0]) + ", " + str(geo_data[i][1]))])
-                    else:
-                        annot_data.append([(str(tick) + ": " + outfile[i]),(str(bmus[i][0]) + str(bmus[i][1]))])
+                if tick == '':
+                    annot_ticks[bmus[i][0]][bmus[i][1]] = str(counter)
+                    annot_strings[str(counter)] = [data_label[i]]
+                    annot_strings_for_dict[str(counter)]=[data_label[i]]
+                    annot_data.append([f"{counter}: {data_label[i]}", f"{bmus[i][0]}{bmus[i][1]}",
+                                       f"{geo_data[i][0]}, {geo_data[i][1]}" if outgeofile is not None else None])
+                else:
+                    annot_strings[tick].append(data_label[i])
+                    annot_strings_for_dict[tick].append(data_label[i])
+                    annot_data.append([f"{tick}: {data_label[i]}", f"{bmus[i][0]}{bmus[i][1]}",
+                                       f"{geo_data[i][0]}, {geo_data[i][1]}" if outgeofile is not None else None])
 
-        for i in range(1, len(annot_strings_for_dict)+1): 
-            annot_strings_for_dict[str(i)].sort()
+        for i in range(1, len(annot_strings)+1): 
+            annot_strings[str(i)].sort()
 
-        #add a step: merge duplicates within a labeling group. BUT the below result must also be kept...
-        #eli joku unique filtteri vaan vetää eka tähän, sit jatko saa mennä aivan samaan tapaan.
-        #merge duplicates:         
-        for i in range(1, len(annot_strings_for_dict)+1):
-            for j in range(1, len(annot_strings_for_dict)+1):
-                if ((i!=j) and annot_strings_for_dict[str(i)]==annot_strings_for_dict[str(j)]):		
-                    if(str(i) in annot_strings):
-                        annot_strings.pop(str(j))
-                    for a in range(0,len(annot_ticks)):
-                        for b in range(0,len(annot_ticks[a])):
-                            if(annot_ticks[a][b]==str(i)):
-                                annot_ticks[a][b]=str(j)	
+        # Merge duplicates within a labeling group
+        for i, j in itertools.combinations(range(1, counter + 1), 2):
+            if annot_strings.get(str(i)) == annot_strings.get(str(j)):
+                #remove duplicate entry from dictionary 'annot_strings'
+                annot_strings.pop(str(j), None)
+                #go through all indices of 2D array 'annot_ticks' and replace value if equal to duplicate entry j
+                for a, b in itertools.product(range(len(annot_ticks)), range(len(annot_ticks[0]))):
+                    if annot_ticks[a][b] == str(j):
+                        annot_ticks[a][b] = str(i)
 
-        #remove gaps in index numbers:                        
-        counter=0
-        for i in range (1, len(annot_strings_for_dict)+1):
+        # set new index numbers
+        counter = 0
+        for i in range(1, len(annot_strings_for_dict) + 1):
             if str(i) in annot_strings:
-                counter=counter+1
-                annot_strings[str(counter)] = annot_strings.pop(str(i)) 
-                for a in range(0,len(annot_ticks)):
-                    for b in range(0,len(annot_ticks[a])):
-                        if(annot_ticks[a][b]==str(i)):
-                            annot_ticks[a][b]=counter	
-        #format ticks:
-        for i in range(1,len(annot_strings)+1):
-            annot_strings[str(i)]=str(i)+": "+ ','.join(annot_strings[str(i)])
+                counter += 1
+                annot_strings[str(counter)] = annot_strings.pop(str(i))
+                for a, b in itertools.product(range(len(annot_ticks)), range(len(annot_ticks[0]))):
+                    if annot_ticks[a][b] == str(i):
+                        annot_ticks[a][b] = str(counter)
 
-    #else:
-    #    annot_ticks=np.empty([somx, somy], dtype='<U')
-    #    annot_ticks.fill("")
+        # Format ticks
+        for i in range(1, len(annot_strings) + 1):
+            annot_strings[str(i)] = f"{i}: {','.join(annot_strings[str(i)])}"
+    
 
-
-    #-----label old end
-
-
-
-    #dict_param = {
+    #return {
     #    "geo_data": geo_data,
     #    "geo_headers": geo_headers, 
     #    "som_data": som_data, 
@@ -372,7 +302,6 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, no
     #    "labelIndex": labelIndex
     #}
 
-    #return dict_param
     return geo_data, geo_headers, som_data, som_table, som_headers, som_dict, grid, annot_data, annot_ticks, annot_strings, clusters, cluster_ticks, cluster_tick_labels, discrete_cmap, discrete_cmap_2, labelIndex
 
 

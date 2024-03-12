@@ -7,48 +7,33 @@ Currently, the models are:<br>
 """
 
 models = {
-    "MVT_GEOPHYSICS": {
-        #--Numerical Data from LAWLEY 22
-        # Gravity
-        "Gravity_GOCE_ShapeIndex": False,
-        "Gravity_Bouguer": False,
-        "Gravity_Bouguer_HGM": False,
-        "Gravity_Bouguer_UpCont30km_HGM": False,
-        "Gravity_Bouguer_HGM_Worms_Proximity": True,
-        "Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity": True,
-        # Magnetic
-        "Magnetic_HGM": False,
-        "Magnetic_LongWavelength_HGM": False,
-        "Magnetic_HGM_Worms_Proximity": True,
-        "Magnetic_LongWavelength_HGM_Worms_Proximity": True,
-        # Seismic
-        "Seismic_LAB_Priestley": False,
-        "Seismic_LAB_Hoggard": False,
-        "Seismic_Moho": False,
-        #--Numerical Data from MCCAFFERTY 23
-        # Gravity
+    "MVT_PREFERRED_GEOPHYSICS_ISOGRAV_SOM": {
+        # Gravity from ScienceBase (MCCAFFERTY 23)
         "Gravity": False,
         "Gravity_HGM": False,
-        "Gravity_Up30km": False,
-        "Gravity_Up30km_HGM": False,
-        "SatelliteGravity_ShapeIndex": False,
-        # Magnetic
-        "Mag": False,
-        "MagRTP": False,
-        "MagRTP_DeepSources": False,
-        "MagRTP_HGM": False,
-        "MagRTP_HGMDeepSources": False,
-        "MagRTP_VD": True,
-        # Seismic
-        "Moho": True,
-        "LAB": True,
-        #--Aeromagnetics
-        "SMidCont_RTP_PGRV_HGM_UTM15": True,
-        "SMidCont_RTP_UTM15": True,
-        #-- Isostatic Gravimetry
+        "Gravity_Up30km": True,
+        "SatelliteGravity_ShapeIndex": True,
+        # Gravity Worms from Datacube (LAWLEY 22)
+        "Gravity_Bouguer_HGM_Worms_Proximity": True,
+        "Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity": True,
+        # Isostatic gravity
         "US_IsostaticGravity_HGM_WGS84": True,
         "US_IsostaticGravity_WGS84": True,
-        "US_IsostaticGravity_HGM_WGS84_Worms": True,
+        "US_IsostaticGravity_HGM_WGS84_Worms": False,
+        # Magnetics from ScienceBase (MCCAFFERTY 23)
+        "MagRTP": False,
+        "MagRTP_HGM": False,
+        "MagRTP_HGMDeepSources": True,
+        "Mag_AnalyticSignal_cog": True,
+        # Magnetic Worms from Datacube (LAWLEY 22)
+        "Magnetic_HGM_Worms_Proximity": True,
+        "Magnetic_LongWavelength_HGM_Worms_Proximity": True,
+        # AeroMagnetics from HighResMagnetic
+        "SMidCont_RTP_UTM15": True,
+        "SMidCont_RTP_PGRV_HGM_UTM15": True,
+        # Seismics from ScienceBase (MCCAFFERTY 23)
+        "LAB": True,
+        "Moho": True,
     },
     "MVT_PREFERRED": {
         #--Categorical Data from LAWLEY 22
@@ -119,59 +104,4 @@ models = {
         "US_IsostaticGravity_WGS84": True,
         "US_IsostaticGravity_HGM_WGS84_Worms": True,
     },
-    "MVT_PREFERRED_NUMERICAL": {
-        #--Numerical Data from LAWLEY 22
-        # Proximity
-        "Terrane_Proximity": True,
-        "Geology_PassiveMargin_Proximity": True,
-        "Geology_BlackShale_Proximity": True,
-        "Geology_Fault_Proximity": True,
-        # Paleogeography
-        "Geology_Paleolatitude_Period_Maximum": True,
-        "Geology_Paleolatitude_Period_Minimum": True,
-        # Gravity
-        "Gravity_GOCE_ShapeIndex": False,
-        "Gravity_Bouguer": False,
-        "Gravity_Bouguer_HGM": False,
-        "Gravity_Bouguer_UpCont30km_HGM": False,
-        "Gravity_Bouguer_HGM_Worms_Proximity": True,
-        "Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity": True,
-        # Magnetic
-        "Magnetic_HGM": False,
-        "Magnetic_LongWavelength_HGM": False,
-        "Magnetic_HGM_Worms_Proximity": True,
-        "Magnetic_LongWavelength_HGM_Worms_Proximity": True,
-        # Seismic
-        "Seismic_LAB_Priestley": False,
-        "Seismic_LAB_Hoggard": False,
-        "Seismic_Moho": False,
-        #--Numerical Data from MCCAFFERTY 23
-        # Gravity
-        "Gravity": True,
-        "Gravity_HGM": True,
-        "Gravity_Up30km": True,
-        "Gravity_Up30km_HGM": True,
-        "SatelliteGravity_ShapeIndex": True,
-        # Magnetic
-        "Mag": False,
-        "MagRTP": False,
-        "MagRTP_DeepSources": True,
-        "MagRTP_HGM": False,
-        "MagRTP_HGMDeepSources": True,
-        "MagRTP_VD": True,
-        # Seismic
-        "Moho": True,
-        "LAB": True,
-        #--Aeromagnetics
-        "SMidCont_RTP_PGRV_HGM_UTM15": True,
-        "SMidCont_RTP_UTM15": True,
-        #-- Isostatic Gravimetry
-        "US_IsostaticGravity_HGM_WGS84": True,
-        "US_IsostaticGravity_WGS84": True,
-        "US_IsostaticGravity_HGM_WGS84_Worms": True,
-    },
-    "MVT_LABELS": {
-        "MVT_EPSG_32615_RES_50_0": True,
-    },
-
 }
