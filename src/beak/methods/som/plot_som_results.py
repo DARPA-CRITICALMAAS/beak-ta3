@@ -66,7 +66,7 @@ def run_plotting_script(argsP):
         start_time = time.time()
         if(argsP.dataType=='scatter'):
             if(clusters>1):
-                plot_geospace_clusters_scatter(geo_data, discrete_cmap_2, argsP.dir)
+                plot_geospace_clusters_scatter(argsP.som_x, argsP.som_y,clusters,cluster_tick_labels,geo_data, discrete_cmap_2, argsP.dir)
             if(argsP.redraw!=False):
                 plot_geospace_results_scatter(geo_data, geo_headers, som_data, argsP.dir)
         else:
@@ -97,7 +97,7 @@ def run_plotting_script(argsP):
     print("Plot SOM space results")
     start_time = time.time()
 
-    draw_umatrix(som_data, som_table, grid, argsP.grid_type, annot_ticks, som_headers, argsP.dir)
+    draw_umatrix(argsP.som_x, argsP.som_y,clusters,cluster_tick_labels,som_data, som_table, grid, argsP.grid_type, annot_ticks, som_headers, argsP.dir)
     draw_number_of_hits(argsP, som_dict,som_data, clusters, grid, cluster_tick_labels, annot_ticks)
     #in case the function was called for redrawing after selecting a different clustering result. so that we can skip stuff we don't have to redraw to speed things up. CURRENTLY NOT IN USE, ALWAYS TRUE.
     if(argsP.redraw!=False):
@@ -141,9 +141,6 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, no
     somy=int(som_y)
     outgeofile=None          
     geo_data=None
-    eastingIndex=None
-    northingIndex=None
-    labelIndex=None 
 
     if aOutgeofile is not None:
         outgeofile=aOutgeofile    
@@ -219,7 +216,7 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, no
 
     colnames = header_line.split() if outgeofile is not None else header_line.split("\t")
 
-    #labelIndex = colnames.index('label') if 'label' in colnames else None
+    labelIndex = colnames.index('label') if 'label' in colnames else None
 
     # Process label data
     annot_ticks = np.empty([somx, somy], dtype='<U32' if 'label' in colnames else '<U')
@@ -231,33 +228,57 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, no
 
     if 'label' in colnames:
         annot_strings_for_dict={}
+  
         # "best matching unit" in som space for each data containing grid point in geo space
         bmus = som_dict["bmus"]
         data = np.loadtxt(data_file, dtype='str', delimiter=' ' if outgeofile is not None else '\t',
                           skiprows=1 if outgeofile is not None else 3)
         
-        labelIndex = colnames.index('label')
+        #labelIndex = colnames.index('label')
         data_label=data[:,labelIndex]
+        unique_labels = set(data_label) - {'0.0', '', "nan", "NA", "NULL", "Null", "NoData", noDataValue}
 
-        for i in range(0,len(data_label)):    
-            if data_label[i] not in ['0.0', '', "nan", "NA", "NULL", "Null", "NoData", noDataValue]:
-                tick = annot_ticks[bmus[i][0]][bmus[i][1]]
-                counter = len(annot_strings) + 1
+        if len(unique_labels) == 1:
+            common_label = next(iter(unique_labels))
+            # If all labels are the same, store the count for the common label
+            for i in range(0, len(data_label)):
+                if data_label[i] == common_label:
+                    tick = annot_ticks[bmus[i][0]][bmus[i][1]]
+                    counter = len(annot_strings) + 1
 
-                if tick == '':
-                    annot_ticks[bmus[i][0]][bmus[i][1]] = str(counter)
-                    annot_strings[str(counter)] = [data_label[i]]
-                    annot_strings_for_dict[str(counter)]=[data_label[i]]
-                    annot_data.append([f"{counter}: {data_label[i]}", f"{bmus[i][0]}{bmus[i][1]}",
-                                       f"{geo_data[i][0]}, {geo_data[i][1]}" if outgeofile is not None else None])
-                else:
-                    annot_strings[tick].append(data_label[i])
-                    annot_strings_for_dict[tick].append(data_label[i])
-                    annot_data.append([f"{tick}: {data_label[i]}", f"{bmus[i][0]}{bmus[i][1]}",
-                                       f"{geo_data[i][0]}, {geo_data[i][1]}" if outgeofile is not None else None])
+                    if tick == '':
+                        annot_ticks[bmus[i][0]][bmus[i][1]] = str(counter)
+                        annot_strings[str(counter)] = {common_label: 1}  # Store label and count as a dictionary
+                        annot_strings_for_dict[str(counter)] = {common_label: 1}
+                        annot_data.append([f"{counter}: {common_label}", f"{bmus[i][0]}", f"{bmus[i][1]}",
+                                           f"{geo_data[i][0]}, {geo_data[i][1]}" if outgeofile is not None else None])
+                    else:
+                        annot_strings[tick][common_label] += 1
+                        annot_strings_for_dict[tick][common_label] += 1
+                        annot_data.append([f"{tick}: {common_label}", f"{bmus[i][0]}", f"{bmus[i][1]}",
+                                           f"{geo_data[i][0]}, {geo_data[i][1]}" if outgeofile is not None else None])
+        else:
+            # If there are different labels, get a list of labels in each BMU
+            for i in range(0, len(data_label)):
+                if data_label[i] not in ['0.0', '', "nan", "NA", "NULL", "Null", "NoData", noDataValue]:
+                    tick = annot_ticks[bmus[i][0]][bmus[i][1]]
+                    counter = len(annot_strings) + 1
 
-        for i in range(1, len(annot_strings)+1): 
-            annot_strings[str(i)].sort()
+                    if tick == '':
+                        annot_ticks[bmus[i][0]][bmus[i][1]] = str(counter)
+                        annot_strings[str(counter)] = {data_label[i]: 1}  # Store label and count as a dictionary
+                        annot_strings_for_dict[str(counter)] = {data_label[i]: 1}
+                        annot_data.append([f"{counter}: {data_label[i]}", f"{bmus[i][0]}", f"{bmus[i][1]}",
+                                           f"{geo_data[i][0]}, {geo_data[i][1]}" if outgeofile is not None else None])
+                    else:
+                        annot_strings[tick][data_label[i]] += 1
+                        annot_strings_for_dict[tick][data_label[i]] += 1
+                        annot_data.append([f"{tick}: {data_label[i]}", f"{bmus[i][0]}", f"{bmus[i][1]}",
+                                           f"{geo_data[i][0]}, {geo_data[i][1]}" if outgeofile is not None else None])
+        
+        # Sort annot_strings by key
+        for i in range(1, len(annot_strings) + 1):
+            annot_strings[str(i)] = {k: v for k, v in sorted(annot_strings[str(i)].items())}
 
         # Merge duplicates within a labeling group
         for i, j in itertools.combinations(range(1, counter + 1), 2):
@@ -270,19 +291,52 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, no
                         annot_ticks[a][b] = str(i)
 
         # set new index numbers
-        counter = 0
-        for i in range(1, len(annot_strings_for_dict) + 1):
-            if str(i) in annot_strings:
-                counter += 1
-                annot_strings[str(counter)] = annot_strings.pop(str(i))
-                for a, b in itertools.product(range(len(annot_ticks)), range(len(annot_ticks[0]))):
-                    if annot_ticks[a][b] == str(i):
-                        annot_ticks[a][b] = str(counter)
+        if len(unique_labels) == 1:
+            # Create a new dictionary to store the new indices
+            new_index = {}
 
-        # Format ticks
+            # Iterate over the entries in annot_strings and set the new indices based on the "count"
+            for index, labels in annot_strings.items():
+                count = sum(labels.values())  # Sum up the "count" for the current labels
+                new_index[index] = str(count)  # Use the "count" as the new index
+
+                # Update annot_ticks with the new index
+                for a, b in itertools.product(range(len(annot_ticks)), range(len(annot_ticks[0]))):
+                    if annot_ticks[a][b] == index:
+                        annot_ticks[a][b] = str(count)
+
+            # Update annot_strings with the new index
+            annot_strings = {new_index[index]: labels for index, labels in annot_strings.items()}
+
+            # Sort annot_strings by ascending "count"
+            annot_strings = {k: v for k, v in sorted(annot_strings.items(), key=lambda item: sum(item[1].values()))}
+
+        else:
+            counter = 0
+            for i in range(1, len(annot_strings_for_dict) + 1):
+                if str(i) in annot_strings:
+                    counter += 1
+                    annot_strings[str(counter)] = annot_strings.pop(str(i))
+                    for a, b in itertools.product(range(len(annot_ticks)), range(len(annot_ticks[0]))):
+                        if annot_ticks[a][b] == str(i):
+                            annot_ticks[a][b] = str(counter)
+
+        ##---
+        ## set new index numbers and sum up label counts
+        #new_index = {}
+        #for i, (key, labels) in enumerate(sorted(annot_strings.items(), key=lambda x: len(x[1]))):
+        #    new_index[key] = str(i + 1)  # Update index
+        #    for a, b in itertools.product(range(len(annot_ticks)), range(len(annot_ticks[0]))):
+        #        if annot_ticks[a][b] == key:
+        #            annot_ticks[a][b] = new_index[key]  # Update annot_ticks to new index
+#
+        ## Update annot_strings with new index
+        #annot_strings = {new_index[key]: labels for key, labels in annot_strings.items()}            
+        ##---
+
         for i in range(1, len(annot_strings) + 1):
-            annot_strings[str(i)] = f"{i}: {','.join(annot_strings[str(i)])}"
-    
+            annot_strings[str(i)] = f"{i}: {','.join([f'{label}({count})' for label, count in annot_strings[str(i)].items()])}"
+
 
     #return {
     #    "geo_data": geo_data,
@@ -511,7 +565,7 @@ def draw_som_results(argsP, som_data, som_table,grid, annot_ticks, som_headers,c
     print()
         
 
-def draw_umatrix(som_data, som_table,grid, grid_type, annot_ticks, som_headers,working_dir):
+def draw_umatrix(somx,somy,clusters,cluster_tick_labels,som_data, som_table,grid, grid_type, annot_ticks, som_headers,working_dir):
     """Draw U-matrix in geo space.
 
     Args:
@@ -617,9 +671,9 @@ def draw_som_clusters(argsP, grid, som_data, som_table, annot_ticks, som_headers
         plt.close()
         df = pd.DataFrame(annot_data)
         if argsP.outgeofile is not None: 
-            headers = ["label", "som", "datapoint"]
+            headers = ["label", "som_x", "som_y", "X, Y"]
         else:
-            headers = ["label", "som"]
+            headers = ["label", "som_x", "som_y"]
         df.to_csv(argsP.dir+'/labels_flat.csv', index=False, header=headers)   #so in addition to this there should be a list thats written out in the format of current label legend?
         #list_grouped=list(annot_strings.items())
         array_grouped=np.array(list(annot_strings.items()))#dict to list and list to np array
@@ -695,7 +749,7 @@ def plot_geospace_clusters_grid(geo_data,discrete_cmap,clusters,cluster_ticks,cl
     plt.close()       
     
     
-def plot_geospace_clusters_scatter(geo_data,discrete_cmap_2,working_dir):
+def plot_geospace_clusters_scatter(somx,somy,clusters,cluster_tick_labels,geo_data,discrete_cmap_2,working_dir):
     """Plot geospace clusters if input type is scatter
 
     Args:
