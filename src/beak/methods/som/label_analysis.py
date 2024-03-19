@@ -86,9 +86,8 @@ def write_bmu_cluster_label_data(workdir, cluster_array, geo_data, labels):
                 cluster_label_counts[cluster] = label_count
             
             for geo_point in bmu_info['geo_xy']:
-                #geo_label_bmu.append([geo_point[0], geo_point[1], som_x, som_y])
                 geo_x, geo_y = geo_point
-                geo_label_bmu.append([int(som_x), int(som_y), int(label_count), geo_x, geo_y])
+                geo_label_bmu.append([geo_x, geo_y, int(som_x), int(som_y), int(label_count), int(cluster), int(cluster_label_counts[cluster])])
 
         # Convert the list of geo points to a NumPy array
         bmu_geo_label_data = np.array(geo_label_bmu)
@@ -96,9 +95,9 @@ def write_bmu_cluster_label_data(workdir, cluster_array, geo_data, labels):
         # Add BMU ID column
         sorted_bmus = sorted(bmu_labeled.keys())
         bmu_id_map = {bmu: idx for idx, bmu in enumerate(sorted_bmus)}
-        bmu_geo_label_data_with_id = np.empty((bmu_geo_label_data.shape[0], bmu_geo_label_data.shape[1] + 1), dtype=int)
+        bmu_geo_label_data_with_id = np.empty((bmu_geo_label_data.shape[0], bmu_geo_label_data.shape[1] + 1), dtype=float)
         for idx, row in enumerate(bmu_geo_label_data):
-            bmu_key = (row[0], row[1])
+            bmu_key = (row[2], row[3])
             bmu_id = bmu_id_map[bmu_key]
             bmu_geo_label_data_with_id[idx] = np.concatenate(([bmu_id], row))
 
@@ -109,12 +108,12 @@ def write_bmu_cluster_label_data(workdir, cluster_array, geo_data, labels):
         sorted_array = bmu_geo_label_data_with_id[sorted_indices]
 
         # Save the array to a text file
-        np.savetxt(workdir + "/" + "geo_labeled_bmu.txt", sorted_array, delimiter='\t', fmt='%d\t%d\t%d\t%d\t%f\t%f', header='bmu_id\tsom_x\tsom_y\tbmu_label_count\tgeo_x\tgeo_y')
+        np.savetxt(workdir + "/" + "geo_labeled_bmu.txt", sorted_array, delimiter='\t', fmt='%d\t%f\t%f\t%d\t%d\t%d\t%d\t%d', header='bmu_id\tgeo_x\tgeo_y\tsom_x\tsom_y\tbmu_label_count\tcluster\tcluster_label_count')
 
         #---
         # Convert the dictionary to a list of tuples
         cluster_label_counts_list = [(cluster, count) for cluster, count in cluster_label_counts.items()]
-        cluster_label_counts_list.sort(key=lambda x: x[0])
+        cluster_label_counts_list.sort(key=lambda x: x[0], reverse=False)
 
         # Convert the list to a numpy array
         cluster_label_counts_array = np.array(cluster_label_counts_list)

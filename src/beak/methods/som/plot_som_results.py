@@ -91,12 +91,13 @@ def run_plotting_script(argsP):
         plot_davies_bouldin(loaded_cluster_list, argsP.dir)
         print("    Plot cluster hit count")
         plot_cluster_hit_count(argsP.dir+"/cluster_hit_count.txt", argsP.dir)
-        
-        if labelIndex is not None:
-            print("    Write som labels to file")
-            labels = write_som_label_data(argsP.dir, argsP.outgeofile, annot_data, annot_strings)
-            if argsP.outgeofile is not None:
-                write_bmu_cluster_label_data(argsP.dir, som_dict['clusters'], geo_data, labels)
+
+    if labelIndex is not None:
+        print("    Write som labels to file")
+        labels = write_som_label_data(argsP.dir, argsP.outgeofile, annot_data, annot_strings)
+
+        if argsP.outgeofile is not None and clusters > 1:
+            write_bmu_cluster_label_data(argsP.dir, som_dict['clusters'], geo_data, labels)
 
         end_time = time.time()
         print(f"    Execution time: {end_time - start_time} seconds")
