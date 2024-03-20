@@ -101,7 +101,9 @@ def load_geotiff_files(input_file_list, label_file=""):
 
     # Reshape returndata to have each raster as a column
     returndata = returndata.reshape(-1, layer_count, order='F')
-    labeldata = labeldata.reshape(-1, len(geotiff_array) - layer_count, order='F')
+    if(label == True):
+        labeldata = labeldata.reshape(-1, len(geotiff_array) - layer_count, order='F')
+
     rows=len(returndata) 
     cols=len(returndata[0])              
 
