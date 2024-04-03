@@ -15,6 +15,7 @@ with warnings.catch_warnings():
     import sys
     #from .lrnfile import load_lrn_file, read_coordidate_columns, read_data_columns
     from .loadfile import load_input_file, read_coordinate_columns, read_data_columns
+    from beak.methods.som.label_analysis import *
     import heapq
     import pickle
     from pathlib import Path
@@ -22,6 +23,7 @@ with warnings.catch_warnings():
     from sklearn.metrics import davies_bouldin_score
     from decimal import Decimal
     import os.path
+    import math
     #import ast
 class NxtSomCore(object):
     """Class for training self-organizing map and saving results.
@@ -245,35 +247,41 @@ class NxtSomCore(object):
 
         if(labelIndex==True):
             #-- when input format is lrn file:
-            #data = np.loadtxt(
-            #    input_file, 
-            #    dtype='str',
-            #    delimiter='\t',
-            #    skiprows=3
-            #)
-            #labelcol=[]
-            #for i in range(0,len(data[0])):
-            #    if(data[0][i]=='label'):
-            #        labelcol=data[1:,i]
+            if(input_file[-3:].lower()=="lrn"):
 
+                raise NotImplementedError("Read label data from csv file is not yet implemented")
+            
+                data = np.loadtxt(
+                    input_file, 
+                    dtype='str',
+                    delimiter='\t',
+                    skiprows=3
+                )
+                labelcol=[]
+                for i in range(0,len(data[0])):
+                    if(data[0][i]=='label'):
+                        labelcol=data[1:,i]
+            
             #-- when input format is geotiff file:
-            labelcol = header['labeldata']
-            labelcol_deleted = np.c_[np.full((coord_cols['data_deleted'].shape[0],labelcol.shape[1]), np.nan)]
-            labelcol_all = np.vstack((labelcol, labelcol_deleted))
+            else:
+                labelcol = header['labeldata']
+                labelcol_deleted = np.c_[np.full((coord_cols['data_deleted'].shape[0],labelcol.shape[1]), np.nan)]
+                labelcol_all = np.vstack((labelcol, labelcol_deleted))
 
-            combined_cols_all=np.c_[combined_cols_all,labelcol_all]
-            #combined_cols_deleted=np.c_[combined_cols_deleted,np.full((coord_cols['data_deleted'].shape[0],1), np.nan)]
+                combined_cols_all=np.c_[combined_cols_all,labelcol_all]
+                #combined_cols_deleted=np.c_[combined_cols_deleted,np.full((coord_cols['data_deleted'].shape[0],1), np.nan)]
 
-            header_line= header_line+" label"            
-            np.savetxt(output_file, combined_cols_all, fmt='%s', header=header_line, delimiter=' ', comments='')
-            np.savetxt(output_file[:-3] + "csv", combined_cols_all, fmt='%s', header=header_line.replace(" ",","),delimiter=',', comments='')
-            #np.savetxt(output_file[:-3] + "csv", final_combined_cols, fmt=header_line.replace(" ", ","), delimiter=',', comments='')
+                header_line= header_line+" label"            
+                np.savetxt(output_file, combined_cols_all, fmt='%s', header=header_line, delimiter=' ', comments='')
+                #np.savetxt(output_file[:-3] + "csv", combined_cols_all, fmt='%s', header=header_line.replace(" ",","),delimiter=',', comments='')
+
         else:            
             fmt_combined = '{} {} {} {}'.format(coord_cols['fmt'], som_cols['fmt'], data_cols['fmt'], '%.5f')#'%.5f')       
             np.savetxt(output_file, combined_cols_all, fmt='%s', header=header_line, delimiter=' ', comments='')
-            #np.savetxt(output_file, combined_cols_all,fmt=fmt_combined, header=header_line, delimiter=' ', comments='')
-            np.savetxt(output_file[:-3] + "csv", combined_cols_all, fmt=fmt_combined.replace(" ",","), header=header_line.replace(" ",","), comments='')
-            #np.savetxt(output_file[:-3] + "csv", combined_cols_all, fmt=header_line.replace(" ", ","), delimiter=',', comments='')
+            #np.savetxt(output_file[:-3] + "csv", combined_cols_all, fmt=fmt_combined.replace(" ",","), header=header_line.replace(" ",","), comments='')
+
+        return combined_cols_all
+
 
     def save_somspace_result(self, output_file, header, som, output_folder, normalized=False):
         """Write SOM results with header line and input columns to disk in somspace.
@@ -316,7 +324,7 @@ class NxtSomCore(object):
         som_cols['fmt']=som_cols['fmt']+ " %f"
         header_line = '{}'.format(str(som_cols['colnames'])).replace('[','').replace(']','').replace(',','').replace('\'','')+" hits"#.translate(None, "[]',") replaced by a lower level solution that works in both 2.x and 3.x python
         np.savetxt(output_file, som_cols['data'], fmt=som_cols['fmt'], header=header_line, comments='')
-        np.savetxt(output_file[:-3]+"csv", som_cols['data'], fmt=som_cols['fmt'].replace(" ",","), header=header_line.replace(" ",","), comments='')
+        #np.savetxt(output_file[:-3]+"csv", som_cols['data'], fmt=som_cols['fmt'].replace(" ",","), header=header_line.replace(" ",","), comments='')
 
     def _extract_som_cols_geospace(self, som, col_names):
         x_col = som['bmus'][:, 1]
@@ -356,7 +364,8 @@ class NxtSomCore(object):
         return {'data': combined_data, 'colnames':combined_col_list, 'fmt': combined_fmt}
 
 
-    def write_geotiff_out(self, output_folder, geodatafile, somdatafile, input_file): 
+
+    def write_geotiff_out(self, output_folder, geodatafile, somdatafile, input_file, label = False, index_nolabel = None): 
         """Write geotiff to file using gdal.
 
         Args:
@@ -368,37 +377,34 @@ class NxtSomCore(object):
         from osgeo import gdal
         import pandas as pd
 
-        #print("     input file: ", input_file)
-
         inDs=gdal.Open(input_file.split(',')[0])
         inBand=inDs.GetRasterBand(1)
         gt = inDs.GetGeoTransform()
+        proj = inDs.GetProjection()
+        noDataValue = inBand.GetNoDataValue()
 
-        #print("     genfromtxt som_data")
-        #som_data= np.genfromtxt(somdatafile,skip_header=(1), delimiter=' ')
-        #print("     genfromtxt geo_data")
-        #geo_data=np.genfromtxt(geodatafile,skip_header=(1), delimiter=' ') 
-        #headers=[]
+        data_type = gdal.GetDataTypeName(inBand.DataType)
+        bit_depth = gdal.GetDataTypeSize(inBand.DataType)
+
+        print("Data type:", data_type)
+        print("Bit depth:", bit_depth, "bits")
+
+
+        driver = gdal.GetDriverByName('GTiff')
 
         print("     read_csv som_data")
-        som_data = pd.read_csv(somdatafile, skiprows=1, delimiter=' ').values
+        som_data = pd.read_csv(somdatafile, skiprows=0, delimiter=' ').values
         print("     read_csv geo_data")
-        geo_data = pd.read_csv(geodatafile, skiprows=1, delimiter=' ').values
+        geo_data = pd.read_csv(geodatafile, skiprows=0, delimiter=' ').values
         headers = pd.read_csv(geodatafile, nrows=0, delimiter=' ').columns.tolist()
 
         x=geo_data[:,0]
         y=geo_data[:,1]
 
         # Create the destination folder if it doesn't exist
-        destination_path = output_folder + "/GeoTIFF"
+        destination_path = output_folder + "/GeoTIFF/"
         if not os.path.exists(destination_path):
             os.makedirs(destination_path)
-
-        #print("     open(geodatafile)")
-        #
-        #with open(geodatafile) as gd:   # easier way using pandas?
-        #    line = gd.readline()
-        #    headers=line.split()
 
         print("     Iterate over each geoTIF file:")
 
@@ -414,11 +420,9 @@ class NxtSomCore(object):
             cols = pivotted.shape[1]
             rows = pivotted.shape[0]
 
-            driver = gdal.GetDriverByName('GTiff')
-
             # Create the output GeoTIFF
-            outName = destination_path + "/out_" + os.path.splitext(os.path.basename(headers[4 + a]))[0] + ".tif"
-            outDs = driver.Create(outName, cols, rows, 1, gdal.GDT_Float32)
+            outName = destination_path + os.path.splitext(os.path.basename(headers[4 + a]))[0] + ".tif"
+            outDs = driver.Create(outName, cols, rows, 1, gdal.GDT_Float32, options=['COMPRESS=DEFLATE'])
 
             if outDs is None:
                 print ("Could not create tif file")
@@ -430,23 +434,18 @@ class NxtSomCore(object):
 
             outBand.WriteArray(outData, 0, 0)
             outBand.FlushCache()
-            outBand.SetNoDataValue(inBand.GetNoDataValue())
-            #outBand.SetNoDataValue(-99)
+            outBand.SetNoDataValue(noDataValue)
 
             # Use the geotransform and projection information from the input file
-            outDs.SetGeoTransform(inDs.GetGeoTransform())
-            outDs.SetProjection(inDs.GetProjection())
-
-            # check
-            #print("     Name geoTIF output: ", outName)
+            outDs.SetGeoTransform(gt)
+            outDs.SetProjection(proj)
 
             # Flush and close the output dataset
             outDs.FlushCache()
             outDs = None
             
-        #q_error. output columns should probably be rearranged, so these could be handled in a single for loop again. or split main code into a different function
-        #x=geo_data[:,0]
-        #y=geo_data[:,1]
+        #q_error.
+        print("          q_error")
         z=geo_data[:,(len(som_data[0])-5)*2 +5]
         df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
         df.columns = ['X_value','Y_value','Z_value']
@@ -454,7 +453,7 @@ class NxtSomCore(object):
         pivotted= df.pivot(index='Y_value',columns='X_value',values='Z_value')
 
         driver = gdal.GetDriverByName('GTiff')
-        outName = destination_path + "/out_q_error.tif"
+        outName = destination_path + "q_error.tif"
         outDs = driver.Create(outName, cols, rows, 1, gdal.GDT_Float32)
 
         if outDs is None:
@@ -462,18 +461,187 @@ class NxtSomCore(object):
             sys.exit(1) 
 
         outBand = outDs.GetRasterBand(1)
-        #outData = pivotted.to_numpy()
         outData = np.flip(pivotted.to_numpy(), 0)  
         
         outBand.WriteArray(outData, 0, 0)
         outBand.FlushCache()
-        outBand.SetNoDataValue(inBand.GetNoDataValue())
+        outBand.SetNoDataValue(noDataValue)
 
-        outDs.SetGeoTransform(inDs.GetGeoTransform())
-        outDs.SetProjection(inDs.GetProjection())
+        outDs.SetGeoTransform(gt)
+        outDs.SetProjection(proj)
+
+
+        if label is True:
+            label_file_path = output_folder + "/geo_labeled_bmu.txt"
+            label_data = read_geo_labeled_bmu(label_file_path)
+
+            label_data_df = pd.DataFrame(label_data)
+
+            # Define the list of z values to iterate over
+            z_values = ['BMU label count', 'cluster label count']
+
+            # Determine the number of decimal places based on the precision of gt
+            decimal_precision = abs(Decimal(str(abs(gt[1]))).as_tuple().exponent)
+
+            ## Find duplicate rows in label_data
+            #duplicate_rows_z1 = label_data_df[label_data_df.duplicated(subset=['X', 'Y', 'bmu_id'], keep=False)]
+            #print("Duplicates in x, y, bmu_id: ", len(duplicate_rows_z1))
+
+            x_label = np.round(label_data_df['X'],decimal_precision)
+            y_label = np.round(label_data_df['Y'],decimal_precision)
+
+            # Extract x and y values from geo_data for the no-label indexes
+            x_no_label = np.round(geo_data[index_nolabel, 0], decimal_precision)
+            y_no_label = np.round(geo_data[index_nolabel, 1], decimal_precision)
+
+            # Combine x and y coordinates into a single array and eliminating any duplicate coordinate pairs
+            #label_coords = set(zip(x_label, y_label))
+            #no_label_coords = set(zip(x_no_label, y_no_label))
+
+            # Combine x and y coordinates into a single array for label and no-label data
+            label_coords = set([(x, y) for x, y in zip(x_label, y_label)])
+            no_label_coords = set([(x, y) for x, y in zip(x_no_label, y_no_label)])            
+
+            # Identify unique combinations of x and y coordinates that are not in label data
+            unique_no_label_coords = np.array(list(no_label_coords - label_coords))
+
+            # Separate unique x and y coordinates from unique_no_label_coords
+            unique_x_no_label, unique_y_no_label = unique_no_label_coords[:, 0], unique_no_label_coords[:, 1]
+
+
+            # Concatenate x_no_label and y_no_label with x_label and y_label respectively
+            x_label = np.concatenate([x_label, unique_x_no_label])
+            y_label = np.concatenate([y_label, unique_y_no_label])
+
+            # Add NaN values to z_label for the rows without labels
+            unique_z_no_label = np.full_like(unique_x_no_label, math.nan)
+            
+            #print("Geo transform original: ", gt)
+            #print("Min...Max values of x_label:", min(x_label), "...", max(x_label))
+            #print("Min...Max values of y_label:", min(y_label), "...", max(y_label))
+
+            for z_value in z_values:
+                print("         ", f"BMU_{z_value.replace(' ', '_')}.tif")
+                z = np.concatenate([label_data_df[z_value], unique_z_no_label])
+                df = pd.DataFrame({'X_value': x_label, 'Y_value': y_label, 'Z_value': z})
+                df['Z_value'] = pd.to_numeric(df['Z_value'])
+                pivotted= df.pivot(index='Y_value',columns='X_value',values='Z_value')
+
+                cols = pivotted.shape[1]
+                rows = pivotted.shape[0]
+
+                driver = gdal.GetDriverByName('GTiff')
+                z_value = z_value.replace(' ', '_')
+                outName = destination_path + f"BMU_{z_value}.tif"
+                outDs = driver.Create(outName, cols, rows, 1, gdal.GDT_Float32)
+
+                if outDs is None:
+                    print ("Could not create label tif file")
+                    sys.exit(1) 
+
+                outBand = outDs.GetRasterBand(1)
+                outData = np.flip(pivotted.to_numpy(), 0)  
+
+                outBand.WriteArray(outData, 0, 0)
+                outBand.FlushCache()
+                outBand.SetNoDataValue(noDataValue)
+
+                outDs.SetGeoTransform(gt)
+                #outDs.SetGeoTransform(gt_label)
+                outDs.SetProjection(proj)
+
         
         outDs.FlushCache()
         inDs=None
         outDs=None
+
+    def X_write_geotiff_out(self, output_folder, geodatafile, somdatafile, input_file): 
+        """
+        Write geotiff to file using rasterio.
+
+        Args:
+            output_folder (str): Folder path where to write geotiff file.
+            geodatafile (str): Path and name for text file that contains som results in geospace.
+            somdatafile (str): Path and name for text file that contains som results in somspace.
+            input_file (LiteralStringstr): List of input files, separated by comma (only first line is used to get the geotransform and projection information to set output GeoFIT geotransform and projection).
+
+        Returns:
+            None
+        """
+        from osgeo import gdal
+        import pandas as pd
+        import rasterio
+        from rasterio.crs import CRS
+        from rasterio.transform import from_origin
+        # Custom modules
+        from beak.utilities.io import save_raster
+
+
+        inDs = gdal.Open(input_file.split(',')[0])
+        inBand = inDs.GetRasterBand(1)
+        gt = inDs.GetGeoTransform()
+        proj = inDs.GetProjection()
+        noDataValue = inBand.GetNoDataValue()
+        crs = rasterio.crs.CRS.from_string(proj)
+        transform = from_origin(gt[0], gt[3], gt[1], gt[5]) 
+
+        som_data = pd.read_csv(somdatafile, skiprows=1, delimiter=' ').values
+        geo_data = pd.read_csv(geodatafile, skiprows=1, delimiter=' ').values
+        headers = pd.read_csv(geodatafile, nrows=0, delimiter=' ').columns.tolist()
+
+        x = geo_data[:, 0]
+        y = geo_data[:, 1]
+
+        # Create the destination folder if it doesn't exist
+        destination_path = output_folder + "/GeoTIFF"
+        if not os.path.exists(destination_path):
+            os.makedirs(destination_path)
+
+        print("     Iterate over each geoTIF file:")
+        for a in range(0, som_data.shape[1] - 4):
+            print("     ", os.path.splitext(os.path.basename(headers[4 + a]))[0])
+
+            z = geo_data[:, (4 + a)]
+            df = pd.DataFrame.from_dict(np.array([x, y, z]).T)
+            df.columns = ['X_value', 'Y_value', 'Z_value']
+            df['Z_value'] = pd.to_numeric(df['Z_value'])
+            pivotted = df.pivot(index='Y_value', columns='X_value', values='Z_value')
+
+            cols = pivotted.shape[1]
+            rows = pivotted.shape[0]    
+
+            outName = destination_path + "/out_" + os.path.splitext(os.path.basename(headers[4 + a]))[0] + ".tif"
+            
+            # Coordinates in the output geoTIF are wrong (shifted towards north) and file size is much larger in comparison to Write geotiff to file using gdal!
+            save_raster(
+                Path(outName),
+                pivotted.to_numpy(),
+                crs,
+                rows,
+                cols,
+                noDataValue,
+                transform,
+            )
+
+        z = geo_data[:, (len(som_data[0]) - 5) * 2 + 5]
+        df = pd.DataFrame.from_dict(np.array([x, y, z]).T)
+        df.columns = ['X_value', 'Y_value', 'Z_value']
+        df['Z_value'] = pd.to_numeric(df['Z_value'])
+        pivotted = df.pivot(index='Y_value', columns='X_value', values='Z_value')
+
+        outName = destination_path + "/out_q_error.tif"
+
+        save_raster(
+            Path(outName),
+            pivotted.to_numpy(),
+            crs,
+            rows,
+            cols,
+            noDataValue,
+            transform,
+        )
+
+        inDs = None
+
             
     

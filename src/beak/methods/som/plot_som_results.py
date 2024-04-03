@@ -34,7 +34,7 @@ from .plotting_functions import plot_hexa
 from .label_analysis import *
 import time
 import warnings
-import itertools
+
 """
 Run plotting scripts
 """    
@@ -92,15 +92,15 @@ def run_plotting_script(argsP):
         print("    Plot cluster hit count")
         plot_cluster_hit_count(argsP.dir+"/cluster_hit_count.txt", argsP.dir)
 
-    if labelIndex is not None:
-        print("    Write som labels to file")
-        labels = write_som_label_data(argsP.dir, argsP.outgeofile, annot_data, annot_strings)
-
-        if argsP.outgeofile is not None and clusters > 1:
-            write_bmu_cluster_label_data(argsP.dir, som_dict['clusters'], geo_data, labels)
-
-        end_time = time.time()
-        print(f"    Execution time: {end_time - start_time} seconds")
+    #if labelIndex is not None:
+    #    print("    Write som labels to file")
+    #    labels = write_som_label_data(argsP.dir, argsP.outgeofile, annot_data, annot_strings)
+#
+    #    if argsP.outgeofile is not None:
+    #        write_bmu_cluster_label_data(argsP.dir, som_dict['clusters'], geo_data, labels)
+#
+    #    end_time = time.time()
+    #    print(f"    Execution time: {end_time - start_time} seconds")
 
     print("Plot SOM space results")
     start_time = time.time()
@@ -219,125 +219,26 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, no
 
     # Read data using space delimiter if input file is GeoTIFF
     data_file = outgeofile if outgeofile is not None else input_file
+
     with open(data_file, encoding='utf-8-sig') as fh:
         header_line = fh.readline()
-
     colnames = header_line.split() if outgeofile is not None else header_line.split("\t")
 
-    labelIndex = colnames.index('label') if 'label' in colnames else None
-
-    # Process label data
-    annot_ticks = np.empty([somx, somy], dtype='<U32' if 'label' in colnames else '<U')
-    #annot_ticks = np.empty([somx, somy], dtype='<U32')
-    annot_ticks.fill("")
-
-    annot_strings = {}
-    annot_data = []
-
     if 'label' in colnames:
-        annot_strings_for_dict={}
-  
-        # "best matching unit" in som space for each data containing grid point in geo space
-        bmus = som_dict["bmus"]
-        data = np.loadtxt(data_file, dtype='str', delimiter=' ' if outgeofile is not None else '\t',
-                          skiprows=1 if outgeofile is not None else 3)
-        
-        #labelIndex = colnames.index('label')
-        data_label=data[:,labelIndex]
-        unique_labels = set(data_label) - {'0.0', '', "nan", "NA", "NULL", "Null", "NoData", noDataValue}
+        print(f"        Read label annotation data")
+        annot_ticks, annot_strings, annot_data, index_label, index_nolabel  = get_label_annotation_data(som_dict, geo_data, outgeofile, noDataValue)
+        #labelIndex = geo_data.shape[1] - 1
+        labelIndex = colnames.index('label')
 
-        if len(unique_labels) == 1:
-            common_label = next(iter(unique_labels))
-            # If all labels are the same, store the count for the common label
-            for i in range(0, len(data_label)):
-                if data_label[i] == common_label:
-                    tick = annot_ticks[bmus[i][0]][bmus[i][1]]
-                    counter = len(annot_strings) + 1
+    else:
+        annot_ticks = np.empty([somx, somy], dtype='<U')
+        annot_ticks.fill("")
 
-                    if tick == '':
-                        annot_ticks[bmus[i][0]][bmus[i][1]] = str(counter)
-                        annot_strings[str(counter)] = {common_label: 1}  # Store label and count as a dictionary
-                        annot_strings_for_dict[str(counter)] = {common_label: 1}
-                        annot_data.append([f"{counter}", f"{common_label}", f"{bmus[i][0]}", f"{bmus[i][1]}",
-                                           f"{geo_data[i][0]}" if outgeofile is not None else None, f"{geo_data[i][1]}" if outgeofile is not None else None])
-                    else:
-                        annot_strings[tick][common_label] += 1
-                        annot_strings_for_dict[tick][common_label] += 1
-                        annot_data.append([f"{tick}", f"{common_label}", f"{bmus[i][0]}", f"{bmus[i][1]}",
-                                           f"{geo_data[i][0]}" if outgeofile is not None else None, f"{geo_data[i][1]}" if outgeofile is not None else None])
-        else:
-            # If there are different labels, get a list of labels in each BMU
-            for i in range(0, len(data_label)):
-                if data_label[i] not in ['0.0', '', "nan", "NA", "NULL", "Null", "NoData", noDataValue]:
-                    tick = annot_ticks[bmus[i][0]][bmus[i][1]]
-                    counter = len(annot_strings) + 1
+        annot_strings = {}
+        annot_data = []
 
-                    if tick == '':
-                        annot_ticks[bmus[i][0]][bmus[i][1]] = str(counter)
-                        annot_strings[str(counter)] = {data_label[i]: 1}  # Store label and count as a dictionary
-                        annot_strings_for_dict[str(counter)] = {data_label[i]: 1}
-                        annot_data.append([f"{counter}: {data_label[i]}", f"{bmus[i][0]}", f"{bmus[i][1]}",
-                                           f"{geo_data[i][0]}, {geo_data[i][1]}" if outgeofile is not None else None])
-                    else:
-                                    # Check if the label already exists in annot_strings[tick]
-                        if data_label[i] in annot_strings[tick]:
-                            annot_strings[tick][data_label[i]] += 1
-                            annot_strings_for_dict[tick][data_label[i]] += 1
-                        else:
-                            annot_strings[tick][data_label[i]] = 1  # Initialize count if label doesn't exist
-                            annot_strings_for_dict[tick][data_label[i]] = 1
+        labelIndex = None
 
-                        annot_data.append([f"{tick}: {data_label[i]}", f"{bmus[i][0]}", f"{bmus[i][1]}",
-                                           f"{geo_data[i][0]}, {geo_data[i][1]}" if outgeofile is not None else None])
-        
-        # Sort annot_strings by key
-        for i in range(1, len(annot_strings) + 1):
-            annot_strings[str(i)] = {k: v for k, v in sorted(annot_strings[str(i)].items())}
-
-        # Merge duplicates within a labeling group
-        for i, j in itertools.combinations(range(1, counter + 1), 2):
-            if annot_strings.get(str(i)) == annot_strings.get(str(j)):
-                #remove duplicate entry from dictionary 'annot_strings'
-                annot_strings.pop(str(j), None)
-                #go through all indices of 2D array 'annot_ticks' and replace value if equal to duplicate entry j
-                for a, b in itertools.product(range(len(annot_ticks)), range(len(annot_ticks[0]))):
-                    if annot_ticks[a][b] == str(j):
-                        annot_ticks[a][b] = str(i)
-
-        # set new index numbers
-        if len(unique_labels) == 1:
-            # Create a new dictionary to store the new indices
-            new_index = {}
-
-            # Iterate over the entries in annot_strings and set the new indices based on the "count"
-            for index, labels in annot_strings.items():
-                count = sum(labels.values())  # Sum up the "count" for the current labels
-                new_index[index] = str(count)  # Use the "count" as the new index
-
-                # Update annot_ticks with the new index
-                for a, b in itertools.product(range(len(annot_ticks)), range(len(annot_ticks[0]))):
-                    if annot_ticks[a][b] == index:
-                        annot_ticks[a][b] = str(count)
-
-            # Update annot_strings with the new index
-            annot_strings = {new_index[index]: labels for index, labels in annot_strings.items()}
-
-            # Sort annot_strings by ascending "count"
-            annot_strings = {k: v for k, v in sorted(annot_strings.items(), key=lambda item: sum(item[1].values()))}
-
-        else:
-            counter = 0
-            for i in range(1, len(annot_strings_for_dict) + 1):
-                if str(i) in annot_strings:
-                    counter += 1
-                    annot_strings[str(counter)] = annot_strings.pop(str(i))
-                    for a, b in itertools.product(range(len(annot_ticks)), range(len(annot_ticks[0]))):
-                        if annot_ticks[a][b] == str(i):
-                            annot_ticks[a][b] = str(counter)
-
-    
-        for key in annot_strings:
-            annot_strings[str(key)] = f"{key}: {','.join([f'{label}({count})' for label, count in annot_strings[str(key)].items()])}"
 
 
     #return {
