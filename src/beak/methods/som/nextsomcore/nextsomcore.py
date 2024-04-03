@@ -383,13 +383,6 @@ class NxtSomCore(object):
         proj = inDs.GetProjection()
         noDataValue = inBand.GetNoDataValue()
 
-        data_type = gdal.GetDataTypeName(inBand.DataType)
-        bit_depth = gdal.GetDataTypeSize(inBand.DataType)
-
-        print("Data type:", data_type)
-        print("Bit depth:", bit_depth, "bits")
-
-
         driver = gdal.GetDriverByName('GTiff')
 
         print("     read_csv som_data")
@@ -521,7 +514,7 @@ class NxtSomCore(object):
             #print("Min...Max values of y_label:", min(y_label), "...", max(y_label))
 
             for z_value in z_values:
-                print("         ", f"BMU_{z_value.replace(' ', '_')}.tif")
+                print("         ", f"BMU_{z_value.replace(' ', '_')}")
                 z = np.concatenate([label_data_df[z_value], unique_z_no_label])
                 df = pd.DataFrame({'X_value': x_label, 'Y_value': y_label, 'Z_value': z})
                 df['Z_value'] = pd.to_numeric(df['Z_value'])

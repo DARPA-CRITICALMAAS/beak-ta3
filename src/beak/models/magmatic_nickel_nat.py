@@ -1,5 +1,5 @@
 """
-This file contains the models used for the MVT_NAT experiment.
+This file contains the models used for the MAGMATIC_NICKEL experiment.
 
 Currently, the models are:<br>
     `MAGMATIC_NICKEL_V1`: Config V1<p>

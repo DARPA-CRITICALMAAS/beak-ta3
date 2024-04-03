@@ -63,7 +63,7 @@ def move_figures(file_path, subfolder_name):
     Returns:
         list: matching files and their corresponding destination paths
     """
-    file_patterns = ["geoplot_*.png", "somplot_*.png", "boxplot_*.png", "db_score.png", "cluster_hit_count.png"]
+    file_patterns = ["geoplot_*.png", "somplot_*.png", "boxplot_*.png", "db_score.png", "cluster*_count.png"]
     destination_path = file_path + "/" + subfolder_name + "/"
 
     # Lists to store matching files with their corresponding destination paths

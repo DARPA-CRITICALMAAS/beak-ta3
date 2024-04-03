@@ -214,10 +214,4 @@ models = {
         # Magnetic
         "Magnetic_HGM": True,
     },
-    "MVT_GROUND_TRUTH": {
-        "Training_MVT_Deposit_Present": False,
-        "Training_MVT_Occurrence_Present": False,
-        "Training_MVT_Present": True,
-    },
-
 }

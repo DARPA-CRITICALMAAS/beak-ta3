@@ -1,5 +1,5 @@
 """
-This file contains the models used for the MVT_NAT experiment.
+This file contains the models used for the TUNGSTEN_SKARN experiment.
 
 Currently, the models are:<br>
     `TUNGSTEN_SKARN_V1`: Config V1<p>
