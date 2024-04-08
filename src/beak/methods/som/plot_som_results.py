@@ -31,6 +31,7 @@ from matplotlib.ticker import FormatStrFormatter
 import math
 from matplotlib.lines import Line2D
 from .plotting_functions import plot_hexa
+from .label_analysis import *
 import time
 import warnings
 
@@ -66,7 +67,7 @@ def run_plotting_script(argsP):
         start_time = time.time()
         if(argsP.dataType=='scatter'):
             if(clusters>1):
-                plot_geospace_clusters_scatter(geo_data, discrete_cmap_2, argsP.dir)
+                plot_geospace_clusters_scatter(argsP.som_x, argsP.som_y,clusters,cluster_tick_labels,geo_data, discrete_cmap_2, argsP.dir)
             if(argsP.redraw!=False):
                 plot_geospace_results_scatter(geo_data, geo_headers, som_data, argsP.dir)
         else:
@@ -81,15 +82,20 @@ def run_plotting_script(argsP):
     if(clusters>1): 
         print("Plot Cluster result SOM space")
         start_time = time.time()
-        #draw som cluster plot if there is more than 1 cluster
-        draw_som_clusters(argsP, grid, som_data, som_table, annot_ticks, som_headers, discrete_cmap, discrete_cmap_2, clusters, cluster_ticks, cluster_tick_labels, labelIndex, annot_data, annot_strings)
-        # Load cluster dictionary
+
+        print("    Draw som cluster plot")
+        draw_som_clusters(argsP, grid, som_data, som_table, annot_ticks, som_headers, discrete_cmap, discrete_cmap_2, clusters, cluster_ticks, cluster_tick_labels, labelIndex, annot_strings)
         loaded_cluster_list = load_cluster_dictionary(argsP.dir)
-        # Plot and save the Davies-Bouldin Index vs Number of Clusters
+        
         print("    Plot Davies Bouldin index")
         plot_davies_bouldin(loaded_cluster_list, argsP.dir)
+        
         print("    Plot cluster hit count")
         plot_cluster_hit_count(argsP.dir+"/cluster_hit_count.txt", argsP.dir)
+       
+        if labelIndex is not None:
+            print("    Plot cluster label count")
+            plot_cluster_label_count(argsP.dir+"/cluster_label_counts.txt", argsP.dir)
 
         end_time = time.time()
         print(f"    Execution time: {end_time - start_time} seconds")
@@ -97,12 +103,13 @@ def run_plotting_script(argsP):
     print("Plot SOM space results")
     start_time = time.time()
 
-    draw_umatrix(som_data, som_table, grid, argsP.grid_type, annot_ticks, som_headers, argsP.dir)
+    draw_umatrix(argsP.som_x, argsP.som_y,clusters,cluster_tick_labels,som_data, som_table, grid, argsP.grid_type, annot_ticks, som_headers, argsP.dir)
     draw_number_of_hits(argsP, som_dict,som_data, clusters, grid, cluster_tick_labels, annot_ticks)
+    
     #in case the function was called for redrawing after selecting a different clustering result. so that we can skip stuff we don't have to redraw to speed things up. CURRENTLY NOT IN USE, ALWAYS TRUE.
     if(argsP.redraw!=False):
         draw_som_results(argsP, som_data, som_table, grid, annot_ticks, som_headers, clusters, cluster_tick_labels)
-
+        
     end_time = time.time()
     print(f"    Execution time: {end_time - start_time} seconds")
     
@@ -141,9 +148,6 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, no
     somy=int(som_y)
     outgeofile=None          
     geo_data=None
-    eastingIndex=None
-    northingIndex=None
-    labelIndex=None 
 
     if aOutgeofile is not None:
         outgeofile=aOutgeofile    
@@ -163,7 +167,7 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, no
         #geo_data=np.genfromtxt(outgeofile, skip_header=(1), delimiter=' ')
         #time_A = time.time()
         #print(f"        Read geo data (genfromtxt):                 {time_A - time_1} seconds")
-        geo_data = pd.read_csv(outgeofile, skiprows=1, delimiter=' ').values
+        geo_data = pd.read_csv(outgeofile, skiprows=0, delimiter=' ').values
         time_A = time.time()
         #print(f"        Read geo data (read_csv):                 {time_A - time_1} seconds")
         #if spatial, draw geo plots
@@ -214,63 +218,29 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, no
 
     # Read data using space delimiter if input file is GeoTIFF
     data_file = outgeofile if outgeofile is not None else input_file
+
     with open(data_file, encoding='utf-8-sig') as fh:
         header_line = fh.readline()
-
     colnames = header_line.split() if outgeofile is not None else header_line.split("\t")
 
-    labelIndex = colnames.index('label') if 'label' in colnames else None
-
-    # Process label data
-    annot_ticks = np.empty([somx, somy], dtype='<U32')
-    annot_ticks.fill("")
-
-    annot_strings = {}
-    annot_data = []
-
     if 'label' in colnames:
-        label_index = colnames.index('label')
-        data = np.loadtxt(data_file, dtype='str', delimiter=' ' if outgeofile is not None else '\t',
-                          skiprows=0 if outgeofile is not None else 3)
+        print(f"        Read label annotation data")
+        annot_ticks, annot_strings, annot_data, index_label, index_nolabel  = get_label_annotation_data(som_dict, geo_data, outgeofile, noDataValue)
+        #labelIndex = geo_data.shape[1] - 1
+        labelIndex = colnames.index('label')
 
-        for i in range(len(data)):
-            if data[i][label_index] not in ['', "nan", "NA", "NULL", "Null", "NoData", noDataValue]:
-                tick = annot_ticks[som_dict['bmus'][i][0]][som_dict['bmus'][i][1]]
-                counter = len(annot_strings) + 1
+    else:
+        annot_ticks = np.empty([somx, somy], dtype='<U')
+        annot_ticks.fill("")
 
-                if tick == '':
-                    annot_ticks[som_dict['bmus'][i][0]][som_dict['bmus'][i][1]] = str(counter)
-                    annot_strings[str(counter)] = [data[i][label_index]]
-                    annot_data.append([f"{counter}: {data[i][label_index]}", f"{som_dict['bmus'][i][0]}{som_dict['bmus'][i][1]}",
-                                       f"{geo_data[i][0]}, {geo_data[i][1]}" if outgeofile is not None else None])
-                else:
-                    annot_strings[tick].append(data[i][label_index])
-                    annot_data.append([f"{tick}: {data[i][label_index]}", f"{som_dict['bmus'][i][0]}{som_dict['bmus'][i][1]}",
-                                       f"{geo_data[i][0]}, {geo_data[i][1]}" if outgeofile is not None else None])
+        annot_strings = {}
+        annot_data = []
 
-        # Merge duplicates within a labeling group
-        for i, j in itertools.combinations(range(1, counter + 1), 2):
-            if annot_strings.get(str(i)) == annot_strings.get(str(j)):
-                annot_strings.pop(str(j), None)
-                for a, b in itertools.product(range(len(annot_ticks)), range(len(annot_ticks[0]))):
-                    if annot_ticks[a][b] == str(j):
-                        annot_ticks[a][b] = str(i)
+        labelIndex = None
 
-        # Remove gaps in index numbers
-        counter = 0
-        for i in range(1, counter + 1):
-            if str(i) in annot_strings:
-                counter += 1
-                annot_strings[str(counter)] = annot_strings.pop(str(i))
-                for a, b in itertools.product(range(len(annot_ticks)), range(len(annot_ticks[0]))):
-                    if annot_ticks[a][b] == str(i):
-                        annot_ticks[a][b] = str(counter)
 
-        # Format ticks
-        for i in range(1, len(annot_strings) + 1):
-            annot_strings[str(i)] = f"{i}: {','.join(annot_strings[str(i)])}"
-    
-    #dict_param = {
+
+    #return {
     #    "geo_data": geo_data,
     #    "geo_headers": geo_headers, 
     #    "som_data": som_data, 
@@ -288,7 +258,6 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, no
     #    "labelIndex": labelIndex
     #}
 
-    #return dict_param
     return geo_data, geo_headers, som_data, som_table, som_headers, som_dict, grid, annot_data, annot_ticks, annot_strings, clusters, cluster_ticks, cluster_tick_labels, discrete_cmap, discrete_cmap_2, labelIndex
 
 
@@ -498,7 +467,7 @@ def draw_som_results(argsP, som_data, som_table,grid, annot_ticks, som_headers,c
     print()
         
 
-def draw_umatrix(som_data, som_table,grid, grid_type, annot_ticks, som_headers,working_dir):
+def draw_umatrix(somx,somy,clusters,cluster_tick_labels,som_data, som_table,grid, grid_type, annot_ticks, som_headers,working_dir):
     """Draw U-matrix in geo space.
 
     Args:
@@ -533,7 +502,7 @@ def draw_umatrix(som_data, som_table,grid, grid_type, annot_ticks, som_headers,w
         mpl.rcParams.update({'font.size': 12})
 
 
-def draw_som_clusters(argsP, grid, som_data, som_table, annot_ticks, som_headers,discrete_cmap,discrete_cmap_2,clusters,cluster_ticks,cluster_tick_labels, labelIndex, annot_data, annot_strings):    
+def draw_som_clusters(argsP, grid, som_data, som_table, annot_ticks, som_headers,discrete_cmap,discrete_cmap_2,clusters,cluster_ticks,cluster_tick_labels, labelIndex, annot_strings):    
     """Draw Som Cluster plot.
 
     Args:
@@ -602,18 +571,6 @@ def draw_som_clusters(argsP, grid, som_data, som_table, annot_ticks, som_headers
         plt.clf()
         plt.cla()
         plt.close()
-        df = pd.DataFrame(annot_data)
-        if argsP.outgeofile is not None: 
-            headers = ["label", "som", "datapoint"]
-        else:
-            headers = ["label", "som"]
-        df.to_csv(argsP.dir+'/labels_flat.csv', index=False, header=headers)   #so in addition to this there should be a list thats written out in the format of current label legend?
-        #list_grouped=list(annot_strings.items())
-        array_grouped=np.array(list(annot_strings.items()))#dict to list and list to np array
-        for i in range(0,len(array_grouped)):
-            array_grouped[i][1]= array_grouped[i][1][(array_grouped[i][1].find(":")+1):len(array_grouped[i][1])]      #  ": "+ ','.join(annot_strings[str(i)])
-        np.savetxt(argsP.dir+'/labels_grouped.csv', array_grouped, delimiter=',', fmt='%s')
-        #df_grouped.to_csv(argsP.dir+'/labels_grouped.csv', index=False, header=headers)
 
 
 def plot_geospace_clusters_grid(geo_data,discrete_cmap,clusters,cluster_ticks,cluster_tick_labels,working_dir):
@@ -682,7 +639,7 @@ def plot_geospace_clusters_grid(geo_data,discrete_cmap,clusters,cluster_ticks,cl
     plt.close()       
     
     
-def plot_geospace_clusters_scatter(geo_data,discrete_cmap_2,working_dir):
+def plot_geospace_clusters_scatter(somx,somy,clusters,cluster_tick_labels,geo_data,discrete_cmap_2,working_dir):
     """Plot geospace clusters if input type is scatter
 
     Args:
@@ -863,6 +820,31 @@ def plot_cluster_hit_count(txtFile, output_path):
     ax.grid(True)
     #plt.show()
     fig.savefig(output_path+"/cluster_hit_count.png")
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+"""
+Draw cluster_label_count
+"""
+def plot_cluster_label_count(txtFile, output_path):
+    """Draw cluster_label_count
+
+    Args:
+        txtFile (str): txt file path holding cluster numbers and label count
+        output_path (str): destination folder where to save figure
+    """    
+    # Load the cluster_hit_count.txt file
+    data = np.genfromtxt(txtFile, delimiter='\t', names=True)
+    
+    fig, ax = plt.subplots()
+    ax.bar(data['Cluster'], data['Label_Count'])
+    ax.set_xlabel('Cluster Number')
+    ax.set_ylabel('Label Count')
+    ax.set_title('Cluster Label Count')
+    ax.grid(True)
+    #plt.show()
+    fig.savefig(output_path+"/cluster_label_count.png")
     plt.clf()
     plt.cla()
     plt.close()

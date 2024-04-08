@@ -1,5 +1,5 @@
 """
-This file contains the models used for the MVT_NAT experiment.
+This file contains the models used for the MAGMATIC_NICKEL experiment.
 
 Currently, the models are:<br>
     `MAGMATIC_NICKEL_V1`: Config V1<p>
@@ -149,5 +149,21 @@ models = {
         "LAB": True,
         "LAB_HGM_cog": True,
         "LAB_Worms_Proximity": True,
+    },
+    "TEST_RUN_SOM": {
+        "US_IsostaticGravity_WGS84": True,
+        "Gravity_Up30km_HGM": False,
+        "Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity": False,
+        "CONUS_MT2023_9km_cog": False,
+        "CONUS_MT2023_15km_cog": False,
+        "CONUS_MT2023_30km_cog": False,
+        "MagRTP": False,
+        "MagRTP_HGMDeepSources": False,
+        "Magnetic_LongWavelength_HGM_Worms_Proximity": False,
+        "Mag_AnalyticSignal_cog": True,
+        "Moho": False,
+        "LAB": False,
+        "LAB_HGM_cog": False,
+        "LAB_Worms_Proximity": False,
     },
 }

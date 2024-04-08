@@ -2,6 +2,7 @@ from .nextsomcore.nextsomcore import NxtSomCore
 import pickle
 import time
 import numpy as np
+from .label_analysis import *
 
 def run_SOM(args):
     """Load data, run SOM and k-means clustering, write output to file.
@@ -54,7 +55,7 @@ def run_SOM(args):
     else:
         output_folder=args.output_folder
     #print(args.output_folder)
-    if(args.kmeans.lower()=="true"):
+    if(args.kmeans==True):
         start_time = time.time()
         som['clusters']=nxtsomcore.clusters(som,args.kmeans_min,args.kmeans_max,args.kmeans_init,output_folder)     
         end_time = time.time()
@@ -63,7 +64,7 @@ def run_SOM(args):
     if args.outgeofile is not None:
         print('Save geo space results')
         start_time = time.time()
-        nxtsomcore.save_geospace_result(args.outgeofile, header, som, output_folder, args.input_file, args.normalized, args.label) 
+        geo_data = nxtsomcore.save_geospace_result(args.outgeofile, header, som, output_folder, args.input_file, args.normalized, args.label) 
         end_time = time.time()
         print(f"    Execution time: {end_time - start_time} seconds")
 
@@ -80,12 +81,25 @@ def run_SOM(args):
     end_time = time.time()
     print(f"    Execution time: {end_time - start_time} seconds")
 
+    index_nolabel = None
+    if args.label is True:
+        print('Do label analysis and write to file')
+        start_time = time.time()
+
+        annot_ticks, annot_strings, annot_data, index_label, index_nolabel  = get_label_annotation_data(som, geo_data, args.output_file_geospace, header['noDataValue'])
+        #print('index_nolabel: ', index_nolabel)
+        labels = write_som_label_data(args.output_folder, args.output_file_geospace, annot_data, annot_strings)
+        if args.output_file_geospace is not None:
+            write_bmu_cluster_label_data(args.output_folder, som['clusters'], geo_data, labels)
+
+        end_time = time.time()
+        print(f"    Execution time: {end_time - start_time} seconds")
+
     if(args.geotiff_input is not None):
         print('Write GeoTIFF file')
         start_time = time.time()
         inputFileArray=args.geotiff_input.split(",")    
-        #nxtsomcore.write_geotiff_out(args.output_folder, inputFileArray[0])
-        nxtsomcore.write_geotiff_out(args.output_folder, args.output_file_geospace, args.output_file_somspace, inputFileArray[0])
+        nxtsomcore.write_geotiff_out(args.output_folder, args.output_file_geospace, args.output_file_somspace, inputFileArray[0], args.label, index_nolabel)
         end_time = time.time()
         print(f"    Execution time: {end_time - start_time} seconds")
     
@@ -119,7 +133,7 @@ def cluster_hit_count(som, output_file_somspace, output_path):
             for bmu in som['bmus']:
                 if (cluster_array[bmu[0]][bmu[1]])+1==i:
                     cluster_hit_count[i-1]+=1
-            print(f"        Cluster hit count: {i-1} - {cluster_hit_count[i-1]}")
+            #print(f"        Cluster hit count: {i-1} - {cluster_hit_count[i-1]}")
 
     # Create a NumPy array with cluster numbers and hit counts
     result_array = np.column_stack((np.arange(clusters), cluster_hit_count))
