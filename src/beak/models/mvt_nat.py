@@ -148,7 +148,7 @@ models = {
         # Isostatic Gravity from ScienceBase
         "US_IsostaticGravity_WGS84": True,
         "US_IsostaticGravity_HGM_WGS84": True,
-        "US_IsostaticGravity_HGM_WGS84_Worms": True,
+        "US_IsostaticGravity_HGM_WGS84_Worms": False,
         # Magnetic from ScienceBase
         "MagRTP_HGM": True,
         "MagRTP_HGMDeepSources": True,
