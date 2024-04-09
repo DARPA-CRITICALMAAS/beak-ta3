@@ -139,8 +139,8 @@ models = {
         "Geology_Paleolatitude_Period_Minimum": True,
         # Gravity from ScienceBase
         "SatelliteGravity_ShapeIndex": True,
-        "Gravity": True,
-        "Gravity_HGM": True,
+        "Gravity": False,
+        "Gravity_HGM": False,
         "Gravity_Up30km": True,
         # Gravity Worms from Datacube
         "Gravity_Bouguer_HGM_Worms_Proximity": True,
