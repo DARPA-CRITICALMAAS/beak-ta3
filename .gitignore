@@ -176,3 +176,6 @@ exports/
 logs/
 experiments/**/models/
 
+# File types
+evaluation/**/export/
+evaluation/**/models/

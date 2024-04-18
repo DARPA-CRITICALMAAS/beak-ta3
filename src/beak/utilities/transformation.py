@@ -26,7 +26,7 @@ from beak.utilities.io import (
 # GitHub repository https://github.com/GispoCoding/eis_toolkit under EUPL-1.2 license.
 
 
-# region: reproject raster data
+# region: scale raster data
 def _scale_raster_process(
     file: Path,
     input_folder: Path,
@@ -126,7 +126,7 @@ def scale_raster(
 
     Args:
         input_folder (Path): The path to the input folder containing the rasters.
-        output_folder (Path): The path to the output folder where the reprojected rasters will be saved.
+        output_folder (Path): The path to the output folder where the scaled rasters will be saved.
         method (Literal[str]): The scaling method to be used. Options are "minmax" for min-max scaling and "standard" for z-score scaling.
         n_workers (int): The number of worker processes to use for parallel processing. Defaults to the number of CPU cores.
     """
@@ -163,7 +163,7 @@ def scale_raster(
     # Check output folder
     check_path(output_folder)
 
-    # Run reprojection
+    # Run scaling
     with mp.Pool(n_workers) as pool:
         with tqdm(total=len(args_list), desc="Processing files") as pbar:
             for _ in pool.starmap(_scale_raster_process, args_list):

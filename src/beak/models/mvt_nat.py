@@ -4,6 +4,7 @@ This file contains the models used for the MVT_NAT experiment.
 Currently, the models are:<br>
     `MVT_BASELINE`: The baseline model for MVT deposits from the Lawley et al. 2022 paper, containing only geophysical layers.<p>
     `MVT_PREFERRED`: The preferred model for MVT deposits from the Lawley et al. 2022 paper, containing geophysical and geological layers.
+    `MVT_PREFERRED_ISOGRAV`: The MVT_PREFERRED model but gravity has been substituted with isostatic gravity.
 """
 
 models = {
@@ -141,7 +142,7 @@ models = {
         "SatelliteGravity_ShapeIndex": True,
         "Gravity": False,
         "Gravity_HGM": False,
-        "Gravity_Up30km": True,
+        "Gravity_Up30km_HGM": True,
         # Gravity Worms from Datacube
         "Gravity_Bouguer_HGM_Worms_Proximity": True,
         "Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity": True,

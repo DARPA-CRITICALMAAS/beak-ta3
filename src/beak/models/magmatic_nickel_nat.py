@@ -53,7 +53,7 @@ models = {
         "Moho": True,
     },
     "MAGMATIC_NICKEL_HM6_V1": {
-        # Geology Ultramafics
+        # Geology Ultramafics from SGMC
         "US_Ultramafics": True,
         # Isostatic Gravity from ScienceBase
         "US_IsostaticGravity_WGS84": True,
@@ -71,30 +71,47 @@ models = {
         "CONUS_MT2023_30km_cog": True,
     },
     "SOURCE_V2": {
+        # Isostatic Gravity from ScienceBase
         "US_IsostaticGravity_WGS84": True,
+        # Magnetic from ScienceBase
         "MagRTP": True,
+        # Magnetotelluric from ScienceBase
         "CONUS_MT2023_9km_cog": True,
         "CONUS_MT2023_15km_cog": True,
+        # Magnetic Analytic Signal from Hackathon M6
         "Mag_AnalyticSignal_cog": True,
+        # Seismic from ScienceBase
         "Moho": True,
         "LAB": True,
     },
     "PATHWAYS_V1": {
-        "LAB_HGM_cog": True,
-        "LAB_Worms_Proximity": True,
-        "Gravity_Up30km_HGM": True,
-        "Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity": True,
-        "MagRTP_HGMDeepSources": True,
-        "Magnetic_LongWavelength_HGM_Worms_Proximity": True,
-        "MagRTP_HGM": True,
-        "Magnetic_HGM_Worms_Proximity": True,
+      # Seismic from ScienceBase
+      "LAB_HGM_cog": True,
+      "LAB_Worms_Proximity": True,
+      # Gravity from ScienceBase
+      "Gravity_Up30km_HGM": True,
+      # Gravity Worms from Datacube
+      "Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity": True,
+      # Magnetic from ScienceBase
+      "MagRTP_HGMDeepSources": True,
+      # Magnetic Worms from Datacube
+      "Magnetic_LongWavelength_HGM_Worms_Proximity": True,
+      # Magnetic from ScienceBase
+      "MagRTP_HGM": True,
+      # Magnetic Worms from Datacube
+      "Magnetic_HGM_Worms_Proximity": True,
     },
     "PATHWAYS_V2": {
+        # Seismic from ScienceBase
         "LAB_HGM_cog": True,
         "LAB_Worms_Proximity": True,
+        # Gravity from ScienceBase
         "Gravity_Up30km_HGM": True,
+        # Gravity Worms from Datacube
         "Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity": True,
+        # Magnetic from ScienceBase
         "MagRTP_HGMDeepSources": True,
+        # Magnetic Worms from Datacube
         "Magnetic_LongWavelength_HGM_Worms_Proximity": True,
         "CONUS_MT2023_30km_cog": True,
     },

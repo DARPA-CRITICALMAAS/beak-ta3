@@ -458,6 +458,7 @@ def create_binary_raster(
     fill_negatives: bool = True,
     same_shape: bool = True,
     out_file: Optional[Union[str, Path]] = None,
+    dtype: Optional[np.dtype] = np.dtype(np.int8),
 ) -> np.ndarray:
     """
     Creates a binary from a geodataframe by rasterizing its geometries.
@@ -472,10 +473,10 @@ def create_binary_raster(
         resolution (Optional[np.number]): The resolution of the output raster. Defaults to None.
         query (Optional[str]): An optional query to filter the geometries. Defaults to None.
         all_touched (bool): Whether to consider all pixels touched by the geometries. Defaults to False.
-        fill_negatives (bool): Whether to fill negative values with 0. Defaults to True.
+        fill_negatives (bool): Whether to fill uncovered areas in given extent with 0. Defaults to True.
         same_shape (bool): Whether to ensure the output array has the same shape as the base raster.
             Defaults to True.
-        out_file (Optional[Union[str, Path]]): An optional output file path to save the rasterized labels.
+        out_file (Optional[Union[str, Path]]): An optional output file path to save the raster.
             Defaults to None.
 
     Returns:
@@ -490,7 +491,6 @@ def create_binary_raster(
         width = base_raster.width
         height = base_raster.height
         transform = base_raster.transform
-        nodata = base_raster.nodata
         crs = base_raster.crs
     elif resolution is not None:
         width, height, transform = transform_from_geometries(gdf, resolution)
@@ -509,11 +509,14 @@ def create_binary_raster(
         transform=transform,
         all_touched=all_touched,
         merge_alg=getattr(MergeAlg, "replace"),
-        default_value=0,
+        default_value=1,
+        dtype=dtype,
     )
 
     if base_raster is not None and same_shape is True:
-        out_array = np.where(base_raster.read() == nodata, nodata, out_array)
+        out_array = np.where(
+            base_raster.read() == base_raster.nodata, nodata, out_array
+        )
 
     if out_file is not None:
         out_path = os.path.dirname(out_file)
@@ -527,6 +530,7 @@ def create_binary_raster(
             width=width,
             nodata_value=nodata,
             transform=transform,
+            dtype=dtype,
         )
 
     return out_array
