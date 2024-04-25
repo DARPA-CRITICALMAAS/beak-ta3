@@ -2,7 +2,7 @@
 # Introduction
 
 The environment can be set up
-1. by following the descriptions in the [Readme](../../README.md) provided on this repository or (**Docker** or **Conda**)
+1. by following the descriptions in the [Readme](../../../README.md) provided on this repository or (**Docker** or **Conda**)
 2. by importing the ready-to-go Docker container provided with this release
 
 In any case, please consider to use either the **Docker install** or the **prepared container** over the conda install.
@@ -19,13 +19,13 @@ In case you select **option 2**, ensure to have the latest Docker version runnin
 For **Linux or Mac**
 
 ```
-cat beak_ta3_docker_image.tar | docker import - beak-ta3:latest`
+cat beak_ta3_docker_image.tar | docker import - beak-ta3:latest
 ```
    
 For **Windows**
 
 ```
-type beak_ta3_docker_image.tar | docker import - beak-ta3:latest`
+type beak_ta3_docker_image.tar | docker import - beak-ta3:latest
 ```
    
 3. Initialize/build a container
@@ -52,7 +52,7 @@ docker run -i -t -p 8888:8888 -v C:/CMAAS/MTRI_Evaluation_Package_2024_04/GitHub
 4. Start Jupyter Lab: `jupyter lab --ip=0.0.0.0 --no-browser --allow-root`
 5. Paste the provided URL (the one with the **IP**) into your webbrowser
 ### Docker Desktop
-(graphical user interface)
+(GUI)
 
 1. Open Docker Desktop
 2. Start the container

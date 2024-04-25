@@ -32,7 +32,7 @@ Examples within
 
 Imputation and transformation of data is only needed for the **SOM** approach. The examples provided for the neural networks cover these steps within the notebooks.
 
-If there are any open questions, please check out the [code documentation](../../docs/build/html/index.html).
+If there are any open questions, please check out the [code documentation](../../../docs/build/html/index.html).
 
 ## 1.2 Examples
 
