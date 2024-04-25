@@ -1,5 +1,6 @@
 import os
 import glob
+import json
 
 class Args:
     """Arguments for SOM and k-means clustering.
@@ -44,48 +45,55 @@ class Args:
         label (Optional[str]): Whether data contains label column ("true" or "false").
         label_geotiff_file (Optional[str]): Geotiff_input file.
     """    
-    input_file: str            # Input file(*.lrn or list, separated with ",")
-    output_folder: str         # Folder to save som dictionary and cluster dictionary
-    output_file_somspace: str   # Text file that will contain calculated values: som_x som_y b_data1 b_data2 b_dataN umatrix cluster in geospace
-    outgeofile: str             # file name of the geospace output
-
-    #Parameter required for som calculation. 
-
-    som_x = 30                # X dimension of generated SOM
-    som_y = 30                # Y dimension of generated SOM
-    epochs = 10               # Number of epochs to run
-
-    maptype='toroid'            # Type of SOM ("sheet", "toroid")
-    initialcodebook=None        # File path of initial codebook, 2D numpy.array of float32.
-    neighborhood='gaussian'     # Shape of the neighborhood function. gaussian or bubble
-    std_coeff=0.5               # Coefficient in the Gaussian neighborhood function
-    radius0=0.0                   # Initial size of the neighborhood
-    radiusN=1.0                   # Final size of the neighborhood
-    radiuscooling='linear'      # Function that defines the decrease in the neighborhood size as the training proceeds ("linear", "exponential")
-    scalecooling='linear'       # Function that defines the decrease in the learning scale as the training proceeds ("linear", "exponential")
-    scale0=0.1                  # Initial learning rate
-    scaleN=0.01                 # Final learning rate
-    initialization='random'     # Type of SOM initialization ("random", "pca")
-    gridtype='rectangular'      # Type of SOM grid ("hexagonal", "rectangular")
-
-    kmeans=True              # Run k-means clustering
-    kmeans_init= 5           # Number of initializations
-    kmeans_min= 2            # Minimum number of k-mean clusters
-    kmeans_max= 25           # Maximum number of k-mean clusters
-
-    # Additional optional parameter:
-
-    output_file_geospace=None   # Text file that will contain calculated values: {X Y Z} data1 data2 ... dataN som_x som_y cluster b_data1 b_data2 b_dataN in geospace.
-    geotiff_input=None        # geotiff_input files, separated by komma, to write GeoTIF out (only first line is used to get the geotransform and projection information to set output GeoFIT geotransform and projection)
-    normalized="false"      # Whether the data has been normalized or not ("false", "true")
-    #minN=0                  # Minimum value for normalization
-    #maxN=1                  # Maximum value for normalization
-    label=None              # Whether data contains label column, true or false
-    label_geotiff_file = None       # geotiff_input file
 
     def __init__(self):
-        """Constructor for the class
+        """Constructor for the class. Initialize all attributes with default values
         """
+        self.input_file = ""
+        self.output_folder = ""
+        self.output_file_somspace = ""
+        #self.outgeofile = ""
+        self.som_x = 30
+        self.som_y = 30
+        self.epochs = 10
+        self.maptype = 'toroid'
+        self.initialcodebook = None
+        self.neighborhood = 'gaussian'
+        self.std_coeff = 0.5
+        self.radius0 = 0.0
+        self.radiusN = 1.0
+        self.radiuscooling = 'linear'
+        self.scalecooling = 'linear'
+        self.scale0 = 0.1
+        self.scaleN = 0.01
+        self.initialization = 'random'
+        self.gridtype = 'rectangular'
+        self.kmeans = True
+        self.kmeans_init = 5
+        self.kmeans_min = 2
+        self.kmeans_max = 25
+        self.output_file_geospace = None
+        self.geotiff_input = False
+        self.normalized = "false"
+        self.label = False
+        self.label_geotiff_file = None
+
+    @classmethod
+    def from_json_file(cls, file_path):
+        """Creates an instance of Args from a JSON file.
+
+        Args:
+            file_path (str): The path to the JSON file containing arguments data.
+
+        Returns:
+            Args: An instance of Args populated with data from the JSON file.
+        """
+        with open(str(file_path), 'r') as file:
+            data = json.load(file)
+
+        args_instance = cls()
+        args_instance.__dict__.update(data)  # Update instance attributes with JSON data
+        return args_instance  
 
     def create_list_from_pattern(self, file_path, file_patterns):
         """Create a list of full file names from files matching the given file_patterns within the file_path

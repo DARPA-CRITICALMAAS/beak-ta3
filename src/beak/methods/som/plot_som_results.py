@@ -539,9 +539,19 @@ def draw_som_clusters(argsP, grid, som_data, som_table, annot_ticks, som_headers
     plt.clf()
     plt.cla()
     plt.close()
+
     if(labelIndex!=None):
+        
+        # Calculate the width of the figure based on the maximum text length
+        max_text_length = max(len(text) for text in annot_strings.values())
+        fig_width = max(3, 0.2 * max_text_length) # initial width: 6.4
+
+        # Calculate the height of the figure based on the number of entries in annot_strings
+        num_entries = len(annot_strings)
+        fig_height = max(4.8, 0.3 * num_entries)
+
         mpl.rcParams.update({'font.size': 12})  
-        fig = plt.figure(figsize= [6.4, 4.8])
+        fig = plt.figure(figsize= [fig_width, fig_height])
         ax1 = fig.add_subplot(211) # Creates another plot image and turns visibility of the axes off
         ax1.axis('off')
         children=[]

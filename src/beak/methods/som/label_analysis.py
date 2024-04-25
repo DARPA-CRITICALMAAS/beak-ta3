@@ -49,7 +49,7 @@ def write_bmu_cluster_label_data(workdir, cluster_array, geo_data, labels):
                 
                 # get cluster 
                 if cluster_array is not None:
-                    cluster = int(cluster_array[som_x][som_y])
+                    cluster = int(cluster_array[som_y][som_x])
                 else:
                     cluster = 0
 
@@ -94,21 +94,18 @@ def write_bmu_cluster_label_data(workdir, cluster_array, geo_data, labels):
             
             for geo_point in bmu_info['geo_xy']:
                 geo_x, geo_y = geo_point
-                geo_label_bmu.append([geo_x, geo_y, int(som_x), int(som_y), int(label_count), int(cluster), int(cluster_label_counts[cluster])])
+                geo_label_bmu.append([geo_x, geo_y, int(som_x), int(som_y), int(label_count), int(cluster)])
+
+        for idx, row in enumerate(geo_label_bmu):
+            cluster = row[5]
+            cluster_label_count = cluster_label_counts[cluster]
+            geo_label_bmu[idx].append(int(cluster_label_count))
 
         # Convert geo_label_bmu list to a DataFrame
         geo_label_df = pd.DataFrame(geo_label_bmu, columns=['X', 'Y', 'SOM_X', 'SOM_Y', 'Label_Count', 'Cluster', 'Cluster_Label_Count'])
 
-        # Drop duplicates based on X, Y, SOM_X, SOM_Y columns
-        #dropped_rows = geo_label_df[geo_label_df.duplicated(subset=['X', 'Y', 'SOM_X', 'SOM_Y'], keep=False)]
-        #print("Duplicates in 'geo_label': ", len(dropped_rows))
-        #geo_label_df.drop_duplicates(subset=['X', 'Y', 'SOM_X', 'SOM_Y'], inplace=True)
-
         # Convert the DataFrame back to a NumPy array
         bmu_geo_label_data = geo_label_df.to_numpy()
-        
-        ## Convert the list of geo points to a NumPy array
-        #bmu_geo_label_data = np.array(geo_label_bmu)
 
         # Add BMU ID column
         sorted_bmus = sorted(bmu_labeled.keys())
@@ -142,10 +139,8 @@ def write_bmu_cluster_label_data(workdir, cluster_array, geo_data, labels):
 
 
 def read_geo_labeled_bmu(file_path):
-    # Lese die Datei mit np.loadtxt ein
     data = np.loadtxt(file_path, delimiter='\t', skiprows=1)
     
-    # Extrahiere die Daten
     bmu_id = data[:, 0]
     geo_x = data[:, 1]
     geo_y = data[:, 2]
@@ -155,7 +150,6 @@ def read_geo_labeled_bmu(file_path):
     cluster = data[:, 6].astype(int)
     cluster_label_counts = data[:, 7].astype(int)
     
-    # Gib die extrahierten Daten zurück
     return {
         'bmu_id': bmu_id,
         'X':geo_x, 
@@ -245,29 +239,49 @@ def get_label_annotation_data(som_dict, geo_data, outgeofile, noDataValue):
     # Sort annot_strings by key
     for i in range(1, len(annot_strings) + 1):
         annot_strings[str(i)] = {k: v for k, v in sorted(annot_strings[str(i)].items())}
+
     # Merge duplicates within a labeling group
     for i, j in itertools.combinations(range(1, counter + 1), 2):
+
         if annot_strings.get(str(i)) == annot_strings.get(str(j)):
+
             #remove duplicate entry from dictionary 'annot_strings'
             annot_strings.pop(str(j), None)
+
             #go through all indices of 2D array 'annot_ticks' and replace value if equal to duplicate entry j
             for a, b in itertools.product(range(len(annot_ticks)), range(len(annot_ticks[0]))):
-                if annot_ticks[a][b] == str(j):
-                    annot_ticks[a][b] = str(i)
+                if annot_ticks[a][b] == str(i) or annot_ticks[a][b] == str(j):
+                    if len(unique_labels) == 1:
+                        annot_ticks[a][b] = 'x' + str(i)
+                    else:
+                        annot_ticks[a][b] = str(i)
+
+    if len(unique_labels) == 1:
+        # Check if 'x' is included in all annot_ticks elements, if not (when no duplicates), add it
+        for a in range(len(annot_ticks)):
+            for b in range(len(annot_ticks[a])):
+                if 'x' not in annot_ticks[a][b] and not annot_ticks[a][b]=='':
+                    annot_ticks[a][b] = 'x' + annot_ticks[a][b]
+
     # set new index numbers
     if len(unique_labels) == 1:
-        # Create a new dictionary to store the new indices
-        new_index = {}
-        # Iterate over the entries in annot_strings and set the new indices based on the "count"
-        for index, labels in annot_strings.items():
-            count = sum(labels.values())  # Sum up the "count" for the current labels
-            new_index[index] = str(count)  # Use the "count" as the new index
-            # Update annot_ticks with the new index
-            for a, b in itertools.product(range(len(annot_ticks)), range(len(annot_ticks[0]))):
-                if annot_ticks[a][b] == index:
-                    annot_ticks[a][b] = str(count)
-        # Update annot_strings with the new index
-        annot_strings = {new_index[index]: labels for index, labels in annot_strings.items()}
+        # Sort annot_strings by label count
+        sorted_indices = sorted(annot_strings.keys(), key=lambda x: sum(annot_strings[x].values()))
+        new_indices = {}
+        for index in sorted_indices:
+            count = sum(annot_strings[index].values())
+            new_indices[index] = str(count)
+            for a in range(len(annot_ticks)):
+                for b in range(len(annot_ticks[a])):
+                    if annot_ticks[a][b] == 'x' + index:
+                        annot_ticks[a][b] = str(count)
+
+
+        # Update annot_strings with the new indices
+        #annot_strings = {new_index[index]: labels for index, labels in annot_strings.items()}
+        #annot_strings = {new_index: labels for new_index, labels in sorted(annot_strings.items(), key=lambda x: int(x[0]))}
+        annot_strings = {new_index: annot_strings[index] for index, new_index in new_indices.items()}
+
         # Sort annot_strings by ascending "count"
         annot_strings = {k: v for k, v in sorted(annot_strings.items(), key=lambda item: sum(item[1].values()))}
 
@@ -282,9 +296,7 @@ def get_label_annotation_data(som_dict, geo_data, outgeofile, noDataValue):
                         annot_ticks[a][b] = str(counter)
 
     for key in annot_strings:
-        annot_strings[str(key)] = f"{key}: {','.join([f'{label}({count})' for label, count in annot_strings[str(key)].items()])}"
-
-    #print("Maximum index in index_nolabel:", max(index_nolabel))
-    #print("Size of geo_data array:", geo_data.shape[0])
+        #annot_strings[str(key)] = f"{key}: {','.join([f'{label}({count})' for label, count in annot_strings[str(key)].items()])}"
+        annot_strings[key] = f"{key}: {','.join([f'{label}({count})' for label, count in annot_strings[key].items()])}"
     
     return annot_ticks, annot_strings, annot_data, index_label, index_nolabel
