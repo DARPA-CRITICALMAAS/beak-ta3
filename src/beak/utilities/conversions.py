@@ -285,6 +285,7 @@ def rasterize_vector(
     compress_num_threads: Optional[Union[str, int]] = "all_cpus",
     n_workers: int = mp.cpu_count(),
     chunksize: Optional[int] = None,
+    export_prefix: Optional[str] = None,
 ) -> Tuple[List, List, List]:
     """
     Rasterize vector data.
@@ -427,6 +428,7 @@ def rasterize_vector(
                     export_folder = Path(raster_save_folder)
 
                 export_name = replace_invalid_characters(column)
+                
                 save_raster(
                     path=Path(export_folder) / f"{export_name}.tif",
                     array=raster,

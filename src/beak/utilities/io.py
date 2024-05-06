@@ -212,6 +212,7 @@ def save_raster(
     metadata: Optional[Dict] = None,
     compress_method: Optional[str] = "lzw",
     compress_num_threads: Optional[Union[int, str]] = "all_cpus",
+    overwrite: bool = False,
 ):
     """
     Save raster data to disk.
@@ -233,40 +234,48 @@ def save_raster(
     Returns:
         (None): None
     """
-    if array.ndim == 2:
-        array = np.expand_dims(array, axis=0)
-
-    count = array.shape[0]
-    dtype = array.dtype if dtype is None else dtype
-    nodata_value = metadata["nodata"] if nodata_value is None else nodata_value
-
-    if metadata is None:
-        if crs.is_epsg_code:
-            epsg_code = CRS.to_epsg(crs)
-            crs = CRS.from_epsg(epsg_code)
-
-        meta = {
-            "driver": "GTiff",
-            "dtype": str(dtype),
-            "nodata": nodata_value,
-            "width": width,
-            "height": height,
-            "count": count,
-            "crs": crs,
-            "transform": transform,
-        }
+    if path.exists() and overwrite is False:
+        print(f"File already exists: {path.name}.")
+        return
     else:
-        meta = metadata
-        meta.update({"count": count})
-        meta.update({"dtype": str(dtype)})
-        meta.update({"nodata": nodata_value})
+        if array.ndim == 2:
+            array = np.expand_dims(array, axis=0)
 
-    with rasterio.open(
-        path, "w", compress=compress_method, num_threads=compress_num_threads, **meta
-    ) as dst:
-        for i in range(0, count):
-            dst.write(array[i].astype(dtype), i + 1)
-        dst.close()
+        count = array.shape[0]
+        dtype = array.dtype if dtype is None else dtype
+        nodata_value = metadata["nodata"] if nodata_value is None else nodata_value
+
+        if metadata is None:
+            if crs.is_epsg_code:
+                epsg_code = CRS.to_epsg(crs)
+                crs = CRS.from_epsg(epsg_code)
+
+            meta = {
+                "driver": "GTiff",
+                "dtype": str(dtype),
+                "nodata": nodata_value,
+                "width": width,
+                "height": height,
+                "count": count,
+                "crs": crs,
+                "transform": transform,
+            }
+        else:
+            meta = metadata
+            meta.update({"count": count})
+            meta.update({"dtype": str(dtype)})
+            meta.update({"nodata": nodata_value})
+
+        with rasterio.open(
+            path,
+            "w",
+            compress=compress_method,
+            num_threads=compress_num_threads,
+            **meta,
+        ) as dst:
+            for i in range(0, count):
+                dst.write(array[i].astype(dtype), i + 1)
+            dst.close()
 
 
 def dataframe_to_feather(data: pd.DataFrame, file_path: Path):

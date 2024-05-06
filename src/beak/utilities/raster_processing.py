@@ -217,7 +217,7 @@ def reproject_raster(
         target_epsg (int): The EPSG code of the target coordinate reference system (CRS).
         target_resolution (Optional[np.number]): The target resolution of the reprojected rasters. Defaults to None.
         resampling_method (warp.Resampling): The resampling method to use during reprojection. Defaults to warp.Resampling.nearest.
-        reampling_mode (Literal["manual", "auto"]): Uses "nearest" for integers and "bilinear" for floats.
+        resampling_mode (Literal["manual", "auto"]): Uses "nearest" for integers and "bilinear" for floats.
             Overwrites resampling_method if set to "auto". Defaults to "manual".
         n_workers (int): The number of worker processes to use for parallel processing. Defaults to the number of CPU cores.
     """
@@ -352,7 +352,7 @@ def _clip_raster_with_shapefile(
 
 def _clip_raster_process(
     file: Path,
-    input_folder: Path,
+    input_folder: Optional[Path],
     output_folder: Optional[Union[str, Path]],
     shapefile: Optional[Union[str, Path]],
     query: Optional[str],
@@ -404,6 +404,9 @@ def _clip_raster_process(
     else:
         raise ValueError("Either shapefile or bounds must be provided for clipping.")
 
+    if input_folder is None:
+        input_folder = file.parent
+
     if output_folder is not None:
         relative_file = file.relative_to(input_folder)
         out_file = output_folder / relative_file
@@ -418,6 +421,64 @@ def _clip_raster_process(
             raster.nodata,
             out_meta["transform"],
         )
+    return out_array, out_meta
+
+
+def clip_raster_file(
+    input_file: Union[str, Path],
+    output_file: Optional[Union[str, Path]] = None,
+    shapefile: Optional[Union[str, Path]] = None,
+    query: Optional[str] = None,
+    bounds: Optional[
+        Tuple[Optional[Number], Optional[Number], Optional[Number], Optional[Number]]
+    ] = None,
+    all_touched: bool = False,
+):
+    """
+    Clips a raster file based on the provided parameters.
+
+    Args:
+        input_file (Union[str, Path]): The path to the input raster file.
+        shapefile (Optional[Union[str, Path]]): The path to the shapefile used for clipping. Default is None.
+        query (Optional[str]): An optional query string to filter the shapefile features. Default is None.
+        bounds (Optional[Tuple[Optional[Number], Optional[Number], Optional[Number], Optional[Number]]]):
+            An optional tuple representing the bounding box coordinates (minx, miny, maxx, maxy) for clipping.
+            Default is None.
+        all_touched (bool): A flag indicating whether to include all pixels touched by the shapefile features.
+            Default is False.
+
+    Returns:
+        Tuple: A tuple containing the clipped raster array and the metadata of the clipped raster.
+
+    """
+    input_file = Path(input_file)
+
+    if shapefile:
+        shapefile = Path(shapefile)
+
+    out_array, out_meta = _clip_raster_process(
+        file=input_file,
+        input_folder=None,
+        output_folder=None,
+        shapefile=shapefile,
+        query=query,
+        bounds=bounds,
+        all_touched=all_touched,
+    )
+
+    if output_file:
+        output_file = Path(output_file)
+
+        save_raster(
+            output_file,
+            out_array,
+            out_meta["crs"],
+            out_meta["height"],
+            out_meta["width"],
+            out_meta["nodata"],
+            out_meta["transform"],
+        )
+
     return out_array, out_meta
 
 
@@ -509,7 +570,7 @@ def _unify_raster_grids(
         base_raster = rasterio.open(base_raster)
     if isinstance(raster_to_unify, Path):
         raster_to_unify = rasterio.open(raster_to_unify)
-        
+
     dst_crs = base_raster.crs
     dst_width = base_raster.width
     dst_height = base_raster.height
@@ -589,7 +650,7 @@ def unify_raster_grids(
     same_extent: bool = False,
     same_shape: bool = False,
     n_workers: int = 1,
-    verbose: int = 0
+    verbose: int = 0,
 ) -> List[Tuple[np.ndarray, dict]]:
     """
     Unifies the grids of multiple rasters to match the grid of a base raster.
@@ -622,7 +683,7 @@ def unify_raster_grids(
     if n_workers > 1:
         if verbose == 1:
             print("Starting parallel processing...")
-            
+
         with mp.Pool(n_workers) as pool:
             for result in pool.starmap(_unify_raster_grids, args_list):
                 unified_results.append(result)
@@ -636,10 +697,10 @@ def unify_raster_grids(
                 same_shape,
             )
             unified_results.append((out_array, out_meta))
-    
+
     if verbose == 1:
         print("Done!")
-    
+
     return unified_results
 
 

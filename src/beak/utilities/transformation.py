@@ -44,8 +44,8 @@ def _scale_raster_process(
     Returns:
         None
     """
-    raster = load_raster(file)
     out_file = output_folder / file.relative_to(Path(input_folder))
+    raster = load_raster(file)
     check_path(out_file.parent)
     out_array = _scale_raster_core(raster, method)
 
@@ -79,7 +79,7 @@ def _scale_data(
         scaler = MinMaxScaler()
     elif method == "standard":
         scaler = StandardScaler()
-    
+
     if isinstance(data, np.ndarray):
         out_data = scaler.fit_transform(data.reshape(-1, 1))
     elif isinstance(data, pd.DataFrame):

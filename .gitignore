@@ -174,8 +174,15 @@ probflow/
 results/
 exports/
 logs/
-experiments/**/models/
+*qgis/
 
-# File types
-evaluation/**/export/
-evaluation/**/models/
+experiments/**/models/
+releases/**/export/
+releases/**/model/
+releases/**/models/
+releases/**/prediction/
+releases/**/train/
+releases/**/validation/
+releases/20240506_hackathon_m9_preliminary/**/bnn
+
+
