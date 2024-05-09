@@ -184,5 +184,5 @@ releases/**/prediction/
 releases/**/train/
 releases/**/validation/
 releases/20240506_hackathon_m9_preliminary/**/bnn
-
+releases/20240509_dropout_evaluation_poco_nat_80p/
 
