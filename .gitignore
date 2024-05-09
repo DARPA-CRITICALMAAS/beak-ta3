@@ -177,6 +177,8 @@ logs/
 *qgis/
 
 experiments/**/models/
+experiments/*evaluation*/
+
 releases/**/export/
 releases/**/model/
 releases/**/models/
@@ -185,6 +187,5 @@ releases/**/train/
 releases/**/validation/
 releases/20240506_hackathon_m9_preliminary/**/bnn
 releases/20240509_dropout_evaluation/
-experiments/hackathon_9m_related_evaluation/
 
 
