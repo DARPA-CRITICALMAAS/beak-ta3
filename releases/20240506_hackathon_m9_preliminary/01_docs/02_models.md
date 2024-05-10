@@ -105,5 +105,6 @@ Metrics are based on evaluation of the **positive** labels only (**not** AUC).
 | TUSK | Fox         | BNN**  | 1.0      | 1.0      | 0.994      | 18         |
 | TUSK | Bison (ext) | BNN**  | 1.0      | 1.0      | 0.995      | 207        |
 | TUSK | Fox (ext)   | BNN**  | 1.0      | 1.0      | 0.996      | 171        |
-\* incorporates also negative values used for validation
+
+\* incorporates also negative values used for validation<br>
 \** pixels greater or equal than **0.5** treated as predicted positive
