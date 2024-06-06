@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import geopandas as gpd
 import rasterio
 import shutil
 import zipfile
@@ -13,6 +14,8 @@ from typing import Optional, Tuple, Union, Dict, Sequence, List, Any
 from numbers import Number
 from collections import Counter
 from tqdm import tqdm
+
+from beak.utilities.checks import check_write_permissions
 
 
 def load_dataset(
@@ -599,6 +602,35 @@ def compress_to_zip(file_path: Path, method: int = zipfile.ZIP_LZMA, level: int 
         zip_file.write(
             file_path, file_path.name, compress_type=method, compresslevel=level
         )
+
+
+def save_geodataframe(
+    dataframe: gpd.GeoDataFrame, path: Union[Path, str], overwrite: bool = False
+):
+    """
+    Save a GeoDataFrame to a file.
+
+    This function saves a GeoDataFrame to a file in either ESRI Shapefile or GeoPackage format,
+    depending on the file extension provided in the output path.
+
+    Args:
+        dataframe (gpd.GeoDataFrame): The GeoDataFrame to be saved.
+        path (Path): The path to the output file. The file extension determines the format:
+                     - ".shp" for ESRI Shapefile
+                     - ".gpkg" for GeoPackage
+        overwrite (bool): Whether to overwrite the file if it already exists. Defaults to False.
+
+    Returns:
+        None
+    """
+    path = Path(path)
+
+    write_file = check_write_permissions(path, overwrite)
+    if write_file is True:
+        if path.suffix == ".shp":
+            dataframe.to_file(path, driver="ESRI Shapefile")
+        elif path.suffix == ".gpkg":
+            dataframe.to_file(path, driver="GPKG")
 
 
 # region: Test code

@@ -3,8 +3,12 @@ import pandas as pd
 import geopandas as gpd
 
 from sklearn.impute import SimpleImputer
-from typing import List, Tuple, Union, Optional
+from beartype.typing import List, Tuple, Union, Optional, Literal
 from numbers import Number
+
+from beak.utilities.focal import (
+    _create_local_buffer,
+)
 
 
 def create_encodings_from_dataframe(
@@ -84,40 +88,54 @@ def impute_data(
     return data_imputed
 
 
-def create_nan_buffer(
-    array: np.ndarray, target_value: Number = 1, radius: int = 1
-) -> np.ndarray:
-    """
-    Creates a buffer of NaN values around the selected value in a given array.
-
-    Args:
-        array (np.ndarray): The array to be buffered.
-        target_value (Number): The value to be buffered. Defaults to 1.
-        radius (int): Number of cells (distance) to the targeted value to be changed.
-            Defaults to 1. E.g. radius of 1 will change the 8 cells around the targeted value.
-
-    Returns:
-        np.ndarray: The buffered array.
-    """
-    target_locations = np.where(array == target_value)
-    if np.issubdtype(array.dtype, np.integer):
-        array = array.astype(np.float16)
-
-    out_array = np.copy(array)
-
-    for x, y in zip(target_locations[0], target_locations[1]):
-        row_range = slice(max(0, x - radius), min(array.shape[0], x + radius + 1))
-        col_range = slice(max(0, y - radius), min(array.shape[1], y + radius + 1))
-        out_array[row_range, col_range] = np.nan
-
-    return np.where(array == target_value, target_value, out_array)
-
-
 def delete_nan_elements(array: np.ndarray, transpose: bool = True) -> np.ndarray:
     target_locations = np.isnan(array).any(axis=0)
     out_array = array[:, ~target_locations]
 
     if transpose is True:
         out_array = np.transpose(out_array)
+
+    return out_array
+
+
+def create_hard_buffer_around_labels(
+    array: np.ndarray,
+    radius: int = 1,
+    shape: Literal["square", "circle"] = "circle",
+    positive_label_value: int = 1,
+    buffer_value: Optional[Number] = None,
+) -> np.ndarray:
+    """
+    Extends the positive values in the given array.
+
+    A: If the buffer value is not specified, the buffer value will be the same as the positive labels value.
+    B: If the buffer value is specified, elements around the positive labels will be replaced with this value.
+
+    For extending positive labels, use option A.
+    For excluding negative labels, use option B with values such as np.nan oder -1.
+
+    Args:
+        array (np.ndarray): The array to be extended.
+        radius (int): The radius of the buffer (1 for a 3x3 window with 9 pixels, size is n*2 + 1). Defaults to 1.
+        shape (Literal["square", "circle"]): The shape of the buffer. Defaults to "square".
+        selected_value (int): The value to be extended. Defaults to 1.
+        buffer_value (Optional[Number]): The value to be used for the buffer. Defaults to np.nan
+
+    Returns:
+        np.ndarray: The extended label's array.
+    """
+    out_array = np.copy(array)
+    out_array = _create_local_buffer(
+        array=array,
+        radius=radius,
+        shape=shape,
+        target_value=positive_label_value,
+    )
+
+    if buffer_value is not None:
+        out_array = np.where(out_array == positive_label_value, buffer_value, out_array)
+        out_array = np.where(
+            array == positive_label_value, positive_label_value, out_array
+        )
 
     return out_array

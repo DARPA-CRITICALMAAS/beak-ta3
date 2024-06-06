@@ -94,7 +94,7 @@ def _reproject_raster_process(
     file: Path,
     input_folder: Path,
     output_folder: Path,
-    target_epsg: int,
+    target_crs: Union[int, rasterio.crs.CRS],
     target_resolution: Optional[np.number],
     resampling_method: warp.Resampling,
     resampling_mode: str,
@@ -105,7 +105,7 @@ def _reproject_raster_process(
         file (Path): The path to the input raster file.
         input_folder (Path): The path to the input folder.
         output_folder (Path): The path to the output folder.
-        target_epsg (int): The target EPSG code for the reprojection.
+        target_crs (Union[int, rasterio.crs.CRS]): Target coordinate reference system (CRS).
         target_resolution (Optional[np.number]): The target resolution for the reprojection.
         resampling_method (warp.Resampling): The resampling method to use.
     """
@@ -115,13 +115,13 @@ def _reproject_raster_process(
         raster = load_raster(file)
         check_path(Path(os.path.dirname(out_file)))
         out_array, out_meta = _reproject_raster_core(
-            raster, target_epsg, target_resolution, resampling_method, resampling_mode
+            raster, target_crs, target_resolution, resampling_method, resampling_mode
         )
 
         save_raster(
             out_file,
             out_array,
-            CRS.from_epsg(target_epsg),
+            out_meta["crs"],
             out_meta["height"],
             out_meta["width"],
             raster.nodata,
@@ -131,7 +131,7 @@ def _reproject_raster_process(
 
 def _reproject_raster_core(
     raster: rasterio.io.DatasetReader,
-    target_crs: int,
+    target_crs: Union[int, rasterio.crs.CRS],
     target_resolution: Optional[np.number],
     resampling_method: warp.Resampling,
     resampling_mode: str,
@@ -143,7 +143,7 @@ def _reproject_raster_core(
 
     Args:
         raster (rasterio.io.DatasetReader): The input raster to be reprojected.
-        target_crs (int): The EPSG code of the target CRS.
+        target_crs (Union[int, rasterio.crs.CRS]): Target coordinate reference system (CRS).
         target_resolution (Optional[np.number]): The target resolution of the reprojected raster.
         resampling_method (warp.Resampling): The resampling method to be used during reprojection.
 
@@ -152,7 +152,11 @@ def _reproject_raster_core(
     """
 
     src_arr = raster.read()
-    dst_crs = rasterio.crs.CRS.from_epsg(target_crs)
+
+    if isinstance(target_crs, int):
+        dst_crs = CRS.from_epsg(target_crs)
+    else:
+        dst_crs = target_crs
 
     dst_transform, dst_width, dst_height = warp.calculate_default_transform(
         raster.crs,
@@ -201,7 +205,7 @@ def _reproject_raster_core(
 def reproject_raster(
     input_folder: Union[str, Path],
     output_folder: Union[str, Path],
-    target_epsg: int,
+    target_crs: Union[int, rasterio.crs.CRS],
     target_resolution: Optional[np.number] = None,
     resampling_method: warp.Resampling = warp.Resampling.nearest,
     resampling_mode: Literal["manual", "auto"] = "manual",
@@ -214,7 +218,7 @@ def reproject_raster(
     Args:
         input_folder (Path): The path to the input folder containing the rasters.
         output_folder (Path): The path to the output folder where the reprojected rasters will be saved.
-        target_epsg (int): The EPSG code of the target coordinate reference system (CRS).
+        target_crs (Union[int, rasterio.crs.CRS]): The target coordinate reference system (CRS).
         target_resolution (Optional[np.number]): The target resolution of the reprojected rasters. Defaults to None.
         resampling_method (warp.Resampling): The resampling method to use during reprojection. Defaults to warp.Resampling.nearest.
         resampling_mode (Literal["manual", "auto"]): Uses "nearest" for integers and "bilinear" for floats.
@@ -253,7 +257,7 @@ def reproject_raster(
             file,
             input_folder,
             output_folder,
-            target_epsg,
+            target_crs,
             target_resolution,
             resampling_method,
             resampling_mode,
@@ -806,7 +810,6 @@ def snap_raster(
         The updated metadata.
 
     Raises:
-        ValueError: Raster and and snap raster are not in the same CRS.
         ValueError: Raster and and snap raster are not in the same CRS.
     """
     if not raster.crs == snap_raster.crs:

@@ -428,7 +428,7 @@ def rasterize_vector(
                     export_folder = Path(raster_save_folder)
 
                 export_name = replace_invalid_characters(column)
-                
+
                 save_raster(
                     path=Path(export_folder) / f"{export_name}.tif",
                     array=raster,
@@ -521,6 +521,8 @@ def create_binary_raster(
         )
 
     if out_file is not None:
+        out_file = Path(out_file)
+
         out_path = os.path.dirname(out_file)
         check_path(out_path)
 
