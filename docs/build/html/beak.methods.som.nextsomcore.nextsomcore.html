@@ -104,7 +104,7 @@ modyfied by Ina Storch, 2024</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="beak.methods.som.nextsomcore.nextsomcore.NxtSomCore">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">beak.methods.som.nextsomcore.nextsomcore.</span></span><span class="sig-name descname"><span class="pre">NxtSomCore</span></span><a class="reference internal" href="_modules/beak/methods/som/nextsomcore/nextsomcore.html#NxtSomCore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class for training self-organizing map and saving results.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="beak.methods.som.nextsomcore.nextsomcore.NxtSomCore.__init__">
@@ -119,15 +119,15 @@ modyfied by Ina Storch, 2024</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>input_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The name of the file to be loaded.</p></li>
-<li><p><strong>label_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – The name of the label file to be loaded. Defaults to “”.</p></li>
+<li><p><strong>input_file</strong> (<em>str</em>) – The name of the file to be loaded.</p></li>
+<li><p><strong>label_file</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the label file to be loaded. Defaults to “”.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Dictionary holding de model data as a ndarray and meta data such as numer of rows and column, column (data) names, file type.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)">dict</a></p>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -140,16 +140,16 @@ modyfied by Ina Storch, 2024</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<em>nparray</em>) – Training data used in SOM.</p></li>
-<li><p><strong>som_x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – X-size of the map.</p></li>
-<li><p><strong>som_y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Y-size of the map.</p></li>
-<li><p><strong>epochs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>, </em><em>optional</em>) – Number of rounds the training is performed. Defaults to 10.</p></li>
+<li><p><strong>som_x</strong> (<em>int</em>) – X-size of the map.</p></li>
+<li><p><strong>som_y</strong> (<em>int</em>) – Y-size of the map.</p></li>
+<li><p><strong>epochs</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of rounds the training is performed. Defaults to 10.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Dictionary holding SOM results, umatrix and meta data like number of columns and rows.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)">dict</a></p>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -164,8 +164,8 @@ modyfied by Ina Storch, 2024</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>som</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – SOM-related data obtained from training(codebook, dimensions, etc..)</p></li>
-<li><p><strong>cluster_count</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Number of clusters used in clustering</p></li>
+<li><p><strong>som</strong> (<em>dict</em>) – SOM-related data obtained from training(codebook, dimensions, etc..)</p></li>
+<li><p><strong>cluster_count</strong> (<em>int</em>) – Number of clusters used in clustering</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -189,11 +189,11 @@ Returns the best clustering, and writes the best clustering results for each num
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>som</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – SOM-related data obtained from training(codebook, dimensions, etc..)</p></li>
-<li><p><strong>cluster_min</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Minimum number of clusters used in clustering</p></li>
-<li><p><strong>cluster_max</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Maximum number of clusters used in clustering</p></li>
-<li><p><strong>cluster_init</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Number of initializations used in clustering</p></li>
-<li><p><strong>working_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Destination folder to be used for saving the result.</p></li>
+<li><p><strong>som</strong> (<em>dict</em>) – SOM-related data obtained from training(codebook, dimensions, etc..)</p></li>
+<li><p><strong>cluster_min</strong> (<em>int</em>) – Minimum number of clusters used in clustering</p></li>
+<li><p><strong>cluster_max</strong> (<em>int</em>) – Maximum number of clusters used in clustering</p></li>
+<li><p><strong>cluster_init</strong> (<em>int</em>) – Number of initializations used in clustering</p></li>
+<li><p><strong>working_dir</strong> (<em>str</em>) – Destination folder to be used for saving the result.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -219,13 +219,13 @@ q_error= Q-error, difference between som results and original columns</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>output_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Filename to be used for saving the result.</p></li>
-<li><p><strong>header</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary holding header data ((load_data(…)).</p></li>
-<li><p><strong>som</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary holding SOM results (train(…)).</p></li>
-<li><p><strong>output_folder</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Destination folder to be used for saving the result.</p></li>
+<li><p><strong>output_file</strong> (<em>str</em>) – Filename to be used for saving the result.</p></li>
+<li><p><strong>header</strong> (<em>dict</em>) – Dictionary holding header data ((load_data(…)).</p></li>
+<li><p><strong>som</strong> (<em>dict</em>) – Dictionary holding SOM results (train(…)).</p></li>
+<li><p><strong>output_folder</strong> (<em>str</em>) – Destination folder to be used for saving the result.</p></li>
 <li><p><strong>input_file</strong> (<em>LiteralStringstr</em>) – list of input files, separated by komma (only first line is used to get the geotransform and projection information to set output GeoFIT geotransform and projection)</p></li>
-<li><p><strong>normalized</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether data is normalized or not. Defaults to False.</p></li>
-<li><p><strong>labelIndex</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether input data has label data column. Defaults to False.</p></li>
+<li><p><strong>normalized</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether data is normalized or not. Defaults to False.</p></li>
+<li><p><strong>labelIndex</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether input data has label data column. Defaults to False.</p></li>
 </ul>
 </dd>
 </dl>
@@ -243,11 +243,11 @@ cluster - Cluster group number</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>output_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Filename to be used for saving the result.</p></li>
-<li><p><strong>header</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary holding header data ((load_data(…)).</p></li>
-<li><p><strong>som</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary holding SOM results (train(…)).</p></li>
-<li><p><strong>output_folder</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Destination folder to be used for saving the result.</p></li>
-<li><p><strong>normalized</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether data is normalized or not. Defaults to False.</p></li>
+<li><p><strong>output_file</strong> (<em>str</em>) – Filename to be used for saving the result.</p></li>
+<li><p><strong>header</strong> (<em>dict</em>) – Dictionary holding header data ((load_data(…)).</p></li>
+<li><p><strong>som</strong> (<em>dict</em>) – Dictionary holding SOM results (train(…)).</p></li>
+<li><p><strong>output_folder</strong> (<em>str</em>) – Destination folder to be used for saving the result.</p></li>
+<li><p><strong>normalized</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether data is normalized or not. Defaults to False.</p></li>
 </ul>
 </dd>
 </dl>
@@ -265,16 +265,35 @@ cluster - Cluster group number</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="beak.methods.som.nextsomcore.nextsomcore.NxtSomCore.write_geotiff_out">
-<span class="sig-name descname"><span class="pre">write_geotiff_out</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geodatafile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">somdatafile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/nextsomcore/nextsomcore.html#NxtSomCore.write_geotiff_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore.write_geotiff_out" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">write_geotiff_out</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geodatafile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">somdatafile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index_nolabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/nextsomcore/nextsomcore.html#NxtSomCore.write_geotiff_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore.write_geotiff_out" title="Link to this definition"></a></dt>
 <dd><p>Write geotiff to file using gdal.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>output_folder</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – folder path where to write geotiff file</p></li>
-<li><p><strong>geodatafile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – path and name for text file that contains som results in geospace</p></li>
-<li><p><strong>somdatafile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – path and name for text file that contains som results in somspace</p></li>
+<li><p><strong>output_folder</strong> (<em>str</em>) – folder path where to write geotiff file</p></li>
+<li><p><strong>geodatafile</strong> (<em>str</em>) – path and name for text file that contains som results in geospace</p></li>
+<li><p><strong>somdatafile</strong> (<em>str</em>) – path and name for text file that contains som results in somspace</p></li>
 <li><p><strong>input_file</strong> (<em>LiteralStringstr</em>) – list of input files, separated by komma (only first line is used to get the geotransform and projection information to set output GeoFIT geotransform and projection)</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="beak.methods.som.nextsomcore.nextsomcore.NxtSomCore.X_write_geotiff_out">
+<span class="sig-name descname"><span class="pre">X_write_geotiff_out</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geodatafile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">somdatafile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/nextsomcore/nextsomcore.html#NxtSomCore.X_write_geotiff_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore.X_write_geotiff_out" title="Link to this definition"></a></dt>
+<dd><p>Write geotiff to file using rasterio.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_folder</strong> (<em>str</em>) – Folder path where to write geotiff file.</p></li>
+<li><p><strong>geodatafile</strong> (<em>str</em>) – Path and name for text file that contains som results in geospace.</p></li>
+<li><p><strong>somdatafile</strong> (<em>str</em>) – Path and name for text file that contains som results in somspace.</p></li>
+<li><p><strong>input_file</strong> (<em>LiteralStringstr</em>) – List of input files, separated by comma (only first line is used to get the geotransform and projection information to set output GeoFIT geotransform and projection).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>

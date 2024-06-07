@@ -90,6 +90,7 @@
   <h1>Source code for beak.methods.som.argsSOM</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">json</span>
 
 <div class="viewcode-block" id="Args">
 <a class="viewcode-back" href="../../../../beak.methods.som.argsSOM.html#beak.methods.som.argsSOM.Args">[docs]</a>
@@ -136,50 +137,60 @@
 <span class="sd">        label (Optional[str]): Whether data contains label column (&quot;true&quot; or &quot;false&quot;).</span>
 <span class="sd">        label_geotiff_file (Optional[str]): Geotiff_input file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="n">input_file</span><span class="p">:</span> <span class="nb">str</span>            <span class="c1"># Input file(*.lrn or list, separated with &quot;,&quot;)</span>
-    <span class="n">output_folder</span><span class="p">:</span> <span class="nb">str</span>         <span class="c1"># Folder to save som dictionary and cluster dictionary</span>
-    <span class="n">output_file_somspace</span><span class="p">:</span> <span class="nb">str</span>   <span class="c1"># Text file that will contain calculated values: som_x som_y b_data1 b_data2 b_dataN umatrix cluster in geospace</span>
-    <span class="n">outgeofile</span><span class="p">:</span> <span class="nb">str</span>             <span class="c1"># file name of the geospace output</span>
-
-    <span class="c1">#Parameter required for som calculation. </span>
-
-    <span class="n">som_x</span> <span class="o">=</span> <span class="mi">30</span>                <span class="c1"># X dimension of generated SOM</span>
-    <span class="n">som_y</span> <span class="o">=</span> <span class="mi">30</span>                <span class="c1"># Y dimension of generated SOM</span>
-    <span class="n">epochs</span> <span class="o">=</span> <span class="mi">10</span>               <span class="c1"># Number of epochs to run</span>
-
-    <span class="n">maptype</span><span class="o">=</span><span class="s1">&#39;toroid&#39;</span>            <span class="c1"># Type of SOM (&quot;sheet&quot;, &quot;toroid&quot;)</span>
-    <span class="n">initialcodebook</span><span class="o">=</span><span class="kc">None</span>        <span class="c1"># File path of initial codebook, 2D numpy.array of float32.</span>
-    <span class="n">neighborhood</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span>     <span class="c1"># Shape of the neighborhood function. gaussian or bubble</span>
-    <span class="n">std_coeff</span><span class="o">=</span><span class="mf">0.5</span>               <span class="c1"># Coefficient in the Gaussian neighborhood function</span>
-    <span class="n">radius0</span><span class="o">=</span><span class="mf">0.0</span>                   <span class="c1"># Initial size of the neighborhood</span>
-    <span class="n">radiusN</span><span class="o">=</span><span class="mf">1.0</span>                   <span class="c1"># Final size of the neighborhood</span>
-    <span class="n">radiuscooling</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span>      <span class="c1"># Function that defines the decrease in the neighborhood size as the training proceeds (&quot;linear&quot;, &quot;exponential&quot;)</span>
-    <span class="n">scalecooling</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span>       <span class="c1"># Function that defines the decrease in the learning scale as the training proceeds (&quot;linear&quot;, &quot;exponential&quot;)</span>
-    <span class="n">scale0</span><span class="o">=</span><span class="mf">0.1</span>                  <span class="c1"># Initial learning rate</span>
-    <span class="n">scaleN</span><span class="o">=</span><span class="mf">0.01</span>                 <span class="c1"># Final learning rate</span>
-    <span class="n">initialization</span><span class="o">=</span><span class="s1">&#39;random&#39;</span>     <span class="c1"># Type of SOM initialization (&quot;random&quot;, &quot;pca&quot;)</span>
-    <span class="n">gridtype</span><span class="o">=</span><span class="s1">&#39;rectangular&#39;</span>      <span class="c1"># Type of SOM grid (&quot;hexagonal&quot;, &quot;rectangular&quot;)</span>
-
-    <span class="n">kmeans</span><span class="o">=</span><span class="s2">&quot;true&quot;</span>            <span class="c1"># Run k-means clustering</span>
-    <span class="n">kmeans_init</span><span class="o">=</span> <span class="mi">5</span>           <span class="c1"># Number of initializations</span>
-    <span class="n">kmeans_min</span><span class="o">=</span> <span class="mi">2</span>            <span class="c1"># Minimum number of k-mean clusters</span>
-    <span class="n">kmeans_max</span><span class="o">=</span> <span class="mi">25</span>           <span class="c1"># Maximum number of k-mean clusters</span>
-
-    <span class="c1"># Additional optional parameter:</span>
-
-    <span class="n">output_file_geospace</span><span class="o">=</span><span class="kc">None</span>   <span class="c1"># Text file that will contain calculated values: {X Y Z} data1 data2 ... dataN som_x som_y cluster b_data1 b_data2 b_dataN in geospace.</span>
-    <span class="n">geotiff_input</span><span class="o">=</span><span class="kc">None</span>        <span class="c1"># geotiff_input files, separated by komma, to write GeoTIF out (only first line is used to get the geotransform and projection information to set output GeoFIT geotransform and projection)</span>
-    <span class="n">normalized</span><span class="o">=</span><span class="s2">&quot;false&quot;</span>      <span class="c1"># Whether the data has been normalized or not (&quot;false&quot;, &quot;true&quot;)</span>
-    <span class="c1">#minN=0                  # Minimum value for normalization</span>
-    <span class="c1">#maxN=1                  # Maximum value for normalization</span>
-    <span class="n">label</span><span class="o">=</span><span class="kc">None</span>              <span class="c1"># Whether data contains label column, true or false</span>
-    <span class="n">label_geotiff_file</span> <span class="o">=</span> <span class="kc">None</span>       <span class="c1"># geotiff_input file</span>
 
 <div class="viewcode-block" id="Args.__init__">
 <a class="viewcode-back" href="../../../../beak.methods.som.argsSOM.html#beak.methods.som.argsSOM.Args.__init__">[docs]</a>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for the class</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for the class. Initialize all attributes with default values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_file</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_folder</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_file_somspace</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="c1">#self.outgeofile = &quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">som_x</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">som_y</span> <span class="o">=</span> <span class="mi">30</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maptype</span> <span class="o">=</span> <span class="s1">&#39;toroid&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialcodebook</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">neighborhood</span> <span class="o">=</span> <span class="s1">&#39;gaussian&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">std_coeff</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius0</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radiusN</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radiuscooling</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scalecooling</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale0</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaleN</span> <span class="o">=</span> <span class="mf">0.01</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialization</span> <span class="o">=</span> <span class="s1">&#39;random&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gridtype</span> <span class="o">=</span> <span class="s1">&#39;rectangular&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kmeans</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kmeans_init</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kmeans_min</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kmeans_max</span> <span class="o">=</span> <span class="mi">25</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_file_geospace</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geotiff_input</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalized</span> <span class="o">=</span> <span class="s2">&quot;false&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_geotiff_file</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="Args.from_json_file">
+<a class="viewcode-back" href="../../../../beak.methods.som.argsSOM.html#beak.methods.som.argsSOM.Args.from_json_file">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_json_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file_path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates an instance of Args from a JSON file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            file_path (str): The path to the JSON file containing arguments data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Args: An instance of Args populated with data from the JSON file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">file_path</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+        <span class="n">args_instance</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
+        <span class="n">args_instance</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># Update instance attributes with JSON data</span>
+        <span class="k">return</span> <span class="n">args_instance</span>  </div>
 
 
 <div class="viewcode-block" id="Args.create_list_from_pattern">

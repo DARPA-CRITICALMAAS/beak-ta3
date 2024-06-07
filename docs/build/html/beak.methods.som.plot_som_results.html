@@ -116,7 +116,7 @@
 <dd><p>Run the basic set up of figures and plot som space results, geo space results, draw som clusters, plot Davies-Bouldin index, cluster hit count, U-matrix and box-plots.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>argsP</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary holding agruments: file path to som results, size of som space, input file string, grid type, no data value, working directory</p>
+<dd class="field-odd"><p><strong>argsP</strong> (<em>dict</em>) – Dictionary holding agruments: file path to som results, size of som space, input file string, grid type, no data value, working directory</p>
 </dd>
 </dl>
 </dd></dl>
@@ -128,21 +128,21 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>outsomfile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – somspace output text file</p></li>
-<li><p><strong>som_x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – som x dimension</p></li>
-<li><p><strong>som_y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – som y dimension</p></li>
-<li><p><strong>input_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Input file (list)</p></li>
-<li><p><strong>working_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – directory where SOM output dictionary is saved</p></li>
-<li><p><strong>grid_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – grid type (rectangular or hexagonal)</p></li>
-<li><p><strong>noDataValue</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – noData value</p></li>
-<li><p><strong>aOutgeofile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – som geospace results txt file</p></li>
+<li><p><strong>outsomfile</strong> (<em>str</em>) – somspace output text file</p></li>
+<li><p><strong>som_x</strong> (<em>int</em>) – som x dimension</p></li>
+<li><p><strong>som_y</strong> (<em>int</em>) – som y dimension</p></li>
+<li><p><strong>input_file</strong> (<em>str</em>) – Input file (list)</p></li>
+<li><p><strong>working_dir</strong> (<em>str</em>) – directory where SOM output dictionary is saved</p></li>
+<li><p><strong>grid_type</strong> (<em>str</em>) – grid type (rectangular or hexagonal)</p></li>
+<li><p><strong>noDataValue</strong> (<em>str</em>) – noData value</p></li>
+<li><p><strong>aOutgeofile</strong> (<em>str</em>) – som geospace results txt file</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>dictionary containing initialized variables</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)">dict</a></p>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -155,10 +155,10 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>geo_data</strong> (<em>ndarray</em>) – array holding geo space results</p></li>
-<li><p><strong>geo_headers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>]</em>) – list of strings holding names of feature layers to set figure titles</p></li>
+<li><p><strong>geo_headers</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – list of strings holding names of feature layers to set figure titles</p></li>
 <li><p><strong>som_data</strong> (<em>ndarray</em>) – array holding som space results</p></li>
-<li><p><strong>working_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – working directory where to save figures</p></li>
-<li><p><strong>noDataValue</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – no data value in geo space som results</p></li>
+<li><p><strong>working_dir</strong> (<em>str</em>) – working directory where to save figures</p></li>
+<li><p><strong>noDataValue</strong> (<em>str</em>) – no data value in geo space som results</p></li>
 </ul>
 </dd>
 </dl>
@@ -172,9 +172,9 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>geo_data</strong> (<em>ndarray</em>) – array holding geo space results</p></li>
-<li><p><strong>geo_headers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>]</em>) – one-dimensional array of strings holding names of feature layers to set figure titles</p></li>
+<li><p><strong>geo_headers</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – one-dimensional array of strings holding names of feature layers to set figure titles</p></li>
 <li><p><strong>som_data</strong> (<em>ndarray</em>) – array holding som space results</p></li>
-<li><p><strong>working_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – working directory where to save figures</p></li>
+<li><p><strong>working_dir</strong> (<em>str</em>) – working directory where to save figures</p></li>
 </ul>
 </dd>
 </dl>
@@ -187,10 +187,10 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>argsP</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary holding agruments: file path to som results, size of som space, input file string, grid type, no data value, working directory</p></li>
+<li><p><strong>argsP</strong> (<em>dict</em>) – Dictionary holding agruments: file path to som results, size of som space, input file string, grid type, no data value, working directory</p></li>
 <li><p><strong>som_data</strong> (<em>ndarray</em>) – array holding som space results</p></li>
 <li><p><strong>som_table</strong> (<em>ndarray</em>) – empty som_x*som_y sized table for som plots</p></li>
-<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – dictionary holding x, y and center point information if grid type is hexagonal</p></li>
+<li><p><strong>grid</strong> (<em>dict</em>) – dictionary holding x, y and center point information if grid type is hexagonal</p></li>
 <li><p><strong>annot_ticks</strong> (<em>ndarray</em>) – annotation ticks for labeled data</p></li>
 <li><p><strong>som_headers</strong> (<em>Series</em>) – one-dimensional array of strings in header line of som reslult txt file naming the containing data colums</p></li>
 </ul>
@@ -200,18 +200,18 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="beak.methods.som.plot_som_results.draw_umatrix">
-<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">draw_umatrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">som_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annot_ticks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_headers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#draw_umatrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.draw_umatrix" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">draw_umatrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">somx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">somy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_tick_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annot_ticks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_headers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#draw_umatrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.draw_umatrix" title="Link to this definition"></a></dt>
 <dd><p>Draw U-matrix in geo space.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>som_data</strong> (<em>ndarray</em>) – array holding som space results</p></li>
 <li><p><strong>som_table</strong> (<em>ndarray</em>) – empty som_x*som_y sized table for som plots</p></li>
-<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – dictionary holding x, y and center point information if grid type is hexagonal</p></li>
-<li><p><strong>grid_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – type of grid (rectangular or hexagonal)</p></li>
+<li><p><strong>grid</strong> (<em>dict</em>) – dictionary holding x, y and center point information if grid type is hexagonal</p></li>
+<li><p><strong>grid_type</strong> (<em>str</em>) – type of grid (rectangular or hexagonal)</p></li>
 <li><p><strong>annot_ticks</strong> (<em>ndarray</em>) – annotation ticks for labeled data</p></li>
 <li><p><strong>som_headers</strong> (<em>Series</em>) – one-dimensional array of strings in header line of som reslult txt file naming the containing data colums</p></li>
-<li><p><strong>working_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – working directory where to save figures</p></li>
+<li><p><strong>working_dir</strong> (<em>str</em>) – working directory where to save figures</p></li>
 </ul>
 </dd>
 </dl>
@@ -219,24 +219,24 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="beak.methods.som.plot_som_results.draw_som_clusters">
-<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">draw_som_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argsP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annot_ticks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_headers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discrete_cmap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discrete_cmap_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_ticks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_tick_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelIndex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annot_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annot_strings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#draw_som_clusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.draw_som_clusters" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">draw_som_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argsP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annot_ticks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_headers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discrete_cmap</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discrete_cmap_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_ticks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_tick_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelIndex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annot_strings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#draw_som_clusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.draw_som_clusters" title="Link to this definition"></a></dt>
 <dd><p>Draw Som Cluster plot.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>argsP</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary holding agruments: file path to som results, size of som space, input file string, grid type, no data value, working directory</p></li>
-<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – dictionary holding x, y and center point information if grid type is hexagonal</p></li>
+<li><p><strong>argsP</strong> (<em>dict</em>) – Dictionary holding agruments: file path to som results, size of som space, input file string, grid type, no data value, working directory</p></li>
+<li><p><strong>grid</strong> (<em>dict</em>) – dictionary holding x, y and center point information if grid type is hexagonal</p></li>
 <li><p><strong>som_data</strong> (<em>ndarray</em>) – array holding som space results</p></li>
 <li><p><strong>som_table</strong> (<em>ndarray</em>) – empty som_x*som_y sized table for som plots</p></li>
 <li><p><strong>annot_ticks</strong> (<em>ndarray</em>) – annotation ticks for labeled data</p></li>
 <li><p><strong>som_headers</strong> (<em>Series</em>) – one-dimensional array of strings in header line of som reslult txt file, names for the containing data colums</p></li>
 <li><p><strong>discrete_cmap</strong> (<em>_RGBColorPalette</em>) – color palette for cluster plot if grid type is rectangular</p></li>
 <li><p><strong>discrete_cmap_2</strong> (<em>ListedColormap</em>) – color palette for cluster plot if grid type is hexagonal</p></li>
-<li><p><strong>clusters</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – number of clusters</p></li>
+<li><p><strong>clusters</strong> (<em>int</em>) – number of clusters</p></li>
 <li><p><strong>cluster_ticks</strong> (<em>ndarray</em>) – array with cluster ticks</p></li>
 <li><p><strong>cluster_tick_labels</strong> (<em>ndarray</em>) – array with tick labels for clusters</p></li>
-<li><p><strong>labelIndex</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – laben index</p></li>
-<li><p><strong>annot_strings</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – annotation strings</p></li>
+<li><p><strong>labelIndex</strong> (<em>int</em>) – laben index</p></li>
+<li><p><strong>annot_strings</strong> (<em>dict</em>) – annotation strings</p></li>
 </ul>
 </dd>
 </dl>
@@ -251,10 +251,10 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>geo_data</strong> (<em>ndarray</em>) – array holding geo space results</p></li>
 <li><p><strong>discrete_cmap</strong> (<em>_RGBColorPalette</em>) – color palette for cluster plot if grid type is rectangular</p></li>
-<li><p><strong>clusters</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – number of clusters</p></li>
+<li><p><strong>clusters</strong> (<em>int</em>) – number of clusters</p></li>
 <li><p><strong>cluster_ticks</strong> (<em>ndarray</em>) – array with cluster ticks</p></li>
 <li><p><strong>cluster_tick_labels</strong> (<em>ndarray</em>) – array with tick labels for clusters</p></li>
-<li><p><strong>working_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – working directory where to save figures</p></li>
+<li><p><strong>working_dir</strong> (<em>str</em>) – working directory where to save figures</p></li>
 </ul>
 </dd>
 </dl>
@@ -262,14 +262,14 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="beak.methods.som.plot_som_results.plot_geospace_clusters_scatter">
-<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">plot_geospace_clusters_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">geo_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discrete_cmap_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#plot_geospace_clusters_scatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.plot_geospace_clusters_scatter" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">plot_geospace_clusters_scatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">somx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">somy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_tick_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geo_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discrete_cmap_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">working_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#plot_geospace_clusters_scatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.plot_geospace_clusters_scatter" title="Link to this definition"></a></dt>
 <dd><p>Plot geospace clusters if input type is scatter</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>geo_data</strong> (<em>ndarray</em>) – array holding geo space results</p></li>
 <li><p><strong>discrete_cmap_2</strong> (<em>ListedColormap</em>) – color palette for cluster plot if input type is scatter</p></li>
-<li><p><strong>working_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – working directory where to save figures</p></li>
+<li><p><strong>working_dir</strong> (<em>str</em>) – working directory where to save figures</p></li>
 </ul>
 </dd>
 </dl>
@@ -286,7 +286,7 @@
 <li><p><strong>som_headers</strong> (<em>Series</em>) – one-dimensional array of strings in header line of som reslult txt file, names for the containing data colums</p></li>
 <li><p><strong>discrete_cmap</strong> (<em>_RGBColorPalette</em>) – color palette for cluster plot if grid type is rectangular</p></li>
 <li><p><strong>cluster_tick_labels</strong> (<em>ndarray</em>) – array with tick labels for clusters</p></li>
-<li><p><strong>working_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – working directory where to save figures</p></li>
+<li><p><strong>working_dir</strong> (<em>str</em>) – working directory where to save figures</p></li>
 </ul>
 </dd>
 </dl>
@@ -299,11 +299,11 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>argsP</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary holding agruments: file path to som results, size of som space, input file string, grid type, no data value, working directory</p></li>
-<li><p><strong>som_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – dictionary holding som results</p></li>
+<li><p><strong>argsP</strong> (<em>dict</em>) – Dictionary holding agruments: file path to som results, size of som space, input file string, grid type, no data value, working directory</p></li>
+<li><p><strong>som_dict</strong> (<em>dict</em>) – dictionary holding som results</p></li>
 <li><p><strong>som_data</strong> (<em>ndarray</em>) – array holding som space results</p></li>
-<li><p><strong>clusters</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – number of clusters</p></li>
-<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – dictionary holding x, y and center point information if grid type is hexagonal</p></li>
+<li><p><strong>clusters</strong> (<em>int</em>) – number of clusters</p></li>
+<li><p><strong>grid</strong> (<em>dict</em>) – dictionary holding x, y and center point information if grid type is hexagonal</p></li>
 <li><p><strong>cluster_tick_labels</strong> (<em>ndarray</em>) – array with tick labels for clusters</p></li>
 <li><p><strong>annot_ticks</strong> (<em>ndarray</em>) – annotation ticks for labeled data</p></li>
 </ul>
@@ -317,13 +317,13 @@
 <dd><p>Load the clustering dictionary from the specified file path.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>file_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The path to the ‘cluster.dictionary’ file.</p>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – The path to the ‘cluster.dictionary’ file.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>List containing clustering information.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)">list</a></p>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -334,13 +334,13 @@
 <dd><p>Plot the number of clusters against the Davies-Bouldin Index and save the plot to a file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>cluster_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a>) – List containing clustering information.</p>
+<dd class="field-odd"><p><strong>cluster_list</strong> (<em>list</em>) – List containing clustering information.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The path to save the plot as a PNG file.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
@@ -352,8 +352,22 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>txtFile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – txt file path holding cluster numbers and hit count</p></li>
-<li><p><strong>output_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – destination folder where to save figure</p></li>
+<li><p><strong>txtFile</strong> (<em>str</em>) – txt file path holding cluster numbers and hit count</p></li>
+<li><p><strong>output_path</strong> (<em>str</em>) – destination folder where to save figure</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.methods.som.plot_som_results.plot_cluster_label_count">
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.plot_som_results.</span></span><span class="sig-name descname"><span class="pre">plot_cluster_label_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">txtFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/plot_som_results.html#plot_cluster_label_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.plot_som_results.plot_cluster_label_count" title="Link to this definition"></a></dt>
+<dd><p>Draw cluster_label_count</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>txtFile</strong> (<em>str</em>) – txt file path holding cluster numbers and label count</p></li>
+<li><p><strong>output_path</strong> (<em>str</em>) – destination folder where to save figure</p></li>
 </ul>
 </dd>
 </dl>

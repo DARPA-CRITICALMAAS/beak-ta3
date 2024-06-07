@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>beak.methods.som.label_analysis &mdash; beak-ta3 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=29a6c3e3"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            beak-ta3
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../beak.html">beak package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../beak.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../beak.data.html">beak.data package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../beak.methods.html">beak.methods package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../beak.methods.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../beak.utilities.html">beak.utilities package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../beak.utilities.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">beak-ta3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">beak.methods.som.label_analysis</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for beak.methods.som.label_analysis</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+
+<div class="viewcode-block" id="write_som_label_data">
+<a class="viewcode-back" href="../../../../beak.methods.som.label_analysis.html#beak.methods.som.label_analysis.write_som_label_data">[docs]</a>
+<span class="k">def</span> <span class="nf">write_som_label_data</span><span class="p">(</span><span class="n">workdir</span><span class="p">,</span> <span class="n">outgeofile</span><span class="p">,</span> <span class="n">annot_data</span><span class="p">,</span> <span class="n">annot_strings</span><span class="p">):</span>
+        
+        <span class="c1"># Set column names based on whether &#39;outgeofile&#39; is present</span>
+        <span class="k">if</span> <span class="n">outgeofile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">column_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="s2">&quot;som_x&quot;</span><span class="p">,</span> <span class="s2">&quot;som_y&quot;</span><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">column_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span> <span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="s2">&quot;som_x&quot;</span><span class="p">,</span> <span class="s2">&quot;som_y&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Create DataFrame with specified column names</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">annot_data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">column_names</span><span class="p">)</span>
+
+        <span class="c1"># Save the DataFrame to a text file</span>
+        <span class="n">labels</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">workdir</span> <span class="o">+</span> <span class="s1">&#39;/labels_flat.txt&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1">#list_grouped=list(annot_strings.items())</span>
+        <span class="n">array_grouped</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">annot_strings</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span><span class="c1">#dict to list and list to np array</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">array_grouped</span><span class="p">)):</span>
+            <span class="n">array_grouped</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span> <span class="n">array_grouped</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">][(</span><span class="n">array_grouped</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span><span class="nb">len</span><span class="p">(</span><span class="n">array_grouped</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])]</span>      <span class="c1">#  &quot;: &quot;+ &#39;,&#39;.join(annot_strings[str(i)])</span>
+
+        <span class="c1"># Save the array to a text file</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">workdir</span> <span class="o">+</span> <span class="s1">&#39;/labels_grouped.txt&#39;</span><span class="p">,</span> <span class="n">array_grouped</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">labels</span></div>
+
+
+
+<div class="viewcode-block" id="write_bmu_cluster_label_data">
+<a class="viewcode-back" href="../../../../beak.methods.som.label_analysis.html#beak.methods.som.label_analysis.write_bmu_cluster_label_data">[docs]</a>
+<span class="k">def</span> <span class="nf">write_bmu_cluster_label_data</span><span class="p">(</span><span class="n">workdir</span><span class="p">,</span> <span class="n">cluster_array</span><span class="p">,</span> <span class="n">geo_data</span><span class="p">,</span> <span class="n">labels</span><span class="p">):</span>
+        <span class="c1">#---------------------------------------------------</span>
+        <span class="c1">##--- Identify all geo points in label-bearing BMU</span>
+
+        <span class="c1"># Identify rows with noDataValue and delete</span>
+        <span class="n">rows_to_delete</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">geo_data</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">geo_data</span> <span class="o">=</span> <span class="n">geo_data</span><span class="p">[</span><span class="o">~</span><span class="n">rows_to_delete</span><span class="p">]</span>
+
+        <span class="c1"># Initialize an empty dictionary to store BMUs with labels</span>
+        <span class="n">bmu_labeled</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Iterate over each row in labels DataFrame</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">labels</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">som_x</span><span class="p">,</span> <span class="n">som_y</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;som_x&#39;</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;som_y&#39;</span><span class="p">])</span>
+            <span class="n">bmu_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">som_x</span><span class="p">,</span> <span class="n">som_y</span><span class="p">)</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
+
+            <span class="c1"># If the BMU key is not in bmu_labeled, add it with an empty list for labels and geo points</span>
+            <span class="k">if</span> <span class="n">bmu_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">bmu_labeled</span><span class="p">:</span>
+                
+                <span class="c1"># get cluster </span>
+                <span class="k">if</span> <span class="n">cluster_array</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">cluster</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cluster_array</span><span class="p">[</span><span class="n">som_y</span><span class="p">][</span><span class="n">som_x</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">cluster</span> <span class="o">=</span> <span class="mi">0</span>
+
+                <span class="n">bmu_labeled</span><span class="p">[</span><span class="n">bmu_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;cluster&#39;</span><span class="p">:</span> <span class="n">cluster</span><span class="p">,</span> <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;geo_xy&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+
+                <span class="c1"># Find matching SOM coordinates in geo_data and append geo points to corresponding BMU</span>
+                <span class="n">matching_rows</span> <span class="o">=</span> <span class="n">geo_data</span><span class="p">[(</span><span class="n">geo_data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">som_x</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">geo_data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">som_y</span><span class="p">)]</span>
+                <span class="k">for</span> <span class="n">matching_row</span> <span class="ow">in</span> <span class="n">matching_rows</span><span class="p">:</span>
+                    <span class="n">bmu_labeled</span><span class="p">[</span><span class="n">bmu_key</span><span class="p">][</span><span class="s1">&#39;geo_xy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">matching_row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">matching_row</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+            <span class="c1"># Append label to corresponding BMU</span>
+            <span class="n">bmu_labeled</span><span class="p">[</span><span class="n">bmu_key</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+
+
+        <span class="c1">#---------------------------------------------------</span>
+        <span class="c1">#--- Extract all geo points with som_x, som_y from bmu_labeled and count labels per cluster</span>
+        <span class="n">geo_label_bmu</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Create an empty dictionary to store the label counts for each cluster</span>
+        <span class="n">cluster_label_counts</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Iterate over each BMU in bmu_labeled</span>
+        <span class="k">for</span> <span class="n">bmu_key</span><span class="p">,</span> <span class="n">bmu_info</span> <span class="ow">in</span> <span class="n">bmu_labeled</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Extract BMU coordinates</span>
+            <span class="n">som_x</span><span class="p">,</span> <span class="n">som_y</span> <span class="o">=</span> <span class="n">bmu_key</span>
+
+            <span class="c1"># Extract cluster information</span>
+            <span class="n">cluster</span> <span class="o">=</span> <span class="n">bmu_info</span><span class="p">[</span><span class="s1">&#39;cluster&#39;</span><span class="p">]</span>
+
+            <span class="c1"># Extract labels and geo points</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">bmu_info</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span>
+            <span class="c1">#geo_xy = bmu_info[&#39;geo_xy&#39;]</span>
+
+            <span class="c1"># Count the number of labels</span>
+            <span class="n">label_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+
+            <span class="c1"># Update the label count for the current cluster</span>
+            <span class="k">if</span> <span class="n">cluster</span> <span class="ow">in</span> <span class="n">cluster_label_counts</span><span class="p">:</span>
+                <span class="n">cluster_label_counts</span><span class="p">[</span><span class="n">cluster</span><span class="p">]</span> <span class="o">+=</span> <span class="n">label_count</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cluster_label_counts</span><span class="p">[</span><span class="n">cluster</span><span class="p">]</span> <span class="o">=</span> <span class="n">label_count</span>
+            
+            <span class="k">for</span> <span class="n">geo_point</span> <span class="ow">in</span> <span class="n">bmu_info</span><span class="p">[</span><span class="s1">&#39;geo_xy&#39;</span><span class="p">]:</span>
+                <span class="n">geo_x</span><span class="p">,</span> <span class="n">geo_y</span> <span class="o">=</span> <span class="n">geo_point</span>
+                <span class="n">geo_label_bmu</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">geo_x</span><span class="p">,</span> <span class="n">geo_y</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">som_x</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">som_y</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">label_count</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">cluster</span><span class="p">)])</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">geo_label_bmu</span><span class="p">):</span>
+            <span class="n">cluster</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+            <span class="n">cluster_label_count</span> <span class="o">=</span> <span class="n">cluster_label_counts</span><span class="p">[</span><span class="n">cluster</span><span class="p">]</span>
+            <span class="n">geo_label_bmu</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">cluster_label_count</span><span class="p">))</span>
+
+        <span class="c1"># Convert geo_label_bmu list to a DataFrame</span>
+        <span class="n">geo_label_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">geo_label_bmu</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;SOM_X&#39;</span><span class="p">,</span> <span class="s1">&#39;SOM_Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Label_Count&#39;</span><span class="p">,</span> <span class="s1">&#39;Cluster&#39;</span><span class="p">,</span> <span class="s1">&#39;Cluster_Label_Count&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Convert the DataFrame back to a NumPy array</span>
+        <span class="n">bmu_geo_label_data</span> <span class="o">=</span> <span class="n">geo_label_df</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+
+        <span class="c1"># Add BMU ID column</span>
+        <span class="n">sorted_bmus</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">bmu_labeled</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">bmu_id_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">bmu</span><span class="p">:</span> <span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">bmu</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sorted_bmus</span><span class="p">)}</span>
+        <span class="n">bmu_geo_label_data_with_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">bmu_geo_label_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bmu_geo_label_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bmu_geo_label_data</span><span class="p">):</span>
+            <span class="n">bmu_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+            <span class="n">bmu_id</span> <span class="o">=</span> <span class="n">bmu_id_map</span><span class="p">[</span><span class="n">bmu_key</span><span class="p">]</span>
+            <span class="n">bmu_geo_label_data_with_id</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(([</span><span class="n">bmu_id</span><span class="p">],</span> <span class="n">row</span><span class="p">))</span>
+
+        <span class="c1"># Sort the array by the added BMU ID column</span>
+        <span class="n">sorted_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">lexsort</span><span class="p">((</span><span class="n">bmu_geo_label_data_with_id</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],))</span>
+
+        <span class="c1"># Reorder the array based on the sorted indices</span>
+        <span class="n">sorted_array</span> <span class="o">=</span> <span class="n">bmu_geo_label_data_with_id</span><span class="p">[</span><span class="n">sorted_indices</span><span class="p">]</span>
+
+        <span class="c1"># Save the array to a text file</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">workdir</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="s2">&quot;geo_labeled_bmu.txt&quot;</span><span class="p">,</span> <span class="n">sorted_array</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%d</span><span class="se">\t</span><span class="si">%f</span><span class="se">\t</span><span class="si">%f</span><span class="se">\t</span><span class="si">%d</span><span class="se">\t</span><span class="si">%d</span><span class="se">\t</span><span class="si">%d</span><span class="se">\t</span><span class="si">%d</span><span class="se">\t</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="s1">&#39;bmu_id</span><span class="se">\t</span><span class="s1">geo_x</span><span class="se">\t</span><span class="s1">geo_y</span><span class="se">\t</span><span class="s1">som_x</span><span class="se">\t</span><span class="s1">som_y</span><span class="se">\t</span><span class="s1">bmu_label_count</span><span class="se">\t</span><span class="s1">cluster</span><span class="se">\t</span><span class="s1">cluster_label_count&#39;</span><span class="p">)</span>
+
+        <span class="c1">#---</span>
+        <span class="c1"># Convert the dictionary to a list of tuples</span>
+        <span class="n">cluster_label_counts_list</span> <span class="o">=</span> <span class="p">[(</span><span class="n">cluster</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span> <span class="k">for</span> <span class="n">cluster</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">cluster_label_counts</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="n">cluster_label_counts_list</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Convert the list to a numpy array</span>
+        <span class="n">cluster_label_counts_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cluster_label_counts_list</span><span class="p">)</span>
+
+        <span class="c1"># Save the array to a text file</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">workdir</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="s2">&quot;cluster_label_counts.txt&quot;</span><span class="p">,</span> <span class="n">cluster_label_counts_array</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="s1">&#39;Cluster</span><span class="se">\t</span><span class="s1">Label_Count&#39;</span><span class="p">)</span></div>
+
+
+
+
+<div class="viewcode-block" id="read_geo_labeled_bmu">
+<a class="viewcode-back" href="../../../../beak.methods.som.label_analysis.html#beak.methods.som.label_analysis.read_geo_labeled_bmu">[docs]</a>
+<span class="k">def</span> <span class="nf">read_geo_labeled_bmu</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="n">bmu_id</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">geo_x</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">geo_y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">som_x</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">som_y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">label_count</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">cluster</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">cluster_label_counts</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">7</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;bmu_id&#39;</span><span class="p">:</span> <span class="n">bmu_id</span><span class="p">,</span>
+        <span class="s1">&#39;X&#39;</span><span class="p">:</span><span class="n">geo_x</span><span class="p">,</span> 
+        <span class="s1">&#39;Y&#39;</span><span class="p">:</span><span class="n">geo_y</span><span class="p">,</span> 
+        <span class="s1">&#39;SOM X&#39;</span><span class="p">:</span><span class="n">som_x</span><span class="p">,</span> 
+        <span class="s1">&#39;SOM Y&#39;</span><span class="p">:</span><span class="n">som_y</span><span class="p">,</span> 
+        <span class="s1">&#39;BMU label count&#39;</span><span class="p">:</span><span class="n">label_count</span><span class="p">,</span> 
+        <span class="s1">&#39;cluster&#39;</span><span class="p">:</span><span class="n">cluster</span><span class="p">,</span> 
+        <span class="s1">&#39;cluster label count&#39;</span><span class="p">:</span><span class="n">cluster_label_counts</span>
+        <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="get_label_annotation_data">
+<a class="viewcode-back" href="../../../../beak.methods.som.label_analysis.html#beak.methods.som.label_analysis.get_label_annotation_data">[docs]</a>
+<span class="k">def</span> <span class="nf">get_label_annotation_data</span><span class="p">(</span><span class="n">som_dict</span><span class="p">,</span> <span class="n">geo_data</span><span class="p">,</span> <span class="n">outgeofile</span><span class="p">,</span> <span class="n">noDataValue</span><span class="p">):</span>
+    
+    <span class="n">somx</span> <span class="o">=</span> <span class="n">som_dict</span><span class="p">[</span><span class="s1">&#39;n_columns&#39;</span><span class="p">]</span>
+    <span class="n">somy</span> <span class="o">=</span> <span class="n">som_dict</span><span class="p">[</span><span class="s1">&#39;n_rows&#39;</span><span class="p">]</span>
+    
+    <span class="n">annot_ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="n">somx</span><span class="p">,</span> <span class="n">somy</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;&lt;U32&#39;</span><span class="p">)</span>
+    <span class="n">annot_ticks</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">annot_strings</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">annot_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">index_label</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">index_nolabel</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">annot_strings_for_dict</span><span class="o">=</span><span class="p">{}</span>
+
+    <span class="c1"># get label index in data_file</span>
+    <span class="c1">#with open(data_file, encoding=&#39;utf-8-sig&#39;) as fh:</span>
+    <span class="c1">#    header_line = fh.readline()</span>
+    <span class="c1">#colnames = header_line.split() if outgeofile is not None else header_line.split(&quot;\t&quot;)</span>
+    <span class="n">labelIndex</span> <span class="o">=</span> <span class="n">geo_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="c1">#labelIndex = colnames.index(&#39;label&#39;)</span>
+
+    <span class="c1"># &quot;best matching unit&quot; in som space for each data containing grid point in geo space</span>
+    <span class="n">bmus</span> <span class="o">=</span> <span class="n">som_dict</span><span class="p">[</span><span class="s2">&quot;bmus&quot;</span><span class="p">]</span>
+    
+    <span class="n">data_label</span><span class="o">=</span><span class="n">geo_data</span><span class="p">[:,</span> <span class="n">labelIndex</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">unique_labels</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">data_label</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="s1">&#39;0.0&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s2">&quot;nan&quot;</span><span class="p">,</span> <span class="s2">&quot;NA&quot;</span><span class="p">,</span> <span class="s2">&quot;NULL&quot;</span><span class="p">,</span> <span class="s2">&quot;Null&quot;</span><span class="p">,</span> <span class="s2">&quot;NoData&quot;</span><span class="p">,</span> <span class="n">noDataValue</span><span class="p">}</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_labels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">common_label</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">unique_labels</span><span class="p">))</span>
+        <span class="c1"># If all labels are the same, store the count for the common label</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_label</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">data_label</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">common_label</span><span class="p">:</span>
+                <span class="n">index_label</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">tick</span> <span class="o">=</span> <span class="n">annot_ticks</span><span class="p">[</span><span class="n">bmus</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]][</span><span class="n">bmus</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="n">counter</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">annot_strings</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">tick</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                    <span class="n">annot_ticks</span><span class="p">[</span><span class="n">bmus</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]][</span><span class="n">bmus</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span>
+                    <span class="n">annot_strings</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span><span class="n">common_label</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>  <span class="c1"># Store label and count as a dictionary</span>
+                    <span class="n">annot_strings_for_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span><span class="n">common_label</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+                    <span class="n">annot_data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">counter</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">common_label</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bmus</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bmus</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                                       <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">geo_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">outgeofile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">geo_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">outgeofile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">annot_strings</span><span class="p">[</span><span class="n">tick</span><span class="p">][</span><span class="n">common_label</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">annot_strings_for_dict</span><span class="p">[</span><span class="n">tick</span><span class="p">][</span><span class="n">common_label</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">annot_data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tick</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">common_label</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bmus</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bmus</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                                       <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">geo_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">outgeofile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">geo_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">outgeofile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">index_nolabel</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># If there are different labels, get a list of labels in each BMU</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_label</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">data_label</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;0.0&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s2">&quot;nan&quot;</span><span class="p">,</span> <span class="s2">&quot;NA&quot;</span><span class="p">,</span> <span class="s2">&quot;NULL&quot;</span><span class="p">,</span> <span class="s2">&quot;Null&quot;</span><span class="p">,</span> <span class="s2">&quot;NoData&quot;</span><span class="p">,</span> <span class="n">noDataValue</span><span class="p">]:</span>
+                <span class="n">index_label</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">tick</span> <span class="o">=</span> <span class="n">annot_ticks</span><span class="p">[</span><span class="n">bmus</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]][</span><span class="n">bmus</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="n">counter</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">annot_strings</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">tick</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                    <span class="n">annot_ticks</span><span class="p">[</span><span class="n">bmus</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]][</span><span class="n">bmus</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span>
+                    <span class="n">annot_strings</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span><span class="n">data_label</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="mi">1</span><span class="p">}</span>  <span class="c1"># Store label and count as a dictionary</span>
+                    <span class="n">annot_strings_for_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span><span class="n">data_label</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="mi">1</span><span class="p">}</span>
+                    <span class="n">annot_data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">counter</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">data_label</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bmus</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bmus</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                                       <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">geo_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">geo_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">outgeofile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                                <span class="c1"># Check if the label already exists in annot_strings[tick]</span>
+                    <span class="k">if</span> <span class="n">data_label</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">annot_strings</span><span class="p">[</span><span class="n">tick</span><span class="p">]:</span>
+                        <span class="n">annot_strings</span><span class="p">[</span><span class="n">tick</span><span class="p">][</span><span class="n">data_label</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">annot_strings_for_dict</span><span class="p">[</span><span class="n">tick</span><span class="p">][</span><span class="n">data_label</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">annot_strings</span><span class="p">[</span><span class="n">tick</span><span class="p">][</span><span class="n">data_label</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Initialize count if label doesn&#39;t exist</span>
+                        <span class="n">annot_strings_for_dict</span><span class="p">[</span><span class="n">tick</span><span class="p">][</span><span class="n">data_label</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">annot_data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tick</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">data_label</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bmus</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bmus</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                                       <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">geo_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">geo_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">outgeofile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">index_nolabel</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    
+    <span class="c1"># Sort annot_strings by key</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">annot_strings</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">annot_strings</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">annot_strings</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span><span class="o">.</span><span class="n">items</span><span class="p">())}</span>
+
+    <span class="c1"># Merge duplicates within a labeling group</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">counter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">2</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">annot_strings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="o">==</span> <span class="n">annot_strings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)):</span>
+
+            <span class="c1">#remove duplicate entry from dictionary &#39;annot_strings&#39;</span>
+            <span class="n">annot_strings</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="c1">#go through all indices of 2D array &#39;annot_ticks&#39; and replace value if equal to duplicate entry j</span>
+            <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">annot_ticks</span><span class="p">)),</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">annot_ticks</span><span class="p">[</span><span class="mi">0</span><span class="p">]))):</span>
+                <span class="k">if</span> <span class="n">annot_ticks</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="n">b</span><span class="p">]</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="ow">or</span> <span class="n">annot_ticks</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="n">b</span><span class="p">]</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_labels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">annot_ticks</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">annot_ticks</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_labels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># Check if &#39;x&#39; is included in all annot_ticks elements, if not (when no duplicates), add it</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">annot_ticks</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">annot_ticks</span><span class="p">[</span><span class="n">a</span><span class="p">])):</span>
+                <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">annot_ticks</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="n">b</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">annot_ticks</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="n">b</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;&#39;</span><span class="p">:</span>
+                    <span class="n">annot_ticks</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span> <span class="o">+</span> <span class="n">annot_ticks</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="n">b</span><span class="p">]</span>
+
+    <span class="c1"># set new index numbers</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_labels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># Sort annot_strings by label count</span>
+        <span class="n">sorted_indices</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">annot_strings</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">annot_strings</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+        <span class="n">new_indices</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">sorted_indices</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">annot_strings</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="n">new_indices</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">annot_ticks</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">annot_ticks</span><span class="p">[</span><span class="n">a</span><span class="p">])):</span>
+                    <span class="k">if</span> <span class="n">annot_ticks</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="n">b</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span> <span class="o">+</span> <span class="n">index</span><span class="p">:</span>
+                        <span class="n">annot_ticks</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+
+
+        <span class="c1"># Update annot_strings with the new indices</span>
+        <span class="c1">#annot_strings = {new_index[index]: labels for index, labels in annot_strings.items()}</span>
+        <span class="c1">#annot_strings = {new_index: labels for new_index, labels in sorted(annot_strings.items(), key=lambda x: int(x[0]))}</span>
+        <span class="n">annot_strings</span> <span class="o">=</span> <span class="p">{</span><span class="n">new_index</span><span class="p">:</span> <span class="n">annot_strings</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">new_index</span> <span class="ow">in</span> <span class="n">new_indices</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="c1"># Sort annot_strings by ascending &quot;count&quot;</span>
+        <span class="n">annot_strings</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">annot_strings</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()))}</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">annot_strings_for_dict</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="ow">in</span> <span class="n">annot_strings</span><span class="p">:</span>
+                <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">annot_strings</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)]</span> <span class="o">=</span> <span class="n">annot_strings</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">annot_ticks</span><span class="p">)),</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">annot_ticks</span><span class="p">[</span><span class="mi">0</span><span class="p">]))):</span>
+                    <span class="k">if</span> <span class="n">annot_ticks</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="n">b</span><span class="p">]</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                        <span class="n">annot_ticks</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">annot_strings</span><span class="p">:</span>
+        <span class="c1">#annot_strings[str(key)] = f&quot;{key}: {&#39;,&#39;.join([f&#39;{label}({count})&#39; for label, count in annot_strings[str(key)].items()])}&quot;</span>
+        <span class="n">annot_strings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s1">)&#39;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">label</span><span class="p">,</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">annot_strings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span><span class="si">}</span><span class="s2">&quot;</span>
+    
+    <span class="k">return</span> <span class="n">annot_ticks</span><span class="p">,</span> <span class="n">annot_strings</span><span class="p">,</span> <span class="n">annot_data</span><span class="p">,</span> <span class="n">index_label</span><span class="p">,</span> <span class="n">index_nolabel</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

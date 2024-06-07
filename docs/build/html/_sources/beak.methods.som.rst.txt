@@ -28,6 +28,7 @@ Submodules
    beak.methods.som.argsPlot
    beak.methods.som.argsSOM
    beak.methods.som.do_nextsomcore_save_results
+   beak.methods.som.label_analysis
    beak.methods.som.load_csv
    beak.methods.som.load_geotiff
    beak.methods.som.move_to_subfolder

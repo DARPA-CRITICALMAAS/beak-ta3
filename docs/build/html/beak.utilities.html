@@ -99,6 +99,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="beak.utilities.checks.html">beak.utilities.checks module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.checks.html#beak.utilities.checks.check_positives"><code class="docutils literal notranslate"><span class="pre">check_positives()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.checks.html#beak.utilities.checks.check_write_permissions"><code class="docutils literal notranslate"><span class="pre">check_write_permissions()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="beak.utilities.conversions.html">beak.utilities.conversions module</a><ul>
@@ -116,6 +117,17 @@
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.eda.html#beak.utilities.eda.get_outliers_zscore"><code class="docutils literal notranslate"><span class="pre">get_outliers_zscore()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.eda.html#beak.utilities.eda.get_outliers_iqr"><code class="docutils literal notranslate"><span class="pre">get_outliers_iqr()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.eda.html#beak.utilities.eda.clip_outliers"><code class="docutils literal notranslate"><span class="pre">clip_outliers()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="beak.utilities.focal.html">beak.utilities.focal module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.focal.html#beak.utilities.focal._check_filter_size"><code class="docutils literal notranslate"><span class="pre">_check_filter_size()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.focal.html#beak.utilities.focal._get_kernel_size"><code class="docutils literal notranslate"><span class="pre">_get_kernel_size()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.focal.html#beak.utilities.focal._create_grid"><code class="docutils literal notranslate"><span class="pre">_create_grid()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.focal.html#beak.utilities.focal._basic_kernel"><code class="docutils literal notranslate"><span class="pre">_basic_kernel()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.focal.html#beak.utilities.focal._apply_generic_filter"><code class="docutils literal notranslate"><span class="pre">_apply_generic_filter()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.focal.html#beak.utilities.focal._replace_value_in_kernel"><code class="docutils literal notranslate"><span class="pre">_replace_value_in_kernel()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.focal.html#beak.utilities.focal.create_simple_buffer"><code class="docutils literal notranslate"><span class="pre">create_simple_buffer()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.focal.html#beak.utilities.focal._create_local_buffer"><code class="docutils literal notranslate"><span class="pre">_create_local_buffer()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="beak.utilities.io.html">beak.utilities.io module</a><ul>
@@ -136,6 +148,8 @@
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.io.html#beak.utilities.io.copy_folder_structure"><code class="docutils literal notranslate"><span class="pre">copy_folder_structure()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.io.html#beak.utilities.io.save_input_file_list"><code class="docutils literal notranslate"><span class="pre">save_input_file_list()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.io.html#beak.utilities.io.copy_files"><code class="docutils literal notranslate"><span class="pre">copy_files()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.io.html#beak.utilities.io.compress_to_zip"><code class="docutils literal notranslate"><span class="pre">compress_to_zip()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.io.html#beak.utilities.io.save_geodataframe"><code class="docutils literal notranslate"><span class="pre">save_geodataframe()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="beak.utilities.misc.html">beak.utilities.misc module</a><ul>
@@ -146,8 +160,8 @@
 <li class="toctree-l1"><a class="reference internal" href="beak.utilities.preparation.html">beak.utilities.preparation module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.preparation.html#beak.utilities.preparation.create_encodings_from_dataframe"><code class="docutils literal notranslate"><span class="pre">create_encodings_from_dataframe()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.preparation.html#beak.utilities.preparation.impute_data"><code class="docutils literal notranslate"><span class="pre">impute_data()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="beak.utilities.preparation.html#beak.utilities.preparation.create_nan_buffer"><code class="docutils literal notranslate"><span class="pre">create_nan_buffer()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.preparation.html#beak.utilities.preparation.delete_nan_elements"><code class="docutils literal notranslate"><span class="pre">delete_nan_elements()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.preparation.html#beak.utilities.preparation.create_hard_buffer_around_labels"><code class="docutils literal notranslate"><span class="pre">create_hard_buffer_around_labels()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="beak.utilities.raster_processing.html">beak.utilities.raster_processing module</a><ul>
@@ -158,10 +172,13 @@
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.raster_processing.html#beak.utilities.raster_processing._clip_raster_with_coords"><code class="docutils literal notranslate"><span class="pre">_clip_raster_with_coords()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.raster_processing.html#beak.utilities.raster_processing._clip_raster_with_shapefile"><code class="docutils literal notranslate"><span class="pre">_clip_raster_with_shapefile()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.raster_processing.html#beak.utilities.raster_processing._clip_raster_process"><code class="docutils literal notranslate"><span class="pre">_clip_raster_process()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.raster_processing.html#beak.utilities.raster_processing.clip_raster_file"><code class="docutils literal notranslate"><span class="pre">clip_raster_file()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.raster_processing.html#beak.utilities.raster_processing.clip_raster"><code class="docutils literal notranslate"><span class="pre">clip_raster()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.raster_processing.html#beak.utilities.raster_processing._unify_raster_grids"><code class="docutils literal notranslate"><span class="pre">_unify_raster_grids()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.raster_processing.html#beak.utilities.raster_processing.unify_raster_grids"><code class="docutils literal notranslate"><span class="pre">unify_raster_grids()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.raster_processing.html#beak.utilities.raster_processing._return_raster_bounds"><code class="docutils literal notranslate"><span class="pre">_return_raster_bounds()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.raster_processing.html#beak.utilities.raster_processing._snap_raster"><code class="docutils literal notranslate"><span class="pre">_snap_raster()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.raster_processing.html#beak.utilities.raster_processing._check_grid_alignment"><code class="docutils literal notranslate"><span class="pre">_check_grid_alignment()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.raster_processing.html#beak.utilities.raster_processing.snap_raster"><code class="docutils literal notranslate"><span class="pre">snap_raster()</span></code></a></li>
 </ul>
 </li>
@@ -170,6 +187,10 @@
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.transformation.html#beak.utilities.transformation._scale_data"><code class="docutils literal notranslate"><span class="pre">_scale_data()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.transformation.html#beak.utilities.transformation._scale_raster_core"><code class="docutils literal notranslate"><span class="pre">_scale_raster_core()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.transformation.html#beak.utilities.transformation.scale_raster"><code class="docutils literal notranslate"><span class="pre">scale_raster()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="beak.utilities.vector_processing.html">beak.utilities.vector_processing module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.vector_processing.html#beak.utilities.vector_processing._reproject_vector_data"><code class="docutils literal notranslate"><span class="pre">_reproject_vector_data()</span></code></a></li>
 </ul>
 </li>
 </ul>

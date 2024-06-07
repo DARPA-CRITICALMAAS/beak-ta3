@@ -18,8 +18,10 @@ Submodules
    beak.utilities.checks
    beak.utilities.conversions
    beak.utilities.eda
+   beak.utilities.focal
    beak.utilities.io
    beak.utilities.misc
    beak.utilities.preparation
    beak.utilities.raster_processing
    beak.utilities.transformation
+   beak.utilities.vector_processing

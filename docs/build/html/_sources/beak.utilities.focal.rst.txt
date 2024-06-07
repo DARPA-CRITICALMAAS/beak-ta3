@@ -1,0 +1,8 @@
+beak.utilities.focal module
+===========================
+
+.. automodule:: beak.utilities.focal
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

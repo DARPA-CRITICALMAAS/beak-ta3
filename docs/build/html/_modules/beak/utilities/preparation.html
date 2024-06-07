@@ -93,8 +93,12 @@
 <span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
 
 <span class="kn">from</span> <span class="nn">sklearn.impute</span> <span class="kn">import</span> <span class="n">SimpleImputer</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">beartype.typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Literal</span>
 <span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Number</span>
+
+<span class="kn">from</span> <span class="nn">beak.utilities.focal</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_create_local_buffer</span><span class="p">,</span>
+<span class="p">)</span>
 
 
 <div class="viewcode-block" id="create_encodings_from_dataframe">
@@ -180,38 +184,6 @@
 
 
 
-<div class="viewcode-block" id="create_nan_buffer">
-<a class="viewcode-back" href="../../../beak.utilities.preparation.html#beak.utilities.preparation.create_nan_buffer">[docs]</a>
-<span class="k">def</span> <span class="nf">create_nan_buffer</span><span class="p">(</span>
-    <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">target_value</span><span class="p">:</span> <span class="n">Number</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Creates a buffer of NaN values around the selected value in a given array.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        array (np.ndarray): The array to be buffered.</span>
-<span class="sd">        target_value (Number): The value to be buffered. Defaults to 1.</span>
-<span class="sd">        radius (int): Number of cells (distance) to the targeted value to be changed.</span>
-<span class="sd">            Defaults to 1. E.g. radius of 1 will change the 8 cells around the targeted value.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        np.ndarray: The buffered array.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">target_locations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">array</span> <span class="o">==</span> <span class="n">target_value</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
-        <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float16</span><span class="p">)</span>
-
-    <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">target_locations</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">target_locations</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-        <span class="n">row_range</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="n">radius</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span> <span class="o">+</span> <span class="n">radius</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
-        <span class="n">col_range</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="n">radius</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">y</span> <span class="o">+</span> <span class="n">radius</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
-        <span class="n">out_array</span><span class="p">[</span><span class="n">row_range</span><span class="p">,</span> <span class="n">col_range</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">array</span> <span class="o">==</span> <span class="n">target_value</span><span class="p">,</span> <span class="n">target_value</span><span class="p">,</span> <span class="n">out_array</span><span class="p">)</span></div>
-
-
-
 <div class="viewcode-block" id="delete_nan_elements">
 <a class="viewcode-back" href="../../../beak.utilities.preparation.html#beak.utilities.preparation.delete_nan_elements">[docs]</a>
 <span class="k">def</span> <span class="nf">delete_nan_elements</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">transpose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -220,6 +192,52 @@
 
     <span class="k">if</span> <span class="n">transpose</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">out_array</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out_array</span></div>
+
+
+
+<div class="viewcode-block" id="create_hard_buffer_around_labels">
+<a class="viewcode-back" href="../../../beak.utilities.preparation.html#beak.utilities.preparation.create_hard_buffer_around_labels">[docs]</a>
+<span class="k">def</span> <span class="nf">create_hard_buffer_around_labels</span><span class="p">(</span>
+    <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">shape</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;square&quot;</span><span class="p">,</span> <span class="s2">&quot;circle&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;circle&quot;</span><span class="p">,</span>
+    <span class="n">positive_label_value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">buffer_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extends the positive values in the given array.</span>
+
+<span class="sd">    A: If the buffer value is not specified, the buffer value will be the same as the positive labels value.</span>
+<span class="sd">    B: If the buffer value is specified, elements around the positive labels will be replaced with this value.</span>
+
+<span class="sd">    For extending positive labels, use option A.</span>
+<span class="sd">    For excluding negative labels, use option B with values such as np.nan oder -1.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array (np.ndarray): The array to be extended.</span>
+<span class="sd">        radius (int): The radius of the buffer (1 for a 3x3 window with 9 pixels, size is n*2 + 1). Defaults to 1.</span>
+<span class="sd">        shape (Literal[&quot;square&quot;, &quot;circle&quot;]): The shape of the buffer. Defaults to &quot;square&quot;.</span>
+<span class="sd">        selected_value (int): The value to be extended. Defaults to 1.</span>
+<span class="sd">        buffer_value (Optional[Number]): The value to be used for the buffer. Defaults to np.nan</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: The extended label&#39;s array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+    <span class="n">out_array</span> <span class="o">=</span> <span class="n">_create_local_buffer</span><span class="p">(</span>
+        <span class="n">array</span><span class="o">=</span><span class="n">array</span><span class="p">,</span>
+        <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
+        <span class="n">target_value</span><span class="o">=</span><span class="n">positive_label_value</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">buffer_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">out_array</span> <span class="o">==</span> <span class="n">positive_label_value</span><span class="p">,</span> <span class="n">buffer_value</span><span class="p">,</span> <span class="n">out_array</span><span class="p">)</span>
+        <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">array</span> <span class="o">==</span> <span class="n">positive_label_value</span><span class="p">,</span> <span class="n">positive_label_value</span><span class="p">,</span> <span class="n">out_array</span>
+        <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">out_array</span></div>
 

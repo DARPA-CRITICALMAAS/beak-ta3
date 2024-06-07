@@ -1,0 +1,8 @@
+beak.methods.som.label\_analysis module
+=======================================
+
+.. automodule:: beak.methods.som.label_analysis
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

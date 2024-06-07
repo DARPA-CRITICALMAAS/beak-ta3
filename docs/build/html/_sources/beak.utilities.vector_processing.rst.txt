@@ -1,0 +1,8 @@
+beak.utilities.vector\_processing module
+========================================
+
+.. automodule:: beak.utilities.vector_processing
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

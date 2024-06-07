@@ -135,7 +135,7 @@
 <span class="sd">    Args:</span>
 <span class="sd">        file_path (str): file path of som output files</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">file_patterns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;*som.*&quot;</span><span class="p">,</span><span class="s2">&quot;*geo.*&quot;</span><span class="p">,</span> <span class="s2">&quot;RunStats.txt&quot;</span><span class="p">,</span><span class="s2">&quot;cluster.dictionary&quot;</span><span class="p">,</span><span class="s2">&quot;db_score.png&quot;</span><span class="p">,</span><span class="s2">&quot;cluster_hit_count.txt&quot;</span><span class="p">]</span>
+    <span class="n">file_patterns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;*som.*&quot;</span><span class="p">,</span><span class="s2">&quot;*geo.*&quot;</span><span class="p">,</span> <span class="s2">&quot;RunStats.txt&quot;</span><span class="p">,</span><span class="s2">&quot;cluster.dictionary&quot;</span><span class="p">,</span><span class="s2">&quot;db_score.png&quot;</span><span class="p">,</span><span class="s2">&quot;cluster_hit_count.txt&quot;</span><span class="p">,</span><span class="s2">&quot;*label*&quot;</span><span class="p">]</span>
 
     <span class="k">for</span> <span class="n">file_pattern</span> <span class="ow">in</span> <span class="n">file_patterns</span><span class="p">:</span>
         <span class="c1"># Use glob to get all files with the specified pattern</span>
@@ -161,7 +161,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        list: matching files and their corresponding destination paths</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">file_patterns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;geoplot_*.png&quot;</span><span class="p">,</span> <span class="s2">&quot;somplot_*.png&quot;</span><span class="p">,</span> <span class="s2">&quot;boxplot_*.png&quot;</span><span class="p">,</span> <span class="s2">&quot;db_score.png&quot;</span><span class="p">,</span> <span class="s2">&quot;cluster_hit_count.png&quot;</span><span class="p">]</span>
+    <span class="n">file_patterns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;geoplot_*.png&quot;</span><span class="p">,</span> <span class="s2">&quot;somplot_*.png&quot;</span><span class="p">,</span> <span class="s2">&quot;boxplot_*.png&quot;</span><span class="p">,</span> <span class="s2">&quot;db_score.png&quot;</span><span class="p">,</span> <span class="s2">&quot;cluster*_count.png&quot;</span><span class="p">]</span>
     <span class="n">destination_path</span> <span class="o">=</span> <span class="n">file_path</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">subfolder_name</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span>
 
     <span class="c1"># Lists to store matching files with their corresponding destination paths</span>

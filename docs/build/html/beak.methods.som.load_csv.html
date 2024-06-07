@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="beak.methods.som.load_geotiff module" href="beak.methods.som.load_geotiff.html" />
-    <link rel="prev" title="beak.methods.som.do_nextsomcore_save_results module" href="beak.methods.som.do_nextsomcore_save_results.html" /> 
+    <link rel="prev" title="beak.methods.som.label_analysis module" href="beak.methods.som.label_analysis.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -104,13 +104,13 @@ Script for loading csv input data files
 <dd><p>Load CSV input file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>input_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – full file path to csv file holding the data</p>
+<dd class="field-odd"><p><strong>input_file</strong> (<em>str</em>) – full file path to csv file holding the data</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Dictionary holding data as ndarray and meta data (number of rows and columns, column names, file type, input file name)</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)">dict</a></p>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -121,13 +121,13 @@ Script for loading csv input data files
 <dd><p>Read coordinate columns from dictionary when input file is csv</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>csv_header</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary holding data as ndarray and meta data (number of rows and columns, column names, file type, input file name)</p>
+<dd class="field-odd"><p><strong>csv_header</strong> (<em>dict</em>) – Dictionary holding data as ndarray and meta data (number of rows and columns, column names, file type, input file name)</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Dictionary holding coordinate columns as ndarray and column names</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)">dict</a></p>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -138,13 +138,13 @@ Script for loading csv input data files
 <dd><p>Read coordinate columns from dictionary when input file is csv</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>csv_header</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – dictionary holding the data as a ndarray and meta data, such as numer of rows and column, column (data) names, file type</p>
+<dd class="field-odd"><p><strong>csv_header</strong> (<em>dict</em>) – dictionary holding the data as a ndarray and meta data, such as numer of rows and column, column (data) names, file type</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Dictionary holding data columns as ndarray and column names</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)">dict</a></p>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -156,19 +156,19 @@ Script for loading csv input data files
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>csv_header</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – dictionary holding the data as a ndarray and meta data</p></li>
-<li><p><strong>columns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>]</em>) – list of columns to return</p></li>
-<li><p><strong>fmt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – format. Defaults to ‘’.</p></li>
+<li><p><strong>csv_header</strong> (<em>dict</em>) – dictionary holding the data as a ndarray and meta data</p></li>
+<li><p><strong>columns</strong> (<em>list</em><em>[</em><em>int</em><em>]</em>) – list of columns to return</p></li>
+<li><p><strong>fmt</strong> (<em>str</em><em>, </em><em>optional</em>) – format. Defaults to ‘’.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.12)"><strong>TypeError</strong></a> – Invalid type: columns must be a list or tuple</p>
+<dd class="field-even"><p><strong>TypeError</strong> – Invalid type: columns must be a list or tuple</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dictionary holding selected data columns as a ndarray, column names and format</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)">dict</a></p>
+<dd class="field-even"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -179,13 +179,13 @@ Script for loading csv input data files
 <dd><p>Read metadata from files of csv file format</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>input_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – input file path</p>
+<dd class="field-odd"><p><strong>input_file</strong> (<em>str</em>) – input file path</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>dictionary holding meta data from input file, such as input file name, number of rows and columns, column (data) names, file type</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)">dict</a></p>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -196,7 +196,7 @@ Script for loading csv input data files
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="beak.methods.som.do_nextsomcore_save_results.html" class="btn btn-neutral float-left" title="beak.methods.som.do_nextsomcore_save_results module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="beak.methods.som.label_analysis.html" class="btn btn-neutral float-left" title="beak.methods.som.label_analysis module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="beak.methods.som.load_geotiff.html" class="btn btn-neutral float-right" title="beak.methods.som.load_geotiff module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

@@ -1,5 +1,4 @@
 import multiprocessing as mp
-import time
 import os
 import warnings
 
@@ -8,6 +7,7 @@ from typing import Optional, Tuple, Union, Sequence, List, Literal
 
 import numpy as np
 import geopandas as gpd
+import rasterio.coords
 import scipy
 import rasterio
 import math
@@ -15,7 +15,6 @@ import math
 from numbers import Number
 from rasterio import warp
 from rasterio.mask import mask
-from rasterio.windows import Window, from_bounds
 from rasterio.enums import Resampling
 from rasterio.crs import CRS
 from tqdm import tqdm
@@ -28,7 +27,7 @@ from beak.utilities.io import (
     save_raster,
 )
 
-from beak.utilities.io import load_raster, save_raster, copy_folder_structure
+from beak.utilities.io import load_raster, save_raster
 
 
 # References
@@ -708,77 +707,107 @@ def unify_raster_grids(
     return unified_results
 
 
-def _snap_raster(
-    raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader
-) -> Tuple[np.ndarray, dict]:
-    raster_bounds = raster.bounds
-    snap_bounds = snap_raster.bounds
-    raster_pixel_size_x = raster.transform.a
-    raster_pixel_size_y = abs(raster.transform.e)
-    snap_pixel_size_x = snap_raster.transform.a
-    snap_pixel_size_y = abs(snap_raster.transform.e)
+# region: snap raster
+def _return_raster_bounds(metadata: dict) -> rasterio.coords.BoundingBox:
+    """
+    Returns the bounds of a raster as a rasterio.coords.BoundingBox object.
 
-    cells_added_x = math.ceil(snap_pixel_size_x / raster_pixel_size_x)
-    cells_added_y = math.ceil(snap_pixel_size_y / raster_pixel_size_y)
+    Args:
+        metadata (dict): The metadata of the raster.
+
+    Returns:
+    rasterio.coords.BoundingBox: The bounds of the raster as a rasterio.coords.BoundingBox object.
+    """
+    raster_bounds = rasterio.transform.array_bounds(
+        metadata["height"], metadata["width"], metadata["transform"]
+    )
+    return rasterio.coords.BoundingBox(*raster_bounds)
+
+
+def _snap_raster(
+    raster_array: np.ndarray,
+    raster_meta: dict,
+    snap_meta: dict,
+) -> Tuple[np.ndarray, dict]:
+    """
+    Snaps a raster to align with the grid of a reference (snap) raster.
+
+    This function adjusts the input raster so that its grid aligns with the grid of the snap raster.
+    The snapping is done from the left-bottom corner to the nearest snap raster grid corner in the left-bottom direction.
+
+    Args:
+        raster_array (np.ndarray): The input raster array.
+        raster_meta (dict): The metadata of the input raster.
+        snap_data (dict): The dictionary containing the data for snapping the input raster.
+
+    Returns:
+        Tuple[np.ndarray, dict]:
+            A tuple containing the snapped raster array and the updated metadata.
+    """
+    raster_bounds = _return_raster_bounds(raster_meta)
+    snap_bounds = _return_raster_bounds(snap_meta)
+
+    raster_px_size_x = abs(raster_meta["transform"].a)
+    raster_px_size_y = abs(raster_meta["transform"].e)
+
+    snap_px_size_x = abs(snap_meta["transform"].a)
+    snap_px_size_y = abs(snap_meta["transform"].e)
+
+    cells_added_x = math.ceil(snap_px_size_x / raster_px_size_x)
+    cells_added_y = math.ceil(snap_px_size_y / raster_px_size_y)
 
     out_image = np.full(
-        (raster.count, raster.height + cells_added_y, raster.width + cells_added_x),
-        raster.nodata,
+        (
+            raster_meta["count"],
+            raster_meta["height"] + cells_added_y,
+            raster_meta["width"] + cells_added_x,
+        ),
+        raster_meta["nodata"],
     )
-    out_meta = raster.meta.copy()
+    out_meta = raster_meta.copy()
 
-    # Coordinates for the snap raster boundaries
-    left_distance_in_pixels = (
-        raster_bounds.left - snap_bounds.left
-    ) // snap_pixel_size_x
     left_snap_coordinate = (
-        snap_bounds.left + left_distance_in_pixels * snap_pixel_size_x
+        snap_bounds.left
+        + ((raster_bounds.left - snap_bounds.left) // snap_px_size_x) * snap_px_size_x
     )
 
-    bottom_distance_in_pixels = (
-        raster_bounds.bottom - snap_bounds.bottom
-    ) // snap_pixel_size_y
     bottom_snap_coordinate = (
-        snap_bounds.bottom + bottom_distance_in_pixels * snap_pixel_size_y
+        snap_bounds.bottom
+        + ((raster_bounds.bottom - snap_bounds.bottom) // snap_px_size_y)
+        * snap_px_size_y
     )
+
     top_snap_coordinate = (
-        bottom_snap_coordinate + (raster.height + cells_added_y) * raster_pixel_size_y
+        bottom_snap_coordinate
+        + (raster_meta["height"] + cells_added_y) * raster_px_size_y
     )
 
-    # Distance and array indices of close cell corner in snapped raster to slot values
-    x_distance = (raster_bounds.left - left_snap_coordinate) % raster_pixel_size_x
-    x0 = int((raster_bounds.left - left_snap_coordinate) // raster_pixel_size_x)
-    x1 = x0 + raster.width
+    x_distance = (raster_bounds.left - left_snap_coordinate) % raster_px_size_x
+    x0 = int((raster_bounds.left - left_snap_coordinate) // raster_px_size_x)
+    x1 = x0 + raster_meta["width"]
 
-    y_distance = (raster_bounds.bottom - bottom_snap_coordinate) % raster_pixel_size_y
+    y_distance = (raster_bounds.bottom - bottom_snap_coordinate) % raster_px_size_y
     y0 = int(
         cells_added_y
-        - ((raster_bounds.bottom - bottom_snap_coordinate) // raster_pixel_size_y)
+        - ((raster_bounds.bottom - bottom_snap_coordinate) // raster_px_size_y)
     )
-    y1 = y0 + raster.height
+    y1 = y0 + raster_meta["height"]
 
-    # Find the closest corner of the snapped grid for shifting/slotting the original raster
-    if x_distance < raster_pixel_size_x / 2 and y_distance < raster_pixel_size_y / 2:
-        out_image[:, y0:y1, x0:x1] = raster.read()  # Snap values towards left-bottom
-    elif x_distance < raster_pixel_size_x / 2 and y_distance > raster_pixel_size_y / 2:
-        out_image[:, y0 - 1 : y1 - 1, x0:x1] = (
-            raster.read()
-        )  # Snap values towards left-top # noqa: E203
-    elif x_distance > raster_pixel_size_x / 2 and y_distance > raster_pixel_size_y / 2:
-        out_image[:, y0 - 1 : y1 - 1, x0 + 1 : x1 + 1] = (
-            raster.read()
-        )  # Snap values toward right-top # noqa: E203
+    if x_distance < raster_px_size_x / 2 and y_distance < raster_px_size_y / 2:
+        out_image[:, y0:y1, x0:x1] = raster_array
+    elif x_distance < raster_px_size_x / 2 and y_distance > raster_px_size_y / 2:
+        out_image[:, y0 - 1 : y1 - 1, x0:x1] = raster_array
+    elif x_distance > raster_px_size_x / 2 and y_distance > raster_px_size_y / 2:
+        out_image[:, y0 - 1 : y1 - 1, x0 + 1 : x1 + 1] = raster_array
     else:
-        out_image[:, y0:y1, x0 + 1 : x1 + 1] = (
-            raster.read()
-        )  # Snap values towards right-bottom # noqa: E203
+        out_image[:, y0:y1, x0 + 1 : x1 + 1] = raster_array
 
     out_transform = rasterio.Affine(
-        raster.transform.a,
-        raster.transform.b,
+        raster_meta["transform"].a,
+        raster_meta["transform"].b,
         left_snap_coordinate,
-        raster.transform.d,
-        raster.transform.e,
+        raster_meta["transform"].d,
+        raster_meta["transform"].e,
         top_snap_coordinate,
     )
     out_meta.update(
@@ -788,22 +817,48 @@ def _snap_raster(
             "height": out_image.shape[-2],
         }
     )
+
     return out_image, out_meta
 
 
+def _check_grid_alignment(
+    src_bounds: rasterio.coords.BoundingBox, target_bounds: rasterio.coords.BoundingBox
+) -> bool:
+    """
+    Checks if two bounding boxes are aligned.
+
+    Args:
+        src_bounds (rasterio.coords.BoundingBox): The source bounding box.
+        target_bounds (rasterio.coords.BoundingBox): The target bounding box.
+
+    Returns:
+        bool: Whether the bounding boxes are aligned.
+    """
+    if (
+        src_bounds.left == target_bounds.left
+        and src_bounds.bottom == target_bounds.bottom
+    ):
+        return True
+    else:
+        return False
+
+
 def snap_raster(
-    raster: rasterio.DatasetReader, snap_raster: rasterio.DatasetReader
+    raster: Union[rasterio.DatasetReader, Tuple[np.ndarray, dict]],
+    snap_raster: Union[rasterio.DatasetReader, Tuple[Number, Number]],
 ) -> Tuple[np.ndarray, dict]:
-    """Snaps/aligns raster to given snap raster.
+    """
+    Snaps/aligns raster to given snap raster.
 
     Raster is snapped from its left-bottom corner to nearest snap raster grid corner in left-bottom direction.
     If rasters are aligned, simply returns input raster data and metadata.
 
-    Adapted core function from EIS Toolkit (main branch as of 29-01-2024).
-
     Args:
-        raster: The raster to be clipped.
-        snap_raster: The snap raster i.e. reference grid raster.
+        raster: The raster or an array with metadata to be snapped.
+        snap_raster:
+            The reference raster or
+            a rasterio metadata dictionary or
+            a tuple containing the x and y origin to snap on.
 
     Returns:
         The snapped raster data.
@@ -812,19 +867,40 @@ def snap_raster(
     Raises:
         ValueError: Raster and and snap raster are not in the same CRS.
     """
-    if not raster.crs == snap_raster.crs:
+    if isinstance(raster, rasterio.DatasetReader):
+        raster_array = raster.read()
+        raster_meta = raster.meta.copy()
+    else:
+        raster_array = raster[0]
+        raster_meta = raster[1]
+
+    if isinstance(snap_raster, rasterio.DatasetReader):
+        snap_meta = snap_raster.meta.copy()
+    else:
+        snap_meta = raster_meta.copy()
+        snap_transform = rasterio.transform.from_origin(
+            snap_raster[0],
+            snap_raster[1],
+            abs(snap_meta["transform"].a),
+            abs(snap_meta["transform"].e),
+        )
+        snap_meta["transform"] = snap_transform
+
+    src_bounds = _return_raster_bounds(raster_meta)
+    snap_bounds = _return_raster_bounds(snap_meta)
+
+    if not raster_meta["crs"] == snap_meta["crs"]:
         raise ValueError("Raster and and snap raster have different CRS.")
 
-    if (
-        snap_raster.bounds.bottom == raster.bounds.bottom
-        and snap_raster.bounds.left == raster.bounds.left
-    ):
+    if _check_grid_alignment(src_bounds, snap_bounds) is True:
         raise ValueError("Raster grids are already aligned.")
 
-    out_image, out_meta = _snap_raster(raster, snap_raster)
+    out_image, out_meta = _snap_raster(raster_array, raster_meta, snap_meta)
     return out_image, out_meta
 
 
+# endregion: snap raster
+
 # region: Test code
 
-# endregion
+# endregion: Test code
