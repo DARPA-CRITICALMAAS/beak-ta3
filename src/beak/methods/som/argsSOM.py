@@ -161,3 +161,4 @@ class Args:
         input_file = self.create_list_from_pattern("", file_patterns)
 
         return input_file
+    

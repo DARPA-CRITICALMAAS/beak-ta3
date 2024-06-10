@@ -365,7 +365,7 @@ class NxtSomCore(object):
 
 
 
-    def write_geotiff_out(self, output_folder, geodatafile, somdatafile, input_file, label = False, index_nolabel = None): 
+    def write_geotiff_out(self, output_folder, geodatafile, somdatafile, input_file, label = False, index_nolabel = None, bmu_id = None): 
         """Write geotiff to file using gdal.
 
         Args:
@@ -463,6 +463,38 @@ class NxtSomCore(object):
         outDs.SetGeoTransform(gt)
         outDs.SetProjection(proj)
 
+        # BMU ID in geo space:
+        if bmu_id is not None:
+            print("          BMU_ID")      
+
+            bmu_x_index = np.where(np.isnan(geo_data[:, 2]), -1, geo_data[:, 2]).astype(int)
+            bmu_y_index = np.where(np.isnan(geo_data[:, 3]), -1, geo_data[:, 3]).astype(int)
+
+            z = [bmu_id[y][x] if x != -1 and y != -1 else np.nan for x, y in zip(bmu_x_index, bmu_y_index)]
+
+            df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
+            df.columns = ['X_value','Y_value','Z_value']
+            df['Z_value'] = pd.to_numeric(df['Z_value'])
+            pivotted= df.pivot(index='Y_value',columns='X_value',values='Z_value')
+
+            driver = gdal.GetDriverByName('GTiff')
+            outName = destination_path + "BMU_ID.tif"
+            outDs = driver.Create(outName, cols, rows, 1, gdal.GDT_Float32)
+
+            if outDs is None:
+                print ("Could not create tif file")
+                sys.exit(1) 
+
+            outBand = outDs.GetRasterBand(1)
+            outData = np.flip(pivotted.to_numpy(), 0)  
+
+            outBand.WriteArray(outData, 0, 0)
+            outBand.FlushCache()
+            outBand.SetNoDataValue(noDataValue)
+
+            outDs.SetGeoTransform(gt)
+            outDs.SetProjection(proj)
+
 
         if label is True:
             label_file_path = output_folder + "/geo_labeled_bmu.txt"
@@ -476,20 +508,12 @@ class NxtSomCore(object):
             # Determine the number of decimal places based on the precision of gt
             decimal_precision = abs(Decimal(str(abs(gt[1]))).as_tuple().exponent)
 
-            ## Find duplicate rows in label_data
-            #duplicate_rows_z1 = label_data_df[label_data_df.duplicated(subset=['X', 'Y', 'bmu_id'], keep=False)]
-            #print("Duplicates in x, y, bmu_id: ", len(duplicate_rows_z1))
-
             x_label = np.round(label_data_df['X'],decimal_precision)
             y_label = np.round(label_data_df['Y'],decimal_precision)
 
             # Extract x and y values from geo_data for the no-label indexes
             x_no_label = np.round(geo_data[index_nolabel, 0], decimal_precision)
             y_no_label = np.round(geo_data[index_nolabel, 1], decimal_precision)
-
-            # Combine x and y coordinates into a single array and eliminating any duplicate coordinate pairs
-            #label_coords = set(zip(x_label, y_label))
-            #no_label_coords = set(zip(x_no_label, y_no_label))
 
             # Combine x and y coordinates into a single array for label and no-label data
             label_coords = set([(x, y) for x, y in zip(x_label, y_label)])
@@ -501,47 +525,48 @@ class NxtSomCore(object):
             # Separate unique x and y coordinates from unique_no_label_coords
             unique_x_no_label, unique_y_no_label = unique_no_label_coords[:, 0], unique_no_label_coords[:, 1]
 
-
             # Concatenate x_no_label and y_no_label with x_label and y_label respectively
             x_label = np.concatenate([x_label, unique_x_no_label])
             y_label = np.concatenate([y_label, unique_y_no_label])
 
             # Add NaN values to z_label for the rows without labels
             unique_z_no_label = np.full_like(unique_x_no_label, math.nan)
-            
-            #print("Geo transform original: ", gt)
-            #print("Min...Max values of x_label:", min(x_label), "...", max(x_label))
-            #print("Min...Max values of y_label:", min(y_label), "...", max(y_label))
 
             for z_value in z_values:
-                print("         ", f"BMU_{z_value.replace(' ', '_')}")
-                z = np.concatenate([label_data_df[z_value], unique_z_no_label])
-                df = pd.DataFrame({'X_value': x_label, 'Y_value': y_label, 'Z_value': z})
-                df['Z_value'] = pd.to_numeric(df['Z_value'])
-                pivotted= df.pivot(index='Y_value',columns='X_value',values='Z_value')
+                unique_z = label_data_df[z_value].unique()
+                #print("          Number of unique values in ", f"BMU_{z_value.replace(' ', '_')}", f": {len(unique_z)}")
+                if (len(unique_z) == 1):
+                    print("         ", f"BMU_{z_value.replace(' ', '_')} contains only one unique cluster. No tif file created.")
 
-                cols = pivotted.shape[1]
-                rows = pivotted.shape[0]
+                else:
+                    print("         ", f"BMU_{z_value.replace(' ', '_')}")
+                    z = np.concatenate([label_data_df[z_value], unique_z_no_label])
+                    df = pd.DataFrame({'X_value': x_label, 'Y_value': y_label, 'Z_value': z})
+                    df['Z_value'] = pd.to_numeric(df['Z_value'])
+                    pivotted= df.pivot(index='Y_value',columns='X_value',values='Z_value')
 
-                driver = gdal.GetDriverByName('GTiff')
-                z_value = z_value.replace(' ', '_')
-                outName = destination_path + f"BMU_{z_value}.tif"
-                outDs = driver.Create(outName, cols, rows, 1, gdal.GDT_Float32)
+                    cols = pivotted.shape[1]
+                    rows = pivotted.shape[0]
 
-                if outDs is None:
-                    print ("Could not create label tif file")
-                    sys.exit(1) 
+                    driver = gdal.GetDriverByName('GTiff')
+                    z_value = z_value.replace(' ', '_')
+                    outName = destination_path + f"BMU_{z_value}.tif"
+                    outDs = driver.Create(outName, cols, rows, 1, gdal.GDT_Float32)
 
-                outBand = outDs.GetRasterBand(1)
-                outData = np.flip(pivotted.to_numpy(), 0)  
+                    if outDs is None:
+                        print ("Could not create label tif file")
+                        sys.exit(1) 
 
-                outBand.WriteArray(outData, 0, 0)
-                outBand.FlushCache()
-                outBand.SetNoDataValue(noDataValue)
+                    outBand = outDs.GetRasterBand(1)
+                    outData = np.flip(pivotted.to_numpy(), 0)  
 
-                outDs.SetGeoTransform(gt)
-                #outDs.SetGeoTransform(gt_label)
-                outDs.SetProjection(proj)
+                    outBand.WriteArray(outData, 0, 0)
+                    outBand.FlushCache()
+                    outBand.SetNoDataValue(noDataValue)
+
+                    outDs.SetGeoTransform(gt)
+                    #outDs.SetGeoTransform(gt_label)
+                    outDs.SetProjection(proj)
 
         
         outDs.FlushCache()

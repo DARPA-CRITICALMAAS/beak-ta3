@@ -139,3 +139,9 @@ def create_hard_buffer_around_labels(
         )
 
     return out_array
+
+
+# region: Test code
+
+
+# endregion: Test code

@@ -45,4 +45,26 @@ def check_write_permissions(path: Union[Path, str], overwrite: bool = False) -> 
             return True
     else:
         return True
-    
+  
+  
+def check_grid_alignment(
+    src_bounds: rasterio.coords.BoundingBox, target_bounds: rasterio.coords.BoundingBox
+) -> bool:
+    """
+    Checks if two bounding boxes are aligned.
+
+    Args:
+        src_bounds (rasterio.coords.BoundingBox): The source bounding box.
+        target_bounds (rasterio.coords.BoundingBox): The target bounding box.
+
+    Returns:
+        bool: Whether the bounding boxes are aligned.
+    """
+    if (
+        src_bounds.left == target_bounds.left
+        and src_bounds.bottom == target_bounds.bottom
+    ):
+        return True
+    else:
+        return False
+

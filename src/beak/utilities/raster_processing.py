@@ -28,7 +28,7 @@ from beak.utilities.io import (
 )
 
 from beak.utilities.io import load_raster, save_raster
-
+from beak.utilities.checks import check_grid_alignment
 
 # References
 # Some non-trivial functionalities were adapted from other sources.
@@ -821,28 +821,6 @@ def _snap_raster(
     return out_image, out_meta
 
 
-def _check_grid_alignment(
-    src_bounds: rasterio.coords.BoundingBox, target_bounds: rasterio.coords.BoundingBox
-) -> bool:
-    """
-    Checks if two bounding boxes are aligned.
-
-    Args:
-        src_bounds (rasterio.coords.BoundingBox): The source bounding box.
-        target_bounds (rasterio.coords.BoundingBox): The target bounding box.
-
-    Returns:
-        bool: Whether the bounding boxes are aligned.
-    """
-    if (
-        src_bounds.left == target_bounds.left
-        and src_bounds.bottom == target_bounds.bottom
-    ):
-        return True
-    else:
-        return False
-
-
 def snap_raster(
     raster: Union[rasterio.DatasetReader, Tuple[np.ndarray, dict]],
     snap_raster: Union[rasterio.DatasetReader, Tuple[Number, Number]],
@@ -892,7 +870,7 @@ def snap_raster(
     if not raster_meta["crs"] == snap_meta["crs"]:
         raise ValueError("Raster and and snap raster have different CRS.")
 
-    if _check_grid_alignment(src_bounds, snap_bounds) is True:
+    if check_grid_alignment(src_bounds, snap_bounds) is True:
         raise ValueError("Raster grids are already aligned.")
 
     out_image, out_meta = _snap_raster(raster_array, raster_meta, snap_meta)

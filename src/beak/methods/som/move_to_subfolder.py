@@ -40,7 +40,7 @@ def remove_som_results(file_path):
     Args:
         file_path (str): file path of som output files
     """
-    file_patterns = ["*som.*","*geo.*", "RunStats.txt","cluster.dictionary","db_score.png","cluster_hit_count.txt","*label*"]
+    file_patterns = ["*som.*","*geo.*", "RunStats.txt","cluster.dictionary","db_score.png","cluster_hit_count.txt","*label*","*bmu*"]
 
     for file_pattern in file_patterns:
         # Use glob to get all files with the specified pattern
@@ -63,7 +63,7 @@ def move_figures(file_path, subfolder_name):
     Returns:
         list: matching files and their corresponding destination paths
     """
-    file_patterns = ["geoplot_*.png", "somplot_*.png", "boxplot_*.png", "db_score.png", "cluster*_count.png"]
+    file_patterns = ["geoplot_*.png", "somplot_*.png", "boxplot_*.png", "db_score.png", "cluster*_count.png", "bmu_id_mesh.png"]
     destination_path = file_path + "/" + subfolder_name + "/"
 
     # Lists to store matching files with their corresponding destination paths
@@ -80,6 +80,9 @@ def move_figures(file_path, subfolder_name):
             os.remove(file_to_delete)
 
     for file_pattern in file_patterns:
+
+        print(f"Move figures {file_pattern} to {destination_path}")
+
         # Use glob to get all files with the specified pattern
         matching_files = glob.glob(os.path.join(file_path, file_pattern))
 

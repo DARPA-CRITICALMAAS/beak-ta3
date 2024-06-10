@@ -102,7 +102,15 @@ def run_plotting_script(argsP):
 
     print("Plot SOM space results")
     start_time = time.time()
+    bmu_id = []
+    with open(argsP.dir+'/bmu_ids.txt', 'r') as file:
+        for line in file:
+            # Split the line by whitespace and convert each value to an integer
+            row = [int(value) for value in line.strip().split()]
+            # Append the row to the list of BMU IDs
+            bmu_id.append(row)
 
+    plot_bmu_id_grid(bmu_id, argsP.dir)
     draw_umatrix(argsP.som_x, argsP.som_y,clusters,cluster_tick_labels,som_data, som_table, grid, argsP.grid_type, annot_ticks, som_headers, argsP.dir)
     draw_number_of_hits(argsP, som_dict,som_data, clusters, grid, cluster_tick_labels, annot_ticks)
     
@@ -448,7 +456,8 @@ def draw_som_results(argsP, som_data, som_table,grid, annot_ticks, som_headers,c
             for i in range(0,len(som_data)): 
                 som_table[int(som_data[i][0])][int(som_data[i][1])]=som_data[i][j] #som_table: somx*somy size
             ax = sns.heatmap(som_table.transpose(), cmap="jet", linewidth=0)   
-            ax.set_title(som_headers[j])    
+            ax.set_title(som_headers[j])   
+            ax.set_aspect('equal')  # Set aspect ratio to 'equal' 
         elif(argsP.grid_type.lower()=="hexagonal"):
             hits=som_data[:,j]
             mpl.rcParams.update({'font.size': 30})
@@ -485,6 +494,7 @@ def draw_umatrix(somx,somy,clusters,cluster_tick_labels,som_data, som_table,grid
                 som_table[int(som_data[i][0])][int(som_data[i][1])]=som_data[i][j] #som_table: somx*somy size
             ax = sns.heatmap(som_table.transpose(), cmap="jet", linewidth=0)   
             ax.set_title(som_headers[j])    
+            ax.set_aspect('equal')  # Set aspect ratio to 'equal'
         elif(grid_type.lower()=="hexagonal"):
         #else:
             hits=som_data[:,j]
@@ -528,6 +538,7 @@ def draw_som_clusters(argsP, grid, som_data, som_table, annot_ticks, som_headers
         colorbar = ax.collections[0].colorbar
         colorbar.set_ticklabels(cluster_tick_labels)
         ax.set_title(som_headers[len(som_headers)-2])
+        ax.set_aspect('equal')  # Set aspect ratio to 'equal'
     else:#grid type=="hexagonal":
         hits=som_data[:,len(som_data[0])-2]   
         mpl.rcParams.update({'font.size': 30})  
@@ -752,6 +763,7 @@ def draw_number_of_hits(argsP, som_dict,som_data,clusters,grid,cluster_tick_labe
     if(argsP.grid_type=='rectangular'):
         ax = sns.heatmap(hits, cmap="binary", linewidth=0)   
         ax.set_title("Number of hits per SOM cell")
+        ax.set_aspect('equal')  # Set aspect ratio to 'equal'
     else: #if grid type is hexagonal
         mpl.rcParams.update({'font.size': 30})
         ax = plot_hexa(argsP.som_x,argsP.som_y,clusters,grid,hits.flatten(order='F'),annot_ticks,cluster_tick_labels,  colmap="binary", ptype='grid')    
@@ -837,7 +849,7 @@ def plot_cluster_hit_count(txtFile, output_path):
 """
 Draw cluster_label_count
 """
-def plot_cluster_label_count(txtFile, output_path):
+def plot_cluster_label_count(txtFile, output_folder):
     """Draw cluster_label_count
 
     Args:
@@ -854,7 +866,49 @@ def plot_cluster_label_count(txtFile, output_path):
     ax.set_title('Cluster Label Count')
     ax.grid(True)
     #plt.show()
-    fig.savefig(output_path+"/cluster_label_count.png")
+    fig.savefig(output_folder+"/cluster_label_count.png")
+    plt.clf()
+    plt.cla()
+    plt.close()
+
+def plot_bmu_id_grid(bmu_id, output_folder):
+
+    # Convert bmu_ids to a NumPy array for plotting
+    bmu_ids_array = np.array(bmu_id)
+
+    # Calculate figure size based on the number of grid cells
+    num_cells = bmu_ids_array.size
+    fig_size = max(6, int(np.sqrt(num_cells)) * 0.35)
+
+    # Plot the mesh
+    plt.figure(figsize=(fig_size, fig_size))
+    plt.imshow(np.zeros_like(bmu_ids_array), cmap='gray', interpolation='none')
+
+    # Calculate figure size based on the number of grid cells
+    num_cells = bmu_ids_array.size
+    fig_size = max(6, int(np.sqrt(num_cells)) * 0.5)
+
+    # Overlay the mesh grid
+    for i in range(bmu_ids_array.shape[0] + 1):
+        plt.axhline(i - 0.5, color='white', linewidth=0.5)
+    for j in range(bmu_ids_array.shape[1] + 1):
+        plt.axvline(j - 0.5, color='white', linewidth=0.5)
+
+    # Add text annotations for each value in the grid
+    for i in range(bmu_ids_array.shape[0]):
+        for j in range(bmu_ids_array.shape[1]):
+            plt.text(j, i, str(bmu_ids_array[i, j]), ha='center', va='center', color='white', fontsize=6)
+
+    plt.xticks(range(bmu_ids_array.shape[1]))
+    plt.yticks(range(bmu_ids_array.shape[0]))
+
+    #plt.colorbar(label='BMU ID')
+    plt.xlabel('SOM X')
+    plt.ylabel('SOM Y')
+    plt.title('BMU IDs')
+    plt.grid(False)
+
+    plt.savefig(output_folder + '/bmu_id_mesh.png',bbox_inches='tight')
     plt.clf()
     plt.cla()
     plt.close()
