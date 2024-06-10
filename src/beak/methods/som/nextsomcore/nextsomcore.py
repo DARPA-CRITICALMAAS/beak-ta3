@@ -487,6 +487,7 @@ class NxtSomCore(object):
 
             outBand = outDs.GetRasterBand(1)
             outData = np.flip(pivotted.to_numpy(), 0)  
+            outBMU = outData.copy()
 
             outBand.WriteArray(outData, 0, 0)
             outBand.FlushCache()
@@ -494,7 +495,6 @@ class NxtSomCore(object):
 
             outDs.SetGeoTransform(gt)
             outDs.SetProjection(proj)
-
 
         if label is True:
             label_file_path = output_folder + "/geo_labeled_bmu.txt"
@@ -530,14 +530,13 @@ class NxtSomCore(object):
             y_label = np.concatenate([y_label, unique_y_no_label])
 
             # Add NaN values to z_label for the rows without labels
-            unique_z_no_label = np.full_like(unique_x_no_label, math.nan)
+            unique_z_no_label = np.zeros_like(unique_x_no_label)
 
             for z_value in z_values:
                 unique_z = label_data_df[z_value].unique()
                 #print("          Number of unique values in ", f"BMU_{z_value.replace(' ', '_')}", f": {len(unique_z)}")
                 if (len(unique_z) == 1):
                     print("         ", f"BMU_{z_value.replace(' ', '_')} contains only one unique cluster. No tif file created.")
-
                 else:
                     print("         ", f"BMU_{z_value.replace(' ', '_')}")
                     z = np.concatenate([label_data_df[z_value], unique_z_no_label])
@@ -559,6 +558,7 @@ class NxtSomCore(object):
 
                     outBand = outDs.GetRasterBand(1)
                     outData = np.flip(pivotted.to_numpy(), 0)  
+                    outData = np.where(np.isnan(outBMU), np.nan, outData)
 
                     outBand.WriteArray(outData, 0, 0)
                     outBand.FlushCache()
