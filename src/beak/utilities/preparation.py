@@ -1,7 +1,9 @@
+import rasterio
 import numpy as np
 import pandas as pd
 import geopandas as gpd
 
+from pathlib import Path
 from sklearn.impute import SimpleImputer
 from beartype.typing import List, Tuple, Union, Optional, Literal
 from numbers import Number
@@ -141,7 +143,77 @@ def create_hard_buffer_around_labels(
     return out_array
 
 
-# region: Test code
+# What we need
+# 1: A BMU Cluster map with correlated labels (input as path to a file)
+# 5: Consider positive and negative label selection (easier for negatives, only one class)
 
+# 2: A function to select the the BMU clusters from the map based on
+#    a) the number of labels in a certain cluster
+#    b) the percentile of labels in a certain cluster based on the total number of labels in the cluster
+def _sampling_select_clusters(array: np.ndarray, threshold: Number, type: Literal["positives", "negatives"]):
+    unique_values = np.unique(array)
+    cluster_selection = np.nanquantile(unique_values, threshold, method="nearest") if threshold < 1 else threshold
+
+    if type == "positives":
+        out_array = np.where(array < cluster_selection, np.nan, array)        
+    elif type == "negatives":
+        out_array = np.where(array < cluster_selection, array, np.nan)
+
+    print(f"threshold: {cluster_selection}")
+    return out_array
+
+
+# 3: A function to select the random points based on the calculated number of points
+#   a) equally distributed among all clusters (equal)
+#   b) distributed depending on the number of pixels available for each class (relative)
+def _sampling_select_random_points():
+    return
+
+
+# 4: A testing function that checks if enough pixels are available
+def _sampling_check_number_of_pixels():
+    return 
+
+
+def sampling_from_clusters(file: Union[Path, str], threshold: Number, type: Literal["positives", "negatives"]):
+    if isinstance(file, str):
+        file = Path(file)
+
+    raster = rasterio.open(file)
+    raster_array = raster.read()
+    print(np.unique(raster_array, return_counts=True))
+    print(raster.nodata)
+    raster_array = np.where(raster_array == raster.nodata, np.nan, raster_array)
+
+    if threshold >= np.nanmax(raster_array):
+        raise ValueError(f"Threshold {threshold} is higher than the maximum value in the raster.")
+    if threshold <= 0:
+        raise ValueError(f"Threshold {threshold} is lower or equal to 0.")
+
+    out_array = _sampling_select_clusters(raster_array, threshold, type)
+    return out_array
+
+
+# region: Test code
+if __name__ == "__main__":
+    # User inputs
+    folder = Path("S:/Projekte/20230082_DARPA_CriticalMAAS_TA3/Bearbeitung/GitHub/beak-ta3/experiments/hackathon_9m_related/03_cma/cobalt_nickel_upper_midwest/som/models/")
+    model_config = "BASELINE_BISON"
+
+    model_run_random = "SOM_BASELINE_BISON_F28_X50_Y50_CMAX50_20240612-134211"
+    model_run_pca = "SOM_BASELINE_BISON_F28_X50_Y50_CMAX50_20240612-135610"
+    model_run = model_run_random
+
+    cluster_map = folder / model_config / model_run / "exports" / "GeoTIFF" / "BMU_BMU_label_count.tif"
+
+    # Load data
+    file = cluster_map
+
+    types = ["positives", "negatives"]
+    for type in types:
+        print("\n")
+        print("Type: " + type)
+        output = sampling_from_clusters(file, threshold=3, type=type)
+        print(np.unique(output, return_counts=True))
 
 # endregion: Test code

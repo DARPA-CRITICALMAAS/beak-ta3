@@ -7,15 +7,37 @@ import zipfile
 from rasterio.crs import CRS
 
 import os
+import sys
 import multiprocessing as mp
 
 from pathlib import Path
-from typing import Optional, Tuple, Union, Dict, Sequence, List, Any
+from beartype.typing import Optional, Tuple, Union, Dict, Sequence, List, Any
 from numbers import Number
 from collections import Counter
 from tqdm import tqdm
 
 from beak.utilities.checks import check_write_permissions
+
+
+def data_folder(folder_name: str = "beak.data") -> Path:
+    """
+    Returns the path to the specified data folder.
+
+    If the importlib_resources module is available (Python 3.9 and above), it is used to access the data folder.
+    If importlib_resources is not available, the importlib.resources module is used instead.
+
+    Args:
+        folder_name (str): The name of the data folder. Default is "beak.data".
+
+    Returns:
+        Path: The relative path to the specified data folder.
+    """
+    if sys.version_info < (3, 9):
+        from importlib_resources import files
+    else:
+        from importlib.resources import files
+
+    return files(folder_name)
 
 
 def load_dataset(

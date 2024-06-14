@@ -1,5 +1,6 @@
 """
-This file contains the models used for the MVT_REG experiment.
+This file contains the models used for the magmatic cobalt-nickel experiment.
+The BISON model is used as a geophysical baseline model and is the same as the pre-hack FOX model.
 """
 
 models = {

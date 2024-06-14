@@ -3,7 +3,7 @@ import os
 import warnings
 
 from pathlib import Path
-from typing import Optional, Tuple, Union, Sequence, List, Literal
+from beartype.typing import Optional, Tuple, Union, Sequence, List, Literal
 
 import numpy as np
 import geopandas as gpd
@@ -97,6 +97,7 @@ def _reproject_raster_process(
     target_resolution: Optional[np.number],
     resampling_method: warp.Resampling,
     resampling_mode: str,
+    snap_to_origin: Union[str, Path, Tuple[Number, Number]],
 ):
     """Run reprojection process for a single raster file.
 
@@ -107,14 +108,21 @@ def _reproject_raster_process(
         target_crs (Union[int, rasterio.crs.CRS]): Target coordinate reference system (CRS).
         target_resolution (Optional[np.number]): The target resolution for the reprojection.
         resampling_method (warp.Resampling): The resampling method to use.
+        snap_to_origin (Union[str, Path, Tuple[Number, Number]]): The origin to snap to.
     """
     out_file = output_folder / file.relative_to(Path(input_folder))
 
     if not os.path.exists(out_file):
         raster = load_raster(file)
+        snap_to_origin = load_raster(snap_to_origin) if isinstance(snap_to_origin, (str, Path)) else snap_to_origin
         check_path(Path(os.path.dirname(out_file)))
         out_array, out_meta = _reproject_raster_core(
-            raster, target_crs, target_resolution, resampling_method, resampling_mode
+            raster,
+            target_crs,
+            target_resolution,
+            resampling_method,
+            resampling_mode,
+            snap_to_origin,
         )
 
         save_raster(
@@ -134,6 +142,7 @@ def _reproject_raster_core(
     target_resolution: Optional[np.number],
     resampling_method: warp.Resampling,
     resampling_mode: str,
+    snap_to_origin: Union[rasterio.io.DatasetReader, Tuple[Number, Number]],
 ) -> Tuple[np.ndarray, dict]:
     """
     Reproject a raster to a new coordinate reference system (CRS) and resolution.
@@ -198,6 +207,11 @@ def _reproject_raster_core(
         }
     )
 
+    if snap_to_origin is not None:
+        out_image, out_meta = snap_raster(
+            raster=(out_image, out_meta), snap_to=snap_to_origin
+        )
+
     return out_image.astype(src_arr.dtype), out_meta
 
 
@@ -210,6 +224,7 @@ def reproject_raster(
     resampling_mode: Literal["manual", "auto"] = "manual",
     include_source: bool = False,
     n_workers: int = mp.cpu_count(),
+    snap_to_origin: Optional[Union[str, Path, Tuple[Number, Number]]] = None,
 ):
     """
     Reprojects rasters from the input folder to the output folder using the specified target EPSG code.
@@ -223,6 +238,7 @@ def reproject_raster(
         resampling_mode (Literal["manual", "auto"]): Uses "nearest" for integers and "bilinear" for floats.
             Overwrites resampling_method if set to "auto". Defaults to "manual".
         n_workers (int): The number of worker processes to use for parallel processing. Defaults to the number of CPU cores.
+        snap_to_origin (Optional[Union[str, Tuple[Number, Number]]]): Path to raster or origin to snap to. Defaults to None.
     """
     # Show selected folder
     input_folder = Path(input_folder)
@@ -260,6 +276,7 @@ def reproject_raster(
             target_resolution,
             resampling_method,
             resampling_mode,
+            snap_to_origin,
         )
         for file in file_list
     ]
@@ -565,6 +582,7 @@ def _unify_raster_grids(
     base_raster: Union[Path, rasterio.io.DatasetReader],
     raster_to_unify: Union[Path, rasterio.io.DatasetReader],
     resampling_method: Resampling,
+    resampling_mode: str,
     same_extent: bool,
     same_shape: bool,
 ) -> Tuple[np.ndarray, dict]:
@@ -625,6 +643,12 @@ def _unify_raster_grids(
 
     src_array = raster.read()
 
+    if resampling_mode == "auto":
+        if np.issubdtype(src_array.dtype, np.integer):
+            resampling_method = Resampling.nearest
+        elif np.issubdtype(src_array.dtype, np.floating):
+            resampling_method = Resampling.bilinear
+
     out_array = warp.reproject(
         source=src_array,
         src_crs=raster.crs,
@@ -650,6 +674,7 @@ def unify_raster_grids(
     base_raster: Union[str, Path],
     rasters_to_unify: Sequence[Union[str, Path]],
     resampling_method: Resampling = Resampling.nearest,
+    resampling_mode: Literal["auto", "manual"] = "manual",
     same_extent: bool = False,
     same_shape: bool = False,
     n_workers: int = 1,
@@ -677,6 +702,7 @@ def unify_raster_grids(
             base_raster,
             file,
             resampling_method,
+            resampling_mode,
             same_extent,
             same_shape,
         )
@@ -696,6 +722,7 @@ def unify_raster_grids(
                 base_raster,
                 file,
                 resampling_method,
+                resampling_mode,
                 same_extent,
                 same_shape,
             )
@@ -821,9 +848,10 @@ def _snap_raster(
     return out_image, out_meta
 
 
+#
 def snap_raster(
     raster: Union[rasterio.DatasetReader, Tuple[np.ndarray, dict]],
-    snap_raster: Union[rasterio.DatasetReader, Tuple[Number, Number]],
+    snap_to: Union[rasterio.DatasetReader, Tuple[Number, Number]],
 ) -> Tuple[np.ndarray, dict]:
     """
     Snaps/aligns raster to given snap raster.
@@ -833,7 +861,7 @@ def snap_raster(
 
     Args:
         raster: The raster or an array with metadata to be snapped.
-        snap_raster:
+        snap_to:
             The reference raster or
             a rasterio metadata dictionary or
             a tuple containing the x and y origin to snap on.
@@ -852,13 +880,13 @@ def snap_raster(
         raster_array = raster[0]
         raster_meta = raster[1]
 
-    if isinstance(snap_raster, rasterio.DatasetReader):
-        snap_meta = snap_raster.meta.copy()
+    if isinstance(snap_to, rasterio.DatasetReader):
+        snap_meta = snap_to.meta.copy()
     else:
         snap_meta = raster_meta.copy()
         snap_transform = rasterio.transform.from_origin(
-            snap_raster[0],
-            snap_raster[1],
+            snap_to[0],
+            snap_to[1],
             abs(snap_meta["transform"].a),
             abs(snap_meta["transform"].e),
         )

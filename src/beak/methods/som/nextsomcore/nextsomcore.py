@@ -381,6 +381,7 @@ class NxtSomCore(object):
         inBand=inDs.GetRasterBand(1)
         gt = inDs.GetGeoTransform()
         proj = inDs.GetProjection()
+
         noDataValue = inBand.GetNoDataValue()
 
         driver = gdal.GetDriverByName('GTiff')
@@ -465,6 +466,7 @@ class NxtSomCore(object):
 
         # BMU ID in geo space:
         if bmu_id is not None:
+            BMUnoDataValue = -99
             print("          BMU_ID")      
 
             bmu_x_index = np.where(np.isnan(geo_data[:, 2]), -1, geo_data[:, 2]).astype(int)
@@ -491,7 +493,7 @@ class NxtSomCore(object):
 
             outBand.WriteArray(outData, 0, 0)
             outBand.FlushCache()
-            outBand.SetNoDataValue(noDataValue)
+            outBand.SetNoDataValue(BMUnoDataValue)
 
             outDs.SetGeoTransform(gt)
             outDs.SetProjection(proj)
@@ -562,13 +564,12 @@ class NxtSomCore(object):
 
                     outBand.WriteArray(outData, 0, 0)
                     outBand.FlushCache()
-                    outBand.SetNoDataValue(noDataValue)
+                    outBand.SetNoDataValue(BMUnoDataValue)
 
                     outDs.SetGeoTransform(gt)
                     #outDs.SetGeoTransform(gt_label)
                     outDs.SetProjection(proj)
 
-        
         outDs.FlushCache()
         inDs=None
         outDs=None
@@ -660,6 +661,3 @@ class NxtSomCore(object):
         )
 
         inDs = None
-
-            
-    

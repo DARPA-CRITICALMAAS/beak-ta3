@@ -1,7 +1,12 @@
 import os
 import re
+import rasterio
+import numpy as np
+import pandas as pd
 from pathlib import Path
-from typing import Optional
+from tqdm import tqdm
+from beartype.typing import Optional, Union, Sequence
+from beak.utilities.io import create_file_list
 
 
 def replace_invalid_characters(string: str) -> str:
@@ -64,3 +69,73 @@ def create_tree(
             )
 
     return tree
+
+
+def create_raster_report(
+    path: Union[Path, str] = None,
+    file_extensions: Sequence[str] = [".tif", ".tiff"],
+    recursive_search: bool = True,
+    out_file: Optional[Union[Path, str]] = None,
+) -> pd.DataFrame:
+    """
+    Create a report of all raster files in a given directory.
+
+    Parameters:
+    path (Union[Path, str], optional): The path to the directory containing raster files. Defaults to None, which means the current working directory.
+    file_extensions (list, optional): A list of file extensions to consider as raster files. Defaults to [".tif", ".tiff"].
+    recursive_search (bool, optional): Whether to search for raster files recursively in subdirectories. Defaults to True.
+    out_file (Optional[Union[Path, str]], optional): The path to save the generated report as a CSV file. Defaults to None, which means the report will not be saved.
+
+    Returns:
+    pd.DataFrame: A pandas DataFrame containing the report of raster files.
+    """
+    path = Path(path)
+    file_list = create_file_list(
+        path, extensions=file_extensions, recursive=recursive_search
+    )
+
+    report = pd.DataFrame()
+    for file in tqdm(file_list):
+        raster = rasterio.open(file)
+
+        for band in range(0, raster.count):
+            array = raster.read(band + 1)
+            array = np.where(array == raster.nodatavals[band], np.nan, array)
+
+            decimals = 6
+            band_report = {
+                "file_name": file.name,
+                "crs": raster.crs,
+                "width": round(raster.width, decimals),
+                "height": round(raster.height, decimals),
+                "count": raster.count,
+                "band": band + 1,
+                "single_band": True if raster.count == 1 else False,
+                "nodata": raster.nodatavals[band],
+                "dtype": raster.dtypes[band],
+                "cellsize_x": round(abs(raster.transform.a), decimals),
+                "cellsize_y": round(abs(raster.transform.e), decimals),
+                "value_min": round(np.nanmin(array), decimals),
+                "value_max": round(np.nanmax(array), decimals),
+                "value_mean": round(np.nanmean(array), decimals),
+                "value_median": round(np.nanmedian(array), decimals),
+                "value_std": round(np.nanstd(array), decimals),
+                "file_path": file,
+                "transform": " ".join(map(str, raster.transform)),
+            }
+
+            band_report = pd.DataFrame.from_dict(
+                band_report, orient="index"
+            ).transpose()
+
+            report = pd.concat([report, band_report], ignore_index=True)
+
+    if out_file is not None:
+        report.to_csv(out_file, index=False)
+
+    return report
+
+
+# region: Test code
+
+# endregion: Test code

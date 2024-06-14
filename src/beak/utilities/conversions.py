@@ -461,6 +461,7 @@ def create_binary_raster(
     same_shape: bool = True,
     out_file: Optional[Union[str, Path]] = None,
     dtype: Optional[np.dtype] = np.dtype(np.int8),
+    return_meta: bool = False,
 ) -> np.ndarray:
     """
     Creates a binary from a geodataframe by rasterizing its geometries.
@@ -483,6 +484,7 @@ def create_binary_raster(
 
     Returns:
         np.ndarray: The binary labels as a numpy array.
+        dict: A dictionary containing the metadata of the output raster.
     """
     if base_raster is None and resolution is None:
         raise ValueError("Provide either base_raster or resolution.")
@@ -537,4 +539,16 @@ def create_binary_raster(
             dtype=dtype,
         )
 
-    return out_array
+    if return_meta is True:
+        out_meta = {
+            "dtype": dtype,
+            "nodata": nodata,
+            "width": width,
+            "height": height,
+            "count": 1,
+            "crs": crs,
+            "transform": transform,
+        }
+        return out_array, out_meta
+    else:
+        return out_array

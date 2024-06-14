@@ -122,7 +122,7 @@ def scale_raster(
     n_workers: int = mp.cpu_count(),
 ):
     """
-    Reprojects rasters from the input folder to the output folder using the specified target EPSG code.
+    Scale all rasters within a folder with the selected scaling method.
 
     Args:
         input_folder (Path): The path to the input folder containing the rasters.
