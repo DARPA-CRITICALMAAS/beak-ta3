@@ -689,6 +689,9 @@ def unify_raster_grids(
         base_raster (rasterio.io.DatasetReader): The base raster whose grid will be used as reference.
         rasters_to_unify (Sequence[rasterio.io.DatasetReader]): The rasters to be unified.
         resampling_method (Resampling, optional): The resampling method to be used. Defaults to Resampling.nearest.
+        resampling_mode (str, optional): The resampling mode to be used. Defaults to "manual".
+            If set to "auto", the resampling method will be determined automatically based on the data type.
+            The manual set method will be overwritting in this case.
         same_extent (bool, optional): Whether to force all rasters to have the same extent as the base raster. Defaults to False.
         same_shape (bool, optional): Whether to force all rasters to have the same shape as the base raster. Defaults to False.
 
