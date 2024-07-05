@@ -1,8 +1,8 @@
-import numpy as np
 import rasterio
+import numpy as np
 
 from pathlib import Path
-from typing import Union, Optional
+from beartype.typing import Union, Optional
 
 
 def check_positives(file_path: Union[str, Path], band: Optional[int] = None):
@@ -67,4 +67,3 @@ def check_grid_alignment(
         return True
     else:
         return False
-

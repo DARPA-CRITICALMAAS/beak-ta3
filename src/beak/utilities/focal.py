@@ -1,7 +1,7 @@
 from numbers import Number
 
 import numpy as np
-from beartype.typing import Literal, Optional, Callable
+from beartype.typing import Literal, Callable
 from scipy.ndimage import generic_filter
 
 
@@ -136,14 +136,16 @@ def _create_local_buffer(
     array: np.ndarray,
     radius: int,
     shape: Literal["square", "circle"],
-    target_value: int = 1,
+    target_value: int,
 ) -> np.ndarray:
     """
     Creates a buffer with a constant value around the selected value in a given array.
 
     Args:
         array (np.ndarray): The array to be buffered.
-        selected_value (int): The value to be buffered. Defaults to 1.
+        radius (int): Number of cells (distance) to the targeted value to be changed.
+        shape (Literal["square", "circle"]): The shape of the buffer.
+        target_value (int): The value to be buffered.
 
     Returns:
         np.ndarray: The buffered array.

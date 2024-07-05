@@ -98,18 +98,22 @@ def load_rasters(
     return file_list, loaded_rasters
 
 
-def read_raster(raster: rasterio.io.DatasetReader) -> np.ndarray:
+def read_raster(raster: rasterio.io.DatasetReader, replace_nan=False) -> np.ndarray:
     """
     Read a raster single-band raster dataset.
 
     Args:
         raster (rasterio.io.DatasetReader): The raster dataset to read.
+        replace_nan (bool): Whether to replace the nodata value with NaN. Defaults to False.
 
     Returns:
         np.ndarray: The raster data as a NumPy array.
     """
-    assert raster.band_count == 1
-    return raster.read()
+    assert raster.count == 1
+    
+    out_raster = raster.read()
+    out_raster = np.where(out_raster == raster.nodata, np.nan, out_raster) if replace_nan else out_raster
+    return out_raster
 
 
 def read_rasters(raster_list: List[rasterio.io.DatasetReader]) -> List[np.ndarray]:

@@ -171,10 +171,14 @@ local/
 eis_toolkit/
 probflow/
 .obsidian/
+.idea/
 results/
 exports/
 logs/
 *qgis/
+
+examples/**/*.tif
+examples/**/*.tif.aux.xml
 
 experiments/**/models/
 experiments/*evaluation*/

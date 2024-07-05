@@ -2,12 +2,14 @@ import rasterio
 import numpy as np
 import pandas as pd
 import geopandas as gpd
+import warnings
 
 from pathlib import Path
 from sklearn.impute import SimpleImputer
-from beartype.typing import List, Tuple, Union, Optional, Literal
+from beartype.typing import List, Tuple, Union, Optional, Literal, Sequence
 from numbers import Number
 
+from beak.utilities.io import load_raster, read_raster
 from beak.utilities.focal import (
     _create_local_buffer,
 )
@@ -121,7 +123,7 @@ def create_hard_buffer_around_labels(
         radius (int): The radius of the buffer (1 for a 3x3 window with 9 pixels, size is n*2 + 1). Defaults to 1.
         shape (Literal["square", "circle"]): The shape of the buffer. Defaults to "square".
         selected_value (int): The value to be extended. Defaults to 1.
-        buffer_value (Optional[Number]): The value to be used for the buffer. Defaults to np.nan
+        buffer_value (Optional[Number]): The value to be used for the buffer. Defaults to None.
 
     Returns:
         np.ndarray: The extended label's array.
@@ -139,81 +141,295 @@ def create_hard_buffer_around_labels(
         out_array = np.where(
             array == positive_label_value, positive_label_value, out_array
         )
-
     return out_array
 
 
-# What we need
-# 1: A BMU Cluster map with correlated labels (input as path to a file)
-# 5: Consider positive and negative label selection (easier for negatives, only one class)
+# region: Sampling functions
+def _sampling_select_classes(
+    array: np.ndarray,
+    **kwargs,
+):
+    type = kwargs["type"] if "type" in kwargs.keys() else None
+    threshold = kwargs["threshold"] if "threshold" in kwargs.keys() else None
+    include = kwargs["include"] if "include" in kwargs.keys() else None
+    exclude = kwargs["exclude"] if "exclude" in kwargs.keys() else None
 
-# 2: A function to select the the BMU clusters from the map based on
-#    a) the number of labels in a certain cluster
-#    b) the percentile of labels in a certain cluster based on the total number of labels in the cluster
-def _sampling_select_clusters(array: np.ndarray, threshold: Number, type: Literal["positives", "negatives"]):
-    unique_values = np.unique(array)
-    cluster_selection = np.nanquantile(unique_values, threshold, method="nearest") if threshold < 1 else threshold
+    out_array = np.copy(array)
+    if exclude is not None:
+        exclude_mask = np.isin(out_array, exclude)
+        out_array = np.where(exclude_mask, np.nan, out_array)
 
-    if type == "positives":
-        out_array = np.where(array < cluster_selection, np.nan, array)        
-    elif type == "negatives":
-        out_array = np.where(array < cluster_selection, array, np.nan)
+    if include is not None:
+        include_mask = np.isin(out_array, include)
+        out_array = np.where(include_mask, out_array, np.nan)
 
-    print(f"threshold: {cluster_selection}")
-    return out_array
+    if threshold is not None:
+        unique_values = np.unique(out_array)
+        include_classes = (
+            np.nanquantile(unique_values, threshold, method="nearest")
+            if threshold < 1
+            else threshold
+        )
+
+        if type == "positives":
+            out_array = np.where(array < include_classes, np.nan, out_array)
+        elif type == "negatives":
+            out_array = np.where(array < include_classes, out_array, np.nan)
+
+    classes, counts = _get_unique_values_list(out_array)
+
+    out_dict = {
+        "type": type,
+        "threshold": threshold,
+        "classes": classes,
+        "counts": counts,
+        "counts_sum": np.sum(counts),
+        "include": include,
+        "exclude": exclude,
+    }
+    return out_array, out_dict
 
 
-# 3: A function to select the random points based on the calculated number of points
-#   a) equally distributed among all clusters (equal)
-#   b) distributed depending on the number of pixels available for each class (relative)
-def _sampling_select_random_points():
-    return
+def _get_unique_values_list(
+    array: np.ndarray,
+    include_nan: bool = False,
+    include_inf: bool = False,
+    verbose=0,
+) -> Tuple[Sequence[Number], Sequence[Number]]:
+    """
+    Get a list of unique values and their counts from a numpy array.
+
+    Args:
+        array (np.ndarray): The input array from which to extract unique values.
+        include_nan (bool, optional): Whether to include NaN values in the unique values list. Defaults to False.
+        verbose (int, optional): Whether to print the unique values and their counts. Defaults to 0 (no output).
+
+    Returns:
+        np.ndarray: A tuple containing two numpy arrays:
+            - classes: The unique values in the array.
+            - counts: The counts of each unique value in the array.
+    """
+    unique_values = list(np.unique(array, return_counts=True))
+
+    if include_nan is False:
+        no_nan_mask = ~np.isnan(unique_values[0])
+        unique_values[0] = unique_values[0][no_nan_mask]
+
+    if include_inf is False:
+        no_inf_mask = ~np.isinf(unique_values[0])
+        unique_values[0] = unique_values[0][no_inf_mask]
+
+    classes = list(unique_values[0])
+    counts = list(unique_values[1])
+
+    while len(classes) < len(counts):
+        counts = counts[:-1]
+
+    if verbose == 1:
+        for _class, _count in zip(classes, counts):
+            print(f"Class: {_class}, Count: {_count}")
+    elif verbose > 1:
+        print("Verbose accepts only 0 or 1.")
+
+    return classes, counts
 
 
-# 4: A testing function that checks if enough pixels are available
-def _sampling_check_number_of_pixels():
-    return 
+def _sampling_select_random_points(
+    array: np.ndarray,
+    selection: Sequence[int],
+    strategy: Union[Sequence[Number], Number],
+    target_value: Optional[int] = None,
+    merge_classes: bool = False,
+    min_px: int = 1,
+    seed: Optional[int] = None,
+) -> Tuple[np.ndarray, Sequence[Number], Sequence[Number]]:
+    """
+    Select random points from a given array based on the specified strategy and method.
+
+    Args:
+        array (np.ndarray): The input array from which to select points.
+        selection (Sequence[int]): The sequence of values to include in the class selection.
+        strategy (Union[Sequence[Number], Number]): The sampling strategy, either a single value or a sequence of values.
+            Values must be between 0 and 1, representing the fraction of pixels to select.
+            If not a single value, values must be provided for each class in the same order as the classes.
+        target_value (int): The value to assign to the selected points.
+        merge_classes (bool): The method to use for sampling. Defaults to False.
+            "True" will merge all pixels of the selected classes to one value before sampling.
+            "False" will sample the pixels in each cluster separately.
+        min_px (int, optional): The minimum number of pixels to select for each class. Defaults to 1.
+        seed (Optional[int], optional): The seed for the random number generator. Defaults to None.
+
+    Returns:
+        Tuple[np.ndarray, dict]:
+            - A numpy array with the selected points.
+            - A dictionary with most important information about the sampling process and results.
+
+    Raises:
+        ValueError: If the strategy values are not between 0 and 1.
+        ValueError: If the length of the strategy values does not match the number of classes.
+        ValueError: If the provided array does not contain any valid values.
+        ValueError: If the provided selection and the array classes do not match.
+    """
+    strategy = [strategy] if isinstance(strategy, Number) else strategy
+    array_classes, array_counts = _get_unique_values_list(array)
+
+    if min(strategy) < 0 or max(strategy) > 1:
+        raise ValueError(
+            f"The sampling strategy must always be between 0 and 1, but got {strategy}."
+        )
+    elif len(strategy) > 1 and len(strategy) != len(array_classes):
+        raise ValueError(
+            f"The length of the provide strategy values does not match the number of classes."
+        )
+    elif len(array_classes) == 0:
+        raise ValueError(
+            f"Provided array does not contain any valid values. Please check the provided array."
+        )
+    elif selection != array_classes:
+        raise ValueError(
+            f"Provided selection and the array classes do not match. Please check the provided classes or array."
+        )
+
+    sampling_array = array.copy().flatten()
+    random_array = np.zeros_like(sampling_array)
+
+    if merge_classes is True:
+        merge_value = 1
+        sampling_array = np.where(
+            np.isin(sampling_array, selection), merge_value, np.nan
+        )
+        selection = [merge_value]
+        array_counts = [sum(array_counts)]
+
+    for idx, value in enumerate(selection):
+        fraction_px = strategy[0] if len(strategy) == 1 else strategy[idx]
+        number_px = int(np.round(fraction_px * array_counts[idx]))
+
+        if number_px < min_px:
+            number_px = min_px
+        elif number_px > array_counts[idx]:
+            number_px = array_counts[idx]
+
+        class_idx = np.argwhere(sampling_array == value).flatten()
+        random_idx = np.random.RandomState(seed).choice(
+            class_idx, size=number_px, replace=False
+        )
+
+        random_array[random_idx] = 1
+
+    sampling_classes, sampling_counts = _get_unique_values_list(
+        np.where(random_array == 1, sampling_array, np.nan)
+    )
+
+    out_values = target_value if target_value is not None else array.flatten()
+    out_array = np.where(random_array == 1, out_values, np.nan).reshape(array.shape)
+
+    out_dict = {
+        "classes": sampling_classes,
+        "counts": sampling_counts,
+        "counts_sum": np.sum(sampling_counts),
+        "target_value": target_value,
+        "merged": merge_classes,
+        "min_px_per_class": min_px,
+    }
+    return out_array, out_dict
 
 
-def sampling_from_clusters(file: Union[Path, str], threshold: Number, type: Literal["positives", "negatives"]):
-    if isinstance(file, str):
-        file = Path(file)
+def _sampling_by_selection(
+    file: Union[Path, str],
+    include: Sequence[int] = None,
+    exclude: Optional[Sequence[int]] = None,
+):
+    """
+    Select pixels from a raster file based on inclusion and exclusion criteria.
 
-    raster = rasterio.open(file)
-    raster_array = raster.read()
-    print(np.unique(raster_array, return_counts=True))
-    print(raster.nodata)
-    raster_array = np.where(raster_array == raster.nodata, np.nan, raster_array)
+    Args:
+        file (Union[Path, str]): The path to the raster file.
+        include (Sequence[int], optional): A sequence of values to include in the selection. Defaults to None.
+        exclude (Optional[Sequence[int]], optional): A sequence of values to exclude from the selection. Defaults to None.
 
-    if threshold >= np.nanmax(raster_array):
-        raise ValueError(f"Threshold {threshold} is higher than the maximum value in the raster.")
-    if threshold <= 0:
-        raise ValueError(f"Threshold {threshold} is lower or equal to 0.")
+    Returns:
+        Tuple[np.ndarray, Dict[str, Union[str, Number, Sequence[int]]]]:
+            - The selected pixels as a numpy array.
+            - A dictionary containing the settings used for selection and final results.
 
-    out_array = _sampling_select_clusters(raster_array, threshold, type)
-    return out_array
+    Raises:
+        ValueError: If the include and exclude parameters are identical.
+    """
+    file = Path(file) if isinstance(file, str) else file
+
+    if include == exclude:
+        raise ValueError("Include and exclude cannot be identical.")
+
+    raster = load_raster(file)
+    raster_array = read_raster(raster, replace_nan=True)
+
+    out_raster, out_settings = _sampling_select_classes(
+        array=raster_array,
+        include=include,
+        exclude=exclude,
+    )
+    return out_raster, out_settings
+
+
+def _sampling_by_threshold(
+    file: Union[Path, str],
+    type: Literal["positives", "negatives"],
+    threshold: Number,
+    exclude: Optional[Sequence[int]] = None,
+):
+    """
+    Select pixels from a raster based on a given threshold and type.
+
+    Args:
+        file (Union[Path, str]): The path to the raster file.
+        type (Literal["positives", "negatives"]): The type of pixels to select.
+            "positives" selects pixels greater than or equal to the threshold.
+            "negatives" selects pixels less than the threshold.
+        threshold (Number): The threshold value for selecting pixels.
+        exclude (Optional[Sequence[int]]): A sequence of values to exclude from selection.
+            Defaults to None.
+
+    Returns:
+        Tuple[np.ndarray, Dict[str, Union[str, Number, Sequence[int]]]]:
+            - The selected pixels as a numpy array.
+            - A dictionary containing the settings used for selection and final results.
+
+    Raises:
+        ValueError: If the threshold is higher than the maximum value in the raster,
+            or if the threshold is lower than the minimum value in the raster,
+            or if the threshold is lower than 0.
+    """
+    file = Path(file) if isinstance(file, str) else file
+
+    raster = load_raster(file)
+    raster_array = read_raster(raster, replace_nan=True)
+
+    if threshold > np.nanmax(raster_array):
+        raise ValueError(
+            f"Threshold {threshold} is higher than the maximum value in the raster."
+        )
+    elif threshold < np.nanmin(raster_array):
+        raise ValueError(
+            f"Threshold {threshold} is lower than the minimum value in the raster."
+        )
+    elif threshold < 0:
+        raise ValueError(
+            f"Threshold {threshold} is lower than 0, which is not allowed."
+        )
+
+    out_raster, out_settings = _sampling_select_classes(
+        array=raster_array,
+        type=type,
+        threshold=threshold,
+        exclude=exclude,
+    )
+    return out_raster, out_settings
+
+
+# endregion: Sampling functions
 
 
 # region: Test code
-if __name__ == "__main__":
-    # User inputs
-    folder = Path("S:/Projekte/20230082_DARPA_CriticalMAAS_TA3/Bearbeitung/GitHub/beak-ta3/experiments/hackathon_9m_related/03_cma/cobalt_nickel_upper_midwest/som/models/")
-    model_config = "BASELINE_BISON"
-
-    model_run_random = "SOM_BASELINE_BISON_F28_X50_Y50_CMAX50_20240612-134211"
-    model_run_pca = "SOM_BASELINE_BISON_F28_X50_Y50_CMAX50_20240612-135610"
-    model_run = model_run_random
-
-    cluster_map = folder / model_config / model_run / "exports" / "GeoTIFF" / "BMU_BMU_label_count.tif"
-
-    # Load data
-    file = cluster_map
-
-    types = ["positives", "negatives"]
-    for type in types:
-        print("\n")
-        print("Type: " + type)
-        output = sampling_from_clusters(file, threshold=3, type=type)
-        print(np.unique(output, return_counts=True))
 
 # endregion: Test code
