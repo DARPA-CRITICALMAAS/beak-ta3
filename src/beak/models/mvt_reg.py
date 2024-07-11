@@ -3,82 +3,40 @@ This file contains the models used for the MVT_REG experiment.
 """
 
 models = {
+    # Template
     "DUMMY_DICTIONARY": {
         # Some comments
         "Geology_Lithology_Majority": True,
         "Geology_Lithology_Minority": True,
         "...": False,
     },
-    "BASELINE_BISON": {
-        # Magnetics
-        "CEUS_MAG_TMAG_AAS_CEUSSSC_R0_Log": True,
-        "CEUS_MAG_DRTP_TDR_CEUSSSC_R0": True,
-        "CEUS_MAG_DRTP_HD_TDR_CEUSSSC_R0": True,
-        "CEUS_MAG_DRTP_CEUSSSC_R0": True,
-        "Mag_RTP_HGM_DeepSources": True,
-        "DeepMagSources_Worms_Proximity": True,
-        # Gravity
-        "CEUS_GRAV_RI_HD_1VD_CEUSSSC_R0": True,
-        "CEUS_GRAV_RI_HD_CEUSSSC_R0": True,
-        "CEUS_GRAV_Isostatic_CEUSSSC_R0": True,
-        "CEUS_GRAV_RI_CEUSSSC_R0": True,
-        "CEUS_GRAV_RI_1VD_CEUSSSC_R0": True,
+    # Models for the 12 month hackathon
+    "JITTER_JELLYFISH": {
         # Seismics
         "LAB": True,
         "LAB_HGM": True,
         "LAB_Worms_Proximity": True,
         "Moho": True,
-    },
-    "FEATURE_FOX": {
-        # Magnetics
-        "CEUS_MAG_TMAG_AAS_CEUSSSC_R0_Log": True,
-        "CEUS_MAG_DRTP_TDR_CEUSSSC_R0": True,
-        "CEUS_MAG_DRTP_HD_TDR_CEUSSSC_R0": True,
-        "CEUS_MAG_DRTP_CEUSSSC_R0": True,
-        "Mag_RTP_HGM_DeepSources": True,
-        "DeepMagSources_Worms_Proximity": True,
         # Gravity
-        "CEUS_GRAV_RI_HD_1VD_CEUSSSC_R0": True,
-        "CEUS_GRAV_RI_HD_CEUSSSC_R0": True,
-        "CEUS_GRAV_Isostatic_CEUSSSC_R0": True,
-        "CEUS_GRAV_RI_CEUSSSC_R0": True,
-        "CEUS_GRAV_RI_1VD_CEUSSSC_R0": True,
-        # Seismics
-        "LAB": True,
-        "LAB_HGM": True,
-        "LAB_Worms_Proximity": True,
-        "Moho": True,
-        # Geology
-        "distance_to_geology_macrostrat": True,
-        "distance_to_faults_macrostrat": True,
-        "cambrian-to-early-ordovician-carbonates_zero_macrostrat": True,
-        # Things to wait on: Geochemistry
-        "...": False,
-    },
-    "HACKING_HAMSTER": {  # different order than the FEATURE_FOX
-        # Magnetics new
-        "CEUS_MAG_TMAG_AAS_CEUSSSC_R0_Log": True,
-        "CEUS_MAG_DRTP_TDR_CEUSSSC_R0": True,
-        "CEUS_MAG_DRTP_HD_TDR_CEUSSSC_R0": True,
-        "CEUS_MAG_DRTP_CEUSSSC_R0": True,
-        # Gravity new
-        "CEUS_GRAV_RI_HD_1VD_CEUSSSC_R0": True,
-        "CEUS_GRAV_RI_HD_CEUSSSC_R0": True,
-        "CEUS_GRAV_Isostatic_CEUSSSC_R0": True,
-        "CEUS_GRAV_RI_CEUSSSC_R0": True,
-        "CEUS_GRAV_RI_1VD_CEUSSSC_R0": True,
-        # Things we have
-        "Moho": True,
-        "LAB": True,
-        "LAB_HGM": True,
-        "LAB_Worms_Proximity": True,
+        "Gravity_Up30km_HGM": True,
+        "DeepGravitySources_Worms_Proximity": True,
+        "IsostaticGravity": True,
+        # Magnetics
+        "Mag_RTP": False,
+        "Mag_RTP_HGM": False,
+        "Mag_RTP_SMIDCONT_MERGE": True,                   # TBD, MERGING (?)
+        "Mag_RTP_HGM_SMIDCONT_MERGE": True,               # TBD, MERGING (?)
+        "ShallowMagSources_Worms_Proximity":True,
+        "Mag_RTP_DeepSources": True,
         "Mag_RTP_HGM_DeepSources": True,
         "DeepMagSources_Worms_Proximity": True,
+        # Magnetotelluric
+        "CONUS_MT2023_30km": True,
         # Geology
-        "distance_to_geology_macrostrat": True,
-        "distance_to_faults_macrostrat": True,
-        "cambrian-to-early-ordovician-carbonates_zero": True,
-        # Things to wait on: Geochemistry
-        "...": False,
-    },
+        "SGMC_Geology_Proximity": True,                 # TBD, query needed
+        "SGMC_Age_Proximity": False,                    # TBD, query needed
+        "Paleo_Latitude_Period_Minimum": True,          # TBD, from Lawley
+        "Ancient_Passive_Margins_Proximity": True,      # TBD, from RAW
+        "QFAULTS_Proximity": True,                      # TBD, data available bot no overlap with ROI
+    }
 }
