@@ -43,7 +43,7 @@ def _reproject_vector_data(
         raise ValueError(f"Cannot specify both epsg and crs.")
 
     if isinstance(data, str):
-        file = Path(file)
+        data = Path(data)
 
     if isinstance(data, gpd.GeoDataFrame):
         gdf = data

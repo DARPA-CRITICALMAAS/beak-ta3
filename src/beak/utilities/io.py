@@ -153,7 +153,10 @@ def create_file_list(
 
     Args:
         folder (Path): The folder path to search for files.
-        extensions (List[str]): The list of file extensions to include. Defaults to [".tif", ".tiff"].
+        extensions (List[str]): The list of file extensions to include.
+            Defaults to [".tif", ".tiff"].
+        recursive (bool): Whether to search for files recursively in subdirectories.
+            Defaults to False.
 
     Returns:
         List[Path]: A list of Path objects representing the files found.
@@ -254,11 +257,16 @@ def save_raster(
         width (Optional[int]): The width (number of columns) of the raster.
         nodata_value (Optional[np.number]): The nodata value of the raster.
         transform (affine.Affine): The affine transformation matrix that maps pixel coordinates to CRS coordinates.
-        dtype (Optional[np.dtype]): The data type of the raster. Defaults to None.
-        metadata (Optional[Dict]): Additional metadata to be included in the raster file. Defaults to None.
+        dtype (Optional[np.dtype]): The data type of the raster.
+            Defaults to None.
+        metadata (Optional[Dict]): Additional metadata to be included in the raster file.
             If provided, remaining metadata arguments will be ignored.
+            Defaults to None.
         compress_method (Optional[str]): The compression method to use. Defaults to "lzw".
-        compress_num_threads (Optional[Union[int, str]]): The number of threads to use for compression. Defaults to "all_cpus".
+        compress_num_threads (Optional[Union[int, str]]): The number of threads to use for compression.
+            Defaults to "all_cpus".
+        overwrite (bool): Whether to overwrite the existing file.
+            Defaults to False.
 
     Returns:
         (None): None
@@ -425,7 +433,7 @@ def load_model(
     print("Loading model definition...")
     evidence_layers = []
     for layer, value in model.items():
-        if value == True:
+        if value is True:
             evidence_layers.append(layer)
 
     if not evidence_layers:
@@ -437,7 +445,6 @@ def load_model(
 
     # Create file list from provided folders
     file_list = []
-    folder_list = []
     subfolders_list = []
 
     print("\nSearching for files and folders in provided paths...")

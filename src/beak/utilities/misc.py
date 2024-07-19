@@ -5,23 +5,34 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from tqdm import tqdm
-from beartype.typing import Optional, Union, Sequence
+from beartype.typing import Optional, Union, Sequence, Tuple
 from beak.utilities.io import create_file_list
 
 
-def replace_invalid_characters(string: str) -> str:
+def replace_invalid_characters(string: str, prefix: Optional[str] = None) -> str:
     """
     Replace invalid characters in a string with an underscore.
     Multiple consecutive underscores will be cropped to one.
+    If a prefix is provided, it will be added to the beginning of the string.
 
     Args:
         string (str): Input string.
+        prefix (Optional[str]): Prefix to add to the beginning of the string.
 
     Returns:
         str: String with replaced characters.
     """
-    string = re.sub(r"[ /().,]", "_", string)
+    # Replace invalid characters
+    string = re.sub(r"[ /().,<>]", "_", string)
+
+    # Remove leading, trailing and ending underscores
     string = re.sub(r"(_+)", "_", string)
+    string = re.sub(r"^_|_$", "", string)
+
+    # Add prefix if provided
+    if prefix is not None:
+        string = prefix + "_" + string
+
     return string
 
 
@@ -134,6 +145,48 @@ def create_raster_report(
         report.to_csv(out_file, index=False)
 
     return report
+
+
+def update_model_config_core(model: dict, changes: Tuple[str, Optional[str]]) -> dict:
+    """
+    Update the core model configuration using evidence layers.
+
+    Args:
+        model (dict): The input dictionary.
+        changes (Tuple[str, str]): A tuple containing the old evidence layer
+
+    Returns:
+        out_dict (dict): The updated dictionary with evidence layers replaced.
+    """
+    out_dict = {}
+    old_evidence, new_evidence = changes
+
+    for key, value in model.items():
+        if key == old_evidence:
+            out_dict[new_evidence] = value
+        else:
+            out_dict[key] = value
+
+    return out_dict
+
+def update_model_config(model: dict, changes: Sequence[tuple[str, str]]) -> dict:
+    """
+    Replace evidence layers in a dictionary.
+
+    Args:
+    dict (dict): The input dictionary.
+    changes (Sequence[Tuple[str, str]]): A Sequence of tuples containing the old evidence layer
+        and the new evidence combinations.
+
+    Returns:
+    dict: The updated dictionary with evidence layers replaced.
+    """
+    out_dict = model.copy()
+
+    for change in changes:
+        out_dict = update_model_config_core(out_dict, change)
+
+    return out_dict
 
 
 # region: Test code

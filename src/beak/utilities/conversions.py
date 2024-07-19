@@ -1,7 +1,7 @@
 import multiprocessing as mp
 import time
 from pathlib import Path
-from typing import List, Literal, Optional, Tuple, Union
+from beartype.typing import List, Literal, Optional, Tuple, Union, Sequence
 
 import geopandas as gpd
 import numpy as np
@@ -10,17 +10,18 @@ import rasterio
 import os
 
 from beak.utilities.preparation import create_encodings_from_dataframe
-from beak.utilities.raster_processing import (
-    check_path,
-    save_raster,
-    fill_nodata_with_mean,
-)
+from beak.utilities.raster_processing import fill_nodata_with_mean
+from beak.utilities.vector_processing import _reproject_vector_data
 from beak.utilities.misc import replace_invalid_characters
+from beak.utilities.io import check_path, save_raster
+
 from rasterio import features, profiles, transform
 from rasterio.crs import CRS
 from rasterio.enums import MergeAlg
+
 from shapely.wkt import loads
 from shapely.geometry import Point
+
 from tqdm import tqdm
 
 # References
@@ -249,7 +250,7 @@ def _rasterize_vector_process(
     )
 
     # Impute single nodata values
-    if impute_nodata == True:
+    if impute_nodata is True:
         out_array = fill_nodata_with_mean(
             array=out_array,
             nodata_value=nodata_value,
@@ -294,25 +295,44 @@ def rasterize_vector(
         value_type (Literal["categorical", "numerical", "ground_truth"]): The type of the values to be rasterized.
         value_columns (List[str]): The columns containing the values to be rasterized.
         geodataframe (gpd.GeoDataFrame): The GeoDataFrame containing the vector data.
-        default_value (np.number): The default value to be assigned to raster cells without a value. Defaults to 1.
-        nodata_value (np.number): The nodata value to be assigned to raster cells. Defaults to -99999.
-        resolution (Optional[np.number]): The resolution of the raster cells. Defaults to None.
-        epsg_code (Optional[int]): The EPSG code of the coordinate reference system. Defaults to None.
-        base_raster_profile (Optional[Union[profiles.Profile, dict]]): The base raster profile to use for rasterization. Defaults to None.
-        merge_strategy (str): The strategy to use when merging rasterized values. Defaults to "replace".
-        all_touched (bool): Whether to consider all pixels touched by the vector geometry. Defaults to True.
-        dtype (Optional[np.dtype]): The data type of the raster cells. Defaults to None.
-        impute_nodata (bool): Whether to impute nodata values in the raster. Defaults to False.
-        export_absent (bool): Whether to export absent values as separate columns. Defaults to False.
-        raster_save (bool): Whether to save the rasterized values as raster files. Defaults to False.
-        raster_save_folder (Path): The folder to save the raster files. Defaults to None.
-        compress_method (Optional[str]): The compression method to use for saving the raster files. Defaults to "lzw".
-        compress_num_threads (Optional[Union[str, int]]): The number of threads to use for compression. Defaults to "all_cpus".
-        n_workers (int): The number of worker processes to use for parallel rasterization. Defaults to mp.cpu_count().
-        chunksize (Optional[int]): The number of value columns to process in each worker process. Defaults to None.
+        default_value (np.number): The default value to be assigned to raster cells without a value.
+            Defaults to 1.
+        nodata_value (np.number): The nodata value to be assigned to raster cells.
+            Defaults to -99999.
+        resolution (Optional[np.number]): The resolution of the raster cells.
+            Defaults to None.
+        epsg_code (Optional[int]): The EPSG code of the coordinate reference system.
+            Defaults to None.
+        base_raster_profile (Optional[Union[profiles.Profile, dict]]): The base raster profile to use for rasterization.
+            Defaults to None.
+        merge_strategy (str): The strategy to use when merging rasterized values.
+            Defaults to "replace".
+        all_touched (bool): Whether to consider all pixels touched by the vector geometry.
+            Defaults to True.
+        dtype (Optional[np.dtype]): The data type of the raster cells.
+            Defaults to None.
+        impute_nodata (bool): Whether to impute nodata values in the raster.
+            Defaults to False.
+        export_absent (bool): Whether to export absent values as separate columns.
+            Defaults to False.
+        raster_save (bool): Whether to save the rasterized values as raster files.
+            Defaults to False.
+        raster_save_folder (Path): The folder to save the raster files.
+            Defaults to None.
+        raster_save_in_subfolders (bool): Whether to save the raster files in subfolders based on the value column.
+            Defaults to False.
+        compress_method (Optional[str]): The compression method to use for saving the raster files.
+            Defaults to "lzw".
+        compress_num_threads (Optional[Union[str, int]]): The number of threads to use for compression.
+            Defaults to "all_cpus".
+        n_workers (int): The number of worker processes to use for parallel rasterization.
+            Defaults to mp.cpu_count().
+        chunksize (Optional[int]): The number of value columns to process in each worker process.
+            Defaults to None.
 
     Returns:
-        Tuple[List, List, List]: A tuple containing the list of output column names, the list of output rasters, and the list of output transforms.
+        Tuple[List, List, List]: A tuple containing the list of output column names, the list of output rasters,
+            and the list of output transforms.
     """
     # Check input arguments
     if len(value_columns) == 0:
@@ -472,15 +492,26 @@ def create_binary_raster(
     Args:
         geodataframe (gpd.GeoDataFrame): The geodataframe containing the geometries to rasterize.
         base_raster (rasterio.DatasetReader): The base raster to rasterize the geometries onto.
-            Overwrites the resolution and nodata parameter if provided. Defaults to None.
-        resolution (Optional[np.number]): The resolution of the output raster. Defaults to None.
-        query (Optional[str]): An optional query to filter the geometries. Defaults to None.
-        all_touched (bool): Whether to consider all pixels touched by the geometries. Defaults to False.
-        fill_negatives (bool): Whether to fill uncovered areas in given extent with 0. Defaults to True.
+            Overwrites the resolution and nodata parameter if provided.
+            Defaults to None.
+        resolution (Optional[np.number]): The resolution of the output raster.
+            Defaults to None.
+        nodata (Optional[int]): The nodata value for the output raster.
+            Defaults to -99.
+        query (Optional[str]): An optional query to filter the geometries.
+            Defaults to None.
+        all_touched (bool): Whether to consider all pixels touched by the geometries.
+            Defaults to False.
+        fill_negatives (bool): Whether to fill uncovered areas in given extent with 0.
+            Defaults to True.
         same_shape (bool): Whether to ensure the output array has the same shape as the base raster.
             Defaults to True.
         out_file (Optional[Union[str, Path]]): An optional output file path to save the raster.
             Defaults to None.
+        dtype (Optional[np.dtype]): The data type of the raster cells.
+            Defaults to np.dtype(np.int8).
+        return_meta (bool): Whether to return the metadata of the output raster.
+            Defaults to False.
 
     Returns:
         np.ndarray: The binary labels as a numpy array.
@@ -552,3 +583,63 @@ def create_binary_raster(
         return out_array, out_meta
     else:
         return out_array
+
+
+def create_categorical_rasters(
+    file: Union[str, Path],
+    target_columns: Sequence[str],
+    out_path: Union[str, Path],
+    base_raster: Union[str, Path],
+    query: Optional[str] = None,
+    **kwargs,
+):
+    """
+    Create binary rasters for each unique value in the target columns of a shapefile.
+
+    Args:
+        file (Union[str, Path]): Path to the input shapefile or geopackage.
+        query (Optional[str]): Query to filter the geometries.
+        target_columns (List[str]): List of columns to create binary rasters for.
+        out_path (Union[str, Path]): Path to the output folder.
+        base_raster (Union[str, Path]): Path to the base raster.
+        kwargs: Additional keyword arguments to pass to `create_binary_raster`.
+    """
+    file = Path(file)
+    base_raster = Path(base_raster)
+    out_path = Path(out_path)
+
+    base_raster = rasterio.open(base_raster)
+    gdf = _reproject_vector_data(data=file,
+                                 crs=base_raster.crs,
+                                 query=query)
+
+    if gdf.empty is True:
+        raise ValueError("The geodataframe is empty.")
+
+    for column in target_columns:
+        print(f"Processing column: {column}...")
+        unique_values = gdf[column].dropna().unique()
+
+        out_folder_name = f"{replace_invalid_characters(file.stem)}_{replace_invalid_characters(column)}"
+        out_path = out_path / out_folder_name
+        check_path(out_path)
+
+        for value in tqdm(unique_values):
+            file_name = replace_invalid_characters(str(value), column)
+            gdf_filtered = gdf[gdf[column] == value]
+
+            raster, meta = create_binary_raster(
+                geodataframe=gdf_filtered,
+                base_raster=base_raster,
+                return_meta=True,
+                **kwargs,
+            )
+
+            out_file=out_path / f"{file_name}.tif"
+            save_raster(out_file, raster, metadata=meta, overwrite=True, dtype=np.dtype(np.int8))
+            
+
+# region: test
+
+
+# endregion: test

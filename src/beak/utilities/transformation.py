@@ -2,7 +2,7 @@ import multiprocessing as mp
 import time
 from pathlib import Path
 from typing import Literal, Optional, Sequence, Union
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, FunctionTransformer
 
 import numpy as np
 import pandas as pd
@@ -27,13 +27,42 @@ from beak.utilities.io import (
 
 
 # region: scale raster data
+def _log_transform_ln(data: Union[np.ndarray, pd.DataFrame], columns: Optional[Sequence[str]] = None) -> np.ndarray:
+    """
+    Apply natural logarithm transformation to the input data.
+
+    Args:
+        data (Union[np.ndarray, pd.DataFrame]): The input data.
+
+    Returns:
+        np.ndarray: The transformed data.
+    """
+    out_data = np.log(data) if isinstance(data, np.ndarray) else np.log(data[columns])
+    return out_data
+
+
+def _log_transform_ln1p(data: Union[np.ndarray, pd.DataFrame], columns: Optional[Sequence[str]] = None) -> np.ndarray:
+    """
+    Apply natural logarithm transformation to the input data using x + 1 as input.
+
+    Args:
+        data (Union[np.ndarray, pd.DataFrame]): The input data.
+
+    Returns:
+        np.ndarray: The transformed data.
+    """
+    out_data = np.log1p(data) if isinstance(data, np.ndarray) else np.log(data[columns])
+    return out_data
+
+
 def _scale_raster_process(
     file: Path,
     input_folder: Path,
     output_folder: Path,
     method: str,
 ):
-    """Run scaling process for a single raster file.
+    """
+    Run scaling process for a single raster file.
 
     Args:
         file (Path): The path to the input raster file.
@@ -70,7 +99,7 @@ def _scale_data(
 
     Args:
         data (np.ndarray): The input array to be scaled.
-        method (Literal[str]): The scaling method to be used. Options are "minmax" for min-max scaling and "standard" for standard scaling.
+        method (Literal[str]): The scaling method to be used.
 
     Returns:
         np.ndarray: Numpy array of the rescaled data.
@@ -79,6 +108,10 @@ def _scale_data(
         scaler = MinMaxScaler()
     elif method == "standard":
         scaler = StandardScaler()
+    elif method == "ln":
+        scaler = FunctionTransformer(_log_transform_ln, kw_args={'columns': columns})
+    elif method == "ln1p":
+        scaler = FunctionTransformer(_log_transform_ln1p, kw_args={'columns': columns})
 
     if isinstance(data, np.ndarray):
         out_data = scaler.fit_transform(data.reshape(-1, 1))
@@ -97,7 +130,7 @@ def _scale_raster_core(
 
     Args:
         raster (rasterio.io.DatasetReader): The input raster to be scaled.
-        method (Literal[str]): The scaling method to be used. Options are "minmax" for min-max scaling and "standard" for standard scaling.
+        method (Literal[str]): The scaling method to be used.
 
     Returns:
         np.ndarray: Numpy array of the rescaled raster.
@@ -116,7 +149,7 @@ def _scale_raster_core(
 def scale_raster(
     input_folder: Path,
     output_folder: Path,
-    method: Literal["minmax", "standard"],
+    method: Literal["minmax", "standard", "ln", "ln1p"],
     extensions: Optional[Sequence[str]] = [".tif", ".tiff"],
     include_source: bool = True,
     n_workers: int = mp.cpu_count(),
@@ -127,8 +160,10 @@ def scale_raster(
     Args:
         input_folder (Path): The path to the input folder containing the rasters.
         output_folder (Path): The path to the output folder where the scaled rasters will be saved.
-        method (Literal[str]): The scaling method to be used. Options are "minmax" for min-max scaling and "standard" for z-score scaling.
-        n_workers (int): The number of worker processes to use for parallel processing. Defaults to the number of CPU cores.
+        method (Literal[str]): The scaling method to be used. Options are "minmax" for min-max scaling
+            and "standard" for z-score scaling.
+        n_workers (int): The number of worker processes to use for parallel processing. Defaults to the
+            number of CPU cores.
     """
     # Show selected folder
     print(f"Selected folder: {input_folder.resolve()}")

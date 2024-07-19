@@ -91,7 +91,7 @@ def fill_nodata_with_mean(
 # region: reproject raster data
 def _reproject_raster_process(
     file: Path,
-    input_folder: Path,
+    input_folder: Optional[Path],
     output_folder: Path,
     target_crs: Union[int, rasterio.crs.CRS],
     target_resolution: Optional[np.number],
@@ -140,7 +140,7 @@ def _reproject_raster_core(
     raster: rasterio.io.DatasetReader,
     target_crs: Union[int, rasterio.crs.CRS],
     target_resolution: Optional[np.number],
-    resampling_method: warp.Resampling,
+    resampling_method: Optional[warp.Resampling],
     resampling_mode: str,
     snap_to_origin: Union[rasterio.io.DatasetReader, Tuple[Number, Number]],
 ) -> Tuple[np.ndarray, dict]:
@@ -154,11 +154,12 @@ def _reproject_raster_core(
         target_crs (Union[int, rasterio.crs.CRS]): Target coordinate reference system (CRS).
         target_resolution (Optional[np.number]): The target resolution of the reprojected raster.
         resampling_method (warp.Resampling): The resampling method to be used during reprojection.
+        resampling_mode (str): The resampling mode to be used during reprojection.
+            Overwrites the resampling_method if "auto"
 
     Returns:
         Tuple[np.ndarray, dict]: A tuple containing the reprojected image as a NumPy array and the metadata of the reprojected raster.
     """
-
     src_arr = raster.read()
 
     if isinstance(target_crs, int):
@@ -233,12 +234,19 @@ def reproject_raster(
         input_folder (Path): The path to the input folder containing the rasters.
         output_folder (Path): The path to the output folder where the reprojected rasters will be saved.
         target_crs (Union[int, rasterio.crs.CRS]): The target coordinate reference system (CRS).
-        target_resolution (Optional[np.number]): The target resolution of the reprojected rasters. Defaults to None.
-        resampling_method (warp.Resampling): The resampling method to use during reprojection. Defaults to warp.Resampling.nearest.
+        target_resolution (Optional[np.number]): The target resolution of the reprojected rasters.
+            Defaults to None.
+        resampling_method (warp.Resampling): The resampling method to use during reprojection.
+            Defaults to warp.Resampling.nearest.
         resampling_mode (Literal["manual", "auto"]): Uses "nearest" for integers and "bilinear" for floats.
-            Overwrites resampling_method if set to "auto". Defaults to "manual".
-        n_workers (int): The number of worker processes to use for parallel processing. Defaults to the number of CPU cores.
-        snap_to_origin (Optional[Union[str, Tuple[Number, Number]]]): Path to raster or origin to snap to. Defaults to None.
+            Overwrites resampling_method if set to "auto".
+            Defaults to "manual".
+        include_source: Whether to include the source folder in the reprojected rasters.
+            Defaults to False.
+        n_workers (int): The number of worker processes to use for parallel processing.
+            Defaults to the number of CPU cores.
+        snap_to_origin (Optional[Union[str, Tuple[Number, Number]]]): Path to raster or origin to snap to.
+            Defaults to None.
     """
     # Show selected folder
     input_folder = Path(input_folder)
