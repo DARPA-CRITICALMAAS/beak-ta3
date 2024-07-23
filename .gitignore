@@ -193,5 +193,6 @@ releases/**/train/
 releases/**/validation/
 releases/20240506_hackathon_m9_preliminary/**/bnn
 releases/20240509_dropout_evaluation/
+releases/20240716_hackathon_12m_pre_hack/
 
 
