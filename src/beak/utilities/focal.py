@@ -1,8 +1,8 @@
 from numbers import Number
 
 import numpy as np
-from beartype.typing import Literal, Callable
-from scipy.ndimage import generic_filter
+from beartype.typing import Literal, Callable, Optional
+from scipy.ndimage import generic_filter, binary_dilation
 
 
 def _check_filter_size(radius: int):
@@ -89,6 +89,23 @@ def _apply_generic_filter(
     return generic_filter(array, filter_fn, footprint=kernel, extra_arguments=args)
 
 
+def _apply_binary_dilation(
+    array: np.ndarray, kernel: np.ndarray, target_value: Number
+) -> np.ndarray:
+    """
+    Apply binary dilation to the input array.
+
+    Args:
+        array (np.ndarray): The input array to be dilated.
+        kernel (np.ndarray): The kernel or footprint to be used for dilation.
+        target_value (Number): The value to be dilated.
+
+    Returns:
+        np.ndarray: The dilated array.
+    """
+    return binary_dilation(array == target_value, structure=kernel)
+
+
 def _replace_value_in_kernel(window: np.ndarray, target_value: Number) -> Number:
     p_center = window[window.shape[0] // 2]
     mask = np.where(window == target_value, True, False)
@@ -110,7 +127,8 @@ def create_simple_buffer(
 
     Args:
         array (np.ndarray): The array to be buffered.
-        target_value (Number): The value to be buffered. Defaults to 1.
+        target_value (Number): The value to be buffered.
+            Defaults to 1.
         radius (int): Number of cells (distance) to the targeted value to be changed.
             Defaults to 1. E.g. radius of 1 will change the 8 cells around the targeted value.
         const (Number): The constant value to be used. Defaults to np.nan.
@@ -132,7 +150,7 @@ def create_simple_buffer(
     return np.where(array == target_value, target_value, out_array)
 
 
-def _create_local_buffer(
+def _create_local_buffer_generic_version(
     array: np.ndarray,
     radius: int,
     shape: Literal["square", "circle"],
@@ -159,3 +177,27 @@ def _create_local_buffer(
         kernel,
         target_value,
     )
+
+
+def _create_local_buffer_binary_version(
+    array: np.ndarray,
+    radius: int,
+    shape: Literal["square", "circle"],
+    target_value: Number,
+) -> np.ndarray:
+    """
+    Creates a buffer with a constant value around the selected value in a given array.
+
+    Args:
+        array (np.ndarray): The array to be buffered.
+        radius (int): Number of cells (distance) to the targeted value to be changed.
+        shape (Literal["square", "circle"]): The shape of the buffer.
+        target_value (Number): The value to be buffered.
+
+    Returns:
+        np.ndarray: The buffered array.
+    """
+    kernel = _basic_kernel(radius, shape)
+    array = np.squeeze(array) if array.ndim >= 3 else array
+
+    return binary_dilation(array == target_value, structure=kernel)

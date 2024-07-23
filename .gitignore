@@ -182,6 +182,8 @@ examples/**/*.tif.aux.xml
 
 experiments/**/models/
 experiments/*evaluation*/
+experiments/hackathon_12m_related/**/bnn
+
 
 releases/**/export/
 releases/**/model/

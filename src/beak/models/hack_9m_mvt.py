@@ -51,7 +51,7 @@ regional_scale_ceus = {
         # Geology
         "distance_to_geology_macrostrat": True,
         "distance_to_faults_macrostrat": True,
-        "cambrian-to-early-ordovician-carbonates_zero_macrostrat": True,
+        "cambrian-to-early-ordovician-carbonates_filled_macrostrat": True,
         # Things to wait on: Geochemistry
         "...": False,
     },

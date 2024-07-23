@@ -29,7 +29,7 @@ def write_args_to_file(file_path, **kwargs):
 
 def main(args):
     # Choose model
-    MODEL = "JITTER_JELLYFISH_PP"
+    MODEL = "LOSS_LLAMA_PP"
     model = hack_12m_poco.regional_scale_southwest_swnm[MODEL]
 
     BASE_PATH = files("beak.data")

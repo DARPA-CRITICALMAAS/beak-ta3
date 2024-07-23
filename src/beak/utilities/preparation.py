@@ -10,9 +10,7 @@ from beartype.typing import List, Tuple, Union, Optional, Literal, Sequence
 from numbers import Number
 
 from beak.utilities.io import load_raster, read_raster
-from beak.utilities.focal import (
-    _create_local_buffer,
-)
+from beak.utilities.focal import _create_local_buffer_binary_version, _create_local_buffer_generic_version
 
 
 def create_encodings_from_dataframe(
@@ -93,6 +91,16 @@ def impute_data(
 
 
 def delete_nan_elements(array: np.ndarray, transpose: bool = True) -> np.ndarray:
+    """
+    Deletes NaN elements from the given array.
+
+    Args:
+        array (np.ndarray): The array to be processed.
+        transpose (bool, optional): Flag indicating whether to transpose the array before processing. Defaults to True.
+
+    Returns:
+        np.ndarray: The processed array with NaN elements removed.
+    """
     target_locations = np.isnan(array).any(axis=0)
     out_array = array[:, ~target_locations]
 
@@ -106,8 +114,9 @@ def create_hard_buffer_around_labels(
     array: np.ndarray,
     radius: int = 1,
     shape: Literal["square", "circle"] = "circle",
-    positive_label_value: int = 1,
+    target_value: int = 1,
     buffer_value: Optional[Number] = None,
+    overwrite_nodata: bool = False,
 ) -> np.ndarray:
     """
     Extends the positive values in the given array.
@@ -120,27 +129,35 @@ def create_hard_buffer_around_labels(
 
     Args:
         array (np.ndarray): The array to be extended.
-        radius (int): The radius of the buffer (1 for a 3x3 window with 9 pixels, size is n*2 + 1). Defaults to 1.
-        shape (Literal["square", "circle"]): The shape of the buffer. Defaults to "square".
-        selected_value (int): The value to be extended. Defaults to 1.
-        buffer_value (Optional[Number]): The value to be used for the buffer. Defaults to None.
+        radius (int): The radius of the buffer (1 for a 3x3 window with 9 pixels, size is n*2 + 1).
+            Defaults to 1.
+        shape (Literal["square", "circle"]): The shape of the buffer.
+            Defaults to "square".
+        target_value (int): The value to be extended.
+            Defaults to 1.
+        buffer_value (Optional[Number]): The value to be used for the buffer.
+            Defaults to None.
+        overwrite_nodata (bool): Whether to extend the buffer into nodata cells.
 
     Returns:
         np.ndarray: The extended label's array.
     """
     out_array = np.copy(array)
-    out_array = _create_local_buffer(
-        array=array,
+    out_array = _create_local_buffer_binary_version(
+        array=out_array,
         radius=radius,
         shape=shape,
-        target_value=positive_label_value,
+        target_value=target_value,
     )
 
-    if buffer_value is not None:
-        out_array = np.where(out_array == positive_label_value, buffer_value, out_array)
-        out_array = np.where(
-            array == positive_label_value, positive_label_value, out_array
-        )
+    buffer_value = target_value if buffer_value is None else buffer_value
+
+    out_array = np.where(out_array == True, buffer_value, array)
+    out_array = np.where(array == target_value, target_value, out_array)
+
+    if overwrite_nodata is False:
+        out_array = np.where(np.isnan(array), np.nan, out_array)
+
     return out_array
 
 

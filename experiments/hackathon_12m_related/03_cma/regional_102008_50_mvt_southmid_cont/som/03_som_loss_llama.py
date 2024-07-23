@@ -7,7 +7,7 @@ import argparse
 import json
 from pathlib import Path
 from datetime import datetime
-from beak.models import hack_12m_poco
+from beak.models import hack_12m_mvt
 from beak.utilities.io import load_model, check_path
 
 # SOM specific
@@ -29,22 +29,20 @@ def write_args_to_file(file_path, **kwargs):
 
 def main(args):
     # Choose model
-    MODEL = "JITTER_JELLYFISH_PP"
-    model = hack_12m_poco.regional_scale_southwest_swnm[MODEL]
+    MODEL = "LOSS_LLAMA"
+    model = hack_12m_mvt.regional_scale_ceus[MODEL]
 
     BASE_PATH = files("beak.data")
 
     # Choose data path
-    ROOT_PATH = BASE_PATH / "PROCESSED" / "regional_102008_50_poco_southwest_nm"
-    PATH_BIN_DATA_GEOL = ROOT_PATH / "unified_scaled_bin" / "geology"
+    ROOT_PATH = BASE_PATH / "PROCESSED" / "regional_102008_50_mvt_southmid_cont"
     PATH_STD_DATA = ROOT_PATH / "unified_scaled_std"
-    PATH_LOG_DATA_GEOPHYSICS = ROOT_PATH / "unified_imputed_mean_scaled_log"
-    PATH_LOG_DATA_GEOCHEM = ROOT_PATH / "unified_scaled_log" / "geophysics"
-    PATH_LABELS = ROOT_PATH / "labels" / "TA2_240609_FILTERED_HM9_PCUDEPPRO.tif"
+    PATH_LOG_DATA = ROOT_PATH / "unified_scaled_log"
+    PATH_LABELS = ROOT_PATH / "labels" / "TA2_240609_HM9_MCCAFFERTY_TRAIN.tif"
 
     model_dict, file_list, counts = load_model(
         model=model,
-        folders=[PATH_BIN_DATA_GEOL, PATH_STD_DATA,  PATH_LOG_DATA_GEOPHYSICS, PATH_LOG_DATA_GEOCHEM],
+        folders=[PATH_STD_DATA, PATH_LOG_DATA],
         file_extensions=[".tif", ".tiff"],
         verbose=0,
     )
@@ -156,7 +154,7 @@ def main(args):
     subfolder_name = "plots"
     images, labels = mts.move_figures(args.output_folder, subfolder_name)
 
-    # Delete results_geo.txt due to its gigantic size for regional assessments
+   # Delete results_geo.txt due to its gigantic size for regional assessments
     os.remove(Path(args.output_folder) / "result_geo.txt")
 
 
