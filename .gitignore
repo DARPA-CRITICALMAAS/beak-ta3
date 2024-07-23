@@ -194,6 +194,5 @@ releases/**/prediction/
 releases/**/train/
 releases/**/validation/
 releases/*hackathon_m9_pre_hack/**/bnn
-releases/*9m_dropout_evaluation/
 
 
