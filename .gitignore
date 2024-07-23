@@ -164,6 +164,7 @@ cython_debug/
 # More files to ignore
 sync.ffs_lock
 sync.ffs_db
+run_files.py
 
 # More folders to ignore
 data/
@@ -177,6 +178,7 @@ exports/
 logs/
 *qgis/
 
+experiments/
 examples/**/*.tif
 examples/**/*.tif.aux.xml
 
@@ -191,8 +193,7 @@ releases/**/models/
 releases/**/prediction/
 releases/**/train/
 releases/**/validation/
-releases/20240506_hackathon_m9_preliminary/**/bnn
-releases/20240509_dropout_evaluation/
-releases/20240716_hackathon_12m_pre_hack/
+releases/*hackathon_m9_pre_hack/**/bnn
+releases/*9m_dropout_evaluation/
 
 
