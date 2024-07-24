@@ -187,8 +187,3 @@ def update_model_config(model: dict, changes: Sequence[tuple[str, str]]) -> dict
         out_dict = update_model_config_core(out_dict, change)
 
     return out_dict
-
-
-# region: Test code
-
-# endregion: Test code

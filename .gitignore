@@ -165,6 +165,7 @@ cython_debug/
 sync.ffs_lock
 sync.ffs_db
 run_files.py
+*.pdf
 
 # More folders to ignore
 data/
