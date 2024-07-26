@@ -195,5 +195,6 @@ releases/**/prediction/
 releases/**/train/
 releases/**/validation/
 releases/*hackathon_m9_pre_hack/**/bnn
+releases/05_dry_run_docker_examples/
 
 
