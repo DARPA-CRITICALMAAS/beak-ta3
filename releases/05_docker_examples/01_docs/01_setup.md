@@ -39,7 +39,7 @@ docker run -i -t -p 8888:8888 -v PATH_TO_BEAK_TA3_GITHUB_FOLDER:/beak-ta3 --name
 **Example**
 
 ```
-docker run -i -t -p 8888:8888 -v C:/CMAAS/MTRI_Evaluation_Package_2024_04/GitHub/beak-ta3:/beak-ta3 --name beak-ta3 beak-ta3:latest /bin/bash
+docker run -i -t -p 8888:8888 -v C:/CMAAS/Docker_Example_Run_2024_08/GitHub/beak-ta3:/beak-ta3 --name beak-ta3 beak-ta3:latest /bin/bash
 ```
 
 ## Running the container and tools
