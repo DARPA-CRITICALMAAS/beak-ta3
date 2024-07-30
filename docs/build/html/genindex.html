@@ -120,13 +120,13 @@
         <li><a href="beak.methods.som.nextsomcore.nextsomcore.html#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore.__init__">(beak.methods.som.nextsomcore.nextsomcore.NxtSomCore method)</a>
 </li>
       </ul></li>
+      <li><a href="beak.utilities.focal.html#beak.utilities.focal._apply_binary_dilation">_apply_binary_dilation() (in module beak.utilities.focal)</a>
+</li>
       <li><a href="beak.utilities.focal.html#beak.utilities.focal._apply_generic_filter">_apply_generic_filter() (in module beak.utilities.focal)</a>
 </li>
       <li><a href="beak.utilities.focal.html#beak.utilities.focal._basic_kernel">_basic_kernel() (in module beak.utilities.focal)</a>
 </li>
       <li><a href="beak.utilities.focal.html#beak.utilities.focal._check_filter_size">_check_filter_size() (in module beak.utilities.focal)</a>
-</li>
-      <li><a href="beak.utilities.raster_processing.html#beak.utilities.raster_processing._check_grid_alignment">_check_grid_alignment() (in module beak.utilities.raster_processing)</a>
 </li>
       <li><a href="beak.utilities.raster_processing.html#beak.utilities.raster_processing._clip_raster_process">_clip_raster_process() (in module beak.utilities.raster_processing)</a>
 </li>
@@ -136,13 +136,21 @@
 </li>
       <li><a href="beak.utilities.focal.html#beak.utilities.focal._create_grid">_create_grid() (in module beak.utilities.focal)</a>
 </li>
-      <li><a href="beak.utilities.focal.html#beak.utilities.focal._create_local_buffer">_create_local_buffer() (in module beak.utilities.focal)</a>
+      <li><a href="beak.utilities.focal.html#beak.utilities.focal._create_local_buffer_binary_version">_create_local_buffer_binary_version() (in module beak.utilities.focal)</a>
+</li>
+      <li><a href="beak.utilities.focal.html#beak.utilities.focal._create_local_buffer_generic_version">_create_local_buffer_generic_version() (in module beak.utilities.focal)</a>
 </li>
       <li><a href="beak.methods.som.nextsomcore.nextsomcore.html#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore._extract_som_cols_geospace">_extract_som_cols_geospace() (beak.methods.som.nextsomcore.nextsomcore.NxtSomCore method)</a>
 </li>
       <li><a href="beak.methods.som.nextsomcore.nextsomcore.html#beak.methods.som.nextsomcore.nextsomcore.NxtSomCore._extract_som_cols_somspace">_extract_som_cols_somspace() (beak.methods.som.nextsomcore.nextsomcore.NxtSomCore method)</a>
 </li>
       <li><a href="beak.utilities.focal.html#beak.utilities.focal._get_kernel_size">_get_kernel_size() (in module beak.utilities.focal)</a>
+</li>
+      <li><a href="beak.utilities.preparation.html#beak.utilities.preparation._get_unique_values_list">_get_unique_values_list() (in module beak.utilities.preparation)</a>
+</li>
+      <li><a href="beak.utilities.transformation.html#beak.utilities.transformation._log_transform_ln">_log_transform_ln() (in module beak.utilities.transformation)</a>
+</li>
+      <li><a href="beak.utilities.transformation.html#beak.utilities.transformation._log_transform_ln1p">_log_transform_ln1p() (in module beak.utilities.transformation)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -165,6 +173,14 @@
       <li><a href="beak.utilities.vector_processing.html#beak.utilities.vector_processing._reproject_vector_data">_reproject_vector_data() (in module beak.utilities.vector_processing)</a>
 </li>
       <li><a href="beak.utilities.raster_processing.html#beak.utilities.raster_processing._return_raster_bounds">_return_raster_bounds() (in module beak.utilities.raster_processing)</a>
+</li>
+      <li><a href="beak.utilities.preparation.html#beak.utilities.preparation._sampling_by_selection">_sampling_by_selection() (in module beak.utilities.preparation)</a>
+</li>
+      <li><a href="beak.utilities.preparation.html#beak.utilities.preparation._sampling_by_threshold">_sampling_by_threshold() (in module beak.utilities.preparation)</a>
+</li>
+      <li><a href="beak.utilities.preparation.html#beak.utilities.preparation._sampling_select_classes">_sampling_select_classes() (in module beak.utilities.preparation)</a>
+</li>
+      <li><a href="beak.utilities.preparation.html#beak.utilities.preparation._sampling_select_random_points">_sampling_select_random_points() (in module beak.utilities.preparation)</a>
 </li>
       <li><a href="beak.utilities.transformation.html#beak.utilities.transformation._scale_data">_scale_data() (in module beak.utilities.transformation)</a>
 </li>
@@ -400,6 +416,8 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="beak.utilities.checks.html#beak.utilities.checks.check_grid_alignment">check_grid_alignment() (in module beak.utilities.checks)</a>
+</li>
       <li><a href="beak.utilities.io.html#beak.utilities.io.check_path">check_path() (in module beak.utilities.io)</a>
 </li>
       <li><a href="beak.utilities.checks.html#beak.utilities.checks.check_positives">check_positives() (in module beak.utilities.checks)</a>
@@ -424,11 +442,15 @@
 </li>
       <li><a href="beak.utilities.io.html#beak.utilities.io.copy_files">copy_files() (in module beak.utilities.io)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="beak.utilities.io.html#beak.utilities.io.copy_folder_structure">copy_folder_structure() (in module beak.utilities.io)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="beak.utilities.conversions.html#beak.utilities.conversions.create_binary_raster">create_binary_raster() (in module beak.utilities.conversions)</a>
+</li>
+      <li><a href="beak.methods.som.do_nextsomcore_save_results.html#beak.methods.som.do_nextsomcore_save_results.create_bmu_id">create_bmu_id() (in module beak.methods.som.do_nextsomcore_save_results)</a>
+</li>
+      <li><a href="beak.utilities.conversions.html#beak.utilities.conversions.create_categorical_rasters">create_categorical_rasters() (in module beak.utilities.conversions)</a>
 </li>
       <li><a href="beak.utilities.preparation.html#beak.utilities.preparation.create_encodings_from_dataframe">create_encodings_from_dataframe() (in module beak.utilities.preparation)</a>
 </li>
@@ -448,6 +470,8 @@
 </li>
       <li><a href="beak.methods.som.argsSOM.html#beak.methods.som.argsSOM.Args.create_list_from_pattern">create_list_from_pattern() (beak.methods.som.argsSOM.Args method)</a>
 </li>
+      <li><a href="beak.utilities.misc.html#beak.utilities.misc.create_raster_report">create_raster_report() (in module beak.utilities.misc)</a>
+</li>
       <li><a href="beak.utilities.focal.html#beak.utilities.focal.create_simple_buffer">create_simple_buffer() (in module beak.utilities.focal)</a>
 </li>
       <li><a href="beak.utilities.misc.html#beak.utilities.misc.create_tree">create_tree() (in module beak.utilities.misc)</a>
@@ -458,6 +482,8 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="beak.utilities.io.html#beak.utilities.io.data_folder">data_folder() (in module beak.utilities.io)</a>
+</li>
       <li><a href="beak.utilities.io.html#beak.utilities.io.dataframe_to_feather">dataframe_to_feather() (in module beak.utilities.io)</a>
 </li>
       <li><a href="beak.methods.som.argsPlot.html#beak.methods.som.argsPlot.Args.dataType">dataType (beak.methods.som.argsPlot.Args attribute)</a>
@@ -466,10 +492,10 @@
 </li>
       <li><a href="beak.methods.som.load_geotiff.html#beak.methods.som.load_geotiff.delete_rows_with_no_data">delete_rows_with_no_data() (in module beak.methods.som.load_geotiff)</a>
 </li>
-      <li><a href="beak.methods.som.argsPlot.html#beak.methods.som.argsPlot.Args.dir">dir (beak.methods.som.argsPlot.Args attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="beak.methods.som.argsPlot.html#beak.methods.som.argsPlot.Args.dir">dir (beak.methods.som.argsPlot.Args attribute)</a>
+</li>
       <li><a href="beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.draw_boxplots">draw_boxplots() (in module beak.methods.som.plot_som_results)</a>
 </li>
       <li><a href="beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.draw_number_of_hits">draw_number_of_hits() (in module beak.methods.som.plot_som_results)</a>
@@ -655,16 +681,18 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.plot_bmu_id_grid">plot_bmu_id_grid() (in module beak.methods.som.plot_som_results)</a>
+</li>
       <li><a href="beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.plot_cluster_hit_count">plot_cluster_hit_count() (in module beak.methods.som.plot_som_results)</a>
 </li>
       <li><a href="beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.plot_cluster_label_count">plot_cluster_label_count() (in module beak.methods.som.plot_som_results)</a>
 </li>
       <li><a href="beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.plot_davies_bouldin">plot_davies_bouldin() (in module beak.methods.som.plot_som_results)</a>
 </li>
-      <li><a href="beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.plot_geospace_clusters_grid">plot_geospace_clusters_grid() (in module beak.methods.som.plot_som_results)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.plot_geospace_clusters_grid">plot_geospace_clusters_grid() (in module beak.methods.som.plot_som_results)</a>
+</li>
       <li><a href="beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.plot_geospace_clusters_scatter">plot_geospace_clusters_scatter() (in module beak.methods.som.plot_som_results)</a>
 </li>
       <li><a href="beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.plot_geospace_results_grid">plot_geospace_results_grid() (in module beak.methods.som.plot_som_results)</a>
@@ -768,6 +796,12 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="beak.utilities.raster_processing.html#beak.utilities.raster_processing.unify_raster_grids">unify_raster_grids() (in module beak.utilities.raster_processing)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="beak.utilities.misc.html#beak.utilities.misc.update_model_config">update_model_config() (in module beak.utilities.misc)</a>
+</li>
+      <li><a href="beak.utilities.misc.html#beak.utilities.misc.update_model_config_core">update_model_config_core() (in module beak.utilities.misc)</a>
 </li>
   </ul></td>
 </tr></table>

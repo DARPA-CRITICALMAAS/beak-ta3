@@ -88,17 +88,19 @@
            <div itemprop="articleBody">
              
   <h1>Source code for beak.utilities.preparation</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">import</span> <span class="nn">rasterio</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">sklearn.impute</span> <span class="kn">import</span> <span class="n">SimpleImputer</span>
-<span class="kn">from</span> <span class="nn">beartype.typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Literal</span>
+<span class="kn">from</span> <span class="nn">beartype.typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Sequence</span>
 <span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Number</span>
 
-<span class="kn">from</span> <span class="nn">beak.utilities.focal</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">_create_local_buffer</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">beak.utilities.io</span> <span class="kn">import</span> <span class="n">load_raster</span><span class="p">,</span> <span class="n">read_raster</span>
+<span class="kn">from</span> <span class="nn">beak.utilities.focal</span> <span class="kn">import</span> <span class="n">_create_local_buffer_binary_version</span><span class="p">,</span> <span class="n">_create_local_buffer_generic_version</span>
 
 
 <div class="viewcode-block" id="create_encodings_from_dataframe">
@@ -187,6 +189,16 @@
 <div class="viewcode-block" id="delete_nan_elements">
 <a class="viewcode-back" href="../../../beak.utilities.preparation.html#beak.utilities.preparation.delete_nan_elements">[docs]</a>
 <span class="k">def</span> <span class="nf">delete_nan_elements</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">transpose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Deletes NaN elements from the given array.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array (np.ndarray): The array to be processed.</span>
+<span class="sd">        transpose (bool, optional): Flag indicating whether to transpose the array before processing. Defaults to True.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: The processed array with NaN elements removed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">target_locations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">array</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">out_array</span> <span class="o">=</span> <span class="n">array</span><span class="p">[:,</span> <span class="o">~</span><span class="n">target_locations</span><span class="p">]</span>
 
@@ -203,8 +215,9 @@
     <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="n">shape</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;square&quot;</span><span class="p">,</span> <span class="s2">&quot;circle&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;circle&quot;</span><span class="p">,</span>
-    <span class="n">positive_label_value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">target_value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="n">buffer_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Number</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">overwrite_nodata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extends the positive values in the given array.</span>
@@ -217,30 +230,343 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        array (np.ndarray): The array to be extended.</span>
-<span class="sd">        radius (int): The radius of the buffer (1 for a 3x3 window with 9 pixels, size is n*2 + 1). Defaults to 1.</span>
-<span class="sd">        shape (Literal[&quot;square&quot;, &quot;circle&quot;]): The shape of the buffer. Defaults to &quot;square&quot;.</span>
-<span class="sd">        selected_value (int): The value to be extended. Defaults to 1.</span>
-<span class="sd">        buffer_value (Optional[Number]): The value to be used for the buffer. Defaults to np.nan</span>
+<span class="sd">        radius (int): The radius of the buffer (1 for a 3x3 window with 9 pixels, size is n*2 + 1).</span>
+<span class="sd">            Defaults to 1.</span>
+<span class="sd">        shape (Literal[&quot;square&quot;, &quot;circle&quot;]): The shape of the buffer.</span>
+<span class="sd">            Defaults to &quot;square&quot;.</span>
+<span class="sd">        target_value (int): The value to be extended.</span>
+<span class="sd">            Defaults to 1.</span>
+<span class="sd">        buffer_value (Optional[Number]): The value to be used for the buffer.</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        overwrite_nodata (bool): Whether to extend the buffer into nodata cells.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        np.ndarray: The extended label&#39;s array.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
-    <span class="n">out_array</span> <span class="o">=</span> <span class="n">_create_local_buffer</span><span class="p">(</span>
-        <span class="n">array</span><span class="o">=</span><span class="n">array</span><span class="p">,</span>
+    <span class="n">out_array</span> <span class="o">=</span> <span class="n">_create_local_buffer_binary_version</span><span class="p">(</span>
+        <span class="n">array</span><span class="o">=</span><span class="n">out_array</span><span class="p">,</span>
         <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span>
         <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
-        <span class="n">target_value</span><span class="o">=</span><span class="n">positive_label_value</span><span class="p">,</span>
+        <span class="n">target_value</span><span class="o">=</span><span class="n">target_value</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">buffer_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">out_array</span> <span class="o">==</span> <span class="n">positive_label_value</span><span class="p">,</span> <span class="n">buffer_value</span><span class="p">,</span> <span class="n">out_array</span><span class="p">)</span>
-        <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-            <span class="n">array</span> <span class="o">==</span> <span class="n">positive_label_value</span><span class="p">,</span> <span class="n">positive_label_value</span><span class="p">,</span> <span class="n">out_array</span>
-        <span class="p">)</span>
+    <span class="n">buffer_value</span> <span class="o">=</span> <span class="n">target_value</span> <span class="k">if</span> <span class="n">buffer_value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">buffer_value</span>
+
+    <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">out_array</span> <span class="o">==</span> <span class="kc">True</span><span class="p">,</span> <span class="n">buffer_value</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span>
+    <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">array</span> <span class="o">==</span> <span class="n">target_value</span><span class="p">,</span> <span class="n">target_value</span><span class="p">,</span> <span class="n">out_array</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">overwrite_nodata</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">array</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">out_array</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">out_array</span></div>
 
+
+
+<span class="c1"># region: Sampling functions</span>
+<div class="viewcode-block" id="_sampling_select_classes">
+<a class="viewcode-back" href="../../../beak.utilities.preparation.html#beak.utilities.preparation._sampling_select_classes">[docs]</a>
+<span class="k">def</span> <span class="nf">_sampling_select_classes</span><span class="p">(</span>
+    <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;threshold&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;threshold&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">include</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;include&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;include&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">exclude</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;exclude&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;exclude&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">exclude_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">out_array</span><span class="p">,</span> <span class="n">exclude</span><span class="p">)</span>
+        <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">exclude_mask</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">out_array</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">include_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">out_array</span><span class="p">,</span> <span class="n">include</span><span class="p">)</span>
+        <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">include_mask</span><span class="p">,</span> <span class="n">out_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">unique_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">out_array</span><span class="p">)</span>
+        <span class="n">include_classes</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">nanquantile</span><span class="p">(</span><span class="n">unique_values</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">threshold</span> <span class="o">&lt;</span> <span class="mi">1</span>
+            <span class="k">else</span> <span class="n">threshold</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;positives&quot;</span><span class="p">:</span>
+            <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">array</span> <span class="o">&lt;</span> <span class="n">include_classes</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">out_array</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;negatives&quot;</span><span class="p">:</span>
+            <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">array</span> <span class="o">&lt;</span> <span class="n">include_classes</span><span class="p">,</span> <span class="n">out_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+    <span class="n">classes</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">_get_unique_values_list</span><span class="p">(</span><span class="n">out_array</span><span class="p">)</span>
+
+    <span class="n">out_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span>
+        <span class="s2">&quot;threshold&quot;</span><span class="p">:</span> <span class="n">threshold</span><span class="p">,</span>
+        <span class="s2">&quot;classes&quot;</span><span class="p">:</span> <span class="n">classes</span><span class="p">,</span>
+        <span class="s2">&quot;counts&quot;</span><span class="p">:</span> <span class="n">counts</span><span class="p">,</span>
+        <span class="s2">&quot;counts_sum&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">),</span>
+        <span class="s2">&quot;include&quot;</span><span class="p">:</span> <span class="n">include</span><span class="p">,</span>
+        <span class="s2">&quot;exclude&quot;</span><span class="p">:</span> <span class="n">exclude</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">out_array</span><span class="p">,</span> <span class="n">out_dict</span></div>
+
+
+
+<div class="viewcode-block" id="_get_unique_values_list">
+<a class="viewcode-back" href="../../../beak.utilities.preparation.html#beak.utilities.preparation._get_unique_values_list">[docs]</a>
+<span class="k">def</span> <span class="nf">_get_unique_values_list</span><span class="p">(</span>
+    <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">include_nan</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">include_inf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Number</span><span class="p">],</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Number</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get a list of unique values and their counts from a numpy array.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array (np.ndarray): The input array from which to extract unique values.</span>
+<span class="sd">        include_nan (bool, optional): Whether to include NaN values in the unique values list. Defaults to False.</span>
+<span class="sd">        verbose (int, optional): Whether to print the unique values and their counts. Defaults to 0 (no output).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: A tuple containing two numpy arrays:</span>
+<span class="sd">            - classes: The unique values in the array.</span>
+<span class="sd">            - counts: The counts of each unique value in the array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">unique_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">include_nan</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">no_nan_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">unique_values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">unique_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">unique_values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">no_nan_mask</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">include_inf</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">no_inf_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">unique_values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">unique_values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">unique_values</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">no_inf_mask</span><span class="p">]</span>
+
+    <span class="n">classes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unique_values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unique_values</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">):</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">verbose</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">_class</span><span class="p">,</span> <span class="n">_count</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">classes</span><span class="p">,</span> <span class="n">counts</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Class: </span><span class="si">{</span><span class="n">_class</span><span class="si">}</span><span class="s2">, Count: </span><span class="si">{</span><span class="n">_count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">verbose</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Verbose accepts only 0 or 1.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">classes</span><span class="p">,</span> <span class="n">counts</span></div>
+
+
+
+<div class="viewcode-block" id="_sampling_select_random_points">
+<a class="viewcode-back" href="../../../beak.utilities.preparation.html#beak.utilities.preparation._sampling_select_random_points">[docs]</a>
+<span class="k">def</span> <span class="nf">_sampling_select_random_points</span><span class="p">(</span>
+    <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">selection</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">strategy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Number</span><span class="p">],</span> <span class="n">Number</span><span class="p">],</span>
+    <span class="n">target_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">merge_classes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">min_px</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Number</span><span class="p">],</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Number</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Select random points from a given array based on the specified strategy and method.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array (np.ndarray): The input array from which to select points.</span>
+<span class="sd">        selection (Sequence[int]): The sequence of values to include in the class selection.</span>
+<span class="sd">        strategy (Union[Sequence[Number], Number]): The sampling strategy, either a single value or a sequence of values.</span>
+<span class="sd">            Values must be between 0 and 1, representing the fraction of pixels to select.</span>
+<span class="sd">            If not a single value, values must be provided for each class in the same order as the classes.</span>
+<span class="sd">        target_value (int): The value to assign to the selected points.</span>
+<span class="sd">        merge_classes (bool): The method to use for sampling. Defaults to False.</span>
+<span class="sd">            &quot;True&quot; will merge all pixels of the selected classes to one value before sampling.</span>
+<span class="sd">            &quot;False&quot; will sample the pixels in each cluster separately.</span>
+<span class="sd">        min_px (int, optional): The minimum number of pixels to select for each class. Defaults to 1.</span>
+<span class="sd">        seed (Optional[int], optional): The seed for the random number generator. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[np.ndarray, dict]:</span>
+<span class="sd">            - A numpy array with the selected points.</span>
+<span class="sd">            - A dictionary with most important information about the sampling process and results.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the strategy values are not between 0 and 1.</span>
+<span class="sd">        ValueError: If the length of the strategy values does not match the number of classes.</span>
+<span class="sd">        ValueError: If the provided array does not contain any valid values.</span>
+<span class="sd">        ValueError: If the provided selection and the array classes do not match.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">strategy</span> <span class="o">=</span> <span class="p">[</span><span class="n">strategy</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">strategy</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span> <span class="k">else</span> <span class="n">strategy</span>
+    <span class="n">array_classes</span><span class="p">,</span> <span class="n">array_counts</span> <span class="o">=</span> <span class="n">_get_unique_values_list</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">strategy</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">max</span><span class="p">(</span><span class="n">strategy</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;The sampling strategy must always be between 0 and 1, but got </span><span class="si">{</span><span class="n">strategy</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">strategy</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">strategy</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">array_classes</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;The length of the provide strategy values does not match the number of classes.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">array_classes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Provided array does not contain any valid values. Please check the provided array.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">selection</span> <span class="o">!=</span> <span class="n">array_classes</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Provided selection and the array classes do not match. Please check the provided classes or array.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">sampling_array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">random_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">sampling_array</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">merge_classes</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">merge_value</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">sampling_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">sampling_array</span><span class="p">,</span> <span class="n">selection</span><span class="p">),</span> <span class="n">merge_value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="p">)</span>
+        <span class="n">selection</span> <span class="o">=</span> <span class="p">[</span><span class="n">merge_value</span><span class="p">]</span>
+        <span class="n">array_counts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">sum</span><span class="p">(</span><span class="n">array_counts</span><span class="p">)]</span>
+
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">selection</span><span class="p">):</span>
+        <span class="n">fraction_px</span> <span class="o">=</span> <span class="n">strategy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strategy</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">strategy</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="n">number_px</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">fraction_px</span> <span class="o">*</span> <span class="n">array_counts</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+
+        <span class="k">if</span> <span class="n">number_px</span> <span class="o">&lt;</span> <span class="n">min_px</span><span class="p">:</span>
+            <span class="n">number_px</span> <span class="o">=</span> <span class="n">min_px</span>
+        <span class="k">elif</span> <span class="n">number_px</span> <span class="o">&gt;</span> <span class="n">array_counts</span><span class="p">[</span><span class="n">idx</span><span class="p">]:</span>
+            <span class="n">number_px</span> <span class="o">=</span> <span class="n">array_counts</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+        <span class="n">class_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">sampling_array</span> <span class="o">==</span> <span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">random_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+            <span class="n">class_idx</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">number_px</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+
+        <span class="n">random_array</span><span class="p">[</span><span class="n">random_idx</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">sampling_classes</span><span class="p">,</span> <span class="n">sampling_counts</span> <span class="o">=</span> <span class="n">_get_unique_values_list</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">random_array</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sampling_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">out_values</span> <span class="o">=</span> <span class="n">target_value</span> <span class="k">if</span> <span class="n">target_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">array</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">random_array</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">out_values</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="n">out_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;classes&quot;</span><span class="p">:</span> <span class="n">sampling_classes</span><span class="p">,</span>
+        <span class="s2">&quot;counts&quot;</span><span class="p">:</span> <span class="n">sampling_counts</span><span class="p">,</span>
+        <span class="s2">&quot;counts_sum&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sampling_counts</span><span class="p">),</span>
+        <span class="s2">&quot;target_value&quot;</span><span class="p">:</span> <span class="n">target_value</span><span class="p">,</span>
+        <span class="s2">&quot;merged&quot;</span><span class="p">:</span> <span class="n">merge_classes</span><span class="p">,</span>
+        <span class="s2">&quot;min_px_per_class&quot;</span><span class="p">:</span> <span class="n">min_px</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">out_array</span><span class="p">,</span> <span class="n">out_dict</span></div>
+
+
+
+<div class="viewcode-block" id="_sampling_by_selection">
+<a class="viewcode-back" href="../../../beak.utilities.preparation.html#beak.utilities.preparation._sampling_by_selection">[docs]</a>
+<span class="k">def</span> <span class="nf">_sampling_by_selection</span><span class="p">(</span>
+    <span class="n">file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">include</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">exclude</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Select pixels from a raster file based on inclusion and exclusion criteria.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file (Union[Path, str]): The path to the raster file.</span>
+<span class="sd">        include (Sequence[int], optional): A sequence of values to include in the selection. Defaults to None.</span>
+<span class="sd">        exclude (Optional[Sequence[int]], optional): A sequence of values to exclude from the selection. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[np.ndarray, Dict[str, Union[str, Number, Sequence[int]]]]:</span>
+<span class="sd">            - The selected pixels as a numpy array.</span>
+<span class="sd">            - A dictionary containing the settings used for selection and final results.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the include and exclude parameters are identical.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">file</span>
+
+    <span class="k">if</span> <span class="n">include</span> <span class="o">==</span> <span class="n">exclude</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Include and exclude cannot be identical.&quot;</span><span class="p">)</span>
+
+    <span class="n">raster</span> <span class="o">=</span> <span class="n">load_raster</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="n">raster_array</span> <span class="o">=</span> <span class="n">read_raster</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span> <span class="n">replace_nan</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">out_raster</span><span class="p">,</span> <span class="n">out_settings</span> <span class="o">=</span> <span class="n">_sampling_select_classes</span><span class="p">(</span>
+        <span class="n">array</span><span class="o">=</span><span class="n">raster_array</span><span class="p">,</span>
+        <span class="n">include</span><span class="o">=</span><span class="n">include</span><span class="p">,</span>
+        <span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">out_raster</span><span class="p">,</span> <span class="n">out_settings</span></div>
+
+
+
+<div class="viewcode-block" id="_sampling_by_threshold">
+<a class="viewcode-back" href="../../../beak.utilities.preparation.html#beak.utilities.preparation._sampling_by_threshold">[docs]</a>
+<span class="k">def</span> <span class="nf">_sampling_by_threshold</span><span class="p">(</span>
+    <span class="n">file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;positives&quot;</span><span class="p">,</span> <span class="s2">&quot;negatives&quot;</span><span class="p">],</span>
+    <span class="n">threshold</span><span class="p">:</span> <span class="n">Number</span><span class="p">,</span>
+    <span class="n">exclude</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Select pixels from a raster based on a given threshold and type.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file (Union[Path, str]): The path to the raster file.</span>
+<span class="sd">        type (Literal[&quot;positives&quot;, &quot;negatives&quot;]): The type of pixels to select.</span>
+<span class="sd">            &quot;positives&quot; selects pixels greater than or equal to the threshold.</span>
+<span class="sd">            &quot;negatives&quot; selects pixels less than the threshold.</span>
+<span class="sd">        threshold (Number): The threshold value for selecting pixels.</span>
+<span class="sd">        exclude (Optional[Sequence[int]]): A sequence of values to exclude from selection.</span>
+<span class="sd">            Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[np.ndarray, Dict[str, Union[str, Number, Sequence[int]]]]:</span>
+<span class="sd">            - The selected pixels as a numpy array.</span>
+<span class="sd">            - A dictionary containing the settings used for selection and final results.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the threshold is higher than the maximum value in the raster,</span>
+<span class="sd">            or if the threshold is lower than the minimum value in the raster,</span>
+<span class="sd">            or if the threshold is lower than 0.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">file</span>
+
+    <span class="n">raster</span> <span class="o">=</span> <span class="n">load_raster</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="n">raster_array</span> <span class="o">=</span> <span class="n">read_raster</span><span class="p">(</span><span class="n">raster</span><span class="p">,</span> <span class="n">replace_nan</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">threshold</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">raster_array</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Threshold </span><span class="si">{</span><span class="n">threshold</span><span class="si">}</span><span class="s2"> is higher than the maximum value in the raster.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">threshold</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">raster_array</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Threshold </span><span class="si">{</span><span class="n">threshold</span><span class="si">}</span><span class="s2"> is lower than the minimum value in the raster.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">threshold</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Threshold </span><span class="si">{</span><span class="n">threshold</span><span class="si">}</span><span class="s2"> is lower than 0, which is not allowed.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">out_raster</span><span class="p">,</span> <span class="n">out_settings</span> <span class="o">=</span> <span class="n">_sampling_select_classes</span><span class="p">(</span>
+        <span class="n">array</span><span class="o">=</span><span class="n">raster_array</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+        <span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">out_raster</span><span class="p">,</span> <span class="n">out_settings</span></div>
+
+
+
+<span class="c1"># endregion: Sampling functions</span>
+
+
+<span class="c1"># region: Test code</span>
+
+<span class="c1"># endregion: Test code</span>
 </pre></div>
 
            </div>

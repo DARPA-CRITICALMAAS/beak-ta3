@@ -91,8 +91,8 @@
 <span></span><span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Number</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">beartype.typing</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Callable</span>
-<span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="n">generic_filter</span>
+<span class="kn">from</span> <span class="nn">beartype.typing</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="n">generic_filter</span><span class="p">,</span> <span class="n">binary_dilation</span>
 
 
 <div class="viewcode-block" id="_check_filter_size">
@@ -194,6 +194,26 @@
 
 
 
+<div class="viewcode-block" id="_apply_binary_dilation">
+<a class="viewcode-back" href="../../../beak.utilities.focal.html#beak.utilities.focal._apply_binary_dilation">[docs]</a>
+<span class="k">def</span> <span class="nf">_apply_binary_dilation</span><span class="p">(</span>
+    <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">kernel</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">target_value</span><span class="p">:</span> <span class="n">Number</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply binary dilation to the input array.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array (np.ndarray): The input array to be dilated.</span>
+<span class="sd">        kernel (np.ndarray): The kernel or footprint to be used for dilation.</span>
+<span class="sd">        target_value (Number): The value to be dilated.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: The dilated array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">binary_dilation</span><span class="p">(</span><span class="n">array</span> <span class="o">==</span> <span class="n">target_value</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">kernel</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="_replace_value_in_kernel">
 <a class="viewcode-back" href="../../../beak.utilities.focal.html#beak.utilities.focal._replace_value_in_kernel">[docs]</a>
 <span class="k">def</span> <span class="nf">_replace_value_in_kernel</span><span class="p">(</span><span class="n">window</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">target_value</span><span class="p">:</span> <span class="n">Number</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Number</span><span class="p">:</span>
@@ -220,7 +240,8 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        array (np.ndarray): The array to be buffered.</span>
-<span class="sd">        target_value (Number): The value to be buffered. Defaults to 1.</span>
+<span class="sd">        target_value (Number): The value to be buffered.</span>
+<span class="sd">            Defaults to 1.</span>
 <span class="sd">        radius (int): Number of cells (distance) to the targeted value to be changed.</span>
 <span class="sd">            Defaults to 1. E.g. radius of 1 will change the 8 cells around the targeted value.</span>
 <span class="sd">        const (Number): The constant value to be used. Defaults to np.nan.</span>
@@ -243,20 +264,22 @@
 
 
 
-<div class="viewcode-block" id="_create_local_buffer">
-<a class="viewcode-back" href="../../../beak.utilities.focal.html#beak.utilities.focal._create_local_buffer">[docs]</a>
-<span class="k">def</span> <span class="nf">_create_local_buffer</span><span class="p">(</span>
+<div class="viewcode-block" id="_create_local_buffer_generic_version">
+<a class="viewcode-back" href="../../../beak.utilities.focal.html#beak.utilities.focal._create_local_buffer_generic_version">[docs]</a>
+<span class="k">def</span> <span class="nf">_create_local_buffer_generic_version</span><span class="p">(</span>
     <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">shape</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;square&quot;</span><span class="p">,</span> <span class="s2">&quot;circle&quot;</span><span class="p">],</span>
-    <span class="n">target_value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">target_value</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a buffer with a constant value around the selected value in a given array.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        array (np.ndarray): The array to be buffered.</span>
-<span class="sd">        selected_value (int): The value to be buffered. Defaults to 1.</span>
+<span class="sd">        radius (int): Number of cells (distance) to the targeted value to be changed.</span>
+<span class="sd">        shape (Literal[&quot;square&quot;, &quot;circle&quot;]): The shape of the buffer.</span>
+<span class="sd">        target_value (int): The value to be buffered.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        np.ndarray: The buffered array.</span>
@@ -270,6 +293,33 @@
         <span class="n">kernel</span><span class="p">,</span>
         <span class="n">target_value</span><span class="p">,</span>
     <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="_create_local_buffer_binary_version">
+<a class="viewcode-back" href="../../../beak.utilities.focal.html#beak.utilities.focal._create_local_buffer_binary_version">[docs]</a>
+<span class="k">def</span> <span class="nf">_create_local_buffer_binary_version</span><span class="p">(</span>
+    <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">shape</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;square&quot;</span><span class="p">,</span> <span class="s2">&quot;circle&quot;</span><span class="p">],</span>
+    <span class="n">target_value</span><span class="p">:</span> <span class="n">Number</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a buffer with a constant value around the selected value in a given array.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array (np.ndarray): The array to be buffered.</span>
+<span class="sd">        radius (int): Number of cells (distance) to the targeted value to be changed.</span>
+<span class="sd">        shape (Literal[&quot;square&quot;, &quot;circle&quot;]): The shape of the buffer.</span>
+<span class="sd">        target_value (Number): The value to be buffered.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: The buffered array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">kernel</span> <span class="o">=</span> <span class="n">_basic_kernel</span><span class="p">(</span><span class="n">radius</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+    <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="k">else</span> <span class="n">array</span>
+
+    <span class="k">return</span> <span class="n">binary_dilation</span><span class="p">(</span><span class="n">array</span> <span class="o">==</span> <span class="n">target_value</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">kernel</span><span class="p">)</span></div>
 
 </pre></div>
 

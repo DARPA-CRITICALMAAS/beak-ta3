@@ -263,4 +263,81 @@ national_scale = {
         # Magnetic
         "Magnetic_HGM": True,
     },
+    "EXAMPLE_ISOGRAV_NUM": {
+        # Proximity
+        "Terrane_Proximity": True,
+        "Geology_PassiveMargin_Proximity": True,
+        "Geology_BlackShale_Proximity": True,
+        "Geology_Fault_Proximity": True,
+        # Paleogeography
+        "Geology_Paleolatitude_Period_Maximum": True,
+        "Geology_Paleolatitude_Period_Minimum": True,
+        # Gravity
+        "Gravity_GOCE_ShapeIndex": True,
+        "Gravity_Bouguer": False,
+        "Gravity_Bouguer_HGM": False,
+        "Gravity_Bouguer_UpCont30km_HGM": True,
+        "Gravity_Bouguer_HGM_Worms_Proximity": True,
+        "Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity": True,
+        # Isostatic Gravity
+        "IsostaticGravity": True,
+        "IsostaticGravity_HGM": True,
+        # Magnetic
+        "Magnetic_HGM": True,
+        "Magnetic_LongWavelength_HGM": True,
+        "Magnetic_HGM_Worms_Proximity": True,
+        "Magnetic_LongWavelength_HGM_Worms_Proximity": True,
+        # Seismic
+        "Seismic_LAB_Priestley": False,
+        "Seismic_LAB_Hoggard": True,
+        "Seismic_Moho": True,
+    },
+    "EXAMPLE_PREFERRED_ISOGRAV": {
+        # Geology from Datacube
+        "Geology_Lithology_Majority": True,
+        "Geology_Lithology_Minority": True,
+        "Geology_Period_Maximum_Majority": True,
+        "Geology_Period_Minimum_Majority": True,
+        # Sedimentary dictionaries from Datacube
+        "Geology_Dictionary_Calcareous": True,
+        "Geology_Dictionary_Carbonaceous": True,
+        "Geology_Dictionary_FineClastic": True,
+        # Igneous dictionaries from Datacube
+        "Geology_Dictionary_Felsic": True,
+        "Geology_Dictionary_Intermediate": True,
+        "Geology_Dictionary_UltramaficMafic": True,
+        # Metamorphic dictionaries from Datacube
+        "Geology_Dictionary_Anatectic": True,
+        "Geology_Dictionary_Gneissose": True,
+        "Geology_Dictionary_Schistose": True,
+        # Proximity from Datacube
+        "Terrane_Proximity": True,
+        "Geology_PassiveMargin_Proximity": True,
+        "Geology_BlackShale_Proximity": True,
+        "Geology_Fault_Proximity": True,
+        # Paleogeography from Datacube
+        "Geology_Paleolatitude_Period_Maximum": True,
+        "Geology_Paleolatitude_Period_Minimum": True,
+        # Gravity from ScienceBase
+        "SatelliteGravity_ShapeIndex": True,
+        "Gravity": False,
+        "Gravity_HGM": False,
+        "Gravity_Up30km_HGM": True,
+        # Gravity Worms from Datacube
+        "Gravity_Bouguer_HGM_Worms_Proximity": True,
+        "Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity": True,
+        # Isostatic Gravity from ScienceBase
+        "IsostaticGravity": True,
+        "IsostaticGravity_HGM": True,
+        "IsostaticGravity_HGM_Worms": False,
+        # Magnetic from ScienceBase
+        "Mag_RTP_HGM": True,
+        "Mag_RTP_HGM_DeepSources": True,
+        # Gravity Worms from Datacube
+        "Magnetic_HGM_Worms_Proximity": True,
+        "Magnetic_LongWavelength_HGM_Worms_Proximity": True,
+        # Seismic from ScienceBase
+        "LAB": True,
+        "Moho": True,
+    },
 }

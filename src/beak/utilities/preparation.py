@@ -39,7 +39,7 @@ def create_encodings_from_dataframe(
     # Get new column names
     new_value_columns = data_encoded.columns.to_list()
 
-    if export_absent == False:
+    if export_absent is False:
         # Get rid of the "Absent" columns since they are not needed in binary encoding
         new_value_columns = [
             column for column in new_value_columns if "Absent" not in column

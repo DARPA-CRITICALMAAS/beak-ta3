@@ -169,17 +169,18 @@ def update_model_config_core(model: dict, changes: Tuple[str, Optional[str]]) ->
 
     return out_dict
 
+
 def update_model_config(model: dict, changes: Sequence[tuple[str, str]]) -> dict:
     """
     Replace evidence layers in a dictionary.
 
     Args:
-    dict (dict): The input dictionary.
-    changes (Sequence[Tuple[str, str]]): A Sequence of tuples containing the old evidence layer
-        and the new evidence combinations.
+        dict (dict): The input dictionary.
+        changes (Sequence[Tuple[str, str]]): A Sequence of tuples containing the old evidence layer
+            and the new evidence combinations.
 
     Returns:
-    dict: The updated dictionary with evidence layers replaced.
+        dict: The updated dictionary with evidence layers replaced.
     """
     out_dict = model.copy()
 

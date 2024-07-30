@@ -93,7 +93,7 @@
 <span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span>
+<span class="kn">from</span> <span class="nn">beartype.typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
@@ -118,7 +118,7 @@
 <span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">beak.utilities.io</span> <span class="kn">import</span> <span class="n">load_raster</span><span class="p">,</span> <span class="n">save_raster</span>
-
+<span class="kn">from</span> <span class="nn">beak.utilities.checks</span> <span class="kn">import</span> <span class="n">check_grid_alignment</span>
 
 <span class="c1"># References</span>
 <span class="c1"># Some non-trivial functionalities were adapted from other sources.</span>
@@ -186,12 +186,13 @@
 <a class="viewcode-back" href="../../../beak.utilities.raster_processing.html#beak.utilities.raster_processing._reproject_raster_process">[docs]</a>
 <span class="k">def</span> <span class="nf">_reproject_raster_process</span><span class="p">(</span>
     <span class="n">file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
-    <span class="n">input_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">input_folder</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span>
     <span class="n">output_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">target_crs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">],</span>
     <span class="n">target_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">],</span>
     <span class="n">resampling_method</span><span class="p">:</span> <span class="n">warp</span><span class="o">.</span><span class="n">Resampling</span><span class="p">,</span>
     <span class="n">resampling_mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">snap_to_origin</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Number</span><span class="p">,</span> <span class="n">Number</span><span class="p">]],</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run reprojection process for a single raster file.</span>
 
@@ -202,14 +203,21 @@
 <span class="sd">        target_crs (Union[int, rasterio.crs.CRS]): Target coordinate reference system (CRS).</span>
 <span class="sd">        target_resolution (Optional[np.number]): The target resolution for the reprojection.</span>
 <span class="sd">        resampling_method (warp.Resampling): The resampling method to use.</span>
+<span class="sd">        snap_to_origin (Union[str, Path, Tuple[Number, Number]]): The origin to snap to.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">out_file</span> <span class="o">=</span> <span class="n">output_folder</span> <span class="o">/</span> <span class="n">file</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">input_folder</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">out_file</span><span class="p">):</span>
         <span class="n">raster</span> <span class="o">=</span> <span class="n">load_raster</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="n">snap_to_origin</span> <span class="o">=</span> <span class="n">load_raster</span><span class="p">(</span><span class="n">snap_to_origin</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">snap_to_origin</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">))</span> <span class="k">else</span> <span class="n">snap_to_origin</span>
         <span class="n">check_path</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">out_file</span><span class="p">)))</span>
         <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">_reproject_raster_core</span><span class="p">(</span>
-            <span class="n">raster</span><span class="p">,</span> <span class="n">target_crs</span><span class="p">,</span> <span class="n">target_resolution</span><span class="p">,</span> <span class="n">resampling_method</span><span class="p">,</span> <span class="n">resampling_mode</span>
+            <span class="n">raster</span><span class="p">,</span>
+            <span class="n">target_crs</span><span class="p">,</span>
+            <span class="n">target_resolution</span><span class="p">,</span>
+            <span class="n">resampling_method</span><span class="p">,</span>
+            <span class="n">resampling_mode</span><span class="p">,</span>
+            <span class="n">snap_to_origin</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">save_raster</span><span class="p">(</span>
@@ -230,8 +238,9 @@
     <span class="n">raster</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span>
     <span class="n">target_crs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">],</span>
     <span class="n">target_resolution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">],</span>
-    <span class="n">resampling_method</span><span class="p">:</span> <span class="n">warp</span><span class="o">.</span><span class="n">Resampling</span><span class="p">,</span>
+    <span class="n">resampling_method</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">warp</span><span class="o">.</span><span class="n">Resampling</span><span class="p">],</span>
     <span class="n">resampling_mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">snap_to_origin</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Number</span><span class="p">,</span> <span class="n">Number</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reproject a raster to a new coordinate reference system (CRS) and resolution.</span>
@@ -243,11 +252,12 @@
 <span class="sd">        target_crs (Union[int, rasterio.crs.CRS]): Target coordinate reference system (CRS).</span>
 <span class="sd">        target_resolution (Optional[np.number]): The target resolution of the reprojected raster.</span>
 <span class="sd">        resampling_method (warp.Resampling): The resampling method to be used during reprojection.</span>
+<span class="sd">        resampling_mode (str): The resampling mode to be used during reprojection.</span>
+<span class="sd">            Overwrites the resampling_method if &quot;auto&quot;</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Tuple[np.ndarray, dict]: A tuple containing the reprojected image as a NumPy array and the metadata of the reprojected raster.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">src_arr</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_crs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
@@ -296,6 +306,11 @@
         <span class="p">}</span>
     <span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">snap_to_origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out_image</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">snap_raster</span><span class="p">(</span>
+            <span class="n">raster</span><span class="o">=</span><span class="p">(</span><span class="n">out_image</span><span class="p">,</span> <span class="n">out_meta</span><span class="p">),</span> <span class="n">snap_to</span><span class="o">=</span><span class="n">snap_to_origin</span>
+        <span class="p">)</span>
+
     <span class="k">return</span> <span class="n">out_image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">src_arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span> <span class="n">out_meta</span></div>
 
 
@@ -311,6 +326,7 @@
     <span class="n">resampling_mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;manual&quot;</span><span class="p">,</span> <span class="s2">&quot;auto&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;manual&quot;</span><span class="p">,</span>
     <span class="n">include_source</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">n_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">(),</span>
+    <span class="n">snap_to_origin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Number</span><span class="p">,</span> <span class="n">Number</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reprojects rasters from the input folder to the output folder using the specified target EPSG code.</span>
@@ -319,11 +335,19 @@
 <span class="sd">        input_folder (Path): The path to the input folder containing the rasters.</span>
 <span class="sd">        output_folder (Path): The path to the output folder where the reprojected rasters will be saved.</span>
 <span class="sd">        target_crs (Union[int, rasterio.crs.CRS]): The target coordinate reference system (CRS).</span>
-<span class="sd">        target_resolution (Optional[np.number]): The target resolution of the reprojected rasters. Defaults to None.</span>
-<span class="sd">        resampling_method (warp.Resampling): The resampling method to use during reprojection. Defaults to warp.Resampling.nearest.</span>
+<span class="sd">        target_resolution (Optional[np.number]): The target resolution of the reprojected rasters.</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">        resampling_method (warp.Resampling): The resampling method to use during reprojection.</span>
+<span class="sd">            Defaults to warp.Resampling.nearest.</span>
 <span class="sd">        resampling_mode (Literal[&quot;manual&quot;, &quot;auto&quot;]): Uses &quot;nearest&quot; for integers and &quot;bilinear&quot; for floats.</span>
-<span class="sd">            Overwrites resampling_method if set to &quot;auto&quot;. Defaults to &quot;manual&quot;.</span>
-<span class="sd">        n_workers (int): The number of worker processes to use for parallel processing. Defaults to the number of CPU cores.</span>
+<span class="sd">            Overwrites resampling_method if set to &quot;auto&quot;.</span>
+<span class="sd">            Defaults to &quot;manual&quot;.</span>
+<span class="sd">        include_source: Whether to include the source folder in the reprojected rasters.</span>
+<span class="sd">            Defaults to False.</span>
+<span class="sd">        n_workers (int): The number of worker processes to use for parallel processing.</span>
+<span class="sd">            Defaults to the number of CPU cores.</span>
+<span class="sd">        snap_to_origin (Optional[Union[str, Tuple[Number, Number]]]): Path to raster or origin to snap to.</span>
+<span class="sd">            Defaults to None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Show selected folder</span>
     <span class="n">input_folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">input_folder</span><span class="p">)</span>
@@ -361,6 +385,7 @@
             <span class="n">target_resolution</span><span class="p">,</span>
             <span class="n">resampling_method</span><span class="p">,</span>
             <span class="n">resampling_mode</span><span class="p">,</span>
+            <span class="n">snap_to_origin</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span>
     <span class="p">]</span>
@@ -684,6 +709,7 @@
     <span class="n">base_raster</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">],</span>
     <span class="n">raster_to_unify</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">],</span>
     <span class="n">resampling_method</span><span class="p">:</span> <span class="n">Resampling</span><span class="p">,</span>
+    <span class="n">resampling_mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">same_extent</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">same_shape</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
@@ -744,6 +770,12 @@
 
     <span class="n">src_array</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
+    <span class="k">if</span> <span class="n">resampling_mode</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">src_array</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
+            <span class="n">resampling_method</span> <span class="o">=</span> <span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">src_array</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">):</span>
+            <span class="n">resampling_method</span> <span class="o">=</span> <span class="n">Resampling</span><span class="o">.</span><span class="n">bilinear</span>
+
     <span class="n">out_array</span> <span class="o">=</span> <span class="n">warp</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span>
         <span class="n">source</span><span class="o">=</span><span class="n">src_array</span><span class="p">,</span>
         <span class="n">src_crs</span><span class="o">=</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
@@ -772,6 +804,7 @@
     <span class="n">base_raster</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
     <span class="n">rasters_to_unify</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]],</span>
     <span class="n">resampling_method</span><span class="p">:</span> <span class="n">Resampling</span> <span class="o">=</span> <span class="n">Resampling</span><span class="o">.</span><span class="n">nearest</span><span class="p">,</span>
+    <span class="n">resampling_mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span> <span class="s2">&quot;manual&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;manual&quot;</span><span class="p">,</span>
     <span class="n">same_extent</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">same_shape</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">n_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -786,6 +819,9 @@
 <span class="sd">        base_raster (rasterio.io.DatasetReader): The base raster whose grid will be used as reference.</span>
 <span class="sd">        rasters_to_unify (Sequence[rasterio.io.DatasetReader]): The rasters to be unified.</span>
 <span class="sd">        resampling_method (Resampling, optional): The resampling method to be used. Defaults to Resampling.nearest.</span>
+<span class="sd">        resampling_mode (str, optional): The resampling mode to be used. Defaults to &quot;manual&quot;.</span>
+<span class="sd">            If set to &quot;auto&quot;, the resampling method will be determined automatically based on the data type.</span>
+<span class="sd">            The manual set method will be overwritting in this case.</span>
 <span class="sd">        same_extent (bool, optional): Whether to force all rasters to have the same extent as the base raster. Defaults to False.</span>
 <span class="sd">        same_shape (bool, optional): Whether to force all rasters to have the same shape as the base raster. Defaults to False.</span>
 
@@ -799,6 +835,7 @@
             <span class="n">base_raster</span><span class="p">,</span>
             <span class="n">file</span><span class="p">,</span>
             <span class="n">resampling_method</span><span class="p">,</span>
+            <span class="n">resampling_mode</span><span class="p">,</span>
             <span class="n">same_extent</span><span class="p">,</span>
             <span class="n">same_shape</span><span class="p">,</span>
         <span class="p">)</span>
@@ -818,6 +855,7 @@
                 <span class="n">base_raster</span><span class="p">,</span>
                 <span class="n">file</span><span class="p">,</span>
                 <span class="n">resampling_method</span><span class="p">,</span>
+                <span class="n">resampling_mode</span><span class="p">,</span>
                 <span class="n">same_extent</span><span class="p">,</span>
                 <span class="n">same_shape</span><span class="p">,</span>
             <span class="p">)</span>
@@ -950,36 +988,12 @@
 
 
 
-<div class="viewcode-block" id="_check_grid_alignment">
-<a class="viewcode-back" href="../../../beak.utilities.raster_processing.html#beak.utilities.raster_processing._check_grid_alignment">[docs]</a>
-<span class="k">def</span> <span class="nf">_check_grid_alignment</span><span class="p">(</span>
-    <span class="n">src_bounds</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">BoundingBox</span><span class="p">,</span> <span class="n">target_bounds</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">BoundingBox</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Checks if two bounding boxes are aligned.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        src_bounds (rasterio.coords.BoundingBox): The source bounding box.</span>
-<span class="sd">        target_bounds (rasterio.coords.BoundingBox): The target bounding box.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        bool: Whether the bounding boxes are aligned.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">src_bounds</span><span class="o">.</span><span class="n">left</span> <span class="o">==</span> <span class="n">target_bounds</span><span class="o">.</span><span class="n">left</span>
-        <span class="ow">and</span> <span class="n">src_bounds</span><span class="o">.</span><span class="n">bottom</span> <span class="o">==</span> <span class="n">target_bounds</span><span class="o">.</span><span class="n">bottom</span>
-    <span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span></div>
-
-
-
+<span class="c1">#</span>
 <div class="viewcode-block" id="snap_raster">
 <a class="viewcode-back" href="../../../beak.utilities.raster_processing.html#beak.utilities.raster_processing.snap_raster">[docs]</a>
 <span class="k">def</span> <span class="nf">snap_raster</span><span class="p">(</span>
     <span class="n">raster</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]],</span>
-    <span class="n">snap_raster</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Number</span><span class="p">,</span> <span class="n">Number</span><span class="p">]],</span>
+    <span class="n">snap_to</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">rasterio</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Number</span><span class="p">,</span> <span class="n">Number</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Snaps/aligns raster to given snap raster.</span>
@@ -989,7 +1003,7 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        raster: The raster or an array with metadata to be snapped.</span>
-<span class="sd">        snap_raster:</span>
+<span class="sd">        snap_to:</span>
 <span class="sd">            The reference raster or</span>
 <span class="sd">            a rasterio metadata dictionary or</span>
 <span class="sd">            a tuple containing the x and y origin to snap on.</span>
@@ -1008,13 +1022,13 @@
         <span class="n">raster_array</span> <span class="o">=</span> <span class="n">raster</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">raster_meta</span> <span class="o">=</span> <span class="n">raster</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">snap_raster</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">):</span>
-        <span class="n">snap_meta</span> <span class="o">=</span> <span class="n">snap_raster</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">snap_to</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">):</span>
+        <span class="n">snap_meta</span> <span class="o">=</span> <span class="n">snap_to</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">snap_meta</span> <span class="o">=</span> <span class="n">raster_meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">snap_transform</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">from_origin</span><span class="p">(</span>
-            <span class="n">snap_raster</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-            <span class="n">snap_raster</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">snap_to</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">snap_to</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
             <span class="nb">abs</span><span class="p">(</span><span class="n">snap_meta</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">a</span><span class="p">),</span>
             <span class="nb">abs</span><span class="p">(</span><span class="n">snap_meta</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">e</span><span class="p">),</span>
         <span class="p">)</span>
@@ -1026,7 +1040,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">raster_meta</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">snap_meta</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Raster and and snap raster have different CRS.&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">_check_grid_alignment</span><span class="p">(</span><span class="n">src_bounds</span><span class="p">,</span> <span class="n">snap_bounds</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">check_grid_alignment</span><span class="p">(</span><span class="n">src_bounds</span><span class="p">,</span> <span class="n">snap_bounds</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Raster grids are already aligned.&quot;</span><span class="p">)</span>
 
     <span class="n">out_image</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">_snap_raster</span><span class="p">(</span><span class="n">raster_array</span><span class="p">,</span> <span class="n">raster_meta</span><span class="p">,</span> <span class="n">snap_meta</span><span class="p">)</span>

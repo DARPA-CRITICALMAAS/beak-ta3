@@ -98,46 +98,46 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="beak.methods.som.argsSOM.Args">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">beak.methods.som.argsSOM.</span></span><span class="sig-name descname"><span class="pre">Args</span></span><a class="reference internal" href="_modules/beak/methods/som/argsSOM.html#Args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.argsSOM.Args" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Arguments for SOM and k-means clustering.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>input_file</strong> (<em>str</em>) – Input file(“.lrn “ or list, separated with “,”).</p></li>
-<li><p><strong>output_folder</strong> (<em>str</em>) – Folder to save SOM dictionary and cluster dictionary.</p></li>
-<li><p><strong>output_file_somspace</strong> (<em>str</em>) – Text file that will contain calculated values.
+<li><p><strong>input_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Input file(“.lrn “ or list, separated with “,”).</p></li>
+<li><p><strong>output_folder</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Folder to save SOM dictionary and cluster dictionary.</p></li>
+<li><p><strong>output_file_somspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Text file that will contain calculated values.
 Parameters: som_x som_y b_data1 b_data2 b_dataN umatrix cluster in geospace.</p></li>
-<li><p><strong>outgeofile</strong> (<em>str</em>) – File name of the geospace output.</p></li>
-<li><p><strong>som_x</strong> (<em>int</em>) – X dimension of generated SOM.</p></li>
-<li><p><strong>som_y</strong> (<em>int</em>) – Y dimension of generated SOM.</p></li>
-<li><p><strong>epochs</strong> (<em>int</em>) – Number of epochs to run.</p></li>
-<li><p><strong>maptype</strong> (<em>str</em>) – Type of SOM (“sheet”, “toroid”).</p></li>
-<li><p><strong>initialcodebook</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – File path of initial codebook,
+<li><p><strong>outgeofile</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – File name of the geospace output.</p></li>
+<li><p><strong>som_x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – X dimension of generated SOM.</p></li>
+<li><p><strong>som_y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Y dimension of generated SOM.</p></li>
+<li><p><strong>epochs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Number of epochs to run.</p></li>
+<li><p><strong>maptype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Type of SOM (“sheet”, “toroid”).</p></li>
+<li><p><strong>initialcodebook</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>]</em>) – File path of initial codebook,
 2D numpy array of float32.</p></li>
-<li><p><strong>neighborhood</strong> (<em>str</em>) – Shape of the neighborhood function. gaussian or bubble.</p></li>
-<li><p><strong>std_coeff</strong> (<em>float</em>) – Coefficient in the Gaussian neighborhood function.</p></li>
-<li><p><strong>radius0</strong> (<em>float</em>) – Initial size of the neighborhood.</p></li>
-<li><p><strong>radiusN</strong> (<em>float</em>) – Final size of the neighborhood.</p></li>
-<li><p><strong>radiuscooling</strong> (<em>str</em>) – Function that defines the decrease in the neighborhood
+<li><p><strong>neighborhood</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Shape of the neighborhood function. gaussian or bubble.</p></li>
+<li><p><strong>std_coeff</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – Coefficient in the Gaussian neighborhood function.</p></li>
+<li><p><strong>radius0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – Initial size of the neighborhood.</p></li>
+<li><p><strong>radiusN</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – Final size of the neighborhood.</p></li>
+<li><p><strong>radiuscooling</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Function that defines the decrease in the neighborhood
 size as the training proceeds (“linear”, “exponential”).</p></li>
-<li><p><strong>scalecooling</strong> (<em>str</em>) – Function that defines the decrease in the learning scale
+<li><p><strong>scalecooling</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Function that defines the decrease in the learning scale
 as the training proceeds (“linear”, “exponential”).</p></li>
-<li><p><strong>scale0</strong> (<em>float</em>) – Initial learning rate.</p></li>
-<li><p><strong>scaleN</strong> (<em>float</em>) – Final learning rate.</p></li>
-<li><p><strong>initialization</strong> (<em>str</em>) – Type of SOM initialization (“random”, “pca”).</p></li>
-<li><p><strong>gridtype</strong> (<em>str</em>) – Type of SOM grid (“hexagonal”, “rectangular”).</p></li>
-<li><p><strong>kmeans</strong> (<em>str</em>) – Run k-means clustering (“true” or “false”).</p></li>
-<li><p><strong>kmeans_init</strong> (<em>int</em>) – Number of initializations.</p></li>
-<li><p><strong>kmeans_min</strong> (<em>int</em>) – Minimum number of k-mean clusters.</p></li>
-<li><p><strong>kmeans_max</strong> (<em>int</em>) – Maximum number of k-mean clusters.</p></li>
-<li><p><strong>output_file_geospace</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – Text file that will contain calculated values.
+<li><p><strong>scale0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – Initial learning rate.</p></li>
+<li><p><strong>scaleN</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><em>float</em></a>) – Final learning rate.</p></li>
+<li><p><strong>initialization</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Type of SOM initialization (“random”, “pca”).</p></li>
+<li><p><strong>gridtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Type of SOM grid (“hexagonal”, “rectangular”).</p></li>
+<li><p><strong>kmeans</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Run k-means clustering (“true” or “false”).</p></li>
+<li><p><strong>kmeans_init</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Number of initializations.</p></li>
+<li><p><strong>kmeans_min</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Minimum number of k-mean clusters.</p></li>
+<li><p><strong>kmeans_max</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a>) – Maximum number of k-mean clusters.</p></li>
+<li><p><strong>output_file_geospace</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>]</em>) – Text file that will contain calculated values.
 Parameters: {X Y Z} data1 data2 … dataN som_x som_y cluster b_data1 b_data2 b_dataN in geospace.</p></li>
-<li><p><strong>geotiff_input</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – Geotiff_input files, separated by comma, to write GeoTIF out
+<li><p><strong>geotiff_input</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>]</em>) – Geotiff_input files, separated by comma, to write GeoTIF out
 (only first line is used to get the geotransform and projection information to
 set output GeoFIT geotransform and projection)</p></li>
-<li><p><strong>normalized</strong> (<em>str</em>) – Whether the data has been normalized or not (“true” or “false”).</p></li>
-<li><p><strong>label</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – Whether data contains label column (“true” or “false”).</p></li>
-<li><p><strong>label_geotiff_file</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – Geotiff_input file.</p></li>
+<li><p><strong>normalized</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – Whether the data has been normalized or not (“true” or “false”).</p></li>
+<li><p><strong>label</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>]</em>) – Whether data contains label column (“true” or “false”).</p></li>
+<li><p><strong>label_geotiff_file</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>]</em>) – Geotiff_input file.</p></li>
 </ul>
 </dd>
 </dl>
@@ -153,7 +153,7 @@ set output GeoFIT geotransform and projection)</p></li>
 <dd><p>Creates an instance of Args from a JSON file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – The path to the JSON file containing arguments data.</p>
+<dd class="field-odd"><p><strong>file_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The path to the JSON file containing arguments data.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>An instance of Args populated with data from the JSON file.</p>
@@ -171,8 +171,8 @@ set output GeoFIT geotransform and projection)</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>file_path</strong> (<em>str</em>) – The name of the file path for files to be added to the input list.</p></li>
-<li><p><strong>file_patterns</strong> (<em>str</em>) – One or more patterns for file names to be added to the input list.</p></li>
+<li><p><strong>file_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – The name of the file path for files to be added to the input list.</p></li>
+<li><p><strong>file_patterns</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – One or more patterns for file names to be added to the input list.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -191,8 +191,8 @@ set output GeoFIT geotransform and projection)</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>file_path</strong> (<em>str</em>) – file path to TXT file holding a list of GeoTIF file paths</p></li>
-<li><p><strong>file_path_label</strong> (<em>str</em><em>, </em><em>optional</em>) – file path to TXT file holding a list of label data. Defaults to “”.</p></li>
+<li><p><strong>file_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – file path to TXT file holding a list of GeoTIF file paths</p></li>
+<li><p><strong>file_path_label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – file path to TXT file holding a list of label data. Defaults to “”.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

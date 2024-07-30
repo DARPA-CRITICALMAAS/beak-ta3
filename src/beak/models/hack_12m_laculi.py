@@ -37,9 +37,9 @@ regional_scale_southwest = {
         # Magnetotellurics
         "CONUS_MT2023_9km": True,
         # Geology
-        "SGMC_LITH_PROXIMITY": True,  # TBD
-        "SGMC_AGE": True,   # TBD
-        "Geology_Paleolatitude_Period_Minimum": True,  # Lawley
+        "SGMC_Distance_to_Unconsolidated": True,
+        "SGMC_MinAge": True,                            # Not Max, maybe even not. Lets try.
+        "Geology_Paleolatitude_Period_Minimum": True,   # Lawley, maybe even not. Lets try.
     },
     "GOOFY_GOPHER": {
         # Seismics
@@ -57,9 +57,9 @@ regional_scale_southwest = {
         # Magnetotellurics
         "CONUS_MT2023_9km": True,
         # Geology
-        "SGMC_LITH": True,  # TBD
-        "SGMC_AGE": True,  # TBD
-        "Geology_Paleolatitude_Period_Minimum": True,  # Lawley
+        "SGMC_Distance_to_Unconsolidated": True,
+        "SGMC_MinAge": True,                            # Not Max, maybe even not. Lets try.
+        "Geology_Paleolatitude_Period_Minimum": True,   # Lawley, maybe even not. Lets try.
         # Elevation
         "Li_dem": True,
         "Li_slope": True,
@@ -81,9 +81,9 @@ regional_scale_southwest = {
         # Magnetotellurics
         "CONUS_MT2023_9km": True,
         # Geology
-        "SGMC_LITH": True,  # TBD
-        "SGMC_AGE": True,  # TBD
-        "Geology_Paleolatitude_Period_Minimum": True,  # Lawley
+        "SGMC_Distance_to_Unconsolidated": True,
+        "SGMC_MinAge": True,                            # Not Max, maybe even not. Lets try.
+        "Geology_Paleolatitude_Period_Minimum": True,   # Lawley, maybe even not. Lets try.
         # Elevation
         "Li_dem": True,
         "Li_slope": True,
@@ -107,9 +107,9 @@ regional_scale_southwest = {
         # Magnetotellurics
         "CONUS_MT2023_9km": True,
         # Geology
-        "SGMC_LITH": True,  # TBD
-        "SGMC_AGE": True,  # TBD
-        "Geology_Paleolatitude_Period_Minimum": True,  # Lawley
+        "SGMC_Distance_to_Unconsolidated": True,
+        "SGMC_MinAge": True,                            # Not Max, maybe even not. Lets try.
+        "Geology_Paleolatitude_Period_Minimum": True,   # Lawley, maybe even not. Lets try.
         # Elevation
         "Li_dem": True,
         "Li_slope": True,

@@ -101,24 +101,35 @@
 <dd><p>Load data, run SOM and k-means clustering, write output to file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>args</strong> (<em>dict</em>) – Dictionary holding all parameters for SOM and k-means clustering.</p>
+<dd class="field-odd"><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary holding all parameters for SOM and k-means clustering.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="beak.methods.som.do_nextsomcore_save_results.cluster_hit_count">
-<span class="sig-prename descclassname"><span class="pre">beak.methods.som.do_nextsomcore_save_results.</span></span><span class="sig-name descname"><span class="pre">cluster_hit_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">som</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file_somspace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/do_nextsomcore_save_results.html#cluster_hit_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.do_nextsomcore_save_results.cluster_hit_count" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.do_nextsomcore_save_results.</span></span><span class="sig-name descname"><span class="pre">cluster_hit_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">som</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file_somspace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_folder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/do_nextsomcore_save_results.html#cluster_hit_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.do_nextsomcore_save_results.cluster_hit_count" title="Link to this definition"></a></dt>
 <dd><p>Counts hits per cluster and creates a NumPy array with cluster numbers and hit counts. Saves the array to a text file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>som</strong> (<em>dict</em>) – Dictionary holding the SOM codebook vectors, U-matrix, number of rows and columns, dimension and clusters.</p></li>
-<li><p><strong>output_file_somspace</strong> (<em>str</em>) – full file path for txt file holding som space results</p></li>
-<li><p><strong>output_path</strong> (<em>str</em>) – file path for writhing txt file</p></li>
+<li><p><strong>som</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary holding the SOM codebook vectors, U-matrix, number of rows and columns, dimension and clusters.</p></li>
+<li><p><strong>output_file_somspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – full file path for txt file holding som space results</p></li>
+<li><p><strong>output_folder</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – file path for writhing txt file</p></li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.methods.som.do_nextsomcore_save_results.create_bmu_id">
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.do_nextsomcore_save_results.</span></span><span class="sig-name descname"><span class="pre">create_bmu_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">som_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">som_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_folder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/do_nextsomcore_save_results.html#create_bmu_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.do_nextsomcore_save_results.create_bmu_id" title="Link to this definition"></a></dt>
+<dd><p>Generate BMU (Best Matching Unit) IDs for all combinations of SOM (Self-Organizing Map) coordinates.
+Args:
+som_x (int): The extent of the SOM space along the x-axis.
+som_y (int): The extent of the SOM space along the y-axis.
+Returns:
+list: A 2D array of BMU IDs for each combination of SOM coordinates.</p>
 </dd></dl>
 
 </section>

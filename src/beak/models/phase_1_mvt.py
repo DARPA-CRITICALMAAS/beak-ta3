@@ -67,6 +67,35 @@ national_scale = {
         "Seismic_LAB_Hoggard": True,
         "Seismic_Moho": True,
     },
+    "PREFERRED_ISOGRAV_NUMERICAL": {
+        # Proximity
+        "Terrane_Proximity": True,
+        "Geology_PassiveMargin_Proximity": True,
+        "Geology_BlackShale_Proximity": True,
+        "Geology_Fault_Proximity": True,
+        # Paleogeography
+        "Geology_Paleolatitude_Period_Maximum": True,
+        "Geology_Paleolatitude_Period_Minimum": True,
+        # Gravity
+        "Gravity_GOCE_ShapeIndex": True,
+        "Gravity_Bouguer": False,
+        "Gravity_Bouguer_HGM": False,
+        "Gravity_Bouguer_UpCont30km_HGM": True,
+        "Gravity_Bouguer_HGM_Worms_Proximity": True,
+        "Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity": True,
+        # Isostatic Gravity
+        "IsostaticGravity": True,
+        "IsostaticGravity_HGM": True,
+        # Magnetic
+        "Magnetic_HGM": True,
+        "Magnetic_LongWavelength_HGM": True,
+        "Magnetic_HGM_Worms_Proximity": True,
+        "Magnetic_LongWavelength_HGM_Worms_Proximity": True,
+        # Seismic
+        "Seismic_LAB_Priestley": False,
+        "Seismic_LAB_Hoggard": True,
+        "Seismic_Moho": True,
+    },
     "PREFERRED_ISOGRAV": {
         # Geology
         "Geology_Lithology_Majority": True,

@@ -19,9 +19,9 @@ def run_script(script_path, *args):
 current_dir = Path(os.path.dirname(__file__)).resolve()
 os.chdir(current_dir)
 
-# List of scripts to run
+# List of scripts to run, path can take subfolders: subfoler/example.py
 list_to_call = [
-    ("regional_102008_500_mama_nico_upmidwest/som/02_som_baseline_bison.py",
+    ("01_som_example_call.py",
      ["--epochs", "50", "--som_x", "10", "--som_y", "10"]),
 ]
 
