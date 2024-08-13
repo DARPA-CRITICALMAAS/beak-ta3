@@ -1,94 +1,93 @@
 """
-This file contains the models used for the magmatic nico experiment.
-The BISON model is used as a geophysical baseline model for deeper sources (even shallow, but no surface data).
-The JELLYFISH model is most comparable to the google sheet model configuration, but does not include high-res data.
+This file contains the models used for the peralkaline carbinatite REE experiment.
 """
 
-regional_scale_upper_midwest = {
+national_scale = {
     "BASELINE_BISON": {
-        # Seismics
+        # Geophysics: Seismic
         "LAB": True,
         "LAB_HGM": True,
         "LAB_Worms_Proximity": True,
         "Moho": True,
-        # Gravity
-        "SatelliteGravity_ShapeIndex": True,
-        "CEUS_GRAV_Isostatic_CEUSSSC_R0": True,
-        "CEUS_GRAV_RI_CEUSSSC_R0": True,
-        "CEUS_GRAV_RI_HD_CEUSSSC_R0": True,
-        "CEUS_GRAV_RI_1VD_CEUSSSC_R0": True,
-        "CEUS_GRAV_RI_HD_1VD_CEUSSSC_R0": True,
-        # Magnetics
+        # Geophysics: Gravity
+        "SatelliteGravity_ShapeIndex": False,                # experimental
+        "Gravity_Up30km_HGM": True,
+        "DeepGravitySources_Worms_Proximity": True,
+        "IsostaticGravity": True,
+        "IsostaticGravity_HGM": True,
+        # Geophysics: Magnetic
         "Mag_RTP": True,
         "Mag_RTP_HGM": True,
-        "ShallowMagSources_Worms_Proximity": True,
-        "Mag_RTP_DeepSources": True,
         "Mag_RTP_HGM_DeepSources": True,
         "DeepMagSources_Worms_Proximity": True,
         "Mag_LogAnalyticSignal": True,
-        "CEUS_MAG_DRTP_CEUSSSC_R0": True,
-        "CEUS_MAG_DRTP_TDR_CEUSSSC_R0": True,
-        "CEUS_MAG_DRTP_HD_TDR_CEUSSSC_R0": True,
-        "CEUS_MAG_TMAG_AAS_CEUSSSC_R0_Log": True,
-        # Magnetotellurics
+        # Geophysics: Magnetotelluric
         "CONUS_MT2023_9km": True,
         "CONUS_MT2023_15km": True,
         "CONUS_MT2023_30km": True,
-        "CONUS_MT2023_48km": True,
-        "CONUS_MT2023_92km": True,
     },
     "JITTER_JELLYFISH": {
-        # Seismics
+        # Geophysics: Seismic
         "LAB": True,
         "LAB_HGM": True,
         "LAB_Worms_Proximity": True,
         "Moho": True,
-        # Gravity
-        "SatelliteGravity_ShapeIndex": True,
-        "CEUS_GRAV_Isostatic_CEUSSSC_R0": True,
-        "CEUS_GRAV_RI_CEUSSSC_R0": True,
-        "CEUS_GRAV_RI_HD_CEUSSSC_R0": True,
-        "CEUS_GRAV_RI_1VD_CEUSSSC_R0": True,
-        "CEUS_GRAV_RI_HD_1VD_CEUSSSC_R0": True,
-        # Magnetics
+        # Geophysics: Gravity
+        "SatelliteGravity_ShapeIndex": False,  # experimental
+        "Gravity_Up30km_HGM": True,
+        "DeepGravitySources_Worms_Proximity": True,
+        "IsostaticGravity": True,
+        "IsostaticGravity_HGM": True,
+        # Geophysics: Magnetic
         "Mag_RTP": True,
         "Mag_RTP_HGM": True,
-        "ShallowMagSources_Worms_Proximity": True,
-        "Mag_RTP_DeepSources": True,
         "Mag_RTP_HGM_DeepSources": True,
         "DeepMagSources_Worms_Proximity": True,
-        "Mag_LogAnalyticSignal": True,
-        "CEUS_MAG_DRTP_CEUSSSC_R0": True,
-        "CEUS_MAG_DRTP_TDR_CEUSSSC_R0": True,
-        "CEUS_MAG_DRTP_HD_TDR_CEUSSSC_R0": True,
-        "CEUS_MAG_TMAG_AAS_CEUSSSC_R0_Log": True,
-        # Magnetotellurics
+        "Mag_LogAnalyticSignal": True,  # experimental
+        # Geophysics: Magnetotelluric
         "CONUS_MT2023_9km": True,
         "CONUS_MT2023_15km": True,
         "CONUS_MT2023_30km": True,
-        "CONUS_MT2023_48km": True,
-        "CONUS_MT2023_92km": True,
+        # Geophysics: Radiometry
+        "NAMrad_K": True,
+        "NAMrad_Th": True,
+        "NAMrad_U": True,
         # Geology
-        "BGE_ALL_NORILSK": True,                        # TA2
-        "BGE_DEPOSIT_NORILSK": True,                    # TA2
-        "BGE_ROCK_TYPE_NORILSK": True,                  # TA2
+        "TA2_beg_rock_type_sgmc_pacree": True,
+        "dist_SGMC_Geol_carbonatite_alkali_pegmat": True
+        # ADD HERE
+    },
+    "HACKING_HAMSTER": {
+        # Geophysics: Seismic
+        "LAB": False,
+        "LAB_HGM": True,
+        "LAB_Worms_Proximity": True,
+        "Moho": True,
+        # Geophysics: Gravity
+        "SatelliteGravity_ShapeIndex": False,  # experimental
+        "Gravity_Up30km_HGM": True,
+        "DeepGravitySources_Worms_Proximity": False,
+        "IsostaticGravity": True,
+        "Gravity_HGM": True,
+        # Geophysics: Magnetic
+        "Mag_RTP": False,
+        "Mag_RTP_HGM": True,
+        "Mag_RTP_HGM_DeepSources": True,
+        "DeepMagSources_Worms_Proximity": True,
+        "Mag_LogAnalyticSignal": False,  # experimental
+        "Mag_RTP_VD": True,
+        # Geophysics: Magnetotelluric
+        "CONUS_MT2023_9km": True,
+        "CONUS_MT2023_15km": True,
+        "CONUS_MT2023_48km": True,
+        # Geophysics: Radiometry
+        "NAMrad_K": True,
+        "NAMrad_Th": True,
+        "NAMrad_U": True,
+        # Geology
+        "TA2_beg_rock_type_sgmc_pacree": True,
+        "dist_SGMC_Geol_carbonatite_alkali_pegmat": True
+        # ADD HERE
     },
 }
 
-# Set models without using "dense" proximity information
-models = ["DROPOUT_DUCK", "LOSS_LLAMA"]
-
-update = regional_scale_upper_midwest
-update["DROPOUT_DUCK"] = update["BASELINE_BISON"].copy()
-update["LOSS_LLAMA"] = update["JITTER_JELLYFISH"].copy()
-
-layers_to_false = [
-    "ShallowGravitySources_Worms_Proximity",
-    "IsostaticGravity_Worms_Proximity",
-    "ShallowMagSources_Worms_Proximity",
-]
-
-for model in models:
-    for layer in layers_to_false:
-        if layer in update[model].keys():
-            update[model][layer] = False

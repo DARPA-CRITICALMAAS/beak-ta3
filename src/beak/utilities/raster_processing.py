@@ -3,7 +3,7 @@ import os
 import warnings
 
 from pathlib import Path
-from beartype.typing import Optional, Tuple, Union, Sequence, List, Literal
+from beartype.typing import Optional, Tuple, Union, Sequence, List, Literal, Dict
 
 import numpy as np
 import geopandas as gpd
@@ -18,6 +18,7 @@ from rasterio.mask import mask
 from rasterio.enums import Resampling
 from rasterio.crs import CRS
 from tqdm import tqdm
+from osgeo import gdal
 
 from beak.utilities.io import (
     create_file_folder_list,
@@ -28,7 +29,7 @@ from beak.utilities.io import (
 )
 
 from beak.utilities.io import load_raster, save_raster
-from beak.utilities.checks import check_grid_alignment
+from beak.utilities.checks import check_grid_alignment, check_raster_input
 
 # References
 # Some non-trivial functionalities were adapted from other sources.
@@ -917,6 +918,232 @@ def snap_raster(
 
 
 # endregion: snap raster
+
+# region: calculate distance
+def __create_gdal_proximity_options(**kwargs) -> List:
+    """
+    Creates GDAL proximity options.
+
+    Returns:
+        List[str]: List of GDAL proximity options.
+    """
+    out_list = [f"{key}={value}" for key, value in kwargs.items()]
+    return out_list
+
+
+def calculate_distance_from_raster_gdal_base_fn(
+    input_path: Union[str, Path],
+    output_path: Union[str, Path],
+    **kwargs,
+) -> np.ndarray:
+    """
+    Calculates the distance from a raster to a given point using the GDAL tool.
+
+    Args:
+        input_path (Union[str, Path]): The input raster file path.
+        output_path (Union[str, Path]): The output raster file path.
+        **kwargs: Additional arguments for GDAL's gdal_proximity tool.
+    """
+    # Convert file path to string
+    input_path = str(input_path)
+    output_path = str(output_path)
+
+    # Open rasterized file and get information
+    raster = gdal.Open(input_path, gdal.GA_ReadOnly)
+    band = raster.GetRasterBand(1)
+
+    # Get spatial metadata
+    transform = raster.GetGeoTransform()
+    crs = raster.GetProjection()
+    columns = raster.RasterXSize
+    rows = raster.RasterYSize
+
+    nodata = band.GetNoDataValue()
+
+    # Create options list
+    options = __create_gdal_proximity_options(**kwargs)
+
+    # Create empty proximity raster in memory
+    driver = gdal.GetDriverByName("GTiff")
+
+    # Initialize output raster
+    out_raster = driver.Create(output_path, columns, rows, 1, gdal.GDT_Float32, options=["COMPRESS=LZW"])
+    out_raster.SetGeoTransform(transform)
+    out_raster.SetProjection(crs)
+
+    out_band = out_raster.GetRasterBand(1)
+    out_band.SetNoDataValue(nodata)
+
+    # Compute proximity
+    gdal.ComputeProximity(band, out_band, options)
+
+
+def _calculate_distance_from_raster_core(
+    raster_array: np.ndarray,
+    raster_meta: Dict,
+    **kwargs,
+) -> Tuple[np.ndarray, Dict]:
+    """
+    Core function for raster distance calculation.
+
+    Args:
+        raster_array (np.ndarray): The 2D input raster array.
+        raster_meta (Dict): The metadata dictionary of the input raster, containing spatial information.
+        **kwargs: Additional arguments for GDAL's gdal_proximity tool.
+
+        The "use_input_nodata" option does not work with np.nan values (no effect).
+            Only real values will have an effect on the result.
+
+    Returns:
+        np.ndarray: A numpy array containing the computed distances from each pixel to the nearest target pixel.
+    """
+    # Extract spatial information from rasterio metadata
+    transform = raster_meta["transform"]
+    crs = raster_meta["crs"].to_wkt()
+    columns = raster_meta["width"]
+    rows = raster_meta["height"]
+    nodata = raster_meta["nodata"]
+
+    # Create options list
+    options = __create_gdal_proximity_options(**kwargs)
+
+    # Refactor transformation parameters
+    x_geo = (transform.c, transform.a, transform.b)
+    y_geo = (transform.f, transform.d, transform.e)
+
+    # Create in-memory GDAL dataset from input array
+    driver = gdal.GetDriverByName("MEM")
+
+    raster = driver.Create("", columns, rows, 1, gdal.GDT_Float32)
+    raster.SetGeoTransform(x_geo + y_geo)
+    raster.SetProjection(crs)
+    band = raster.GetRasterBand(1)
+    band.WriteArray(raster_array)
+    band.SetNoDataValue(nodata)
+
+    # Create empty proximity raster
+    out_raster = driver.Create("", columns, rows, 1, gdal.GDT_Float32)
+    out_raster.SetGeoTransform(x_geo + y_geo)
+    out_raster.SetProjection(crs)
+    out_band = out_raster.GetRasterBand(1)
+    out_band.SetNoDataValue(nodata)
+
+    # Compute proximity
+    gdal.ComputeProximity(band, out_band, options)
+
+    # Create outputs
+    out_array = out_band.ReadAsArray()
+    out_meta = raster_meta.copy()
+
+    # Update metadata
+    out_meta["dtype"] = out_array.dtype.name
+    out_meta["count"] = 1
+
+    return out_array, out_meta
+
+
+def calculate_distance_from_raster(
+    input_path: Optional[Union[str, Path]] = None,
+    input_raster: Optional[rasterio.io.DatasetReader] = None,
+    input_data: Optional[Tuple[np.ndarray, Dict]] = None,
+    input_band: int = 1,
+    input_mask: Optional[rasterio.io.DatasetReader] = None,
+    unit_conversion: Number = 0.001,
+    verbose: bool = False,
+    values: str = "1",
+    distunits: Literal["PIXEL", "GEO"] = "GEO",
+    **kwargs,
+) -> Tuple[np.ndarray, dict]:
+    """
+    Calculates the distance from specified values in a raster to each pixel using GDAL's proximity tool.
+
+    Args:
+        input_path (Union[str, Path], optional): The input raster file path.
+        input_raster (rasterio.io.DatasetReader, optional], optional): The input raster.
+        input_data (Tuple[np.ndarray, Dict], optional): A tuple containing the input raster array and metadata.
+        input_band (int, optional): The band number to read from the raster.
+            Defaults to 1.
+        input_mask (rasterio.io.DatasetReader, optional): A raster for applying a mask.
+        unit_conversion (Number): The conversion factor for unit conversion.
+        verbose (bool): Whether to show GDAL warnings and exceptions.
+            Defaults to False.
+        values (str, optional): A comma-separated string of target values to calculate distances from, e.g. "1, 2".
+            Defaults to "1", intended for binary rasters.
+        distunits (Literal["PIXEL", "GEO"], optional): The units for distance calculation.
+            Can be "PIXEL" or "GEO". Defaults to "GEO".
+        **kwargs: Additional arguments for GDAL's gdal_proximity tool.
+
+    Returns:
+        Tuple[np.ndarray, dict]: A tuple containing the distance array and the updated metadata dictionary.
+        Official documentation: https://gdal.org/programs/gdal_proximity.html
+    """
+    # Manage GDAL warnings
+    if verbose is False:
+        gdal.DontUseExceptions()
+
+    # Check inputs and read data
+    raster_array, raster_meta = check_raster_input(input_path, input_raster, input_data, input_band)
+
+    # Reduce dimensions
+    if raster_array.ndim == 3:
+        array_slice = input_band - 1
+        raster_array = raster_array[array_slice, :, :]
+        raster_array = np.squeeze(raster_array)
+        raster_meta["count"] = 1
+
+    # Execute distance calculation
+    out_array, out_meta = _calculate_distance_from_raster_core(
+        raster_array,
+        raster_meta,
+        values=values,
+        distunits=distunits,
+        **dict(kwargs),
+    )
+
+    # Apply unit conversion
+    out_array = out_array * unit_conversion
+
+    # Apply mask if provided
+    if input_mask is not None:
+        mask_array, mask_meta = check_raster_input(raster=input_mask)
+        out_array = _mask_array(out_array, out_meta["nodata"], mask_array, mask_meta["nodata"])
+
+    return out_array, out_meta
+
+
+def _mask_array(raster_array, raster_nodata, mask_array, mask_value):
+    """
+    Replaces raster values based on a provided mask.
+
+    Returns:
+        np.ndarray: A masked array.
+    """
+    # Equalize dimensions of both arrays
+    raster_dim = raster_array.ndim
+    mask_dim = mask_array.ndim
+
+    raster_array = np.expand_dims(raster_array, axis=0) if raster_dim < mask_dim else raster_array
+
+    # Mask
+    if np.isnan(mask_value) is True:
+        bool_mask = np.isnan(mask_array)
+    else:
+        bool_mask = np.equal(mask_array, mask_value)
+
+    raster_array = np.where(
+        bool_mask,
+        raster_nodata,
+        raster_array
+    )
+
+    # Set-back dimension
+    raster_array = np.squeeze(raster_array) if raster_dim != raster_array.ndim else raster_array
+
+    return raster_array
+
+
+# endregion: calculate distance
+
 
 # region: Test code
 

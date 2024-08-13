@@ -106,7 +106,7 @@ def _scale_data(
     """
     if method == "minmax":
         scaler = MinMaxScaler()
-    elif method == "standard":
+    elif method == "standard" or method == "std":
         scaler = StandardScaler()
     elif method == "ln":
         scaler = FunctionTransformer(_log_transform_ln, kw_args={'columns': columns})
@@ -149,7 +149,7 @@ def _scale_raster_core(
 def scale_raster(
     input_folder: Path,
     output_folder: Path,
-    method: Literal["minmax", "standard", "ln", "ln1p"],
+    method: Literal["minmax", "standard", "std", "ln", "ln1p"],
     extensions: Optional[Sequence[str]] = [".tif", ".tiff"],
     include_source: bool = True,
     n_workers: int = mp.cpu_count(),

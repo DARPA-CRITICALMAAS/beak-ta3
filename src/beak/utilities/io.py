@@ -61,18 +61,27 @@ def load_dataset(
     return pd.read_csv(file, encoding=encoding_type, nrows=nrows, **kwargs)
 
 
-def load_raster(file: Path) -> rasterio.io.DatasetReader:
+def load_raster(
+    file: Union[str, Path], return_meta: bool = False,
+) -> Union[rasterio.io.DatasetReader, Tuple[rasterio.io.DatasetReader, Dict]]:
     """
     Load a single raster file using rasterio.
 
     Args:
         file (Path): The path to the raster file.
-
+        return_meta (bool): If True, return the raster metadata along with the dataset.
+        Defaults to False.
     Returns:
         rasterio.io.DatasetReader: The opened raster dataset.
-
+        Dict: The raster metadata.
     """
-    return rasterio.open(file)
+    file = Path(file)
+    raster = rasterio.open(file)
+
+    if return_meta is False:
+        return raster
+    else:
+        return raster, raster.meta
 
 
 def load_rasters(
@@ -110,7 +119,7 @@ def read_raster(raster: rasterio.io.DatasetReader, replace_nan=False) -> np.ndar
         np.ndarray: The raster data as a NumPy array.
     """
     assert raster.count == 1
-    
+
     out_raster = raster.read()
     out_raster = np.where(out_raster == raster.nodata, np.nan, out_raster) if replace_nan else out_raster
     return out_raster
@@ -233,7 +242,7 @@ def check_path(folder: Path):
 
 
 def save_raster(
-    path: Path,
+    path: Union[str, Path],
     array: np.ndarray,
     crs: Optional[rasterio.crs.CRS] = None,
     height: Optional[int] = None,
@@ -271,6 +280,9 @@ def save_raster(
     Returns:
         (None): None
     """
+    if isinstance(path, str):
+        path = Path(path)
+
     if path.exists() and overwrite is False:
         print(f"File already exists: {path.name}.")
         return
