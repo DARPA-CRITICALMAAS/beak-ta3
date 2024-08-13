@@ -1,0 +1,27 @@
+|                                          | BASELINE_BISON | JITTER_JELLYFISH | HACKING_HAMSTER |
+| :--------------------------------------- | :------------- | :--------------- | :-------------- |
+| CONUS_MT2023_15km                        | x              | x                | x               |
+| CONUS_MT2023_30km                        | x              | x                | -               |
+| CONUS_MT2023_48km                        | -              | -                | x               |
+| CONUS_MT2023_9km                         | x              | x                | x               |
+| DeepGravitySources_Worms_Proximity       | x              | x                | -               |
+| DeepMagSources_Worms_Proximity           | x              | x                | x               |
+| Gravity_HGM                              | -              | -                | x               |
+| Gravity_Up30km_HGM                       | x              | x                | x               |
+| IsostaticGravity                         | x              | x                | x               |
+| IsostaticGravity_HGM                     | x              | x                | -               |
+| LAB                                      | x              | x                | -               |
+| LAB_HGM                                  | x              | x                | x               |
+| LAB_Worms_Proximity                      | x              | x                | x               |
+| Mag_LogAnalyticSignal                    | x              | x                | -               |
+| Mag_RTP                                  | x              | x                | -               |
+| Mag_RTP_HGM                              | x              | x                | x               |
+| Mag_RTP_HGM_DeepSources                  | x              | x                | x               |
+| Mag_RTP_VD                               | -              | -                | x               |
+| Moho                                     | x              | x                | x               |
+| NAMrad_K                                 | -              | x                | x               |
+| NAMrad_Th                                | -              | x                | x               |
+| NAMrad_U                                 | -              | x                | x               |
+| SatelliteGravity_ShapeIndex              | -              | -                | -               |
+| TA2_beg_rock_type_sgmc_pacree            | -              | -                | x               |
+| dist_SGMC_Geol_carbonatite_alkali_pegmat | -              | -                | x               |
