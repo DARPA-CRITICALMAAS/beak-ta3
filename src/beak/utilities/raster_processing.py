@@ -9,14 +9,17 @@ import numpy as np
 import geopandas as gpd
 import rasterio.coords
 import scipy
-import rasterio
 import math
-
 from numbers import Number
+
+import rasterio
+import rasterio.crs
+import rasterio.windows
 from rasterio import warp
 from rasterio.mask import mask
 from rasterio.enums import Resampling
 from rasterio.crs import CRS
+
 from tqdm import tqdm
 from osgeo import gdal
 
@@ -24,8 +27,6 @@ from beak.utilities.io import (
     create_file_folder_list,
     create_file_list,
     check_path,
-    load_raster,
-    save_raster,
 )
 
 from beak.utilities.io import load_raster, save_raster
@@ -36,12 +37,12 @@ from beak.utilities.checks import check_grid_alignment, check_raster_input
 # The original sources are listed below and referenced in the code as well.
 #
 # EIS toolkit:
-# GitHub repository https://github.com/GispoCoding/eis_toolkit under EUPL-1.2 license.
+# GitHub repository https://github.com/GispoCoding/eis_toolkit under EUPL-1.2 licence.
 
 
 def fill_nodata_with_mean(
     array: np.ndarray,
-    nodata_value: np.number,
+    nodata_value: Number,
     size: int = 3,
     num_nan_max: int = 4,
 ) -> np.ndarray:
@@ -519,7 +520,7 @@ def clip_raster(
     bounds: Optional[
         Tuple[Optional[Number], Optional[Number], Optional[Number], Optional[Number]]
     ] = None,
-    raster_extensions: List[str] = [".tif", ".tiff"],
+    raster_extensions: Optional[Sequence[str]]=None,
     include_source: bool = True,
     recursive: bool = True,
     all_touched: bool = False,
@@ -537,12 +538,15 @@ def clip_raster(
             Only features that satisfy the query will be used for clipping. Ignored if shapefile is None.
         bounds (Optional[Tuple[Optional[Number], Optional[Number], Optional[Number], Optional[Number]]]):
             Bounding box coordinates (minx, miny, maxx, maxy) used for clipping. Ignored if shapefile is not None.
-        raster_extensions (List[str]): List of file extensions to consider as rasters. Default is [".tif", ".tiff"].
+        raster_extensions (List[str]): List of file extensions to consider as rasters. Default is ['.tif', '.tiff'].
         include_source (bool): Flag indicating whether to include the input folder itself as a source for clipping. Default is True.
         recursive (bool): Flag indicating whether to recursively search for rasters in subfolders. Default is True.
-        all_touched (bool): Flag indicating whether to include all pixels touched by the shapefile or bounding box. Default is Fals.
+        all_touched (bool): Flag indicating whether to include all pixels touched by the shapefile or bounding box. Default is False.
         n_workers (int): Number of parallel workers to use for clipping. Default is the number of available CPU cores.
     """
+    if raster_extensions is None:
+        raster_extensions = [".tif", ".tiff"]
+
     if recursive is False and include_source is False:
         raise ValueError(
             "Either recursive or include_source must be True to avoid an empty file list."
@@ -777,7 +781,7 @@ def _snap_raster(
     Args:
         raster_array (np.ndarray): The input raster array.
         raster_meta (dict): The metadata of the input raster.
-        snap_data (dict): The dictionary containing the data for snapping the input raster.
+        snap_meta (dict): The dictionary containing the data for snapping the input raster.
 
     Returns:
         Tuple[np.ndarray, dict]:
@@ -795,6 +799,8 @@ def _snap_raster(
     cells_added_x = math.ceil(snap_px_size_x / raster_px_size_x)
     cells_added_y = math.ceil(snap_px_size_y / raster_px_size_y)
 
+    dtype = raster_meta["dtype"]
+
     out_image = np.full(
         (
             raster_meta["count"],
@@ -803,6 +809,8 @@ def _snap_raster(
         ),
         raster_meta["nodata"],
     )
+
+    out_image = out_image.astype(dtype)
     out_meta = raster_meta.copy()
 
     left_snap_coordinate = (
@@ -884,6 +892,7 @@ def snap_raster(
 
     Raises:
         ValueError: Raster and and snap raster are not in the same CRS.
+        Warning: Raster grids are already aligned.
     """
     if isinstance(raster, rasterio.DatasetReader):
         raster_array = raster.read()
@@ -911,9 +920,13 @@ def snap_raster(
         raise ValueError("Raster and and snap raster have different CRS.")
 
     if check_grid_alignment(src_bounds, snap_bounds) is True:
-        raise ValueError("Raster grids are already aligned.")
+        warnings.warn("Raster grids are already aligned.")
 
-    out_image, out_meta = _snap_raster(raster_array, raster_meta, snap_meta)
+        out_image = raster_array
+        out_meta = raster_meta
+    else:
+        out_image, out_meta = _snap_raster(raster_array, raster_meta, snap_meta)
+
     return out_image, out_meta
 
 
@@ -935,7 +948,7 @@ def calculate_distance_from_raster_gdal_base_fn(
     input_path: Union[str, Path],
     output_path: Union[str, Path],
     **kwargs,
-) -> np.ndarray:
+):
     """
     Calculates the distance from a raster to a given point using the GDAL tool.
 

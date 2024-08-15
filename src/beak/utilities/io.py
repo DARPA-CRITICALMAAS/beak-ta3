@@ -1,21 +1,25 @@
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-import rasterio
 import shutil
 import zipfile
+
+import rasterio
+from rasterio import MemoryFile
 from rasterio.crs import CRS
+from rasterio.io import MemoryFile
 
 import os
 import sys
 import multiprocessing as mp
 
 from pathlib import Path
-from beartype.typing import Optional, Tuple, Union, Dict, Sequence, List, Any
+from beartype.typing import Optional, Tuple, Union, Dict, Sequence, List
 from numbers import Number
 from collections import Counter
 from tqdm import tqdm
 
+# from importlib.resources.abc import Traversable
 from beak.utilities.checks import check_write_permissions
 
 
@@ -37,7 +41,10 @@ def data_folder(folder_name: str = "beak.data") -> Path:
     else:
         from importlib.resources import files
 
-    return files(folder_name)
+    out_folder = files(folder_name)
+    out_folder = str(out_folder)
+
+    return Path(out_folder)
 
 
 def load_dataset(
@@ -85,18 +92,22 @@ def load_raster(
 
 
 def load_rasters(
-    folder: Path, extensions: List[str] = [".tif", ".tiff"]
-) -> List[rasterio.io.DatasetReader]:
+    folder: Path, extensions: Optional[Sequence[str]] = None,
+) -> Tuple[Sequence[Path], Sequence[rasterio.io.DatasetReader]]:
     """
     Load raster files of a given type from a folder.
 
     Args:
         folder (Path): The folder path where the raster files are located.
-        extensions (List[str]): List of file extensions to consider. Defaults to [".tif", ".tiff"].
+        extensions (List[str]): List of file extensions to consider.
+            Defaults are ['.tif', '.tiff'].
 
     Returns:
         Tuple[List[Path], List[rasterio.io.DatasetReader]]: A tuple containing the list of file paths and the loaded raster datasets.
     """
+    if extensions is None:
+        extensions = [".tif", ".tiff"]
+
     file_list = create_file_list(folder, extensions)
     loaded_rasters = []
 
@@ -140,21 +151,20 @@ def read_rasters(raster_list: List[rasterio.io.DatasetReader]) -> List[np.ndarra
 
 def get_filename_and_extension(file: Path) -> Tuple[str, str]:
     """
-    Get the filename and extension from a given file path.
+    Read filename and extension from a given file path.
 
     Args:
         file (Path): The path to the file.
 
     Returns:
         Tuple[str, str]: A tuple containing the filename and extension.
-
     """
     return file.stem, file.suffix
 
 
 def create_file_list(
     folder: Path,
-    extensions: List[str] = [".tif", ".tiff"],
+    extensions: Optional[Sequence[str]] = None,
     recursive: bool = False,
 ) -> List[Path]:
     """
@@ -162,14 +172,17 @@ def create_file_list(
 
     Args:
         folder (Path): The folder path to search for files.
-        extensions (List[str]): The list of file extensions to include.
-            Defaults to [".tif", ".tiff"].
+        extensions (Optional[Sequence[str]]): Sequence of file extensions to include.
+            Defaults are [".tif", ".tiff"].
         recursive (bool): Whether to search for files recursively in subdirectories.
             Defaults to False.
 
     Returns:
         List[Path]: A list of Path objects representing the files found.
     """
+    if extensions is None:
+        extensions = [".tif", ".tiff"]
+
     file_list = []
 
     if recursive is True:
@@ -194,9 +207,10 @@ def create_file_folder_list(
 
     Args:
         root_folder (Path): The root folder to search for folders.
+        exclude_types (Optional[Sequence[str]]): List of file extensions to exclude.
 
     Returns:
-        Tuple[List[Path], List[Path]]: A tuple containing two lists - the list of folders and the list of files.
+        Tuple[List[Path], List[Path]]: A tuple containing two lists: folders and files.
     """
     folder_list = []
     file_list = []
@@ -211,20 +225,20 @@ def create_file_folder_list(
         for folder in dirs:
             folder_list.append(Path(root) / folder)
 
-        for file in files:
-            if dirs:
-                file_list.append(Path(root) / folder / file)
-            else:
-                file_path = Path(root) / file
+            for file in files:
+                if dirs:
+                    file_list.append(Path(root) / folder / file)
+                else:
+                    file_path = Path(root) / file
 
-                # Ignore metadata files
-                if not file_path.suffix.lower() in exclude_types:
-                    file_list.append(file_path)
+                    # Ignore metadata files
+                    if not file_path.suffix.lower() in exclude_types:
+                        file_list.append(file_path)
 
     return folder_list, file_list
 
 
-def check_path(folder: Path):
+def check_path(folder: Union[str, Path]):
     """
     Check if path exists and create if not.
 
@@ -241,15 +255,44 @@ def check_path(folder: Path):
     return folder
 
 
+def create_raster_object_in_memory(
+    array: np.ndarray,
+    meta: dict,
+):
+    """
+    Create a raster object in memory using the given array and metadata.
+
+    Metadata must have the same number of bands as the array's shape.
+    Do not forget to close the in-memory raster after use with `raster.close()`
+
+    Args:
+        array (np.ndarray): The raster data as a NumPy array.
+        meta (dict): The metadata of the raster.
+
+    Returns:
+        rasterio.io.MemoryFile: The raster object in memory.
+    """
+    memfile = MemoryFile()
+    raster = memfile.open(**meta)
+
+    if array.ndim == 2:
+        raster.write(array, 1)
+    else:
+        for i in range(array.shape[0]):
+            raster.write(array[i], i + 1)
+
+    return raster
+
+
 def save_raster(
     path: Union[str, Path],
     array: np.ndarray,
     crs: Optional[rasterio.crs.CRS] = None,
     height: Optional[int] = None,
     width: Optional[int] = None,
-    nodata_value: Optional[np.number] = None,
+    nodata_value: Optional[Number] = None,
     transform: Optional[rasterio.transform.Affine] = None,
-    dtype: Optional[np.dtype] = None,
+    dtype: Optional[Union[str, np.dtype]] = None,
     metadata: Optional[Dict] = None,
     compress_method: Optional[str] = "lzw",
     compress_num_threads: Optional[Union[int, str]] = "all_cpus",
@@ -266,7 +309,8 @@ def save_raster(
         width (Optional[int]): The width (number of columns) of the raster.
         nodata_value (Optional[np.number]): The nodata value of the raster.
         transform (affine.Affine): The affine transformation matrix that maps pixel coordinates to CRS coordinates.
-        dtype (Optional[np.dtype]): The data type of the raster.
+        dtype (Optional[Union[str, np.dtype]]): The data type of the raster.
+            Either from class np.dtype or a string like "int8" or "float32".
             Defaults to None.
         metadata (Optional[Dict]): Additional metadata to be included in the raster file.
             If provided, remaining metadata arguments will be ignored.
@@ -291,17 +335,17 @@ def save_raster(
             array = np.expand_dims(array, axis=0)
 
         count = array.shape[0]
-        dtype = array.dtype if dtype is None else dtype
         nodata_value = metadata["nodata"] if nodata_value is None else nodata_value
+        dtype = array.dtype if dtype is None else dtype
+        dtype = dtype.name if isinstance(dtype, np.dtype) else dtype
 
-        if metadata is None:
-            if crs.is_epsg_code:
-                epsg_code = CRS.to_epsg(crs)
-                crs = CRS.from_epsg(epsg_code)
+        if metadata is None and crs.is_epsg_code:
+            epsg_code = CRS.to_epsg(crs)
+            crs = CRS.from_epsg(epsg_code)
 
             meta = {
                 "driver": "GTiff",
-                "dtype": str(dtype),
+                "dtype": dtype,
                 "nodata": nodata_value,
                 "width": width,
                 "height": height,
@@ -312,7 +356,7 @@ def save_raster(
         else:
             meta = metadata
             meta.update({"count": count})
-            meta.update({"dtype": str(dtype)})
+            meta.update({"dtype": dtype})
             meta.update({"nodata": nodata_value})
 
         with rasterio.open(
@@ -420,8 +464,8 @@ def spatial_filter(
 
 def load_model(
     model: dict,
-    folders: Sequence[Path],
-    file_extensions: Sequence[str] = [".tif", ".tiff"],
+    folders: List[Path],
+    file_extensions: Optional[List[str]] = None,
     verbose: int = 0,
 ):
     """Load model from dictionary and search for corresponding files.
@@ -429,7 +473,8 @@ def load_model(
     Args:
         model (dict): The model dictionary containing evidence layers.
         folders (Sequence[Path]): The list of folders to search for files.
-        file_extensions (Sequence[str], optional): The file extensions to consider. Defaults to [".tif", ".tiff"].
+        file_extensions (Sequence[str], optional): The file extensions to consider.
+            Defaults are [".tif", ".tiff"].
         verbose (int, optional): The verbosity level. Defaults to 1.
 
     Raises:
@@ -442,6 +487,9 @@ def load_model(
         Counter: A counter containing the number of files for each evidence layer.
     """
     # Load evidence layers from model dictionary
+    if file_extensions is None:
+        file_extensions = [".tif", ".tiff"]
+
     print("Loading model definition...")
     evidence_layers = []
     for layer, value in model.items():
@@ -540,7 +588,7 @@ def load_model(
                     print(f"- '{filename}' occurs {count} times")
         else:
             print(
-                f"Some filenames occur multiple times. Please check with option verbose=1 to see which files are affected."
+                f"Some filenames occur multiple times. Please check with option 'verbose=1' to see affected files."
             )
 
     print(f"Number of files in file list: {len(file_list)}")
@@ -555,6 +603,8 @@ def copy_folder_structure(
     Args:
         source_folder (Path): The source folder.
         destination_folder (Path): The destination folder.
+        include_source (bool): Whether to include the source folder.
+            Defaults to True.
         verbose (int, optional): The verbosity level. Defaults to 1.
     """
     # Get all folders in the root folder
@@ -650,7 +700,7 @@ def compress_to_zip(file_path: Path, method: int = zipfile.ZIP_LZMA, level: int 
 
 
 def save_geodataframe(
-    dataframe: gpd.GeoDataFrame, path: Union[Path, str], overwrite: bool = False
+    dataframe: gpd.GeoDataFrame, path: Union[str, Path], overwrite: bool = False
 ):
     """
     Save a GeoDataFrame to a file.
@@ -668,13 +718,14 @@ def save_geodataframe(
     Returns:
         None
     """
-    path = Path(path)
+    path_suffix = Path(path).suffix
+    path = str(path)
 
     write_file = check_write_permissions(path, overwrite)
     if write_file is True:
-        if path.suffix == ".shp":
+        if path_suffix == ".shp":
             dataframe.to_file(path, driver="ESRI Shapefile")
-        elif path.suffix == ".gpkg":
+        elif path_suffix == ".gpkg":
             dataframe.to_file(path, driver="GPKG")
 
 

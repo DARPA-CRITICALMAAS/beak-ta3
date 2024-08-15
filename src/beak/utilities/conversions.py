@@ -10,7 +10,7 @@ import rasterio
 import os
 
 from beak.utilities.preparation import create_encodings_from_dataframe
-from beak.utilities.raster_processing import fill_nodata_with_mean
+from beak.utilities.raster_processing import fill_nodata_with_mean, snap_raster
 from beak.utilities.vector_processing import _reproject_vector_data
 from beak.utilities.misc import replace_invalid_characters
 from beak.utilities.io import check_path, save_raster
@@ -18,6 +18,8 @@ from beak.utilities.io import check_path, save_raster
 from rasterio import features, profiles, transform
 from rasterio.crs import CRS
 from rasterio.enums import MergeAlg
+
+from numbers import Number
 
 from shapely.wkt import loads
 from shapely.geometry import Point
@@ -35,8 +37,8 @@ from tqdm import tqdm
 # region: General helper functions
 def transform_from_geometries(
     geodataframe: gpd.GeoDataFrame,
-    resolution: np.number,
-) -> Tuple[np.number, np.number, transform.Affine]:
+    resolution: Number,
+) -> Tuple[Number, Number, transform.Affine]:
     """
     Calculate the transform parameters required to convert the input geometries
     to a specified resolution. It takes a GeoDataFrame containing the geometries and the desired
@@ -196,21 +198,21 @@ def _rasterize_vector_helper(args):
     Returns:
         The result of the rasterize_vector_process function.
     """
-    return _rasterize_vector_process(*args)
+    return _rasterize_vector_core(*args)
 
 
 # Helper function to func partial process
-def _rasterize_vector_process(
+def _rasterize_vector_core(
     value_column: Optional[str],
     values: np.ndarray,
     geometries: gpd.array.GeometryArray,
     height: int,
     width: int,
-    nodata_value: np.number,
+    nodata_value: Number,
     transform: transform.Affine,
     all_touched: bool,
     merge_strategy: str,
-    default_value: np.number,
+    default_value: Number,
     dtype: Optional[np.dtype],
     impute_nodata: bool,
 ):
@@ -223,11 +225,11 @@ def _rasterize_vector_process(
         geometries (gpd.array.GeometryArray): The array of geometries to be rasterized.
         height (int): The height of the output raster.
         width (int): The width of the output raster.
-        nodata_value (np.number): The nodata value to be used in the output raster.
+        nodata_value (Number): The nodata value to be used in the output raster.
         transform (transform.Affine): The affine transformation to be applied to the output raster.
         all_touched (bool): Whether to consider all pixels touched by the geometries as valid.
         merge_strategy (str): The merge strategy to be used when multiple geometries overlap a pixel.
-        default_value (np.number): The default value to be used for pixels without any geometries.
+        default_value (Number): The default value to be used for pixels without any geometries.
         dtype (Optional[np.dtype]): The data type of the output raster. If None, it will be inferred from the values array.
         impute_nodata (bool): Whether to impute single nodata values in the output raster.
 
@@ -265,13 +267,13 @@ def _rasterize_vector_process(
 
 
 # Rasterize vector main function
-def rasterize_vector(
+def rasterize_datacube(
     value_type: Literal["categorical", "numerical", "ground_truth"],
     value_columns: List[str],
     geodataframe: gpd.GeoDataFrame,
     default_value: np.number = 1,
     nodata_value: np.number = -99999,
-    resolution: Optional[np.number] = None,
+    resolution: Optional[Number] = None,
     epsg_code: Optional[int] = None,
     base_raster_profile: Optional[Union[profiles.Profile, dict]] = None,
     merge_strategy: str = "replace",
@@ -286,7 +288,6 @@ def rasterize_vector(
     compress_num_threads: Optional[Union[str, int]] = "all_cpus",
     n_workers: int = mp.cpu_count(),
     chunksize: Optional[int] = None,
-    export_prefix: Optional[str] = None,
 ) -> Tuple[List, List, List]:
     """
     Rasterize vector data.
@@ -295,11 +296,11 @@ def rasterize_vector(
         value_type (Literal["categorical", "numerical", "ground_truth"]): The type of the values to be rasterized.
         value_columns (List[str]): The columns containing the values to be rasterized.
         geodataframe (gpd.GeoDataFrame): The GeoDataFrame containing the vector data.
-        default_value (np.number): The default value to be assigned to raster cells without a value.
+        default_value (Number): The default value to be assigned to raster cells without a value.
             Defaults to 1.
-        nodata_value (np.number): The nodata value to be assigned to raster cells.
+        nodata_value (Number): The nodata value to be assigned to raster cells.
             Defaults to -99999.
-        resolution (Optional[np.number]): The resolution of the raster cells.
+        resolution (Optional[Number]): The resolution of the raster cells.
             Defaults to None.
         epsg_code (Optional[int]): The EPSG code of the coordinate reference system.
             Defaults to None.
@@ -330,6 +331,7 @@ def rasterize_vector(
         chunksize (Optional[int]): The number of value columns to process in each worker process.
             Defaults to None.
 
+
     Returns:
         Tuple[List, List, List]: A tuple containing the list of output column names, the list of output rasters,
             and the list of output transforms.
@@ -343,8 +345,14 @@ def rasterize_vector(
             "Provide either resolution or base_raster_profile, but not both."
         )
 
+    if resolution is None and base_raster_profile is None:
+        raise ValueError(
+            "Provide either resolution or a raster profile."
+        )
+
     # Check saving options and special paths
-    if raster_save == True:
+    categorical_subfolders = []
+    if raster_save is True:
         if raster_save_folder is None:
             raise ValueError("Expected raster_save_folder to be given.")
         if raster_save_in_subfolders == True and value_type == "categorical":
@@ -376,6 +384,7 @@ def rasterize_vector(
 
     # Create Affine.transform
     geometries = geodataframe.geometry.values
+
     width, height, transform = (
         transform_from_geometries(geodataframe, resolution)
         if resolution is not None
@@ -467,22 +476,23 @@ def rasterize_vector(
 
     return out_columns, out_rasters, out_transforms
 
-    # endregion
+# endregion
 
 
 def create_binary_raster(
     geodataframe: gpd.GeoDataFrame,
     base_raster: Optional[rasterio.DatasetReader] = None,
-    resolution: Optional[np.number] = None,
+    resolution: Optional[Number] = None,
     nodata: Optional[int] = -99,
     query: Optional[str] = None,
     all_touched: bool = False,
     fill_negatives: bool = True,
     same_shape: bool = True,
     out_file: Optional[Union[str, Path]] = None,
-    dtype: Optional[np.dtype] = np.dtype(np.int8),
+    dtype: Union[str, np.dtype] = "int8",
     return_meta: bool = False,
-) -> np.ndarray:
+    snap_to_origin: Optional[Tuple[Number, Number]] = (0, 0),
+) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
     """
     Creates a binary from a geodataframe by rasterizing its geometries.
 
@@ -496,9 +506,9 @@ def create_binary_raster(
             Defaults to None.
         resolution (Optional[np.number]): The resolution of the output raster.
             Defaults to None.
-        nodata (Optional[int]): The nodata value for the output raster.
+        nodata (int, optional): The nodata value for the output raster.
             Defaults to -99.
-        query (Optional[str]): An optional query to filter the geometries.
+        query (str, optional): An optional query to filter the geometries.
             Defaults to None.
         all_touched (bool): Whether to consider all pixels touched by the geometries.
             Defaults to False.
@@ -506,12 +516,16 @@ def create_binary_raster(
             Defaults to True.
         same_shape (bool): Whether to ensure the output array has the same shape as the base raster.
             Defaults to True.
-        out_file (Optional[Union[str, Path]]): An optional output file path to save the raster.
+        out_file (Union[str, Path], optional): An optional output file path to save the raster.
             Defaults to None.
-        dtype (Optional[np.dtype]): The data type of the raster cells.
-            Defaults to np.dtype(np.int8).
+        dtype (Union[str, np.dtype]): The data type of the raster cells.
+            Either from class np.dtype or a string like "int8" or "float32".
+            Defaults to "int8".
         return_meta (bool): Whether to return the metadata of the output raster.
             Defaults to False.
+        snap_to_origin (Tuple[Number, Number], optional): Whether snap the output raster
+            to the specified origin. If a base raster is provided, it will automatically snap to the raster bounds.
+            Defaults to (0, 0).
 
     Returns:
         np.ndarray: The binary labels as a numpy array.
@@ -521,21 +535,21 @@ def create_binary_raster(
         raise ValueError("Provide either base_raster or resolution.")
 
     gdf = geodataframe.query(query) if query is not None else geodataframe
+    values = np.ones(len(gdf))
+    geometries = gdf.geometry
+
+    fill_value = 0 if fill_negatives is True else nodata
+    dtype = dtype.name if isinstance(dtype, np.dtype) else dtype
 
     if base_raster is not None:
         width = base_raster.width
         height = base_raster.height
         transform = base_raster.transform
         crs = base_raster.crs
-    elif resolution is not None:
+    else:
         width, height, transform = transform_from_geometries(gdf, resolution)
         crs = gdf.crs.to_string()
         crs = CRS.from_string(crs)
-
-    fill_value = 0 if fill_negatives is True else nodata
-
-    values = np.ones(len(gdf))
-    geometries = gdf.geometry
 
     out_array = features.rasterize(
         shapes=list(zip(geometries, values)),
@@ -548,42 +562,44 @@ def create_binary_raster(
         dtype=dtype,
     )
 
+    out_meta = {
+        "dtype": dtype,
+        "nodata": nodata,
+        "width": width,
+        "height": height,
+        "count": 1,
+        "crs": crs,
+        "transform": transform,
+    }
+
     if base_raster is not None and same_shape is True:
         out_array = np.where(
             base_raster.read() == base_raster.nodata, nodata, out_array
         )
 
+    if base_raster is None and snap_to_origin is not None:
+        out_array, out_meta = snap_raster(
+            raster=(out_array, out_meta), snap_to=snap_to_origin
+        )
+        out_array = np.squeeze(out_array)
+
     if out_file is not None:
         out_file = Path(out_file)
-
         out_path = os.path.dirname(out_file)
         check_path(out_path)
 
         save_raster(
             out_file,
             array=out_array,
-            crs=crs,
-            height=height,
-            width=width,
-            nodata_value=nodata,
-            transform=transform,
+            metadata=out_meta,
             dtype=dtype,
         )
 
     if return_meta is True:
-        out_meta = {
-            "dtype": dtype,
-            "nodata": nodata,
-            "width": width,
-            "height": height,
-            "count": 1,
-            "crs": crs,
-            "transform": transform,
-        }
         return out_array, out_meta
     else:
         return out_array
-
+            
 
 def create_categorical_rasters(
     file: Union[str, Path],
@@ -636,8 +652,97 @@ def create_categorical_rasters(
             )
 
             out_file=out_path / f"{file_name}.tif"
-            save_raster(out_file, raster, metadata=meta, overwrite=True, dtype=np.dtype(np.int8))
-            
+            save_raster(out_file, raster, metadata=meta, overwrite=True, dtype="int8")
+
+
+def create_continuous_raster(
+    geodataframe: gpd.GeoDataFrame,
+    column: str,
+    base_raster: Optional[rasterio.DatasetReader] = None,
+    resolution: Optional[Number] = None,
+    nodata: Optional[int] = -99999,
+    query: Optional[str] = None,
+    all_touched: bool = False,
+    same_shape: bool = True,
+    out_file: Optional[Union[str, Path]] = None,
+    dtype: Optional[Union[str, np.dtype]] = "float32",
+    snap_to_origin: Optional[Tuple[Number, Number]] = (0, 0),
+) -> Tuple[np.ndarray, dict]:
+    """
+    Creates a binary from a geodataframe by rasterizing its geometries.
+
+    Returns:
+        np.ndarray: The binary labels as a numpy array.
+        dict: A dictionary containing the metadata of the output raster.
+    """
+    if base_raster is None and resolution is None:
+        raise ValueError("Provide either base_raster or resolution.")
+
+    gdf = geodataframe.query(query) if query is not None else geodataframe
+    values = gdf[column].values
+    geometries = gdf.geometry.values
+
+    fill_value = nodata
+    dtype = values.dtype if dtype is None else dtype
+    dtype = dtype.name if isinstance(dtype, np.dtype) else dtype
+
+    if base_raster is not None:
+        width = base_raster.width
+        height = base_raster.height
+        transform = base_raster.transform
+        crs = base_raster.crs
+    else:
+        width, height, transform = transform_from_geometries(gdf, resolution)
+        crs = gdf.crs.to_string()
+        crs = CRS.from_string(crs)
+
+    out_array = features.rasterize(
+        shapes=list(zip(geometries, values)),
+        out_shape=(height, width),
+        fill=fill_value,
+        transform=transform,
+        all_touched=all_touched,
+        merge_alg=getattr(MergeAlg, "replace"),
+        dtype=dtype,
+    )
+
+    out_meta = {
+        "dtype": dtype,
+        "nodata": nodata,
+        "width": width,
+        "height": height,
+        "count": 1,
+        "crs": crs,
+        "transform": transform,
+    }
+
+    if base_raster is not None and same_shape is True:
+        out_array = np.where(
+            base_raster.read() == base_raster.nodata, nodata, out_array
+        )
+
+    if base_raster is None and snap_to_origin is not None:
+        out_array, out_meta = snap_raster(
+            raster=(out_array, out_meta), snap_to=snap_to_origin
+        )
+
+    if out_array.ndim == 3:
+        out_array = np.squeeze(out_array)
+
+    if out_file is not None:
+        out_file = Path(out_file)
+        out_path = os.path.dirname(out_file)
+        check_path(out_path)
+
+        save_raster(
+            out_file,
+            array=out_array,
+            metadata=out_meta,
+            dtype=dtype,
+        )
+
+    return out_array, out_meta
+
 
 # region: test
 

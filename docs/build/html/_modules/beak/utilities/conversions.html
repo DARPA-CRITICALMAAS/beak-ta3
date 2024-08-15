@@ -300,14 +300,14 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        The result of the rasterize_vector_process function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_rasterize_vector_process</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">_rasterize_vector_core</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
 
 
 
 <span class="c1"># Helper function to func partial process</span>
-<div class="viewcode-block" id="_rasterize_vector_process">
-<a class="viewcode-back" href="../../../beak.utilities.conversions.html#beak.utilities.conversions._rasterize_vector_process">[docs]</a>
-<span class="k">def</span> <span class="nf">_rasterize_vector_process</span><span class="p">(</span>
+<div class="viewcode-block" id="_rasterize_vector_core">
+<a class="viewcode-back" href="../../../beak.utilities.conversions.html#beak.utilities.conversions._rasterize_vector_core">[docs]</a>
+<span class="k">def</span> <span class="nf">_rasterize_vector_core</span><span class="p">(</span>
     <span class="n">value_column</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">geometries</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">GeometryArray</span><span class="p">,</span>
@@ -373,9 +373,9 @@
 
 
 <span class="c1"># Rasterize vector main function</span>
-<div class="viewcode-block" id="rasterize_vector">
-<a class="viewcode-back" href="../../../beak.utilities.conversions.html#beak.utilities.conversions.rasterize_vector">[docs]</a>
-<span class="k">def</span> <span class="nf">rasterize_vector</span><span class="p">(</span>
+<div class="viewcode-block" id="rasterize_datacube">
+<a class="viewcode-back" href="../../../beak.utilities.conversions.html#beak.utilities.conversions.rasterize_datacube">[docs]</a>
+<span class="k">def</span> <span class="nf">rasterize_datacube</span><span class="p">(</span>
     <span class="n">value_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;categorical&quot;</span><span class="p">,</span> <span class="s2">&quot;numerical&quot;</span><span class="p">,</span> <span class="s2">&quot;ground_truth&quot;</span><span class="p">],</span>
     <span class="n">value_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">geodataframe</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
