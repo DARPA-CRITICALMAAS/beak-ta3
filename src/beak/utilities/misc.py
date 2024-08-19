@@ -23,7 +23,7 @@ def replace_invalid_characters(string: str, prefix: Optional[str] = None) -> str
         str: String with replaced characters.
     """
     # Replace invalid characters
-    string = re.sub(r"[ /().,<>]", "_", string)
+    string = re.sub(r"[ /().:,<>]", "_", string)
 
     # Remove leading, trailing and ending underscores
     string = re.sub(r"(_+)", "_", string)
