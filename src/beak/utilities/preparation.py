@@ -52,7 +52,7 @@ def create_encodings_from_dataframe(
 def impute_data(
     data: Union[np.ndarray, pd.DataFrame, gpd.GeoDataFrame],
     columns: Optional[List[str]] = None,
-    strategy: str = "mean",
+    strategy: Literal["mean", "median", "most_frequent", "constant"] = "mean",
     fill_value: Union[Number, str] = None,
     missing_values: Optional[Number] = np.nan,
 ) -> Union[np.ndarray, pd.DataFrame, gpd.GeoDataFrame]:
@@ -63,8 +63,10 @@ def impute_data(
 
     Args:
         data (Union[np.ndarray, pd.DataFrame, gpd.GeoDataFrame]): The data to be imputed.
+            NoData values must already by set to NaN.
         columns (List[str]): The columns to be imputed.
         strategy (str, optional): The imputation strategy. Defaults to "mean".
+            Choose "constant" and provide a fill value if targeted for imputing with min or max values.
         fill_value (Union[Number, str], optional): The value to fill missing values with. Defaults to None.
         missing_values (Optional[Number], optional): The value to be treated as missing. Defaults to np.nan.
 

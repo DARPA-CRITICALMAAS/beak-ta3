@@ -669,7 +669,30 @@ def create_continuous_raster(
     snap_to_origin: Optional[Tuple[Number, Number]] = (0, 0),
 ) -> Tuple[np.ndarray, dict]:
     """
-    Creates a binary from a geodataframe by rasterizing its geometries.
+    Creates a binary raster from a geodataframe by rasterizing its geometries.
+
+    Args:
+        geodataframe (gpd.GeoDataFrame): The input geodataframe.
+        column (str): The column to rasterize.
+        base_raster (Optional[rasterio.DatasetReader], optional): The base raster.
+            Defaults to None. If provided, the output will be automatically snapped to the
+            base raster bounds, i.e., the snapping parameter will be ignored.
+        resolution (Optional[Number], optional): The resolution of the output raster.
+            Defaults to None.
+        nodata (int, optional): The nodata value for the output raster.
+            Defaults to -99999.
+        query (str, optional): An optional query to filter the geometries.
+            Defaults to None.
+        all_touched (bool): Whether to consider all pixels touched by the geometries.
+            Defaults to False.
+        same_shape (bool): Whether to ensure the output array has the same shape as the base raster.
+            Defaults to True.
+        out_file (Union[str, Path], optional): An optional output file path to save the raster.
+            Defaults to None.
+        dtype (Union[str, np.dtype]): The data type of the raster cells.
+            Defaults to "float32".
+        snap_to_origin (Tuple[Number, Number], optional): Whether snap the output raster.
+
 
     Returns:
         np.ndarray: The binary labels as a numpy array.

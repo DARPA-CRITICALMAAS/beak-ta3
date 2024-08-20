@@ -200,6 +200,6 @@ def download_evidence_layers(
             ignored_urls.append(download_url)
 
         if ignored_urls:
-            print("Following URLS where not downloaded:")
+            print("Following URLs where not downloaded:")
             for url in ignored_urls:
                 print(f"{title}: {url}")
