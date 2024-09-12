@@ -261,7 +261,7 @@ def _sampling_select_random_points(
     merge_classes: bool = False,
     min_px: int = 1,
     seed: Optional[int] = None,
-) -> Tuple[np.ndarray, Sequence[Number], Sequence[Number]]:
+) -> Tuple[np.ndarray, dict]:
     """
     Select random points from a given array based on the specified strategy and method.
 

@@ -55,19 +55,19 @@ def run_SOM(args):
 	else:
 		output_folder=args.output_folder
 	#print(args.output_folder)
-	
-	print('Save SOM object to file')
-	start_time = time.time()
-	with open(output_folder+'/som.dictionary', 'wb') as som_dictionary_file:
-		pickle.dump(som, som_dictionary_file) #save som object to file.
-	end_time = time.time()
-	print(f"    Execution time: {end_time - start_time} seconds")
 
 	if(args.kmeans==True):
 		start_time = time.time()
 		som['clusters']=nxtsomcore.clusters(som,args.kmeans_min,args.kmeans_max,args.kmeans_init,output_folder)     
 		end_time = time.time()
 		print(f"    Execution time: {end_time - start_time} seconds")
+
+	print('Save SOM object to file')
+	start_time = time.time()
+	with open(output_folder+'/som.dictionary', 'wb') as som_dictionary_file:
+		pickle.dump(som, som_dictionary_file) #save som object to file.
+	end_time = time.time()
+	print(f"    Execution time: {end_time - start_time} seconds")
 
 	print('Save SOM space results')
 	start_time = time.time()

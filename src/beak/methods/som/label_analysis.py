@@ -214,25 +214,26 @@ def get_label_annotation_data(som_dict, geo_data, outgeofile, noDataValue):
         # If there are different labels, get a list of labels in each BMU
         for i in range(0, len(data_label)):
             if data_label[i] not in ['0.0', '', "nan", "NA", "NULL", "Null", "NoData", noDataValue]:
+                label = int(float(data_label[i]))
                 index_label.append(i)
                 tick = annot_ticks[bmus[i][0]][bmus[i][1]]
                 counter = len(annot_strings) + 1
                 if tick == '':
                     annot_ticks[bmus[i][0]][bmus[i][1]] = str(counter)
-                    annot_strings[str(counter)] = {data_label[i]: 1}  # Store label and count as a dictionary
-                    annot_strings_for_dict[str(counter)] = {data_label[i]: 1}
-                    annot_data.append([f"{counter}: {data_label[i]}", f"{bmus[i][0]}", f"{bmus[i][1]}",
-                                       f"{geo_data[i][0]}, {geo_data[i][1]}" if outgeofile is not None else None])
+                    annot_strings[str(counter)] = {label: 1}  # Store label and count as a dictionary
+                    annot_strings_for_dict[str(counter)] = {label: 1}
+                    annot_data.append([f"{counter}", f"{label}", f"{bmus[i][0]}", f"{bmus[i][1]}",
+                                       f"{geo_data[i][0]}" if outgeofile is not None else None, f"{geo_data[i][1]}" if outgeofile is not None else None])
                 else:
                                 # Check if the label already exists in annot_strings[tick]
-                    if data_label[i] in annot_strings[tick]:
-                        annot_strings[tick][data_label[i]] += 1
-                        annot_strings_for_dict[tick][data_label[i]] += 1
+                    if label in annot_strings[tick]:
+                        annot_strings[tick][label] += 1
+                        annot_strings_for_dict[tick][label] += 1
                     else:
-                        annot_strings[tick][data_label[i]] = 1  # Initialize count if label doesn't exist
-                        annot_strings_for_dict[tick][data_label[i]] = 1
-                    annot_data.append([f"{tick}: {data_label[i]}", f"{bmus[i][0]}", f"{bmus[i][1]}",
-                                       f"{geo_data[i][0]}, {geo_data[i][1]}" if outgeofile is not None else None])
+                        annot_strings[tick][label] = 1  # Initialize count if label doesn't exist
+                        annot_strings_for_dict[tick][label] = 1
+                    annot_data.append([f"{tick}", f"{label}", f"{bmus[i][0]}", f"{bmus[i][1]}",
+                                       f"{geo_data[i][0]}" if outgeofile is not None else None, f"{geo_data[i][1]}" if outgeofile is not None else None])
             else:
                 index_nolabel.append(i)
     

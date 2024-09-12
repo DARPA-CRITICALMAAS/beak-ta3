@@ -3,6 +3,14 @@ import re
 from PIL import Image, ImageDraw, ImageFont
 from fpdf import FPDF
 
+# Files
+import sys
+if sys.version_info < (3, 9):
+    from importlib_resources import files
+else:
+    from importlib.resources import files
+    
+    
 # Function for natural sorting (i.e., handling numbers properly)
 def natural_sort_key(s):
     return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s)]
@@ -18,7 +26,7 @@ def categorize_images(files):
     # Separate files by pattern and naturally sort them
     somplot_images = sorted([f for f in files if f.startswith('somplot_')], key=natural_sort_key)
     geoplot_images = sorted([f for f in files if f.startswith('geoplot_')], key=natural_sort_key)
-    cluster_images = [f for f in files if f.startswith('cluster_')]
+    cluster_images = [f for f in files if f.startswith('cluster_') or f.startswith('BMU')]
     boxplot_images = [f for f in files if f.startswith('boxplot_')]
 
     # Assign the last 4 somplot images to "Cluster results"
@@ -64,7 +72,6 @@ def pngs_to_pdf(folder_path, output_pdf_path, number_of_images_per_row):
     # Categorize images by file name
     categorized_images = categorize_images(files)
 
-    
 
     # Iterate through the categories and add their images
     for category, image_files in categorized_images.items():
@@ -132,13 +139,6 @@ def pngs_to_pdf(folder_path, output_pdf_path, number_of_images_per_row):
     pdf.output(output_pdf_path)
     print(f"PDF successfully created: {output_pdf_path}")
 
-# Example usage
-folder_path = 'E:\\20230082_CriticalMAAS\\GitHub\\beak-ta3\\experiments\\04_hackathon_12m_related\\03_cma\\regional_laculi_southwest_102008_500\\som\\models\\LOSS_LLAMA\\F18_X40_Y40_E10_CMAX50_20240816-101004\\exports\\plots'
-output_pdf_path = 'E:\\20230082_CriticalMAAS\\GitHub\\beak-ta3\\experiments\\04_hackathon_12m_related\\03_cma\\regional_laculi_southwest_102008_500\\som\\models\\LOSS_LLAMA\\F18_X40_Y40_E10_CMAX50_20240816-101004\\exports\\result.pdf'
-#folder_path = 'E:\\20230082_CriticalMAAS\\GitHub\\beak-ta3\\experiments\\03_hackathon_9m_related\\03_cma\\tungsten_skarn_ytu\\som\\models\\SOM_FEATURE_FOX_F21_X50_Y50_CMAX50_20240503-175501\\exports\\plots'
-#output_pdf_path = 'E:\\20230082_CriticalMAAS\\GitHub\\beak-ta3\\experiments\\03_hackathon_9m_related\\03_cma\\tungsten_skarn_ytu\\som\\models\\SOM_FEATURE_FOX_F21_X50_Y50_CMAX50_20240503-175501\\exports\\result.pdf'
-# Call the function
-pngs_to_pdf(folder_path, output_pdf_path, 3)
 
 
 

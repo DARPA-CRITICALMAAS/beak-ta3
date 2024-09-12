@@ -569,7 +569,7 @@ def load_model(
             print(f"WARNING: No file found for evidence layer '{layer}'.")
 
     if missing_layers:
-        print(f"WARNING: {str(len(missing_layers))} layers have no matching files.")
+        raise ValueError(f"{str(len(missing_layers))} layers have no matching files.")
     else:
         print("All layers have matching files.")
 
@@ -587,9 +587,7 @@ def load_model(
                 if count > 1:
                     print(f"- '{filename}' occurs {count} times")
         else:
-            print(
-                f"Some filenames occur multiple times. Please check with option 'verbose=1' to see affected files."
-            )
+            raise ValueError("Some filenames occur multiple times. Please check with option 'verbose=1' to see affected files.")
 
     print(f"Number of files in file list: {len(file_list)}")
     return model_dict, file_list, filename_counts
