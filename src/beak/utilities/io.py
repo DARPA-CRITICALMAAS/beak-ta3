@@ -5,7 +5,6 @@ import shutil
 import zipfile
 
 import rasterio
-from rasterio import MemoryFile
 from rasterio.crs import CRS
 from rasterio.io import MemoryFile
 
@@ -339,10 +338,12 @@ def save_raster(
         dtype = array.dtype if dtype is None else dtype
         dtype = dtype.name if isinstance(dtype, np.dtype) else dtype
 
-        if metadata is None and crs.is_epsg_code:
+        # Unnecessary relict kept for compatibility
+        if crs is not None and crs.is_epsg_code:
             epsg_code = CRS.to_epsg(crs)
             crs = CRS.from_epsg(epsg_code)
 
+        if metadata is None:
             meta = {
                 "driver": "GTiff",
                 "dtype": dtype,

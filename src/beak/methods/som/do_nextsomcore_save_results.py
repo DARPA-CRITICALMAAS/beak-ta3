@@ -54,7 +54,6 @@ def run_SOM(args):
 		output_folder="C:/Temp/NextSom"
 	else:
 		output_folder=args.output_folder
-	#print(args.output_folder)
 
 	if(args.kmeans==True):
 		start_time = time.time()
