@@ -167,6 +167,7 @@ sync.ffs_db
 run_files.py
 *.pdf
 *.csv
+*.DS_Store
 
 # More folders to ignore
 data/
