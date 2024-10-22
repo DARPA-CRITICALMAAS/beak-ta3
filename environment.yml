@@ -1,9 +1,9 @@
-name: beak-ta3
+name: beak-ta3_cdr
 channels:
   - conda-forge
   - defaults
 dependencies:
-  - python==3.9.15
+  - python>=3.10, <3.11
   - numpy==1.24.3
   - rasterio==1.3.8
   - pandas==2.1.0

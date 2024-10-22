@@ -7,7 +7,7 @@ from beartype.typing import List, Tuple, Dict, Union
 import beak.methods.som.argsSOM as asom
 import beak.methods.som.do_nextsomcore_save_results as dnsr
 from beak.hmi_integration.utils import create_file_list, _filter_files, create_zip_from_files
-
+from cdr_schemas.prospectivity_input import ProspectivityOutputLayer
 
 def run_som(
     input_layers: List[str],
@@ -80,7 +80,7 @@ def run_som(
         warnings.simplefilter("ignore")
         dnsr.run_SOM(args)
 
-    out_layers = _collect_output(
+    out_layers = _collect_results(
         cma_id=cma_id,
         model_run_id=model_run_id,
         kmeans=args.kmeans,
@@ -94,7 +94,7 @@ def run_som(
     return out_layers
 
 
-def _collect_output(
+def _collect_results(
     cma_id: str,
     model_run_id: str,
     kmeans: bool,
@@ -159,7 +159,7 @@ def _collect_output(
     )
 
     # Initialize output
-    out_layers = []
+    layers_list = []
 
     # Add raster results
     for file in results_file_list:
@@ -173,7 +173,7 @@ def _collect_output(
             if key == file_stem:
                 meta.update(value)
 
-                out_layers.append(
+                layers_list.append(
                     (file, meta)
                 )
 
@@ -187,7 +187,7 @@ def _collect_output(
             }
         )
 
-        out_layers.append(
+        layers_list.append(
             (file, meta)
         )
 
@@ -208,8 +208,18 @@ def _collect_output(
             }
         )
 
-        out_layers.append(
+        layers_list.append(
             (plots_archive_path, meta)
         )
-
-    return out_layers
+        
+    prospectivity_output_layers = [] 
+    for layer in layers_list:
+        layer_path = layer[0]
+        layer_meta = layer[1]
+        
+        layer_object = ProspectivityOutputLayer(**layer_meta)
+        prospectivity_output_layers.append(
+            (layer_path, layer_object)
+        )
+    
+    return prospectivity_output_layers
