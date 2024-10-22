@@ -396,11 +396,11 @@ class NxtSomCore(object):
         y=geo_data[:,1]
 
         # Create the destination folder if it doesn't exist
-        destination_path = output_folder + "/GeoTIFF/"
+        destination_path = output_folder + "/raster/"
         if not os.path.exists(destination_path):
             os.makedirs(destination_path)
 
-        print("     Iterate over each geoTIF file:")
+        print("     Iterate over each TIF file:")
 
         for a in range(0, som_data.shape[1]-4): 
             print("         ", os.path.splitext(os.path.basename(headers[4 + a]))[0])
@@ -467,7 +467,7 @@ class NxtSomCore(object):
         # BMU ID in geo space:
         if bmu_id is not None:
             BMUnoDataValue = -99
-            print("          BMU_ID")      
+            print("          BMU_ID")
 
             bmu_x_index = np.where(np.isnan(geo_data[:, 2]), -1, geo_data[:, 2]).astype(int)
             bmu_y_index = np.where(np.isnan(geo_data[:, 3]), -1, geo_data[:, 3]).astype(int)
@@ -480,7 +480,7 @@ class NxtSomCore(object):
             pivotted= df.pivot(index='Y_value',columns='X_value',values='Z_value')
 
             driver = gdal.GetDriverByName('GTiff')
-            outName = destination_path + "BMU_ID.tif"
+            outName = destination_path + "bmu_id.tif"
             outDs = driver.Create(outName, cols, rows, 1, gdal.GDT_Float32)
 
             if outDs is None:
@@ -505,7 +505,7 @@ class NxtSomCore(object):
             label_data_df = pd.DataFrame(label_data)
 
             # Define the list of z values to iterate over
-            z_values = ['BMU label count', 'cluster label count']
+            z_values = ['bmu label count', 'cluster label count']
 
             # Determine the number of decimal places based on the precision of gt
             decimal_precision = abs(Decimal(str(abs(gt[1]))).as_tuple().exponent)
@@ -536,11 +536,10 @@ class NxtSomCore(object):
 
             for z_value in z_values:
                 unique_z = label_data_df[z_value].unique()
-                #print("          Number of unique values in ", f"BMU_{z_value.replace(' ', '_')}", f": {len(unique_z)}")
                 if (len(unique_z) == 1):
-                    print("         ", f"BMU_{z_value.replace(' ', '_')} contains only one unique cluster. No tif file created.")
+                    print("         ", f"bmu_{z_value.replace(' ', '_')} contains only one unique cluster. No tif file created.")
                 else:
-                    print("         ", f"BMU_{z_value.replace(' ', '_')}")
+                    print("         ", f"bmu_{z_value.replace(' ', '_')}")
                     z = np.concatenate([label_data_df[z_value], unique_z_no_label])
                     df = pd.DataFrame({'X_value': x_label, 'Y_value': y_label, 'Z_value': z})
                     df['Z_value'] = pd.to_numeric(df['Z_value'])
@@ -551,7 +550,7 @@ class NxtSomCore(object):
 
                     driver = gdal.GetDriverByName('GTiff')
                     z_value = z_value.replace(' ', '_')
-                    outName = destination_path + f"BMU_{z_value}.tif"
+                    outName = destination_path + f"bmu_{z_value}.tif"
                     outDs = driver.Create(outName, cols, rows, 1, gdal.GDT_Float32)
 
                     if outDs is None:
@@ -612,7 +611,7 @@ class NxtSomCore(object):
         y = geo_data[:, 1]
 
         # Create the destination folder if it doesn't exist
-        destination_path = output_folder + "/GeoTIFF"
+        destination_path = output_folder + "/raster"
         if not os.path.exists(destination_path):
             os.makedirs(destination_path)
 

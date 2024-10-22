@@ -2,18 +2,18 @@ import warnings
 import pandas as pd
 
 from pathlib import Path
-from beartype.typing import List
+from beartype.typing import List, Tuple, Dict, Union
 
 import beak.methods.som.argsSOM as asom
 import beak.methods.som.do_nextsomcore_save_results as dnsr
-from beak.hmi_integration.utils import _extract_payload
+from beak.hmi_integration.utils import create_file_list, _filter_files, create_zip_from_files
 
 
 def run_som(
     input_layers: List[str],
     config_file: Path,
     output_folder: Path,
-) -> None:
+) -> List[Tuple[str, Dict]]:
     """
     Calls the SOM algorithm on input layers using the provided configuration.
 
@@ -44,7 +44,10 @@ def run_som(
 
     # Read config
     json_data = pd.read_json(config_file)
-    train_config = _extract_payload(json_data, target="train_config", normalize=False)
+    payload = json_data.loc["payload"]
+    cma_id = payload["cma_id"]
+    model_run_id = payload["model_run_id"]
+    train_config = payload["event"]["train_config"]
 
     # Set SOM arguments
     args.initialcodebook = None
@@ -77,6 +80,136 @@ def run_som(
         warnings.simplefilter("ignore")
         dnsr.run_SOM(args)
 
+    out_layers = _collect_output(
+        cma_id=cma_id,
+        model_run_id=model_run_id,
+        kmeans=args.kmeans,
+        output_folder=output_folder
+    )
+
     # Remaining tasks
     # TODO: Label correlation
     # TODO: Plots
+
+    return out_layers
+
+
+def _collect_output(
+    cma_id: str,
+    model_run_id: str,
+    kmeans: bool,
+    output_folder: Union[str, Path]
+) -> List[Tuple[str, Dict]]:
+    """
+    Creates information for CDR ProspectivityOutputLayer
+    """
+    init_meta = {
+        "system": "statmagic",
+        "system_version": "",
+        "model": "SOM",
+        "model_version":"0.0.1",
+        "model_run_id": model_run_id,
+        "output_type": "",
+        "cma_id": cma_id,
+        "title": "",
+    }
+
+    # Results with individual types and titles
+    results = {
+        "bmu_id": {
+            "output_type": "cluster",
+            "title": "Best Matching Units"
+        },
+        "q_error": {
+            "output_type": "uncertainty",
+            "title": "Quantization Error"
+        },
+        "cluster": {
+            "output_type": "cluster",
+            "title": "KMeans Clusters based on Best Matching Units"
+        },
+        "bmu_bmu_label_count": {
+            "output_type": "cluster",
+            "title": "Number of Labels per Best Matching Unit"
+        },
+        "bmu_cluster_label_count": {
+            "output_type": "cluster",
+            "title": "Number of Labels per Best Matching Unit grouped by KMeans-Cluster"
+        }
+    }
+
+    # Create file lists and modify for kmeans since cluster.tif is created in any case
+    results_file_list = create_file_list(
+        folder=output_folder / "raster"
+    )
+
+    results_file_list = [file for file in results_file_list if not (
+        "cluster.tif" in file and kmeans is False
+    )]
+
+    cdbk_vector_maps_file_list = _filter_files(
+        file_list=results_file_list,
+        file_suffix=None,
+        file_prefix="b_"
+    )
+
+    plots_file_list = create_file_list(
+        folder=output_folder / "plots",
+        file_suffix=".png"
+    )
+
+    # Initialize output
+    out_layers = []
+
+    # Add raster results
+    for file in results_file_list:
+        file_stem = str(
+            Path(file).stem
+        ).lower()
+
+        meta = init_meta.copy()
+
+        for key, value in results.items():
+            if key == file_stem:
+                meta.update(value)
+
+                out_layers.append(
+                    (file, meta)
+                )
+
+    # Add codebook maps
+    for file in cdbk_vector_maps_file_list:
+        meta = init_meta.copy()
+        meta.update(
+            {
+                "output_type": "codebook_map",
+                "title": "Codebook Map"
+            }
+        )
+
+        out_layers.append(
+            (file, meta)
+        )
+
+    # Add plots
+    if plots_file_list:
+        plots_archive_path = str(output_folder / "plots.zip")
+
+        create_zip_from_files(
+            file_list=plots_file_list,
+            archive_path=plots_archive_path
+        )
+
+        meta = init_meta.copy()
+        meta.update(
+            {
+                "output_type": "plots",
+                "title": "Archive containing generated Plots (Boxplots, Codebook Maps, Cluster Maps, Error Maps, ...)"
+            }
+        )
+
+        out_layers.append(
+            (plots_archive_path, meta)
+        )
+
+    return out_layers

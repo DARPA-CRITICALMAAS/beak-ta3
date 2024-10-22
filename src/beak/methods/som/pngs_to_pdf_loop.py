@@ -13,7 +13,7 @@ def get_cluster_results(folder_path):
     # Separate files by pattern and naturally sort them
     somplot_images = sorted([f for f in files if f.startswith('somplot_')], key=natural_sort_key)
     geoplot_images = sorted([f for f in files if f.startswith('geoplot_')], key=natural_sort_key)
-    cluster_images = [f for f in files if f.startswith('cluster_') or f.startswith('BMU')]
+    cluster_images = [f for f in files if f.startswith('cluster_') or f.startswith('bmu')]
     
     cluster_results = []
 

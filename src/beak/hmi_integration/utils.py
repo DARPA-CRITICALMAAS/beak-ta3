@@ -2,8 +2,9 @@ import pandas as pd
 import os
 import sys
 import requests
+import zipfile
 from pathlib import Path
-from beartype.typing import List, Tuple, Optional
+from beartype.typing import List, Tuple, Optional, Sequence, Union, Literal
 
 
 def _get_data_folder(folder_name: str = "beak.data") -> Path:
@@ -16,36 +17,6 @@ def _get_data_folder(folder_name: str = "beak.data") -> Path:
         from importlib.resources import files
 
     return files(folder_name)
-
-
-def _select_data(
-    data: pd.DataFrame,
-    target: str,
-) -> pd.DataFrame:
-    """
-    Selects a specific group from the provided DataFrame.
-    """
-    return data.loc[target]
-
-
-def _extract_payload(
-    data: pd.DataFrame,
-    target: Optional[str],
-    normalize: Optional[bool],
-) -> pd.DataFrame:
-    """
-    Takes a DataFrame and extracts the payload information.
-    """
-    if target is not None:
-        data = _select_data(
-            data,
-            target,
-        )
-
-    payload = data["payload"]
-    payload = pd.json_normalize(payload) if normalize is True else payload
-
-    return payload
 
 
 def _extract_rows(
@@ -65,20 +36,53 @@ def _extract_rows(
     return extractions
 
 
-def _filter_tif_files(
-    file_list: List[str],
-    file_extensions: Tuple[str] = (".tif", ".tiff"),
+def create_file_list(
+    folder: Union[str, Path],
+    file_suffix: Union[str, Tuple, None] = (".tif", ".tiff"),
+    file_prefix: Union[str, Tuple, None] = None,
 ) -> List[str]:
     """
-    Filters out TIF files from the provided download URLs.
+    Create a list of files in the specified folder with the given extensions.
     """
-    filtered_urls = []
-    for url in file_list:
-        if url.endswith(file_extensions):
-            filtered_urls.append(url)
+    folder = Path(folder)
+    file_list = [str(file) for file in folder.glob("*")]
 
-    assert filtered_urls, "No TIF files found in the provided download URLs."
-    return filtered_urls
+    return _filter_files(
+        file_list,
+        file_suffix=file_suffix,
+        file_prefix=file_prefix,
+    )
+
+
+def _filter_files(
+    file_list: List[str],
+    file_suffix: Union[str, Tuple, None],
+    file_prefix: Union[str, Tuple, None],
+) -> List[str]:
+    """
+    Filters out files from the provided list of files.
+    """
+    suffix_match, prefix_match = True, True
+    filtered_files = []
+
+    for file in file_list:
+        file_name = str(
+            Path(file).name
+        ).lower()
+
+        if file_suffix is not None:
+            file_suffix = tuple(ext.lower() for ext in file_suffix) if isinstance(file_suffix, tuple) else file_suffix.lower()
+            suffix_match = file_name.endswith(file_suffix)
+
+        if file_prefix is not None:
+            file_prefix = tuple(prefix.lower() for prefix in file_prefix) if isinstance(file_prefix, tuple) else file_prefix.lower()
+            prefix_match = file_name.startswith(file_prefix)
+
+        if suffix_match and prefix_match:
+            filtered_files.append(file)
+
+    assert filtered_files, "No files found."
+    return filtered_files
 
 
 def _download_cdr_files(
@@ -106,3 +110,16 @@ def _download_cdr_files(
         )
 
     return file_list
+
+
+def create_zip_from_files(
+    file_list: List[Union[str, Path]],
+    archive_path: Union[str, Path]
+):
+    """
+    Creates a zip file from a list of files.
+    """
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        for file in file_list:
+            file = Path(file)
+            archive.write(filename=file, arcname=file.name)

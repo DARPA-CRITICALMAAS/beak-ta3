@@ -156,7 +156,7 @@ def read_geo_labeled_bmu(file_path):
         'Y':geo_y, 
         'SOM X':som_x, 
         'SOM Y':som_y, 
-        'BMU label count':label_count, 
+        'bmu label count':label_count,
         'cluster':cluster, 
         'cluster label count':cluster_label_counts
         }
