@@ -1,4 +1,4 @@
-name: beak-ta3_cdr
+name: beak-ta3
 channels:
   - conda-forge
   - defaults
