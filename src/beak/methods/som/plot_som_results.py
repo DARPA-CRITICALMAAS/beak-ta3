@@ -20,6 +20,7 @@ Inputs:
 10) Redraw (boolean) - whether to calculate all plots or only those that deal with clustering 
 """
 
+import os
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -35,6 +36,7 @@ from .label_analysis import *
 import time
 import warnings
 
+
 """
 Run plotting scripts
 """    
@@ -47,6 +49,10 @@ def run_plotting_script(argsP):
 
     print("Setup figures")
     start_time = time.time()
+
+    # Set output directory for plot exports
+    output_folder = os.path.join(argsP.dir, "plots")
+    os.makedirs(output_folder, exist_ok=True)
 
     [geo_data, geo_headers, 
      som_data, som_table, som_headers, som_dict,
@@ -67,14 +73,14 @@ def run_plotting_script(argsP):
         start_time = time.time()
         if(argsP.dataType=='scatter'):
             if(clusters>1):
-                plot_geospace_clusters_scatter(argsP.som_x, argsP.som_y,clusters,cluster_tick_labels,geo_data, discrete_cmap_2, argsP.dir)
+                plot_geospace_clusters_scatter(argsP.som_x, argsP.som_y,clusters,cluster_tick_labels,geo_data, discrete_cmap_2, output_folder)
             if(argsP.redraw!=False):
-                plot_geospace_results_scatter(geo_data, geo_headers, som_data, argsP.dir)
+                plot_geospace_results_scatter(geo_data, geo_headers, som_data, output_folder)
         else:
             if(clusters>1):#if clusters
-                plot_geospace_clusters_grid(geo_data, discrete_cmap, clusters,cluster_ticks, cluster_tick_labels, argsP.dir)
+                plot_geospace_clusters_grid(geo_data, discrete_cmap, clusters,cluster_ticks, cluster_tick_labels, output_folder)
             if(argsP.redraw!=False):
-                plot_geospace_results_grid(geo_data, geo_headers, som_data, argsP.dir, argsP.noDataValue)
+                plot_geospace_results_grid(geo_data, geo_headers, som_data, argsP.noDataValue, output_folder)
 
         end_time = time.time()
         print(f"    Execution time: {end_time - start_time} seconds")
@@ -84,18 +90,18 @@ def run_plotting_script(argsP):
         start_time = time.time()
 
         print("    Draw som cluster plot")
-        draw_som_clusters(argsP, grid, som_data, som_table, annot_ticks, som_headers, discrete_cmap, discrete_cmap_2, clusters, cluster_ticks, cluster_tick_labels, labelIndex, annot_strings)
+        draw_som_clusters(argsP, grid, som_data, som_table, annot_ticks, som_headers, discrete_cmap, discrete_cmap_2, clusters, cluster_ticks, cluster_tick_labels, labelIndex, annot_strings, output_folder)
         loaded_cluster_list = load_cluster_dictionary(argsP.dir)
         
         print("    Plot Davies Bouldin index")
-        plot_davies_bouldin(loaded_cluster_list, argsP.dir)
+        plot_davies_bouldin(loaded_cluster_list, output_folder)
         
         print("    Plot cluster hit count")
-        plot_cluster_hit_count(argsP.dir+"/cluster_hit_count.txt", argsP.dir)
+        plot_cluster_hit_count(argsP.dir+"/cluster_hit_count.txt", output_folder)
        
         if labelIndex is not None:
             print("    Plot cluster label count")
-            plot_cluster_label_count(argsP.dir+"/cluster_label_counts.txt", argsP.dir)
+            plot_cluster_label_count(argsP.dir+"/cluster_label_counts.txt", output_folder)
 
         end_time = time.time()
         print(f"    Execution time: {end_time - start_time} seconds")
@@ -110,13 +116,13 @@ def run_plotting_script(argsP):
             # Append the row to the list of BMU IDs
             bmu_id.append(row)
 
-    plot_bmu_id_grid(bmu_id, argsP.dir)
-    draw_umatrix(argsP.som_x, argsP.som_y,clusters,cluster_tick_labels,som_data, som_table, grid, argsP.grid_type, annot_ticks, som_headers, argsP.dir)
-    draw_number_of_hits(argsP, som_dict,som_data, clusters, grid, cluster_tick_labels, annot_ticks)
+    plot_bmu_id_grid(bmu_id, output_folder)
+    draw_umatrix(argsP.som_x, argsP.som_y,clusters,cluster_tick_labels,som_data, som_table, grid, argsP.grid_type, annot_ticks, som_headers, output_folder)
+    draw_number_of_hits(argsP, som_dict,som_data, clusters, grid, cluster_tick_labels, annot_ticks, output_folder)
     
     #in case the function was called for redrawing after selecting a different clustering result. so that we can skip stuff we don't have to redraw to speed things up. CURRENTLY NOT IN USE, ALWAYS TRUE.
     if(argsP.redraw!=False):
-        draw_som_results(argsP, som_data, som_table, grid, annot_ticks, som_headers, clusters, cluster_tick_labels)
+        draw_som_results(argsP, som_data, som_table, grid, annot_ticks, som_headers, clusters, cluster_tick_labels, output_folder)
         
     end_time = time.time()
     print(f"    Execution time: {end_time - start_time} seconds")
@@ -127,11 +133,10 @@ def run_plotting_script(argsP):
         print("Plot Boxplots")
         start_time = time.time()
 
-        draw_boxplots(som_data,som_headers,discrete_cmap, cluster_tick_labels, argsP.dir)
+        draw_boxplots(som_data,som_headers,discrete_cmap, cluster_tick_labels, output_folder)
         #print("Boxplots finished")
         end_time = time.time()
         print(f"    Execution time: {end_time - start_time} seconds")
-
 
 
 def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, noDataValue, aOutgeofile):
@@ -269,7 +274,7 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, no
     return geo_data, geo_headers, som_data, som_table, som_headers, som_dict, grid, annot_data, annot_ticks, annot_strings, clusters, cluster_ticks, cluster_tick_labels, discrete_cmap, discrete_cmap_2, labelIndex
 
 
-def plot_geospace_results_grid(geo_data, geo_headers, som_data, working_dir, noDataValue):
+def plot_geospace_results_grid(geo_data, geo_headers, som_data, noDataValue, working_dir):
     """Plot geo space results & q-error if type is grid.
 
     Args:
@@ -439,7 +444,7 @@ def plot_geospace_results_scatter(geo_data, geo_headers, som_data, working_dir):
 
 
 
-def draw_som_results(argsP, som_data, som_table,grid, annot_ticks, som_headers,clusters, cluster_tick_labels):
+def draw_som_results(argsP, som_data, som_table,grid, annot_ticks, som_headers,clusters, cluster_tick_labels, output_folder):
     """Draw results in som space.
 
     Args:
@@ -448,7 +453,8 @@ def draw_som_results(argsP, som_data, som_table,grid, annot_ticks, som_headers,c
         som_table (ndarray): empty som_x*som_y sized table for som plots
         grid (dict): dictionary holding x, y and center point information if grid type is hexagonal
         annot_ticks (ndarray): annotation ticks for labeled data
-        som_headers (Series): one-dimensional array of strings in header line of som reslult txt file naming the containing data colums 
+        som_headers (Series): one-dimensional array of strings in header line of som reslult txt file naming the containing data colums
+        output_folder (str): working directory where to save figures
     """    
     for j in range(2,len(som_data[0])-3):
         print(f"    somspace plot no. {j-1} from {len(som_data[0])-5}", end='\r')
@@ -468,7 +474,7 @@ def draw_som_results(argsP, som_data, som_table,grid, annot_ticks, som_headers,c
         else:
             print("grid_type must be rectangular or hexagonal")
 
-        ax.figure.savefig(argsP.dir+'/somplot_' +str(j-1)+'.png',bbox_inches='tight')#Creating the folder is done in C# side of things.    
+        ax.figure.savefig(output_folder+'/somplot_' +str(j-1)+'.png',bbox_inches='tight')#Creating the folder is done in C# side of things.
         plt.clf()
         plt.cla()
         plt.close()  
@@ -512,11 +518,11 @@ def draw_umatrix(somx,somy,clusters,cluster_tick_labels,som_data, som_table,grid
         mpl.rcParams.update({'font.size': 12})
 
 
-def draw_som_clusters(argsP, grid, som_data, som_table, annot_ticks, som_headers,discrete_cmap,discrete_cmap_2,clusters,cluster_ticks,cluster_tick_labels, labelIndex, annot_strings):    
+def draw_som_clusters(argsP, grid, som_data, som_table, annot_ticks, som_headers,discrete_cmap,discrete_cmap_2,clusters,cluster_ticks,cluster_tick_labels, labelIndex, annot_strings, working_dir):
     """Draw Som Cluster plot.
 
     Args:
-        argsP (dict): Dictionary holding agruments: file path to som results, size of som space, input file string, grid type, no data value, working directory
+        argsP (dict): Dictionary holding agruments: file path to som results, size of som space, input file string, grid type, no data value
         grid (dict): dictionary holding x, y and center point information if grid type is hexagonal
         som_data (ndarray): array holding som space results
         som_table (ndarray): empty som_x*som_y sized table for som plots
@@ -529,6 +535,7 @@ def draw_som_clusters(argsP, grid, som_data, som_table, annot_ticks, som_headers
         cluster_tick_labels (ndarray): array with tick labels for clusters
         labelIndex (int): laben index
         annot_strings (dict): annotation strings
+        working_dir (str): working directory where to save figures
     """    
     if(argsP.grid_type.lower()=="rectangular"):
         mpl.rcParams.update({'font.size': 14})  
@@ -546,7 +553,7 @@ def draw_som_clusters(argsP, grid, som_data, som_table, annot_ticks, som_headers
         mpl.rcParams.update({'font.size': 32})  
         ax.set_title(som_headers[len(som_headers)-2])
         mpl.rcParams.update({'font.size': 30})  
-    ax.figure.savefig(argsP.dir+'/somplot_' + str(len(som_data[0])-3) + '.png',bbox_inches='tight')
+    ax.figure.savefig(working_dir+'/somplot_' + str(len(som_data[0])-3) + '.png',bbox_inches='tight')
     plt.clf()
     plt.cla()
     plt.close()
@@ -588,7 +595,7 @@ def draw_som_clusters(argsP, grid, som_data, som_table, annot_ticks, som_headers
                                             )
         
         ax1.add_artist(anchored_box)
-        ax1.figure.savefig(argsP.dir+'/somplot_' + str(len(som_data[0])-1) + '.png',bbox_inches='tight')
+        ax1.figure.savefig(working_dir+'/somplot_' + str(len(som_data[0])-1) + '.png',bbox_inches='tight')
         plt.clf()
         plt.cla()
         plt.close()
@@ -741,7 +748,7 @@ def draw_boxplots(som_data,som_headers,discrete_cmap,cluster_tick_labels,working
     print()      
         
 
-def draw_number_of_hits(argsP, som_dict,som_data,clusters,grid,cluster_tick_labels,annot_ticks):
+def draw_number_of_hits(argsP, som_dict,som_data,clusters,grid,cluster_tick_labels,annot_ticks, output_folder):
     """Draw number of hits for each som cell
 
     Args:
@@ -752,6 +759,7 @@ def draw_number_of_hits(argsP, som_dict,som_data,clusters,grid,cluster_tick_labe
         grid (dict): dictionary holding x, y and center point information if grid type is hexagonal
         cluster_tick_labels (ndarray): array with tick labels for clusters
         annot_ticks (ndarray): annotation ticks for labeled data
+        output_folder (str): working directory where to save figures
     """    
     mpl.rcParams.update({'font.size': 12}) 
     hits=np.zeros((argsP.som_x, argsP.som_y))   
@@ -773,7 +781,7 @@ def draw_number_of_hits(argsP, som_dict,som_data,clusters,grid,cluster_tick_labe
         #ax.set_title("Number of hits per SOM cell")
  
         mpl.rcParams.update({'font.size': 30})  
-    ax.figure.savefig(argsP.dir+'/somplot_' +str(len(som_data[0])-2)+'.png',bbox_inches='tight')
+    ax.figure.savefig(output_folder+'/somplot_' +str(len(som_data[0])-2)+'.png',bbox_inches='tight')
     mpl.rcParams.update({'font.size': 12})
     plt.clf()
     plt.cla()
@@ -795,12 +803,13 @@ def load_cluster_dictionary(file_path):
         cluster_list = pickle.load(cluster_dictionary_file)
     return cluster_list
 
-def plot_davies_bouldin(cluster_list, output_path):
+def plot_davies_bouldin(cluster_list, output_folder):
     """
     Plot the number of clusters against the Davies-Bouldin Index and save the plot to a file.
     
     Args:
         cluster_list (list): List containing clustering information.
+        output_folder (str): The path to save the plot as a PNG file.
 
     Returns:
         str: The path to save the plot as a PNG file.
@@ -815,7 +824,7 @@ def plot_davies_bouldin(cluster_list, output_path):
     ax.set_xlabel('Number of Clusters')
     ax.set_ylabel('Davies-Bouldin Index')
     ax.grid(True)
-    fig.savefig(output_path+"/db_score.png")
+    fig.savefig(output_folder+"/db_score.png")
     plt.clf()
     plt.cla()
     plt.close()
@@ -824,12 +833,12 @@ def plot_davies_bouldin(cluster_list, output_path):
 """
 Draw cluster_hit_count
 """
-def plot_cluster_hit_count(txtFile, output_path):
+def plot_cluster_hit_count(txtFile, output_folder):
     """Draw cluster_hit_count
 
     Args:
         txtFile (str): txt file path holding cluster numbers and hit count
-        output_path (str): destination folder where to save figure
+        output_folder (str): destination folder where to save figure
     """    
     # Load the cluster_hit_count.txt file
     data = np.genfromtxt(txtFile, delimiter='\t', names=True)
@@ -841,7 +850,7 @@ def plot_cluster_hit_count(txtFile, output_path):
     ax.set_title('Cluster Hit Count')
     ax.grid(True)
     #plt.show()
-    fig.savefig(output_path+"/cluster_hit_count.png")
+    fig.savefig(output_folder + "/cluster_hit_count.png")
     plt.clf()
     plt.cla()
     plt.close()
