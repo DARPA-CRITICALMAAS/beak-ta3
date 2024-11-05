@@ -86,10 +86,12 @@ def run_som(
     argsP.outgeofile = args.output_file_geospace
 
     # Set k-means arguments
-    args.kmeans = True
-    args.kmeans_init = train_config["num_initializations"]
+    # Workaround for the lack of parameters in the CDR schema
+    # TODO: Add and connect HMI-options kmeans[bool], kmeans_min[int], kmeans_max[int] to CDR schema
     args.kmeans_min = 20
     args.kmeans_max = 50
+    args.kmeans_init = train_config["num_initializations"]
+    args.kmeans = True if args.kmeans_init > 0 else False
 
     # Run SOM without k-means warning
     with warnings.catch_warnings():
