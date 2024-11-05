@@ -8,6 +8,7 @@ With this release @08/09/2024, we provide the following **pre-liminary** hackath
 - Regional **porphyry copper** in the southwest U.S (**POCO SW**)
 - Regional **lacustrine lithium for brines and clays** in the southwest U.S. (**LACULI SW**)
 - National **peralkaline carbonatite rare earth elements** (**PACREE US CONT**)
+- Regional tungsten skarn in the great basin area (TUSK GB) including a sub
 
 CMAs. Additionally, we run two separated areas for **MVT** and **POCO** applying the **self-organizing maps** only, which include **high-resolution** geophysical data:
 

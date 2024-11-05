@@ -1,5 +1,5 @@
 """
-This file contains the models used for the magmatic nico experiment.
+This file contains the models used for the tungsten skarn experiment.
 The BISON model is used as a geophysical baseline model for deeper sources (even shallow, but no surface data).
 The JELLYFISH model is most comparable to the google sheet model configuration, but does not include high-res data.
 """
