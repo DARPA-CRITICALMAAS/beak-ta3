@@ -88,7 +88,7 @@ def run_som(
     # Set k-means arguments
     # Workaround for the lack of parameters in the CDR schema
     # TODO: Add and connect HMI-options kmeans[bool], kmeans_min[int], kmeans_max[int] to CDR schema
-    args.kmeans_min = 20
+    args.kmeans_min = 10
     args.kmeans_max = 50
     args.kmeans_init = train_config["num_initializations"]
     args.kmeans = True if args.kmeans_init > 0 else False
