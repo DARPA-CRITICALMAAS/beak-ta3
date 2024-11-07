@@ -44,8 +44,11 @@ def run_som(
     args.geotiff_input = input_layer_string
 
     # Set label arguments
-    args.label = True if input_labels else False
-    args.label_geotiff_file = input_labels
+    if input_labels is not None:
+        args.label = True
+        args.label_geotiff_file = input_labels
+    else:
+        args.label = False
 
     # Define SOM outputs
     args.output_folder = output_folder
