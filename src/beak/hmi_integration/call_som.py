@@ -147,7 +147,7 @@ def _collect_results(
         },
         "cluster": {
             "output_type": "cluster",
-            "title": "KMeans Clusters based on Best Matching Units"
+            "title": "K-Means Clusters"
         },
         "bmu_bmu_label_count": {
             "output_type": "cluster",
@@ -155,7 +155,7 @@ def _collect_results(
         },
         "bmu_cluster_label_count": {
             "output_type": "cluster",
-            "title": "Number of Labels per Best Matching Unit grouped by KMeans-Cluster"
+            "title": "Number of Labels per Best Matching Unit grouped by K-Means-Clusters"
         }
     }
 
