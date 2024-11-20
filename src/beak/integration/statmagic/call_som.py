@@ -9,7 +9,7 @@ import beak.methods.som.argsSOM as asom
 import beak.methods.som.do_nextsomcore_save_results as dnsr
 import beak.methods.som.argsPlot as aplot
 import beak.methods.som.plot_som_results as plot
-from beak.hmi_integration.utils import create_file_list, _filter_files, create_zip_from_files
+from beak.integration.statmagic.utils import create_file_list, _filter_files, create_zip_from_files
 from cdr_schemas.prospectivity_input import ProspectivityOutputLayer
 
 
