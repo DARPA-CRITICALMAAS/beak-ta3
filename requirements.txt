@@ -12,3 +12,4 @@ sphinx
 sphinx-rtd-theme
 myst_parser
 git+https://github.com/DARPA-CRITICALMAAS/cdr_schemas.git
+cdrc>=0.1.15
