@@ -51,7 +51,7 @@ def run_plotting_script(argsP):
     start_time = time.time()
 
     # Set output directory for plot exports
-    output_folder = os.path.join(argsP.dir, "plots")
+    output_folder = os.path.join(argsP.dir, argsP.output_plots_folder)
     os.makedirs(output_folder, exist_ok=True)
 
     [geo_data, geo_headers, 

@@ -365,7 +365,7 @@ class NxtSomCore(object):
 
 
 
-    def write_geotiff_out(self, output_folder, geodatafile, somdatafile, input_file, label = False, index_nolabel = None, bmu_id = None): 
+    def write_geotiff_out(self, output_folder, output_raster_folder, geodatafile, somdatafile, input_file, label = False, index_nolabel = None, bmu_id = None):
         """Write geotiff to file using gdal.
 
         Args:
@@ -396,9 +396,8 @@ class NxtSomCore(object):
         y=geo_data[:,1]
 
         # Create the destination folder if it doesn't exist
-        destination_path = output_folder + "/raster/"
-        if not os.path.exists(destination_path):
-            os.makedirs(destination_path)
+        destination_path = os.path.join(output_folder, output_raster_folder) + "/"
+        os.makedirs(destination_path, exist_ok=True)
 
         print("     Iterate over each TIF file:")
 

@@ -4,12 +4,18 @@ import sys
 import requests
 import zipfile
 from pathlib import Path
-from beartype.typing import List, Tuple, Optional, Sequence, Union, Literal
+from beartype.typing import List, Tuple, Optional, Union, Any
 
 
 def _get_data_folder(folder_name: str = "beak.data") -> Path:
     """
-    Returns the path to the specified data folder.
+    Obtain the path to the specified data folder.
+
+    Args:
+        folder_name: The name of the data folder. Default is "beak.data".
+
+    Returns:
+        The relative path to the specified data folder.
     """
     if sys.version_info < (3, 9):
         from importlib_resources import files
@@ -25,9 +31,15 @@ def _extract_rows(
 ) -> List:
     """
     Extract specific information from the provided data frame.
+
+    Args:
+        data: The DataFrame containing the data.
+        attribute: The column name to extract information from for each row.
+
+    Returns:
+        A list containing the extracted information.
     """
     extractions = []
-    attribute = "data_source" + "." + attribute
 
     for index, row in data.iterrows():
         information = row[attribute]
@@ -43,6 +55,14 @@ def create_file_list(
 ) -> List[str]:
     """
     Create a list of files in the specified folder with the given extensions.
+
+    Args:
+        folder: The folder path to search for files.
+        file_suffix: Sequence of file extensions to include. Defaults to [".tif", ".tiff"].
+        file_prefix: Prefixes of files to filter. Defaults to None.
+
+    Returns:
+        A list of file paths found.
     """
     folder = Path(folder)
     file_list = [str(file) for file in folder.glob("*")]
@@ -60,7 +80,18 @@ def _filter_files(
     file_prefix: Union[str, Tuple, None],
 ) -> List[str]:
     """
-    Filters out files from the provided list of files.
+    Filter files from the provided list of files.
+
+    Args:
+        file_list: List of file paths.
+        file_suffix: Suffixes of files to filter.
+        file_prefix: Prefixes of files to filter.
+
+    Raises:
+        AssertionError: If no files are found.
+
+    Returns:
+        List of file paths that match the specified criteria.
     """
     suffix_match, prefix_match = True, True
     filtered_files = []
@@ -91,7 +122,15 @@ def _download_cdr_files(
     verify_ssl: bool,
 ) -> List[str]:
     """
-    Downloads a file from the provided URL to the specified download folder.
+    Download files from the provided list of URLs to a specified folder.
+
+    Args:
+        download_urls: List of URLs from which to download files.
+        download_folder: Path to the folder where the files will be downloaded.
+        verify_ssl: Whether to verify SSL certificates during the download.
+
+    Returns:
+        List of file paths that were downloaded.
     """
     download_folder.mkdir(parents=True, exist_ok=True)
 
@@ -117,9 +156,33 @@ def create_zip_from_files(
     archive_path: Union[str, Path]
 ):
     """
-    Creates a zip file from a list of files.
+    Create a zip file from a list of files.
+
+    Args:
+        file_list: The list of input files to be saved.
+        archive_path: The path to the output zip file.
+
+    Returns:
+        None
     """
     with zipfile.ZipFile(archive_path, "w") as archive:
         for file in file_list:
             file = Path(file)
             archive.write(filename=file, arcname=file.name)
+
+
+def delete_files(file_list: List[str]) -> None:
+    """
+    Delete files from the specified list.
+
+    Args:
+        file_list: List of file paths to delete.
+
+    Returns:
+        None
+    """
+    for file in file_list:
+        try:
+            os.remove(file)
+        except:
+            print(f"Failed to delete file: {file}")

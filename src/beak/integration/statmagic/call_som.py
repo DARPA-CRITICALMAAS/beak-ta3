@@ -3,13 +3,13 @@ import warnings
 import pandas as pd
 
 from pathlib import Path
-from beartype.typing import List, Tuple, Dict, Union, Optional
+from beartype.typing import List, Tuple, Dict, Optional
 
 import beak.methods.som.argsSOM as asom
 import beak.methods.som.do_nextsomcore_save_results as dnsr
 import beak.methods.som.argsPlot as aplot
 import beak.methods.som.plot_som_results as plot
-from beak.integration.statmagic.utils import create_file_list, _filter_files, create_zip_from_files
+from beak.integration.statmagic.utils import create_file_list, create_zip_from_files, delete_files, _filter_files
 from cdr_schemas.prospectivity_input import ProspectivityOutputLayer
 
 
@@ -20,7 +20,7 @@ def run_som(
     output_folder: str,
 ) -> List[Tuple[str, Dict]]:
     """
-    Calls the SOM algorithm on input layers using the provided configuration.
+    Call the SOM algorithm on input layers using the provided configuration.
 
     Args:
         input_layers: List containing the path of input rasters as strings.
@@ -31,39 +31,49 @@ def run_som(
     Returns:
         None
     """
-    # Check output folder
     os.makedirs(output_folder, exist_ok=True)
 
-    # Initialize args
+    # Initialize arguments
     args = asom.Args()
     argsP = aplot.Args()
 
-    # Set layer arguments
+    # SOM inputs and outputs
     input_layer_string = ','.join(input_layers)
     args.input_file = input_layer_string
     args.geotiff_input = input_layer_string
 
-    # Set label arguments
     if input_labels is not None:
         args.label = True
         args.label_geotiff_file = input_labels
     else:
         args.label = False
 
-    # Define SOM outputs
     args.output_folder = output_folder
     args.output_file_somspace = os.path.join(output_folder, "result_som.txt")
     args.output_file_geospace = os.path.join(output_folder, "result_geo.txt")
     args.outgeofile = args.output_file_geospace
 
-    # Read config
+    # Plot input and outputs
+    argsP.input_file = args.input_file
+    argsP.dir = args.output_folder
+    argsP.outsomfile = args.output_file_somspace
+    argsP.outgeofile = args.output_file_geospace
+
+    # Pack output folders
+    output_folders = (
+        output_folder,
+        os.path.join(output_folder, args.output_raster_folder),
+        os.path.join(output_folder, argsP.output_plots_folder)
+    )
+
+    # Read model_run config
     json_data = pd.read_json(config_file)
     payload = json_data.loc["payload"]
     cma_id = payload["cma_id"]
     model_run_id = payload["model_run_id"]
     train_config = payload["event"]["train_config"]
 
-    # Set SOM arguments
+    # SOM arguments
     args.som_x = train_config["dimensions_x"]
     args.som_y = train_config["dimensions_y"]
     args.epochs = train_config["num_epochs"]
@@ -79,16 +89,7 @@ def run_som(
     args.initialization = train_config["som_initialization"]
     args.gridtype = train_config["grid_type"]
 
-    # Set Plot arguments
-    argsP.outsomfile = args.output_file_somspace
-    argsP.som_x = args.som_x
-    argsP.som_y = args.som_y
-    argsP.input_file = args.input_file
-    argsP.dir = args.output_folder
-    argsP.grid_type = args.gridtype
-    argsP.outgeofile = args.output_file_geospace
-
-    # Set k-means arguments
+    # K-means arguments
     # Workaround for the lack of parameters in the CDR schema
     # TODO: Add and connect HMI-options kmeans[bool], kmeans_min[int], kmeans_max[int] to CDR schema
     args.kmeans_min = 10
@@ -96,34 +97,114 @@ def run_som(
     args.kmeans_init = train_config["num_initializations"]
     args.kmeans = True if args.kmeans_init > 0 else False
 
+    # Plot arguments
+    argsP.som_x = args.som_x
+    argsP.som_y = args.som_y
+    argsP.grid_type = args.gridtype
+
     # Run SOM without k-means warning
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         dnsr.run_SOM(args)
 
-    # Run plotting
+    # Plotting
     plot.run_plotting_script(argsP)
+
+    _create_layer_plot_names(
+        payload=payload,
+        label_column="label_raster",
+        output_folder=output_folders[2],
+    )
 
     # Collect results
     out_layers = _collect_results(
         cma_id=cma_id,
         model_run_id=model_run_id,
         kmeans=args.kmeans,
-        output_folder=output_folder
+        output_folders=output_folders
     )
 
+    # Delete intermediate files
+    _delete_intermediate_files(output_folder)
+
     return out_layers
+
+
+def _delete_intermediate_files(output_folder: str) -> None:
+    """
+    Delete intermediate files from the output folder.
+
+    Args:
+        output_folder: Output folder for the intermediate files.
+
+    Returns:
+        None
+    """
+    files = create_file_list(
+        folder=output_folder,
+        file_suffix=(".txt", ".dictionary"),
+        file_prefix=None
+    )
+
+    if files:
+        delete_files(files)
+
+
+def _create_layer_plot_names(
+    payload: pd.DataFrame,
+    label_column: Optional[str],
+    output_folder: str,
+) -> None:
+    """
+    Create a table for layer names and titles with indices for each evidence layer.
+
+    Args:
+        payload: DataFrame containing the payload.
+        label_column: Column name containing labels.
+        output_folder: Output folder for the plot names.
+
+    Returns:
+        None
+    """
+    layers = payload["event"]["evidence_layers"]
+    layers = pd.json_normalize(layers)
+
+    if label_column in layers.columns:
+        layers = layers[
+            layers[label_column] == False
+        ]
+
+    layers = layers[
+        ["title", "layer_id", "download_url"]
+    ]
+    layers.insert(0, "plot_index", range(1, len(layers) + 1))
+    layers.insert(2, "file_name", layers["download_url"].apply(lambda x: Path(x).name))
+
+    output_path = os.path.join(output_folder, "plot_names.csv")
+    layers.to_csv(output_path, sep=";", index=False)
 
 
 def _collect_results(
     cma_id: str,
     model_run_id: str,
     kmeans: bool,
-    output_folder: str,
+    output_folders: Tuple[str, str, str],
 ) -> List[Tuple[str, ProspectivityOutputLayer]]:
     """
-    Creates information for CDR ProspectivityOutputLayer
+    Create information for the CDR ProspectivityOutputLayer Class.
+
+    Args:
+        cma_id: Unique identifier for the CMA.
+        model_run_id: Unique identifier for the model run.
+        kmeans: Boolean indicating if k-means clustering was performed.
+        output_folders: Tuple containing the output folder, raster folder, and plots folder.
+
+    Returns:
+        List of tuples, where each tuple contains the file path and the related ProspectivityOutputLayer object.
     """
+    output_folder, raster_folder, plots_folder = output_folders
+
+    # Initialization
     init_meta = {
         "system": "statmagic",
         "system_version": "",
@@ -161,22 +242,24 @@ def _collect_results(
 
     # Create file lists and modify for kmeans since "cluster.tif" is created in any case
     results_file_list = create_file_list(
-        folder=os.path.join(output_folder, "raster")
+        folder=raster_folder
     )
 
     results_file_list = [file for file in results_file_list if not (
         "cluster.tif" in file and kmeans is False
     )]
 
+    # Codebook map file list
     codebook_maps_file_list = _filter_files(
         file_list=results_file_list,
         file_suffix=None,
         file_prefix="b_"
     )
 
+    # Plot files list including title-name correlation
     plots_file_list = create_file_list(
-        folder=os.path.join(output_folder, "plots"),
-        file_suffix=".png"
+        folder=plots_folder,
+        file_suffix=(".png", ".csv")
     )
 
     # Initialize output
@@ -184,10 +267,7 @@ def _collect_results(
 
     # Add raster results
     for file in results_file_list:
-        file_stem = str(
-            Path(file).stem
-        ).lower()
-
+        file_stem = Path(file).stem.lower()
         meta = init_meta.copy()
 
         for key, value in results.items():
@@ -198,7 +278,7 @@ def _collect_results(
                     (file, meta)
                 )
 
-    # Add codebook maps
+    # Add codebook maps, names starting with "b_"
     for file in codebook_maps_file_list:
         file_name = str(
             Path(file).stem
@@ -236,7 +316,8 @@ def _collect_results(
         layers_list.append(
             (plots_archive_path, meta)
         )
-        
+
+    # Create CDR object
     prospectivity_output_layers = [] 
     for layer in layers_list:
         layer_path = layer[0]

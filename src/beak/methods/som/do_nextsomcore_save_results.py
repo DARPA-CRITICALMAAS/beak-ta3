@@ -104,7 +104,7 @@ def run_SOM(args):
 		start_time = time.time()
 		inputFileArray=args.geotiff_input.split(",")  
 		bmu_id = create_bmu_id(args.som_x, args.som_y, args.output_folder)  
-		nxtsomcore.write_geotiff_out(args.output_folder, args.output_file_geospace, args.output_file_somspace, inputFileArray[0], args.label, index_nolabel, bmu_id)
+		nxtsomcore.write_geotiff_out(args.output_folder, args.output_raster_folder, args.output_file_geospace, args.output_file_somspace, inputFileArray[0], args.label, index_nolabel, bmu_id)
 		end_time = time.time()
 		print(f"    Execution time: {end_time - start_time} seconds")
 	

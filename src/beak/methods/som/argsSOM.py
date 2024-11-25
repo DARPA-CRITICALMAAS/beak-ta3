@@ -77,6 +77,8 @@ class Args:
         self.normalized = "false"
         self.label = False
         self.label_geotiff_file = None
+        self.output_raster_folder = "raster"
+
 
     @classmethod
     def from_json_file(cls, file_path):
