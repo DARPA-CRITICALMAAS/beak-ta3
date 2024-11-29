@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from beak.experimental.utilities.io import create_file_list
+from beak.experimental.io import create_file_list
 from nbconvert.nbconvertapp import NbConvertApp
 
 def convert_notebook_to_script(notebook_path):

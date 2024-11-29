@@ -23,14 +23,14 @@ from rasterio.crs import CRS
 from tqdm import tqdm
 from osgeo import gdal
 
-from beak.experimental.utilities.io import (
+from beak.experimental.io import (
     create_file_folder_list,
     create_file_list,
     check_path,
 )
 
-from beak.experimental.utilities.io import load_raster, save_raster
-from beak.experimental.utilities.checks import check_grid_alignment, check_raster_input
+from beak.experimental.io import load_raster, save_raster
+from beak.experimental.checks import check_grid_alignment, check_raster_input
 
 # References
 # Some non-trivial functionalities were adapted from other sources.

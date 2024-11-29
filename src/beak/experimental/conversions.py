@@ -9,11 +9,11 @@ import pandas as pd
 import rasterio
 import os
 
-from beak.experimental.utilities.preparation import create_encodings_from_dataframe
-from beak.experimental.utilities.raster_processing import fill_nodata_with_mean, snap_raster
-from beak.experimental.utilities.vector_processing import _reproject_vector_data
-from beak.experimental.utilities.misc import replace_invalid_characters
-from beak.experimental.utilities.io import check_path, save_raster
+from beak.experimental.preparation import create_encodings_from_dataframe
+from beak.experimental.raster_processing import fill_nodata_with_mean, snap_raster
+from beak.experimental.vector_processing import _reproject_vector_data
+from beak.experimental.misc import replace_invalid_characters
+from beak.experimental.io import check_path, save_raster
 
 from rasterio import features, profiles, transform
 from rasterio.crs import CRS

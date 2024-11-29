@@ -589,7 +589,7 @@ class NxtSomCore(object):
         from rasterio.crs import CRS
         from rasterio.transform import from_origin
         # Custom modules
-        from beak.experimental.utilities.io import save_raster
+        from beak.experimental.io import save_raster
 
 
         inDs = gdal.Open(input_file.split(',')[0])

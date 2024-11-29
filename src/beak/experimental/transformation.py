@@ -10,7 +10,7 @@ import geopandas as gpd
 import rasterio
 from tqdm import tqdm
 
-from beak.experimental.utilities.io import (
+from beak.experimental.io import (
     create_file_folder_list,
     create_file_list,
     check_path,

@@ -6,7 +6,7 @@ import pandas as pd
 from pathlib import Path
 from tqdm import tqdm
 from beartype.typing import Optional, Union, Sequence, Tuple
-from beak.experimental.utilities.io import create_file_list
+from beak.experimental.io import create_file_list
 
 
 def replace_invalid_characters(string: str, prefix: Optional[str] = None) -> str:

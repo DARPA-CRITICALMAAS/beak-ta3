@@ -20,7 +20,7 @@ from collections import Counter
 from tqdm import tqdm
 
 # from importlib.resources.abc import Traversable
-from beak.experimental.utilities.checks import check_write_permissions
+from beak.experimental.checks import check_write_permissions
 
 
 def data_folder(folder_name: str = "beak.data") -> Path:

@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 from beak.models import hack_12m_tusk
-from beak.experimental.utilities.io import load_model, check_path
+from beak.experimental.io import load_model, check_path
 
 # SOM specific
 import beak.methods.som.argsSOM as asom

@@ -9,8 +9,8 @@ from sklearn.impute import SimpleImputer
 from beartype.typing import List, Tuple, Union, Optional, Literal, Sequence
 from numbers import Number
 
-from beak.utilities.io import load_raster, read_raster
-from beak.utilities.focal import _create_local_buffer_binary_version, _create_local_buffer_generic_version
+from beak.experimental.io import load_raster, read_raster
+from beak.experimental.focal import _create_local_buffer_binary_version, _create_local_buffer_generic_version
 
 
 def create_encodings_from_dataframe(

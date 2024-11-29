@@ -5,7 +5,7 @@ The JELLIFISH model is most comparable to the google sheet model configuration, 
 The PANDA model is an additional configuration for self-organizing maps with high-res data.
 """
 
-from beak.experimental.utilities.misc import update_model_config
+from beak.experimental.misc import update_model_config
 
 regional_scale_southwest = {
     "BASELINE_BISON": {

@@ -16,9 +16,9 @@ from pandas import json_normalize
 from numbers import Number
 
 from beartype.typing import Union, Optional, Tuple, List
-from beak.experimental.utilities.io import check_path, data_folder
-from beak.experimental.utilities.misc import replace_invalid_characters
-from beak.experimental.utilities.conversions import create_binary_raster
+from beak.experimental.io import check_path, data_folder
+from beak.experimental.misc import replace_invalid_characters
+from beak.experimental.conversions import create_binary_raster
 
 
 def _get_cma(
