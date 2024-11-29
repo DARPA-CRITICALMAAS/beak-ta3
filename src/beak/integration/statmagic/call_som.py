@@ -9,7 +9,15 @@ import beak.methods.som.argsSOM as asom
 import beak.methods.som.do_nextsomcore_save_results as dnsr
 import beak.methods.som.argsPlot as aplot
 import beak.methods.som.plot_som_results as plot
-from beak.integration.statmagic.utils import create_file_list, create_zip_from_files, delete_files, _filter_files
+
+from beak.integration.statmagic.utils import (
+    create_file_list,
+    create_zip_from_files,
+    delete_files,
+    _filter_files,
+    _filter_layers_from_payload
+)
+
 from cdr_schemas.prospectivity_input import ProspectivityOutputLayer
 
 
@@ -166,13 +174,11 @@ def _create_layer_plot_names(
     Returns:
         None
     """
-    layers = payload["event"]["evidence_layers"]
-    layers = pd.json_normalize(layers)
-
-    if label_column in layers.columns:
-        layers = layers[
-            layers[label_column] == False
-        ]
+    layers = _filter_layers_from_payload(
+        payload=payload,
+        label_column=label_column,
+        filter_labels=False
+    )
 
     layers = layers[
         ["title", "layer_id", "download_url"]

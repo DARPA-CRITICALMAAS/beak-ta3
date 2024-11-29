@@ -9,7 +9,6 @@ modyfied by Ina Storch, 2024
 """
 import warnings
 with warnings.catch_warnings():
-    import numpy as np
     from sklearn.cluster import KMeans
     import somoclu
     import sys
@@ -23,7 +22,6 @@ with warnings.catch_warnings():
     from sklearn.metrics import davies_bouldin_score
     from decimal import Decimal
     import os.path
-    import math
     #import ast
 class NxtSomCore(object):
     """Class for training self-organizing map and saving results.
@@ -591,7 +589,7 @@ class NxtSomCore(object):
         from rasterio.crs import CRS
         from rasterio.transform import from_origin
         # Custom modules
-        from beak.utilities.io import save_raster
+        from beak.experimental.utilities.io import save_raster
 
 
         inDs = gdal.Open(input_file.split(',')[0])

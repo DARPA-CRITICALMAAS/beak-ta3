@@ -4,7 +4,7 @@ import sys
 import requests
 import zipfile
 from pathlib import Path
-from beartype.typing import List, Tuple, Optional, Union, Any
+from beartype.typing import List, Tuple, Optional, Union, Literal
 
 
 def _get_data_folder(folder_name: str = "beak.data") -> Path:
@@ -186,3 +186,30 @@ def delete_files(file_list: List[str]) -> None:
             os.remove(file)
         except:
             print(f"Failed to delete file: {file}")
+
+
+def _filter_layers_from_payload(
+    payload: pd.DataFrame,
+    label_column: Optional[str],
+    filter_labels: bool = False
+) -> pd.DataFrame:
+    """
+    Filter evidence layers from configuration file.
+
+    Args:
+        payload: DataFrame containing the payload.
+        label_column: Column name containing labels.
+        filter_labels: Whether to filter layers based on labels. Defaults to False.
+
+    Returns:
+        Filtered dataframe containing evidence layers or label file.
+    """
+    layers = payload["event"]["evidence_layers"]
+    layers = pd.json_normalize(layers)
+
+    if label_column in layers.columns:
+        layers = layers[
+            layers[label_column] == filter_labels
+        ]
+
+    return layers
