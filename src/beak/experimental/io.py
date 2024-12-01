@@ -14,7 +14,7 @@ import sys
 import multiprocessing as mp
 
 from pathlib import Path
-from beartype.typing import Optional, Tuple, Union, Dict, Sequence, List
+from typing import Optional, Tuple, Union, Dict, Sequence, List
 from numbers import Number
 from collections import Counter
 from tqdm import tqdm

@@ -6,7 +6,7 @@ import warnings
 
 from pathlib import Path
 from sklearn.impute import SimpleImputer
-from beartype.typing import List, Tuple, Union, Optional, Literal, Sequence
+from typing import List, Tuple, Union, Optional, Literal, Sequence
 from numbers import Number
 
 from beak.experimental.io import load_raster, read_raster

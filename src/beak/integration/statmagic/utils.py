@@ -4,7 +4,7 @@ import sys
 import requests
 import zipfile
 from pathlib import Path
-from beartype.typing import List, Tuple, Optional, Union, Literal
+from typing import List, Tuple, Optional, Union, Literal
 
 
 def _get_data_folder(folder_name: str = "beak.data") -> Path:

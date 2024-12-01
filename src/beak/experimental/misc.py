@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from tqdm import tqdm
-from beartype.typing import Optional, Union, Sequence, Tuple
+from typing import Optional, Union, Sequence, Tuple
 from beak.experimental.io import create_file_list
 
 

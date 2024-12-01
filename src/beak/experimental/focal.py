@@ -1,7 +1,7 @@
 from numbers import Number
 
 import numpy as np
-from beartype.typing import Literal, Callable, Optional
+from typing import Literal, Callable
 from scipy.ndimage import generic_filter, binary_dilation
 
 

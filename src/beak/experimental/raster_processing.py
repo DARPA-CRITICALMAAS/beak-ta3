@@ -3,7 +3,7 @@ import os
 import warnings
 
 from pathlib import Path
-from beartype.typing import Optional, Tuple, Union, Sequence, List, Literal, Dict
+from typing import Optional, Tuple, Union, Sequence, List, Literal, Dict
 
 import numpy as np
 import geopandas as gpd

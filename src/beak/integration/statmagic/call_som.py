@@ -3,7 +3,7 @@ import warnings
 import pandas as pd
 
 from pathlib import Path
-from beartype.typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Dict, Optional
 
 import beak.methods.som.argsSOM as asom
 import beak.methods.som.do_nextsomcore_save_results as dnsr

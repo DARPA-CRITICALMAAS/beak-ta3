@@ -1,7 +1,7 @@
 import multiprocessing as mp
 import time
 from pathlib import Path
-from beartype.typing import List, Literal, Optional, Tuple, Union, Sequence
+from typing import List, Literal, Optional, Tuple, Union, Sequence
 
 import geopandas as gpd
 import numpy as np

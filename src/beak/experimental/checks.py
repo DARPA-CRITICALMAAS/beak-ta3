@@ -2,7 +2,7 @@ import rasterio
 import numpy as np
 
 from pathlib import Path
-from beartype.typing import Union, Optional, Tuple, Dict, Sequence
+from typing import Union, Optional, Tuple, Dict, Sequence
 
 
 def check_positives(file_path: Union[str, Path], band: Optional[int] = None):
