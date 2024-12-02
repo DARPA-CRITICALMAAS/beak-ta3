@@ -176,6 +176,7 @@ eis_toolkit/
 probflow/
 .obsidian/
 .idea/
+.bak/
 results/
 exports/
 logs/
