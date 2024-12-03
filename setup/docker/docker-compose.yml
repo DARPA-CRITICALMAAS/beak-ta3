@@ -6,10 +6,9 @@ services:
     tty: true
     build:
       context: ../..                                  # Build from root directory
-      dockerfile: install/docker/Dockerfile
+      dockerfile: setup/docker/Dockerfile
     image: beak-ta3:dev                               # Override default image naming
     ports:
-      - 8000:8000                                     # Ports for mkdocs
       - 8888:8888                                     # Ports for jupyter
     volumes:
       - ../../:/beak-ta3/                             # Mount the repo

@@ -4,7 +4,7 @@ set -e
 # Function to log messages
 log_message() {
     printf "%s\n" "$1"
-    printf "%s\n" "$1" >> "${SCRIPT_DIR}/setup_log.txt"
+    printf "%s\n" "$1" >> "${SCRIPT_DIR}/setup.log"
 }
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
