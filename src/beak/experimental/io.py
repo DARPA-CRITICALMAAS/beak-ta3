@@ -14,7 +14,7 @@ import sys
 import multiprocessing as mp
 
 from pathlib import Path
-from typing import Optional, Tuple, Union, Dict, Sequence, List
+from typing import Optional, Tuple, Union, Dict, Sequence, List, Any
 from numbers import Number
 from collections import Counter
 from tqdm import tqdm
@@ -23,7 +23,7 @@ from tqdm import tqdm
 from beak.experimental.checks import check_write_permissions
 
 
-def data_folder(folder_name: str = "beak.data") -> Path:
+def data_folder(package_name: str = "beak", folder_name: str = "data") -> Any:
     """
     Returns the path to the specified data folder.
 
@@ -41,10 +41,7 @@ def data_folder(folder_name: str = "beak.data") -> Path:
     else:
         from importlib.resources import files
 
-    out_folder = files(folder_name)
-    out_folder = str(out_folder)
-
-    return Path(out_folder)
+    return files(package_name) / folder_name
 
 
 def load_dataset(

@@ -1,7 +1,7 @@
 import numpy as np
 from typing import Literal, Dict, Tuple
 
-from mpm_input_preprocessing.common.utils_helper import (
+from beak.preprocessing.helper import (
     _cast_array_to_minimum_dtype,
     _update_nodata
 )

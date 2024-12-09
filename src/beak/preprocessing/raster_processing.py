@@ -3,10 +3,9 @@ from rasterio import warp
 from rasterio.enums import Resampling
 from typing import Optional, Tuple, Dict
 
-from mpm_input_preprocessing.common.utils_helper import (
+from beak.preprocessing.helper import (
     _cast_array_to_minimum_dtype
 )
-
 
 
 def coregistration(

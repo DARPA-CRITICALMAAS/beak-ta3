@@ -4,7 +4,7 @@ import ssl
 
 import rasterio
 import numpy as np
-from typing import Dict, Tuple, Union, Optional
+from typing import Dict, Tuple, Union, Optional, List
 
 
 def download_file_from_cdr(download_url: str) -> io.BytesIO:
@@ -31,7 +31,12 @@ def download_file_from_cdr(download_url: str) -> io.BytesIO:
     return io.BytesIO(response.read())
 
 
-def read_raster_band(raster: rasterio.io.DatasetReader, band: int = 1, **kwargs) -> Tuple[np.ndarray, Dict]:
+def read_raster_band(
+    raster: rasterio.io.DatasetReader,
+    band: int = 1,
+    nodata_to_nan: bool = True,
+    **kwargs
+) -> Tuple[np.ndarray, Dict]:
     """
     Read a raster file from the given DatasetReader object and returns the raster array and its metadata.
 
@@ -42,6 +47,7 @@ def read_raster_band(raster: rasterio.io.DatasetReader, band: int = 1, **kwargs)
     Args:
         raster: The DatasetReader object from which to read the raster.
         band: The band number to read from the raster.
+        nodata_to_nan: Whether to apply a mask to the raster array. Default is True.
         **kwargs: Additional keyword arguments to update the metadata of the raster.
 
     Returns:
@@ -56,8 +62,71 @@ def read_raster_band(raster: rasterio.io.DatasetReader, band: int = 1, **kwargs)
         count=1
     )
     out_meta.update(kwargs)
+    out_array = np.where(out_array == out_meta["nodata"], np.nan, out_array) if nodata_to_nan is True else out_array
 
     return out_array, out_meta
+
+
+def load_layer(input_file: str) -> Tuple[np.ndarray, Dict]:
+    """
+    # TODO: Docstring goes here
+    """
+    out_array, out_meta = read_raster_band(
+        rasterio.open(input_file)
+    )
+
+    return out_array.reshape(1, -1), out_meta
+
+
+def load_layers(
+    input_files: List[str]
+) -> np.ndarray:
+    """
+    # TODO: Docstring goes here
+    """
+    layers_stack = []
+
+    for file in input_files:
+        raster_array, _ = load_layer(file)
+        layers_stack.append(raster_array)
+
+    out_stack = np.vstack(layers_stack)
+    # out_stack = out_stack.reshape(out_stack.shape[0], -1)
+    return out_stack
+
+
+def _remove_nan_rows(
+    data: np.ndarray,
+    axis: int = 1
+):
+    """
+    # TODO: Docstring goes here
+    """
+    model_data = data.copy()
+
+    return model_data[
+        ~np.isnan(model_data).any(axis=axis)
+    ]
+
+
+def prepare_model_data(
+    input_layers: np.ndarray,
+    input_labels: np.ndarray,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    # TODO: Docstring goes here
+    """
+    model_data = np.vstack(
+        [
+            input_layers,
+            input_labels
+        ]
+    )
+
+    model_data = model_data.reshape(model_data.shape[0], -1).T
+    model_data = _remove_nan_rows(model_data)
+
+    return model_data[:, :-1], model_data[:, -1]
 
 
 def save_raster(

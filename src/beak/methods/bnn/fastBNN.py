@@ -1,12 +1,11 @@
-import os
 from typing import List, Tuple
 
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
-from sklearn.metrics import accuracy_score
 from tensorflow_probability import distributions as tfd
 from tqdm import tqdm
+from beak.preprocessing.transform import __transform_minmax
 
 
 def set_global_seed(seed: int) -> None:
@@ -128,6 +127,8 @@ def build_bayesian_network(
     """
     Build a Bayesian network consisting of one core network and two heads (loc and std).
     """
+    head_units = head_units + [1]
+
     core_unit = build_network([input_shape] + core_units[:-1], core_units)
     loc_head = build_network([core_units[-1]] + head_units[:-1], head_units)
     std_head = build_network([core_units[-1]] + head_units[:-1], head_units)
@@ -149,7 +150,13 @@ def forward_layers(
     return x
 
 
-def bayesian_network_forward(x: tf.Tensor, core_unit: List, loc_head: List, std_head: List, trainable: bool = True) -> tf.Tensor:
+def bayesian_network_forward(
+    x: tf.Tensor,
+    core_unit: List,
+    loc_head: List,
+    std_head: List,
+    trainable: bool = True
+) -> tf.Tensor:
     """
     Forward pass through the Bayesian network (core + loc and std heads).
     """
@@ -157,20 +164,23 @@ def bayesian_network_forward(x: tf.Tensor, core_unit: List, loc_head: List, std_
 
     # Core layers
     core_activations = [activation] * len(core_unit)
-    h = forward_layers(x, core_unit, core_activations, trainable)
+    core_output = forward_layers(x, core_unit, core_activations, trainable)
 
     # Apply activation to all but the last layer
     loc_activations = [activation] * (len(loc_head) - 1) + [None]
     std_activations = [activation] * (len(std_head) - 1) + [None]
 
     # Forward pass through loc and std heads
-    loc_preds = forward_layers(h, loc_head, loc_activations, trainable)
-    std_preds = forward_layers(h, std_head, std_activations, trainable)
+    loc_preds = forward_layers(core_output, loc_head, loc_activations, trainable)
+    std_preds = forward_layers(core_output, std_head, std_activations, trainable)
 
     return tf.concat([loc_preds, tf.nn.softplus(std_preds)], axis=1)
 
 
 def negative_log_likelihood(y_true: tf.Tensor, y_pred: tf.Tensor):
+    """
+    Calculate negative log likelighood.
+    """
     loc = y_pred[:, 0]
     scale = y_pred[:, 1]
     distribution = tfd.Normal(loc=loc, scale=scale)
@@ -198,35 +208,31 @@ def train_step(
     variables = [v for layer in core_layers + loc_head + std_head for v in layer]
     gradients = tape.gradient(elbo_loss, variables)
     optimizer.apply_gradients(zip(gradients, variables))
+
     return elbo_loss
 
 
-def fit(
+def fit_model(
     data_train,
-    data_val,
     input_shape: int,
     core_units: List[int],
     head_units: List[int],
     lr: float,
     epochs: int,
     N: int
-    ) -> Tuple[Tuple[List, List, List], np.ndarray, np.ndarray]:
+    ) -> Tuple[Tuple[List, List, List], np.ndarray]:
     """
     Train the Bayesian density network and return the trained model parameters and metrics.
     """
     core_layers, loc_head, std_head = build_bayesian_network(input_shape, core_units, head_units)
     optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
-    elbo, acc = np.zeros(epochs), np.zeros(epochs)
+    elbo = np.zeros(epochs)
 
     for epoch in tqdm(range(epochs), desc="Training", unit="Epoch"):
         for x_data, y_data in data_train:
             elbo[epoch] = train_step(x_data, y_data, core_layers, loc_head, std_head, optimizer, N).numpy()
 
-        for x_data, y_data in data_val:
-            preds = bayesian_network_forward(x_data, core_layers, loc_head, std_head, trainable=False)
-            acc[epoch] = accuracy_score(y_data, preds[:, 0].numpy() > 0.5)
-
-    return (core_layers, loc_head, std_head), elbo, acc
+    return (core_layers, loc_head, std_head), elbo
 
 
 def predict_model(model: Tuple[List, List, List], data: np.ndarray) -> dict:
@@ -236,10 +242,10 @@ def predict_model(model: Tuple[List, List, List], data: np.ndarray) -> dict:
     core_layers, loc_head, std_head = model
     x_data = tf.convert_to_tensor(data, dtype=tf.float32)
 
-    y_pred = bayesian_network_forward(x_data, core_layers, loc_head, std_head, trainable=True)
+    y_pred = bayesian_network_forward(x_data, core_layers, loc_head, std_head, trainable=False)
     prediction_mean = y_pred[:, 0].numpy()
     prediction_sd = y_pred[:, 1].numpy()
     return {
         "prediction": np.clip(prediction_mean, 0, 1),
-        "uncertainty": prediction_sd
+        "uncertainty": __transform_minmax(prediction_sd)
     }
