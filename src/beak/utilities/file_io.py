@@ -1,6 +1,8 @@
+import os
 import urllib.request
 import io
 import ssl
+import json
 
 import rasterio
 import numpy as np
@@ -75,7 +77,7 @@ def load_layer(input_file: str) -> Tuple[np.ndarray, Dict]:
         rasterio.open(input_file)
     )
 
-    return out_array.reshape(1, -1), out_meta
+    return out_array.reshape(-1, 1), out_meta
 
 
 def load_layers(
@@ -90,8 +92,7 @@ def load_layers(
         raster_array, _ = load_layer(file)
         layers_stack.append(raster_array)
 
-    out_stack = np.vstack(layers_stack)
-    # out_stack = out_stack.reshape(out_stack.shape[0], -1)
+    out_stack = np.column_stack(layers_stack)
     return out_stack
 
 
@@ -116,14 +117,7 @@ def prepare_model_data(
     """
     # TODO: Docstring goes here
     """
-    model_data = np.vstack(
-        [
-            input_layers,
-            input_labels
-        ]
-    )
-
-    model_data = model_data.reshape(model_data.shape[0], -1).T
+    model_data = np.column_stack([input_layers, input_labels])
     model_data = _remove_nan_rows(model_data)
 
     return model_data[:, :-1], model_data[:, -1]
@@ -166,6 +160,7 @@ def save_raster(
     raster_array_dtype = raster_array.dtype.name
     raster_array_dtype_min, raster_array_dtype_max = __get_dtype_range_info(raster_array_dtype)
     raster_array_min, raster_array_max = np.min(raster_array), np.max(raster_array)
+
     meta_nodata = raster_meta["nodata"]
 
     # Assertions
@@ -186,10 +181,34 @@ def save_raster(
         )
 
     # Create file
-    with rasterio.open(output_path, "w", **raster_meta) as dst:
+    with rasterio.open(output_path, "w", compress="LZW", **raster_meta) as dst:
         for i in range(0, raster_meta["count"]):
             dst.write(raster_array[i], i + 1)
         dst.close()
+
+
+def prepare_output(
+    src_array: np.ndarray,
+    src_meta: Dict,
+) -> Tuple[np.ndarray, Dict]:
+    """
+    # TODO: Docstring goes here
+    """
+    out_nodata = _update_nodata(
+        src_array,
+        src_meta["nodata"]
+    )
+
+    out_array = np.nan_to_num(src_array, nan=out_nodata)
+    out_array, out_nodata = _cast_array_to_minimum_dtype(out_array, out_nodata)
+
+    out_meta = src_meta.copy()
+    out_meta.update(
+        nodata=out_nodata,
+        dtype=out_array.dtype
+    )
+
+    return out_array, out_meta
 
 
 def _update_nodata(
@@ -536,3 +555,11 @@ def __get_minimum_dtype(
 
     # Else case
     raise ValueError(f"Unsupported data type: {array.dtype}")
+
+
+def write_json(folder_name: str, file_name: str, data: Dict):
+    """
+    # TODO: Docstring goes here.
+    """
+    with open(os.path.join(folder_name, file_name), "w", encoding="utf-8") as json_file:
+        json.dump(data, json_file, indent=4, ensure_ascii=False)

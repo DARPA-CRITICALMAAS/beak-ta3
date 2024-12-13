@@ -3,7 +3,7 @@ from rasterio import warp
 from rasterio.enums import Resampling
 from typing import Optional, Tuple, Dict
 
-from beak.preprocessing.helper import (
+from beak.utilities.file_io import (
     _cast_array_to_minimum_dtype
 )
 

@@ -5,7 +5,7 @@ import rasterio
 from rasterio import features, transform
 from rasterio.enums import MergeAlg
 
-from beak.preprocessing.helper import (
+from beak.utilities.file_io import (
     _cast_array_to_minimum_dtype,
     _initialize_data_for_rasterization
 )

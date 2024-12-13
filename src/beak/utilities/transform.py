@@ -1,10 +1,7 @@
 import numpy as np
 from typing import Literal, Dict, Tuple
 
-from beak.preprocessing.helper import (
-    _cast_array_to_minimum_dtype,
-    _update_nodata
-)
+from beak.utilities.file_io import prepare_output
 
 
 def __transform_log(
@@ -120,14 +117,5 @@ def transform(
     else:
         raise ValueError(f"Invalid transform method: {method}")
 
-    out_nodata = _update_nodata(out_array, src_nodata)
-    out_array = np.nan_to_num(out_array, nan=out_nodata)
-    out_array, out_nodata = _cast_array_to_minimum_dtype(out_array, out_nodata)
-
     out_meta = src_meta.copy()
-    out_meta.update(
-        nodata=out_nodata,
-        dtype=out_array.dtype
-    )
-
-    return out_array, out_meta
+    return prepare_output(out_array, out_meta)

@@ -4,10 +4,10 @@ import sys
 import requests
 import zipfile
 from pathlib import Path
-from typing import List, Tuple, Optional, Union, Literal
+from typing import List, Tuple, Optional, Union, Literal, Any
 
 
-def _get_data_folder(folder_name: str = "beak.data") -> Path:
+def _get_data_folder(package_name = "beak", folder_name: str = "data") -> Any:
     """
     Obtain the path to the specified data folder.
 
@@ -22,7 +22,7 @@ def _get_data_folder(folder_name: str = "beak.data") -> Path:
     else:
         from importlib.resources import files
 
-    return files(folder_name)
+    return files(package_name) / folder_name
 
 
 def _extract_rows(

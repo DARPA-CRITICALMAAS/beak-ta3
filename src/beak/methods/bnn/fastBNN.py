@@ -1,15 +1,17 @@
-from typing import List, Tuple
+from typing import List, Tuple, Sequence, Dict, Optional
 
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 from tensorflow_probability import distributions as tfd
 from tqdm import tqdm
-from beak.preprocessing.transform import __transform_minmax
+from beak.utilities.transform import __transform_minmax
 
 
 def set_global_seed(seed: int) -> None:
-    """Set the global random seed for reproducibility."""
+    """
+    Set the global random seed for reproducibility.
+    """
     np.random.seed(seed)
     tf.random.set_seed(seed)
 
@@ -122,7 +124,7 @@ def calculate_total_kl(layers: List[Tuple[tf.Variable, tf.Variable, tf.Variable,
 def build_bayesian_network(
     input_shape: int,
     core_units: List[int],
-    head_units: List[int]
+    head_units: List[int],
 ) -> Tuple[List, List, List]:
     """
     Build a Bayesian network consisting of one core network and two heads (loc and std).
@@ -219,12 +221,16 @@ def fit_model(
     head_units: List[int],
     lr: float,
     epochs: int,
-    N: int
-    ) -> Tuple[Tuple[List, List, List], np.ndarray]:
+    N: int,
+) -> Tuple[Tuple[List, List, List], np.ndarray]:
     """
     Train the Bayesian density network and return the trained model parameters and metrics.
     """
-    core_layers, loc_head, std_head = build_bayesian_network(input_shape, core_units, head_units)
+    core_layers, loc_head, std_head = build_bayesian_network(
+        input_shape,
+        core_units,
+        head_units,
+    )
     optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
     elbo = np.zeros(epochs)
 
@@ -235,7 +241,13 @@ def fit_model(
     return (core_layers, loc_head, std_head), elbo
 
 
-def predict_model(model: Tuple[List, List, List], data: np.ndarray) -> dict:
+def predict_model(
+    model: Tuple[List, List, List],
+    data: np.ndarray,
+    target_shape: Optional[Tuple[int, ...]] = None,
+    clip_pred: bool = True,
+    norm_sd: bool = True,
+) -> List:
     """
     Generate predictions from the trained Bayesian density network.
     """
@@ -245,7 +257,12 @@ def predict_model(model: Tuple[List, List, List], data: np.ndarray) -> dict:
     y_pred = bayesian_network_forward(x_data, core_layers, loc_head, std_head, trainable=False)
     prediction_mean = y_pred[:, 0].numpy()
     prediction_sd = y_pred[:, 1].numpy()
-    return {
-        "prediction": np.clip(prediction_mean, 0, 1),
-        "uncertainty": __transform_minmax(prediction_sd)
-    }
+
+    if target_shape is not None:
+        prediction_mean = prediction_mean.reshape(target_shape)
+        prediction_sd = prediction_sd.reshape(target_shape)
+
+    return [
+        np.clip(prediction_mean, 0, 1) if clip_pred is True else prediction_mean,
+        __transform_minmax(prediction_sd) if norm_sd is True else prediction_sd
+    ]

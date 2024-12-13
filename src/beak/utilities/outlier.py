@@ -1,10 +1,8 @@
 import numpy as np
 from typing import Tuple, Union, Dict, Literal
 
-from beak.preprocessing.helper import (
-    _cast_array_to_minimum_dtype,
-    _update_nodata
-)
+from beak.utilities.file_io import prepare_output
+
 
 def __get_outliers_iqr(
     src_array: np.ndarray,
@@ -67,14 +65,7 @@ def clip_outliers(
         raise ValueError(f"Invalid transform method: {method}")
 
     out_array = np.clip(src_array, a_min=lower_bound, a_max=upper_bound)
-    out_nodata = _update_nodata(out_array, src_nodata)
-    out_array = np.nan_to_num(out_array, nan=out_nodata)
-    out_array, out_nodata = _cast_array_to_minimum_dtype(out_array, out_nodata)
-
     out_meta = src_meta.copy()
-    out_meta.update(
-        nodata=out_nodata,
-        dtype=out_array.dtype
-    )
 
-    return out_array, out_meta
+    return prepare_output(out_array, out_meta)
+
