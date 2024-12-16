@@ -4,7 +4,7 @@ import sys
 import requests
 import zipfile
 from pathlib import Path
-from typing import List, Tuple, Optional, Union, Literal, Any
+from typing import List, Tuple, Optional, Union, Any, Dict
 
 
 def _get_data_folder(package_name = "beak", folder_name: str = "data") -> Any:
@@ -151,7 +151,7 @@ def _download_cdr_files(
     return file_list
 
 
-def create_zip_from_files(
+def _create_zip_from_files(
     file_list: List[Union[str, Path]],
     archive_path: Union[str, Path]
 ):
@@ -211,5 +211,40 @@ def _filter_layers_from_payload(
         layers = layers[
             layers[label_column] == filter_labels
         ]
+
+    return layers
+
+
+def prepare_output_layers(
+    layers: List[Tuple[str, Dict]],
+    files: Union[str, List[str]],
+    meta: Tuple[Dict, Dict],
+    output: Optional[Tuple[str, str]],
+) -> List[Tuple[str, Dict]]:
+    """
+    TODO: Docstring goes here.
+    """
+    init_meta, update_meta = meta
+    meta = init_meta.copy()
+    meta.update(update_meta)
+
+    if output is not None:
+        output_folder, archive_name = output
+        file_list = [files] if not isinstance(files, list) else files
+
+        file_path = str(
+            os.path.join(output_folder, archive_name)
+        )
+
+        _create_zip_from_files(
+            file_list=file_list,
+            archive_path=file_path
+        )
+    else:
+        file_path = files
+
+    layers.append(
+        (file_path, meta)
+    )
 
     return layers

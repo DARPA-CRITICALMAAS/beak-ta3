@@ -12,10 +12,11 @@ import beak.methods.som.plot_som_results as plot
 
 from beak.integration.statmagic.utils import (
     create_file_list,
-    create_zip_from_files,
+    prepare_output_layers,
     delete_files,
+    _create_zip_from_files,
     _filter_files,
-    _filter_layers_from_payload
+    _filter_layers_from_payload,
 )
 
 from cdr_schemas.prospectivity_input import ProspectivityOutputLayer
@@ -290,37 +291,30 @@ def _collect_results(
             Path(file).stem
         )[2:]
 
-        meta = init_meta.copy()
-        meta.update(
-            {
-                "output_type": "codebook_map",
-                "title": f"Codebook Map {file_name}"
-            }
-        )
+        update_meta = {
+            "output_type": "codebook_map",
+            "title": f"Codebook Map {file_name}"
+        }
 
-        layers_list.append(
-            (file, meta)
+        layers_list = prepare_output_layers(
+            layers=layers_list,
+            files=file,
+            meta=(init_meta, update_meta),
+            output=None
         )
 
     # Add plots
     if plots_file_list:
-        plots_archive_path = os.path.join(output_folder, "plots.zip")
+        update_meta = {
+            "output_type": "plots",
+            "title": "Archive containing generated Plots (Boxplots, Codebook Maps, Cluster Maps, Error Maps, ...)"
+        }
 
-        create_zip_from_files(
-            file_list=plots_file_list,
-            archive_path=plots_archive_path
-        )
-
-        meta = init_meta.copy()
-        meta.update(
-            {
-                "output_type": "plots",
-                "title": "Archive containing generated Plots (Boxplots, Codebook Maps, Cluster Maps, Error Maps, ...)"
-            }
-        )
-
-        layers_list.append(
-            (plots_archive_path, meta)
+        layers_list = prepare_output_layers(
+            layers=layers_list,
+            files=plots_file_list,
+            meta=(init_meta, update_meta),
+            output=(output_folder, "plots.zip")
         )
 
     # Create CDR object

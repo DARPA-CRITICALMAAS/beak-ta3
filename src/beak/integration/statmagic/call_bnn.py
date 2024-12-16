@@ -27,7 +27,8 @@ from beak.evaluation.calculate_metrics import binary_classification
 
 from beak.integration.statmagic.utils import (
     create_file_list,
-    create_zip_from_files,
+    prepare_output_layers,
+    _create_zip_from_files,
 )
 
 from cdr_schemas.prospectivity_input import ProspectivityOutputLayer
@@ -295,7 +296,7 @@ def _collect_results(
     Returns:
         List of tuples, where each tuple contains the file path and the related ProspectivityOutputLayer object.
     """
-    output_folder, raster_folder, metrics_file, meta_file = output_locations
+    output_folder, raster_folder, metrics_file, settings_file = output_locations
 
     # Initialization
     init_meta = {
@@ -343,51 +344,29 @@ def _collect_results(
                 )
 
     # Add metrics
-    file_path = Path(metrics_file)
-    archive_path = os.path.join(
-        str(file_path.parent),
-        str(file_path.stem) + ".zip"
-    )
+    update_meta = {
+        "output_type": "metrics",
+        "title": "Archive containing the calculated metrics"
+    }
 
-    create_zip_from_files(
-        file_list=[metrics_file],
-        archive_path=archive_path
-    )
-
-    meta = init_meta.copy()
-    meta.update(
-        {
-            "output_type": "metrics",
-            "title": "Archive containing the calculated metrics"
-        }
-    )
-
-    layers_list.append(
-        (archive_path, meta)
+    layers_list = prepare_output_layers(
+        layers=layers_list,
+        files=metrics_file,
+        meta=(init_meta, update_meta),
+        output=(output_folder, "metrics.zip")
     )
 
     # Add metadata and settings
-    file_path = Path(meta_file)
-    archive_path = os.path.join(
-        str(file_path.parent),
-        str(file_path.stem) + ".zip"
-    )
+    update_meta = {
+        "output_type": "metadata",
+        "title": "Archive containing model metadata and settings"
+    }
 
-    create_zip_from_files(
-        file_list=[meta_file],
-        archive_path=archive_path
-    )
-
-    meta = init_meta.copy()
-    meta.update(
-        {
-            "output_type": "metadata",
-            "title": "Archive containing model metadata and settings"
-        }
-    )
-
-    layers_list.append(
-        (archive_path, meta)
+    layers_list = prepare_output_layers(
+        layers=layers_list,
+        files=settings_file,
+        meta=(init_meta, update_meta),
+        output=(output_folder, "settings.zip")
     )
 
     # Create CDR object
