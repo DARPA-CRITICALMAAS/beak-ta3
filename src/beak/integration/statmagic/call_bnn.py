@@ -43,7 +43,7 @@ os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 # TODO: Globaler Seed in BNN file
 
 
-def run_BNN(
+def run_bnn(
     input_layers: List[str],
     input_labels: str,
     config_file: str,
