@@ -28,7 +28,6 @@ from beak.evaluation.calculate_metrics import binary_classification
 from beak.integration.statmagic.utils import (
     create_file_list,
     prepare_output_layers,
-    _create_zip_from_files,
 )
 
 from cdr_schemas.prospectivity_input import ProspectivityOutputLayer
@@ -37,10 +36,6 @@ from cdr_schemas.prospectivity_input import ProspectivityOutputLayer
 # Remove Tensorflow's warning messages
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
-
-
-# TODO: Tests auf den Notizzetteln
-# TODO: Globaler Seed in BNN file
 
 
 def run_bnn(
@@ -154,7 +149,7 @@ def run_bnn(
     )
 
     # Evaluation
-    metrics_train = binary_classification(model, X_train, y_train)
+    metrics_train = binary_classification(model, X_train_split, y_train_split)
     evaluations =  {"train": metrics_train}
 
     if y_test is not None:
