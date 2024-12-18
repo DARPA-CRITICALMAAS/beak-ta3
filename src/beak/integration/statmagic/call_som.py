@@ -99,12 +99,11 @@ def run_som(
     args.gridtype = train_config["grid_type"]
 
     # K-means arguments
-    # Workaround for the lack of parameters in the CDR schema
-    # TODO: Add and connect HMI-options kmeans[bool], kmeans_min[int], kmeans_max[int] to CDR schema
-    args.kmeans_min = 10
-    args.kmeans_max = 50
+    # Parameters in the CDR schema
+    args.kmeans = train_config["kmeans"]
+    args.kmeans_min = train_config["kmeans_min"]
+    args.kmeans_max = train_config["kmeans_max"]
     args.kmeans_init = train_config["num_initializations"]
-    args.kmeans = True if args.kmeans_init > 0 else False
 
     # Plot arguments
     argsP.som_x = args.som_x
@@ -181,14 +180,15 @@ def _create_layer_plot_names(
         filter_labels=False
     )
 
-    layers = layers[
-        ["title", "layer_id", "download_url"]
-    ]
-    layers.insert(0, "plot_index", range(1, len(layers) + 1))
-    layers.insert(2, "file_name", layers["download_url"].apply(lambda x: Path(x).name))
+    if not layers.empty:
+        layers = layers[
+            ["title", "layer_id", "download_url"]
+        ]
+        layers.insert(0, "plot_index", range(1, len(layers) + 1))
+        layers.insert(2, "file_name", layers["download_url"].apply(lambda x: Path(x).name))
 
-    output_path = os.path.join(output_folder, "plot_names.csv")
-    layers.to_csv(output_path, sep=";", index=False)
+        output_path = os.path.join(output_folder, "plot_names.csv")
+        layers.to_csv(output_path, sep=";", index=False)
 
 
 def _collect_results(
