@@ -9,8 +9,7 @@ ENV BASE_PATH=/beak-ta3
 WORKDIR $BASE_PATH
 
 RUN apt-get update && apt-get install -y \
-    libgdal-dev \
-    python3-pip
+    libgdal-dev
 
 # Copy files into the container
 COPY setup/docker/conda/environment.yml .
