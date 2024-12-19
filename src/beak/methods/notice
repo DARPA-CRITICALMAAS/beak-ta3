@@ -5,7 +5,12 @@ This project includes adapted and modified code from the following third-party s
     License: MIT License
     File: src/beak/methods/bnn/fastBNN.py
 
+    Modifications: This code has been modified from the original version.
+    For the full license text, see: https://github.com/brendanhasz/tfp-taxi/blob/master/LICENSE
+
 2. Self-organizing Maps
     Author: GTK, 2022
     License: GNU General Public License v3.0
     Submodule: src/beak/methods/som/nextsomcore
+
+    For the full license text, see: https://github.com/gtkfi/GisSOM/blob/main/LICENSE
