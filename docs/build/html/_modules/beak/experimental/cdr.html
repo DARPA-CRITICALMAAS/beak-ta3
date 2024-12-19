@@ -1,0 +1,353 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>beak.experimental.cdr &mdash; beak-ta3 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=29a6c3e3"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            beak-ta3
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../beak.html">beak package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../beak.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.data.html">beak.data package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.evaluation.html">beak.evaluation package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.evaluation.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.experimental.html">beak.experimental package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.experimental.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.integration.html">beak.integration package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.integration.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.methods.html">beak.methods package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.methods.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.utilities.html">beak.utilities package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.utilities.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">beak-ta3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">beak.experimental.cdr</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for beak.experimental.cdr</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<span class="kn">import</span> <span class="nn">shapely</span>
+
+<span class="kn">import</span> <span class="nn">urllib3</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="n">urllib3</span><span class="o">.</span><span class="n">disable_warnings</span><span class="p">(</span><span class="n">urllib3</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">InsecureRequestWarning</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">json_normalize</span>
+<span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Number</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">beak.experimental.io</span> <span class="kn">import</span> <span class="n">check_path</span><span class="p">,</span> <span class="n">data_folder</span>
+<span class="kn">from</span> <span class="nn">beak.experimental.misc</span> <span class="kn">import</span> <span class="n">replace_invalid_characters</span>
+<span class="kn">from</span> <span class="nn">beak.experimental.conversions</span> <span class="kn">import</span> <span class="n">create_binary_raster</span>
+
+
+<div class="viewcode-block" id="_get_cma">
+<a class="viewcode-back" href="../../../beak.experimental.cdr.html#beak.experimental.cdr._get_cma">[docs]</a>
+<span class="k">def</span> <span class="nf">_get_cma</span><span class="p">(</span>
+    <span class="n">json</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">target</span><span class="o">=</span><span class="s2">&quot;cma&quot;</span><span class="p">,</span>
+    <span class="n">payloads</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s2">&quot;payload&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts CMA data from a JSON file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      json (Union[str, Path]): The path to the JSON file containing CMA data.</span>
+<span class="sd">      payloads (str): The name of the payload column containing the CMA data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      pd.DataFrame: A DataFrame containing the CMA information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">json</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">payloads</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+
+<div class="viewcode-block" id="_get_evidence_layers">
+<a class="viewcode-back" href="../../../beak.experimental.cdr.html#beak.experimental.cdr._get_evidence_layers">[docs]</a>
+<span class="k">def</span> <span class="nf">_get_evidence_layers</span><span class="p">(</span>
+    <span class="n">json</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">target</span><span class="o">=</span><span class="s2">&quot;evidence_layers&quot;</span><span class="p">,</span>
+    <span class="n">payloads</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s2">&quot;payload&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extracts evidence layers from a JSON file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      json (Union[str, Path]): The path to the JSON file containing evidence layers.</span>
+<span class="sd">      payloads (str): The name of the payload column containing the evidence layers.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      pd.DataFrame: A DataFrame containing the evidence layer information.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">json</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">explode</span><span class="p">(</span><span class="n">payloads</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">json_normalize</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">payloads</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+
+<div class="viewcode-block" id="_download_cdr_files">
+<a class="viewcode-back" href="../../../beak.experimental.cdr.html#beak.experimental.cdr._download_cdr_files">[docs]</a>
+<span class="k">def</span> <span class="nf">_download_cdr_files</span><span class="p">(</span>
+    <span class="n">download_url</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">download_file_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">verify_ssl</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">download_url</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">download_url</span><span class="p">)</span>
+
+    <span class="n">check_path</span><span class="p">(</span><span class="n">download_file_path</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">download_url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="n">verify_ssl</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">download_file_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="create_template_raster">
+<a class="viewcode-back" href="../../../beak.experimental.cdr.html#beak.experimental.cdr.create_template_raster">[docs]</a>
+<span class="k">def</span> <span class="nf">create_template_raster</span><span class="p">(</span>
+    <span class="n">cma</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">snap_to</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Number</span><span class="p">,</span> <span class="n">Number</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a template raster using CMA data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      cma (dict): The CMA data.</span>
+<span class="sd">      path (Union[str, Path]): The path to save the template raster.</span>
+<span class="sd">      snap_to (Optional[Tuple[Number, Number]]): The geographic x and y coordinates to snap the template raster to.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="n">extent</span> <span class="o">=</span> <span class="n">cma</span><span class="p">[</span><span class="s2">&quot;extent&quot;</span><span class="p">]</span>
+    <span class="n">crs</span> <span class="o">=</span> <span class="n">cma</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">]</span>
+    <span class="n">resolution</span> <span class="o">=</span> <span class="n">cma</span><span class="p">[</span><span class="s2">&quot;resolution&quot;</span><span class="p">]</span>
+
+    <span class="n">polygon</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;geometry&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">shapely</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">extent</span><span class="p">)]</span>
+        <span class="p">},</span>
+        <span class="n">crs</span><span class="o">=</span><span class="n">crs</span>
+    <span class="p">)</span>
+
+    <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">create_binary_raster</span><span class="p">(</span>
+        <span class="n">geodataframe</span><span class="o">=</span><span class="n">polygon</span><span class="p">,</span>
+        <span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span>
+        <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">same_shape</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">fill_negatives</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">return_meta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">snap_to_origin</span><span class="o">=</span><span class="n">snap_to</span><span class="p">,</span>
+        <span class="n">out_file</span><span class="o">=</span><span class="n">path</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span></div>
+
+
+
+<div class="viewcode-block" id="_zip_file_extract_core">
+<a class="viewcode-back" href="../../../beak.experimental.cdr.html#beak.experimental.cdr._zip_file_extract_core">[docs]</a>
+<span class="k">def</span> <span class="nf">_zip_file_extract_core</span><span class="p">(</span>
+    <span class="n">file_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">extract_to</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+<span class="p">):</span>
+    <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">zip_ref</span><span class="p">:</span>
+        <span class="n">zip_ref</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="n">extract_to</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="_zip_file_extract_run">
+<a class="viewcode-back" href="../../../beak.experimental.cdr.html#beak.experimental.cdr._zip_file_extract_run">[docs]</a>
+<span class="k">def</span> <span class="nf">_zip_file_extract_run</span><span class="p">(</span>
+    <span class="n">extract_zip</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">file_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">extract_to</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+<span class="p">):</span>
+    <span class="k">if</span> <span class="n">extract_zip</span> <span class="ow">and</span> <span class="n">file_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.zip&quot;</span><span class="p">:</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+        <span class="n">_zip_file_extract_core</span><span class="p">(</span>
+            <span class="n">file_path</span><span class="p">,</span>
+            <span class="n">extract_to</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="download_evidence_layers">
+<a class="viewcode-back" href="../../../beak.experimental.cdr.html#beak.experimental.cdr.download_evidence_layers">[docs]</a>
+<span class="k">def</span> <span class="nf">download_evidence_layers</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">cma</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">base_folder</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span><span class="o">=</span><span class="n">data_folder</span><span class="p">(),</span>
+    <span class="n">custom_cma_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">extract_zip</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">verify_ssl</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">ignore</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="k">if</span> <span class="n">custom_cma_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cma_id</span> <span class="o">=</span> <span class="n">cma</span><span class="p">[</span><span class="s2">&quot;cma_id&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cma_id</span> <span class="o">=</span> <span class="n">custom_cma_id</span>
+
+    <span class="n">cma_id</span> <span class="o">=</span> <span class="n">replace_invalid_characters</span><span class="p">(</span><span class="n">cma_id</span><span class="p">)</span>
+    <span class="n">base_folder</span> <span class="o">=</span> <span class="n">base_folder</span> <span class="o">/</span> <span class="s2">&quot;cdr&quot;</span> <span class="o">/</span> <span class="n">cma_id</span>
+
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">(),</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+        <span class="n">transform_methods</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;transform_methods&quot;</span><span class="p">]</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span>
+        <span class="n">layer_prefix</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;data_source.evidence_layer_raster_prefix&quot;</span><span class="p">]</span>
+        <span class="n">file_format</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;data_source.format&quot;</span><span class="p">]</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;data_source.description&quot;</span><span class="p">]</span>
+        <span class="n">reference_url</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;data_source.reference_url&quot;</span><span class="p">]</span>
+        <span class="n">data_type</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;data_source.type&quot;</span><span class="p">]</span>
+        <span class="n">resolution</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;data_source.resolution&quot;</span><span class="p">]</span>
+        <span class="n">download_url</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;data_source.download_url&quot;</span><span class="p">]</span>
+        <span class="n">derivative</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;data_source.derivative_ops&quot;</span><span class="p">]</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;data_source.category&quot;</span><span class="p">]</span>
+        <span class="n">subcategory</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;data_source.subcategory&quot;</span><span class="p">]</span>
+        <span class="n">source_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;data_source.data_source_id&quot;</span><span class="p">]</span>
+        <span class="n">ignored_urls</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">download_folder</span> <span class="o">=</span> <span class="n">base_folder</span> <span class="o">/</span> <span class="n">category</span> <span class="o">/</span> <span class="n">subcategory</span>
+        <span class="n">download_file</span> <span class="o">=</span> <span class="n">download_folder</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="n">title</span> <span class="o">+</span> <span class="n">Path</span><span class="p">(</span><span class="n">download_url</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">ignore</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">title</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignore</span><span class="p">)</span> <span class="ow">and</span>
+            <span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">download_file</span><span class="p">)</span> <span class="ow">and</span> <span class="n">download_url</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="p">):</span>
+
+            <span class="n">check_path</span><span class="p">(</span><span class="n">download_folder</span><span class="p">)</span>
+
+            <span class="n">_download_cdr_files</span><span class="p">(</span>
+                <span class="n">download_url</span><span class="o">=</span><span class="n">download_url</span><span class="p">,</span>
+                <span class="n">download_file_path</span><span class="o">=</span><span class="n">download_file</span><span class="p">,</span>
+                <span class="n">verify_ssl</span><span class="o">=</span><span class="n">verify_ssl</span>
+            <span class="p">)</span>
+
+            <span class="n">_zip_file_extract_run</span><span class="p">(</span>
+                <span class="n">extract_zip</span><span class="o">=</span><span class="n">extract_zip</span><span class="p">,</span>
+                <span class="n">file_path</span><span class="o">=</span><span class="n">download_file</span><span class="p">,</span>
+                <span class="n">extract_to</span><span class="o">=</span><span class="n">download_folder</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ignored_urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">download_url</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ignored_urls</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Following URLs where not downloaded:&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">ignored_urls</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

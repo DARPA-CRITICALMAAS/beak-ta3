@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -6,18 +8,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.methods.som.do_nextsomcore_save_results module &mdash; beak-ta3 1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=29a6c3e3"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=29a6c3e3"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +34,6 @@
           <a href="index.html" class="icon icon-home">
             beak-ta3
           </a>
-              <div class="version">
-                1.0.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -52,6 +47,18 @@
 <li class="toctree-l1 current"><a class="reference internal" href="beak.html">beak package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="beak.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="beak.data.html">beak.data package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="beak.evaluation.html">beak.evaluation package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="beak.evaluation.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="beak.experimental.html">beak.experimental package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="beak.experimental.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="beak.integration.html">beak.integration package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="beak.integration.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
 <li class="toctree-l3 current"><a class="reference internal" href="beak.methods.html">beak.methods package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="beak.methods.html#subpackages">Subpackages</a></li>
 </ul>
@@ -96,26 +103,15 @@
   <section id="module-beak.methods.som.do_nextsomcore_save_results">
 <span id="beak-methods-som-do-nextsomcore-save-results-module"></span><h1>beak.methods.som.do_nextsomcore_save_results module<a class="headerlink" href="#module-beak.methods.som.do_nextsomcore_save_results" title="Link to this heading"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="beak.methods.som.do_nextsomcore_save_results.run_SOM">
-<span class="sig-prename descclassname"><span class="pre">beak.methods.som.do_nextsomcore_save_results.</span></span><span class="sig-name descname"><span class="pre">run_SOM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/do_nextsomcore_save_results.html#run_SOM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.do_nextsomcore_save_results.run_SOM" title="Link to this definition"></a></dt>
-<dd><p>Load data, run SOM and k-means clustering, write output to file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary holding all parameters for SOM and k-means clustering.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="beak.methods.som.do_nextsomcore_save_results.cluster_hit_count">
 <span class="sig-prename descclassname"><span class="pre">beak.methods.som.do_nextsomcore_save_results.</span></span><span class="sig-name descname"><span class="pre">cluster_hit_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">som</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file_somspace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_folder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/do_nextsomcore_save_results.html#cluster_hit_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.do_nextsomcore_save_results.cluster_hit_count" title="Link to this definition"></a></dt>
 <dd><p>Counts hits per cluster and creates a NumPy array with cluster numbers and hit counts. Saves the array to a text file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>som</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><em>dict</em></a>) – Dictionary holding the SOM codebook vectors, U-matrix, number of rows and columns, dimension and clusters.</p></li>
-<li><p><strong>output_file_somspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – full file path for txt file holding som space results</p></li>
-<li><p><strong>output_folder</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – file path for writhing txt file</p></li>
+<li><p><strong>som</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Dictionary holding the SOM codebook vectors, U-matrix, number of rows and columns, dimension and clusters.</p></li>
+<li><p><strong>output_file_somspace</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – full file path for txt file holding som space results</p></li>
+<li><p><strong>output_folder</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – file path for writhing txt file</p></li>
 </ul>
 </dd>
 </dl>
@@ -130,6 +126,17 @@ som_x (int): The extent of the SOM space along the x-axis.
 som_y (int): The extent of the SOM space along the y-axis.
 Returns:
 list: A 2D array of BMU IDs for each combination of SOM coordinates.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.methods.som.do_nextsomcore_save_results.run_SOM">
+<span class="sig-prename descclassname"><span class="pre">beak.methods.som.do_nextsomcore_save_results.</span></span><span class="sig-name descname"><span class="pre">run_SOM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/methods/som/do_nextsomcore_save_results.html#run_SOM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.methods.som.do_nextsomcore_save_results.run_SOM" title="Link to this definition"></a></dt>
+<dd><p>Load data, run SOM and k-means clustering, write output to file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a>) – Dictionary holding all parameters for SOM and k-means clustering.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

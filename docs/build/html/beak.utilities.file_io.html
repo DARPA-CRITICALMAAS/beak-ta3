@@ -1,0 +1,511 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>beak.utilities.file_io module &mdash; beak-ta3 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=29a6c3e3"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="beak.utilities.impute module" href="beak.utilities.impute.html" />
+    <link rel="prev" title="beak.utilities.conversion module" href="beak.utilities.conversion.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            beak-ta3
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="beak.html">beak package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="beak.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="beak.data.html">beak.data package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="beak.evaluation.html">beak.evaluation package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="beak.evaluation.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="beak.experimental.html">beak.experimental package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="beak.experimental.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="beak.integration.html">beak.integration package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="beak.integration.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="beak.methods.html">beak.methods package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="beak.methods.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="beak.utilities.html">beak.utilities package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="beak.utilities.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">beak-ta3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="beak.html">beak package</a></li>
+          <li class="breadcrumb-item"><a href="beak.utilities.html">beak.utilities package</a></li>
+      <li class="breadcrumb-item active">beak.utilities.file_io module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/beak.utilities.file_io.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-beak.utilities.file_io">
+<span id="beak-utilities-file-io-module"></span><h1>beak.utilities.file_io module<a class="headerlink" href="#module-beak.utilities.file_io" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.utilities.file_io.__get_dtype_range_info">
+<span class="sig-prename descclassname"><span class="pre">beak.utilities.file_io.</span></span><span class="sig-name descname"><span class="pre">__get_dtype_range_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dtype</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">number</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">number</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/beak/utilities/file_io.html#__get_dtype_range_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.utilities.file_io.__get_dtype_range_info" title="Link to this definition"></a></dt>
+<dd><p>Determine the range of values for the raster array.</p>
+<p>Replaces the rasterio.dtypes.get_dtype_range_info() since this function returns “float64”
+type for min and max values of “float32”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dtype</strong> – A dtype to determine the range for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The minimum and maximum values to the related data type.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple of np.number, np.number</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If the dtype is not supported.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.utilities.file_io.__get_dtype_range_value">
+<span class="sig-prename descclassname"><span class="pre">beak.utilities.file_io.</span></span><span class="sig-name descname"><span class="pre">__get_dtype_range_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dtype</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/beak/utilities/file_io.html#__get_dtype_range_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.utilities.file_io.__get_dtype_range_value" title="Link to this definition"></a></dt>
+<dd><p>Get the range value by dtype.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dtype</strong> – The dtype to get the range value for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The range value for the given dtype.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.utilities.file_io.__get_minimum_dtype">
+<span class="sig-prename descclassname"><span class="pre">beak.utilities.file_io.</span></span><span class="sig-name descname"><span class="pre">__get_minimum_dtype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unify_integer_types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></span><a class="reference internal" href="_modules/beak/utilities/file_io.html#__get_minimum_dtype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.utilities.file_io.__get_minimum_dtype" title="Link to this definition"></a></dt>
+<dd><p>Determine the minimum data type for the raster array.</p>
+<p>Comparison based on the raster’s minimum and maximum values.
+Alternative to rasterio.dtypes._get_minimum_dtype() since it does not return “int8”.
+According to the restrictions, smallest bit-size for outputs is:
+- 8 for integers
+- 32 for floats</p>
+<p>Restrictions:
+- dtypes smaller than “uint8” are not supported by numpy and rasterio
+- dtype “float16” is not yet supported rasterio</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> – The raster array to determine the minimum data type for.</p></li>
+<li><p><strong>unify_integer_types</strong> – Whether to differentiate signed and unsigned integers.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The minimum data type for the raster array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If the dtype is not supported.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.utilities.file_io.__get_next_higher_dtype">
+<span class="sig-prename descclassname"><span class="pre">beak.utilities.file_io.</span></span><span class="sig-name descname"><span class="pre">__get_next_higher_dtype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">dtype</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dtype</span></span></span><a class="reference internal" href="_modules/beak/utilities/file_io.html#__get_next_higher_dtype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.utilities.file_io.__get_next_higher_dtype" title="Link to this definition"></a></dt>
+<dd><p>Get the next higher dtype.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dtype</strong> – The dtype to get the next higher one for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The next higher dtype. If input dtype is not supported, return the original dtype.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.dtype</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.utilities.file_io._cast_array_to_minimum_dtype">
+<span class="sig-prename descclassname"><span class="pre">beak.utilities.file_io.</span></span><span class="sig-name descname"><span class="pre">_cast_array_to_minimum_dtype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unify_integer_types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/beak/utilities/file_io.html#_cast_array_to_minimum_dtype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.utilities.file_io._cast_array_to_minimum_dtype" title="Link to this definition"></a></dt>
+<dd><p>Determine the minimum data type for the raster array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> – The raster array to determine the minimum data type for.</p></li>
+<li><p><strong>value</strong> – The value for additional comparison.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The raster array and its metadata.</dt><dd><ul class="simple">
+<li><p>np.ndarray: The raster array with the minimum data type determined.</p></li>
+<li><p>Dict: The updated metadata dictionary with the minimum data type set.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple of np.ndarray, Dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.utilities.file_io._cast_value_to_int">
+<span class="sig-prename descclassname"><span class="pre">beak.utilities.file_io.</span></span><span class="sig-name descname"><span class="pre">_cast_value_to_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/beak/utilities/file_io.html#_cast_value_to_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.utilities.file_io._cast_value_to_int" title="Link to this definition"></a></dt>
+<dd><p>Cast a value to integer type if possible.</p>
+<p>Maximum to cast are “uint64” and “int64” types, which both return True when passed through np.can_cast().</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> – The value to cast to integer type.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The value cast to integer type if possible, otherwise the original value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.utilities.file_io._initialize_data_for_rasterization">
+<span class="sig-prename descclassname"><span class="pre">beak.utilities.file_io.</span></span><span class="sig-name descname"><span class="pre">_initialize_data_for_rasterization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodata_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/beak/utilities/file_io.html#_initialize_data_for_rasterization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.utilities.file_io._initialize_data_for_rasterization" title="Link to this definition"></a></dt>
+<dd><p>Initialize data for rasterization by adjusting the array data type and handling nodata and fill values.</p>
+<p>If the nodata value is None, nodata value will be initialized by the array’s and fill values.
+The array will be casted to the minimum possible dtype and nodata will be updated to an edge value:
+- for unsigned integers: positive boundary
+- for signed integers: negative boundary
+- for floating point numbers: negative boundary</p>
+<dl class="simple">
+<dt>If the nodata values is not None, the array will be casted to the minimum possible type,</dt><dd><p>without changing the nodata value.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> – Input data array.</p></li>
+<li><p><strong>nodata_value</strong> – Value representing empty pixels.</p></li>
+<li><p><strong>fill_value</strong> – Value used to fill areas.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The processed array, nodata value, and fill value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.utilities.file_io._remove_nan_rows">
+<span class="sig-prename descclassname"><span class="pre">beak.utilities.file_io.</span></span><span class="sig-name descname"><span class="pre">_remove_nan_rows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/utilities/file_io.html#_remove_nan_rows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.utilities.file_io._remove_nan_rows" title="Link to this definition"></a></dt>
+<dd><p>Remove NaN values from the given data along the specified axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – The array to be processed.</p></li>
+<li><p><strong>axis</strong> – The axis along which to remove NaN values. Defaults to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The array with NaN values removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.utilities.file_io._update_nodata">
+<span class="sig-prename descclassname"><span class="pre">beak.utilities.file_io.</span></span><span class="sig-name descname"><span class="pre">_update_nodata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodata_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/utilities/file_io.html#_update_nodata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.utilities.file_io._update_nodata" title="Link to this definition"></a></dt>
+<dd><p>Update nodata value based on the array’s values.</p>
+<p>Sets the nodata value to a boundary value of the array if the provided nodata value is
+within the array’s range. Does not update anything else than this value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> – The input array to be adjusted.</p></li>
+<li><p><strong>nodata_value</strong> – The nodata value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The updated nodata value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.utilities.file_io.download_file_from_cdr">
+<span class="sig-prename descclassname"><span class="pre">beak.utilities.file_io.</span></span><span class="sig-name descname"><span class="pre">download_file_from_cdr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">download_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">BytesIO</span></span></span><a class="reference internal" href="_modules/beak/utilities/file_io.html#download_file_from_cdr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.utilities.file_io.download_file_from_cdr" title="Link to this definition"></a></dt>
+<dd><p>Download a raster file from the specified URL.</p>
+<p>This function attempts to download a raster file from the given URL.
+If the download fails due to SSL verification issues, it retries the download without SSL verification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>download_url</strong> – The URL from which to download the raster file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A BytesIO object containing that can be used as path-like input.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/io.html#io.BytesIO" title="(in Python v3.13)">io.BytesIO</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.utilities.file_io.load_layer">
+<span class="sig-prename descclassname"><span class="pre">beak.utilities.file_io.</span></span><span class="sig-name descname"><span class="pre">load_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.13)"><span class="pre">Dict</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/beak/utilities/file_io.html#load_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.utilities.file_io.load_layer" title="Link to this definition"></a></dt>
+<dd><p>Load a raster file from the given file path.</p>
+<p>Reshapes the output array to (-1, 1).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_file</strong> – The file path to the raster file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The raster array and its metadata.</dt><dd><ul class="simple">
+<li><p>A reshaped numpy array.</p></li>
+<li><p>The metadata of the raster.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.utilities.file_io.load_layers">
+<span class="sig-prename descclassname"><span class="pre">beak.utilities.file_io.</span></span><span class="sig-name descname"><span class="pre">load_layers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.13)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/beak/utilities/file_io.html#load_layers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.utilities.file_io.load_layers" title="Link to this definition"></a></dt>
+<dd><p>Load a list of raster files from the given file paths.</p>
+<p>Single rasters will be reshaped to (-1, 1) and stacked column-wise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_files</strong> – The list of file paths to the raster files.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The stacked raster array with the data from all input files.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.utilities.file_io.prepare_model_data">
+<span class="sig-prename descclassname"><span class="pre">beak.utilities.file_io.</span></span><span class="sig-name descname"><span class="pre">prepare_model_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_layers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/beak/utilities/file_io.html#prepare_model_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.utilities.file_io.prepare_model_data" title="Link to this definition"></a></dt>
+<dd><p>Remove NaN values from both layer and labels for training a model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_layers</strong> – The input raster layers.</p></li>
+<li><p><strong>input_labels</strong> – The input labels for the training data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The prepared model data with layers and labels</dt><dd><ul class="simple">
+<li><p>A numpy array containing the prepared training data.</p></li>
+<li><p>A numpy array containing the labels.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.utilities.file_io.prepare_output">
+<span class="sig-prename descclassname"><span class="pre">beak.utilities.file_io.</span></span><span class="sig-name descname"><span class="pre">prepare_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.13)"><span class="pre">Dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.13)"><span class="pre">Dict</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/beak/utilities/file_io.html#prepare_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.utilities.file_io.prepare_output" title="Link to this definition"></a></dt>
+<dd><p>Prepare output for saving as a raster.</p>
+<dl class="simple">
+<dt>Builds a chain for</dt><dd><ul class="simple">
+<li><p>Changing NaN to the respective nodata value.</p></li>
+<li><p>Casting to the minimum data type possible.</p></li>
+<li><p>Update metadata.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>The prepared output raster array and its metadata.</dt><dd><ul class="simple">
+<li><p>A numpy array containing the prepared output.</p></li>
+<li><p>The updated metadata.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.utilities.file_io.read_raster_band">
+<span class="sig-prename descclassname"><span class="pre">beak.utilities.file_io.</span></span><span class="sig-name descname"><span class="pre">read_raster_band</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raster</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DatasetReader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">band</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodata_to_nan</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.13)"><span class="pre">Dict</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/beak/utilities/file_io.html#read_raster_band"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.utilities.file_io.read_raster_band" title="Link to this definition"></a></dt>
+<dd><p>Read a raster file from the given DatasetReader object and returns the raster array and its metadata.</p>
+<p>In preparation for iterating over multiple bands, the kwargs argument can take every valid key-value pair
+that is present in the input raster’s metadata dictionary. E.g., if different bands have different
+nodata values or data types, the metadata will be updated for further processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>raster</strong> – The DatasetReader object from which to read the raster.</p></li>
+<li><p><strong>band</strong> – The band number to read from the raster.</p></li>
+<li><p><strong>nodata_to_nan</strong> – Whether to apply a mask to the raster array. Default is True.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments to update the metadata of the raster.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The raster array and its updated metadata.</dt><dd><ul class="simple">
+<li><p>A 2-dimensional raster array read from the input raster.</p></li>
+<li><p>The (updated) metadata of the raster read from the input raster.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.utilities.file_io.save_raster">
+<span class="sig-prename descclassname"><span class="pre">beak.utilities.file_io.</span></span><span class="sig-name descname"><span class="pre">save_raster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_meta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.13)"><span class="pre">Dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">compatibility_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/utilities/file_io.html#save_raster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.utilities.file_io.save_raster" title="Link to this definition"></a></dt>
+<dd><p>Save a raster array to a file with the specified metadata or profile.</p>
+<p>Writes a given raster array to a file at the specified output path, using the provided metadata.
+It ensures that the minimum data type for the raster array is set and updates the metadata with any additional
+keyword arguments provided. The metadata can be replaced by the raster’s profile, providing additional parameters
+for tiling and block size in order to optimize storage and processing for COG compatibility.</p>
+<p>Nodata value in the kwargs argument will overwrite the automatically determined nodata value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>src_array</strong> – The raster array to be saved.</p></li>
+<li><p><strong>src_meta</strong> – The metadata dictionary for the raster.</p></li>
+<li><p><strong>output_path</strong> – The file path where the raster will be saved.</p></li>
+<li><p><strong>compatibility_mode</strong> – A boolean indicating whether to enable QGIS compatibility for 8bit signed integers.
+the profile will be updated to support Cloud Optimized GeoTIFF (COG).</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments to update the metadata of the raster.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="beak.utilities.file_io.write_json">
+<span class="sig-prename descclassname"><span class="pre">beak.utilities.file_io.</span></span><span class="sig-name descname"><span class="pre">write_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.13)"><span class="pre">Dict</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/beak/utilities/file_io.html#write_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#beak.utilities.file_io.write_json" title="Link to this definition"></a></dt>
+<dd><p>Write a json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>folder_name</strong> – The folder name where the json file will be saved.</p></li>
+<li><p><strong>file_name</strong> – The name of the json file.</p></li>
+<li><p><strong>data</strong> – The data to be written in the json file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="beak.utilities.conversion.html" class="btn btn-neutral float-left" title="beak.utilities.conversion module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="beak.utilities.impute.html" class="btn btn-neutral float-right" title="beak.utilities.impute module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

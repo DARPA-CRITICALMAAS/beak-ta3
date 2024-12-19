@@ -1,0 +1,11 @@
+This project includes adapted and modified code from the following third-party sources:
+
+1. Bayesian Neural Network
+    Author: Brendan Hasz, 2018
+    License: MIT License
+    File: src/beak/methods/bnn/fastBNN.py
+
+2. Self-organizing Maps
+    Author: GTK, 2022
+    License: GNU General Public License v3.0
+    Submodule: src/beak/methods/som/nextsomcore

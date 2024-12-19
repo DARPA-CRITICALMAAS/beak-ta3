@@ -1,0 +1,8 @@
+beak.integration.statmagic.call\_bnn module
+===========================================
+
+.. automodule:: beak.integration.statmagic.call_bnn
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

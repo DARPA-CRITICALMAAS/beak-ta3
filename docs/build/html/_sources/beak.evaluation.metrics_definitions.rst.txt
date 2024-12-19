@@ -1,0 +1,8 @@
+beak.evaluation.metrics\_definitions module
+===========================================
+
+.. automodule:: beak.evaluation.metrics_definitions
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

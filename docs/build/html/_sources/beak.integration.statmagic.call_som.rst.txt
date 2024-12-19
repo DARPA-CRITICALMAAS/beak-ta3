@@ -1,0 +1,8 @@
+beak.integration.statmagic.call\_som module
+===========================================
+
+.. automodule:: beak.integration.statmagic.call_som
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

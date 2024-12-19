@@ -8,7 +8,16 @@ from beak.evaluation.metrics_definitions import classification
 
 def _calculate_metric(y_true, y_pred, metric_function, decimal_places) -> float:
     """
-    # TODO: Docstring goes here.
+    Calculate a specific metric from a given true and predicted array.
+
+    Args:
+        y_true: The true array of labels.
+        y_pred: The predicted array of labels.
+        metric_function: The function to calculate the metric.
+        decimal_places: The number of decimal places to round the metric value to.
+
+    Returns:
+        The calculated metric.
     """
     return round(metric_function(y_true, y_pred), decimal_places)
 
@@ -20,12 +29,21 @@ def binary_classification(
     threshold: float = 0.5,
 ) -> List:
     """
-    # TODO: Docstring goes here.
+    Calculate metrics for binary classification.
+
+    Args:
+        model: The trained model.
+        X: The input array containing the evidence layers.
+        y: The true array of labels.
+        threshold: The threshold value for binary classification.
+
+    Returns:
+        List of the calculated metrics for binary classification.
     """
     metrics = deepcopy(classification)
     number_classes = np.unique(y).size
 
-    id_loc, fn_loc = "name", "fn"
+    id_loc, fn_loc = "short", "fn"
     metrics_binary_y_pred = ["auc", "auprc"]
     metrics_one_class = ["acc"]
 
@@ -48,6 +66,8 @@ def binary_classification(
                 ),
             }
         )
-        metric.pop(fn_loc)
+
+        for key in [fn_loc, id_loc]:
+            metric.pop(key)
 
     return metrics

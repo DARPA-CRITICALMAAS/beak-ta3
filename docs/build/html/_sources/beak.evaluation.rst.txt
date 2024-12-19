@@ -1,0 +1,19 @@
+beak.evaluation package
+=======================
+
+.. automodule:: beak.evaluation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+Submodules
+----------
+
+.. toctree::
+   :includehidden:
+   :maxdepth: 4
+   :glob:
+
+   beak.evaluation.calculate_metrics
+   beak.evaluation.metrics_definitions

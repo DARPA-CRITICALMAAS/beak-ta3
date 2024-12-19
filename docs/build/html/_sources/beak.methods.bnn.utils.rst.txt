@@ -1,0 +1,8 @@
+beak.methods.bnn.utils module
+=============================
+
+.. automodule:: beak.methods.bnn.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

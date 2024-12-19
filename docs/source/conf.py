@@ -32,36 +32,10 @@ extensions = [
     'myst_parser',
 ]
 
-# enabling dollar math, get back to this for others
-myst_enable_extensions = [
-    "amsmath",
-    "colon_fence",
-    "deflist",
-    "dollarmath",
-    "fieldlist",
-    "html_admonition",
-    "html_image",
-    #"linkify",
-    "replacements",
-    "smartquotes",
-    "substitution",
-    "tasklist"
-]
-
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 language = 'en'
-
-# we need this for documentation of __call__ methods to show up
-autodoc_default_options = {
-    'member-order': 'bysource',
-    'special-members': '__init__,__call__',
-    'undoc-members': True
-}
-
-# suppress annoying warnings about footnotes
-suppress_warnings = ["ref.footnote"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -72,22 +46,8 @@ html_static_path = ['_static']
 # -- Options for intersphinx extension ---------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#configuration
 
-
 intersphinx_mapping = {
-
-    # The entries in this list are modified from github.com/bskinn/intersphinx-gist.
-    # Please feel free to post an issue at that repo if any of these mappings don't work for you,
-    # or if you're having trouble constructing a mapping for a project not listed here.
-
-    "python": ('https://docs.python.org/3/', None),
-    "h5py": ('https://docs.h5py.org/en/latest/', None),
-    "matplotlib": ('https://matplotlib.org/stable/', None),
-    "numpy": ('https://numpy.org/doc/stable/', None),
-    "pandas": ('https://pandas.pydata.org/docs/', None),
-    "scikit-learn": ('https://scikit-learn.org/stable/', None),
-    "scipy": ('https://docs.scipy.org/doc/scipy/', None),
-    "sphinx": ('https://www.sphinx-doc.org/en/master/', None)
-
+    'python': ('https://docs.python.org/3', None),
 }
 
 # -- Options for todo extension ----------------------------------------------

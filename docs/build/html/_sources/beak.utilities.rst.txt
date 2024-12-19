@@ -15,13 +15,11 @@ Submodules
    :maxdepth: 4
    :glob:
 
-   beak.utilities.checks
-   beak.utilities.conversions
-   beak.utilities.eda
-   beak.utilities.focal
-   beak.utilities.io
-   beak.utilities.misc
-   beak.utilities.preparation
+   beak.utilities.conversion
+   beak.utilities.file_io
+   beak.utilities.impute
+   beak.utilities.outlier
    beak.utilities.raster_processing
-   beak.utilities.transformation
+   beak.utilities.sampling
+   beak.utilities.transform
    beak.utilities.vector_processing

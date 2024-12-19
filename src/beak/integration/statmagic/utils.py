@@ -222,7 +222,19 @@ def prepare_output_layers(
     output: Optional[Tuple[str, str]],
 ) -> List[Tuple[str, Dict]]:
     """
-    TODO: Docstring goes here.
+    Concatenate file paths and metadata for output layers.
+
+    If no output folder is provided, no archive will be created.
+    Single files must be provided as a string.
+
+    Args:
+        layers: List of tuples containing layer names and metadata.
+        files: Path to the file or list of files to be included in the archive.
+        meta: Initial and updated metadata for the output layers.
+        output: Output folder and archive name.
+
+    Returns:
+        List of tuples containing layer names and updated metadata.
     """
     init_meta, update_meta = meta
     meta = init_meta.copy()

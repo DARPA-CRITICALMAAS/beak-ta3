@@ -1,0 +1,272 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>beak.utilities.impute &mdash; beak-ta3 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=29a6c3e3"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            beak-ta3
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../beak.html">beak package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../beak.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.data.html">beak.data package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.evaluation.html">beak.evaluation package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.evaluation.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.experimental.html">beak.experimental package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.experimental.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.integration.html">beak.integration package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.integration.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.methods.html">beak.methods package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.methods.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.utilities.html">beak.utilities package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.utilities.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">beak-ta3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">beak.utilities.impute</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for beak.utilities.impute</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">beak.utilities.file_io</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_cast_array_to_minimum_dtype</span><span class="p">,</span>
+    <span class="n">_update_nodata</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="__impute_min">
+<a class="viewcode-back" href="../../../beak.utilities.impute.html#beak.utilities.impute.__impute_min">[docs]</a>
+<span class="k">def</span> <span class="nf">__impute_min</span><span class="p">(</span>
+    <span class="n">src_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">impute_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">src_array</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">src_array</span><span class="p">),</span> <span class="n">impute_value</span><span class="p">,</span> <span class="n">src_array</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="__impute_max">
+<a class="viewcode-back" href="../../../beak.utilities.impute.html#beak.utilities.impute.__impute_max">[docs]</a>
+<span class="k">def</span> <span class="nf">__impute_max</span><span class="p">(</span>
+    <span class="n">src_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">impute_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">src_array</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">src_array</span><span class="p">),</span> <span class="n">impute_value</span><span class="p">,</span> <span class="n">src_array</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="__impute_mean">
+<a class="viewcode-back" href="../../../beak.utilities.impute.html#beak.utilities.impute.__impute_mean">[docs]</a>
+<span class="k">def</span> <span class="nf">__impute_mean</span><span class="p">(</span>
+    <span class="n">src_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">impute_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">src_array</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">src_array</span><span class="p">),</span> <span class="n">impute_value</span><span class="p">,</span> <span class="n">src_array</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="__impute_median">
+<a class="viewcode-back" href="../../../beak.utilities.impute.html#beak.utilities.impute.__impute_median">[docs]</a>
+<span class="k">def</span> <span class="nf">__impute_median</span><span class="p">(</span>
+    <span class="n">src_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">impute_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmedian</span><span class="p">(</span><span class="n">src_array</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">src_array</span><span class="p">),</span> <span class="n">impute_value</span><span class="p">,</span> <span class="n">src_array</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="__impute_zero">
+<a class="viewcode-back" href="../../../beak.utilities.impute.html#beak.utilities.impute.__impute_zero">[docs]</a>
+<span class="k">def</span> <span class="nf">__impute_zero</span><span class="p">(</span>
+    <span class="n">src_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">impute_value</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">src_array</span><span class="p">),</span> <span class="n">impute_value</span><span class="p">,</span> <span class="n">src_array</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="__impute_custom">
+<a class="viewcode-back" href="../../../beak.utilities.impute.html#beak.utilities.impute.__impute_custom">[docs]</a>
+<span class="k">def</span> <span class="nf">__impute_custom</span><span class="p">(</span>
+    <span class="n">src_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">custom_value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">impute_value</span> <span class="o">=</span> <span class="n">custom_value</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">src_array</span><span class="p">),</span> <span class="n">impute_value</span><span class="p">,</span> <span class="n">src_array</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="impute">
+<a class="viewcode-back" href="../../../beak.utilities.impute.html#beak.utilities.impute.impute">[docs]</a>
+<span class="k">def</span> <span class="nf">impute</span><span class="p">(</span>
+    <span class="n">src</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">],</span>
+    <span class="n">template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]],</span>
+    <span class="n">method</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="s2">&quot;zero&quot;</span><span class="p">,</span> <span class="s2">&quot;custom&quot;</span><span class="p">],</span>
+    <span class="n">custom_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Replace nodata values within a 2D-array with a pre-defined method or custom value.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        src: A tuple containing the source array and its metadata.</span>
+<span class="sd">            - src_array: The source array to be transformed.</span>
+<span class="sd">            - src_meta: Metadata associated with the source array, including &#39;nodata&#39; value.</span>
+<span class="sd">        method: The transformation method to apply.</span>
+<span class="sd">            - &quot;min&quot;: Replace missing values with array&#39;s minimum.</span>
+<span class="sd">            - &quot;max&quot;: Replace missing values with array&#39;s maximum.</span>
+<span class="sd">            - &quot;mean&quot;: Replace missing values with array&#39;s mean.</span>
+<span class="sd">            - &quot;median&quot;: Replace missing values with array&#39;s median.</span>
+<span class="sd">            - &quot;zero&quot;: Replace missing values with zero values.</span>
+<span class="sd">            - &quot;custom&quot;:  Replace missing values with user-input</span>
+<span class="sd">        template: A tuple containing the template raster array and its metadata.</span>
+<span class="sd">            - np.ndarray: The template raster data array.</span>
+<span class="sd">            - Dict: The template raster metadata.</span>
+<span class="sd">        custom_value: The value to replace missing values with when using the &quot;custom&quot; method.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A tuple containing the transformed array and its updated metadata.</span>
+<span class="sd">            - out_array: The transformed array.</span>
+<span class="sd">            - out_meta: Updated metadata for the transformed array.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the specified transformation method is not supported.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">src_array</span><span class="p">,</span> <span class="n">src_meta</span> <span class="o">=</span> <span class="n">src</span>
+    <span class="n">src_nodata</span> <span class="o">=</span> <span class="n">src_meta</span><span class="p">[</span><span class="s2">&quot;nodata&quot;</span><span class="p">]</span>
+    <span class="n">src_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">src_array</span> <span class="o">==</span> <span class="n">src_nodata</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">src_array</span><span class="p">)</span>
+
+    <span class="c1"># Impute</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;min&quot;</span><span class="p">:</span>
+        <span class="n">out_array</span> <span class="o">=</span> <span class="n">__impute_min</span><span class="p">(</span><span class="n">src_array</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span>
+        <span class="n">out_array</span> <span class="o">=</span> <span class="n">__impute_max</span><span class="p">(</span><span class="n">src_array</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
+        <span class="n">out_array</span> <span class="o">=</span> <span class="n">__impute_mean</span><span class="p">(</span><span class="n">src_array</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;median&quot;</span><span class="p">:</span>
+        <span class="n">out_array</span> <span class="o">=</span> <span class="n">__impute_median</span><span class="p">(</span><span class="n">src_array</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;zero&quot;</span><span class="p">:</span>
+        <span class="n">out_array</span> <span class="o">=</span> <span class="n">__impute_zero</span><span class="p">(</span><span class="n">src_array</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;custom&quot;</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">custom_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Custom value must be provided for custom imputation method.&quot;</span>
+        <span class="n">out_array</span> <span class="o">=</span> <span class="n">__impute_custom</span><span class="p">(</span><span class="n">src_array</span><span class="p">,</span> <span class="n">custom_value</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid imputation method: </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Update nodata</span>
+    <span class="n">out_nodata</span> <span class="o">=</span> <span class="n">_update_nodata</span><span class="p">(</span><span class="n">out_array</span><span class="p">,</span> <span class="n">src_nodata</span><span class="p">)</span>
+
+    <span class="c1"># Mask with template</span>
+    <span class="k">if</span> <span class="n">template</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">template_array</span><span class="p">,</span> <span class="n">template_meta</span> <span class="o">=</span> <span class="n">template</span>
+        <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">template_array</span> <span class="o">==</span> <span class="n">template_meta</span><span class="p">[</span><span class="s2">&quot;nodata&quot;</span><span class="p">],</span> <span class="n">out_nodata</span><span class="p">,</span> <span class="n">out_array</span><span class="p">)</span>
+
+    <span class="c1"># Cast to minimum dtype and update metadata</span>
+    <span class="n">out_array</span><span class="p">,</span> <span class="n">out_nodata</span> <span class="o">=</span> <span class="n">_cast_array_to_minimum_dtype</span><span class="p">(</span><span class="n">out_array</span><span class="p">,</span> <span class="n">out_nodata</span><span class="p">)</span>
+
+    <span class="n">out_meta</span> <span class="o">=</span> <span class="n">src_meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">out_meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="n">nodata</span><span class="o">=</span><span class="n">out_nodata</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">out_array</span><span class="o">.</span><span class="n">dtype</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+beak.experimental.raster\_processing module
+===========================================
+
+.. automodule:: beak.experimental.raster_processing
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

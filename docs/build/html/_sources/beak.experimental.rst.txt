@@ -1,0 +1,28 @@
+beak.experimental package
+=========================
+
+.. automodule:: beak.experimental
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+Submodules
+----------
+
+.. toctree::
+   :includehidden:
+   :maxdepth: 4
+   :glob:
+
+   beak.experimental.cdr
+   beak.experimental.checks
+   beak.experimental.conversions
+   beak.experimental.eda
+   beak.experimental.focal
+   beak.experimental.io
+   beak.experimental.misc
+   beak.experimental.preparation
+   beak.experimental.raster_processing
+   beak.experimental.transformation
+   beak.experimental.vector_processing

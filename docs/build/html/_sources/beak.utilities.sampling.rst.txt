@@ -1,0 +1,8 @@
+beak.utilities.sampling module
+==============================
+
+.. automodule:: beak.utilities.sampling
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

@@ -1,0 +1,8 @@
+beak.experimental.preparation module
+====================================
+
+.. automodule:: beak.experimental.preparation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

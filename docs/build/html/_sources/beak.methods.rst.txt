@@ -15,4 +15,5 @@ Subpackages
    :maxdepth: 4
    :glob:
 
+   beak.methods.bnn
    beak.methods.som

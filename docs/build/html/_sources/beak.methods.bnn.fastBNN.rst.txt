@@ -1,0 +1,8 @@
+beak.methods.bnn.fastBNN module
+===============================
+
+.. automodule:: beak.methods.bnn.fastBNN
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

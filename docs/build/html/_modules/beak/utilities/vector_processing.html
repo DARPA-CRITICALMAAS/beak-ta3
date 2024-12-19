@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
@@ -5,18 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.utilities.vector_processing &mdash; beak-ta3 1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=29a6c3e3"></script>
-        <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=29a6c3e3"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -33,9 +31,6 @@
           <a href="../../../index.html" class="icon icon-home">
             beak-ta3
           </a>
-              <div class="version">
-                1.0.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,6 +44,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../beak.html">beak package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../beak.html#subpackages">Subpackages</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../beak.data.html">beak.data package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.evaluation.html">beak.evaluation package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.evaluation.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.experimental.html">beak.experimental package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.experimental.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.integration.html">beak.integration package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.integration.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../../beak.methods.html">beak.methods package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../beak.methods.html#subpackages">Subpackages</a></li>
 </ul>
@@ -88,69 +95,322 @@
            <div itemprop="articleBody">
              
   <h1>Source code for beak.utilities.vector_processing</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
-<span class="kn">import</span> <span class="nn">os</span>
-
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Literal</span>
-
+<span></span><span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">rasterio</span>
-<span class="kn">import</span> <span class="nn">pyproj</span>
+<span class="kn">from</span> <span class="nn">rasterio</span> <span class="kn">import</span> <span class="n">features</span><span class="p">,</span> <span class="n">transform</span>
+<span class="kn">from</span> <span class="nn">rasterio.enums</span> <span class="kn">import</span> <span class="n">MergeAlg</span>
 
-<span class="kn">from</span> <span class="nn">rasterio.crs</span> <span class="kn">import</span> <span class="n">CRS</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">beak.utilities.file_io</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_cast_array_to_minimum_dtype</span><span class="p">,</span>
+    <span class="n">_initialize_data_for_rasterization</span>
+<span class="p">)</span>
 
 
-<span class="c1"># region: reproject vector data</span>
-<div class="viewcode-block" id="_reproject_vector_data">
-<a class="viewcode-back" href="../../../beak.utilities.vector_processing.html#beak.utilities.vector_processing._reproject_vector_data">[docs]</a>
-<span class="k">def</span> <span class="nf">_reproject_vector_data</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">],</span>
-    <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;utf-8&quot;</span><span class="p">,</span>
-    <span class="n">epsg</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">,</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="prepare_geodataframe">
+<a class="viewcode-back" href="../../../beak.utilities.vector_processing.html#beak.utilities.vector_processing.prepare_geodataframe">[docs]</a>
+<span class="k">def</span> <span class="nf">prepare_geodataframe</span><span class="p">(</span>
+    <span class="n">src</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">template</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
     <span class="n">query</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Reprojects a vector file (shapefile or geopackage) to a new coordinate reference system (CRS).</span>
+<span class="sd">    Prepare a GeoDataFrame for rasterization.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    file (Union[Path, str]): The path to the input vector file.</span>
-<span class="sd">    epsg (Optional[int]): The EPSG code of the target CRS.</span>
-<span class="sd">    crs (Optional[str]): The CRS string of the target CRS.</span>
+<span class="sd">    Ensure that the input GeoDataFrame is not empty, optionally filters it based on a query,</span>
+<span class="sd">    and reproject&#39;s it to the coordinate reference system (CRS) of the provided template raster.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        src: The input GeoDataFrame to be prepared for rasterization.</span>
+<span class="sd">        template: A tuple containing the template array and its metadata.</span>
+<span class="sd">            - template_array: The array representing the template raster.</span>
+<span class="sd">            - template_meta: The metadata dictionary for the template raster.</span>
+<span class="sd">        query: An optional query string to filter the GeoDataFrame.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">    gpd.GeoDataFrame: The reprojected vector data as a GeoDataFrame.</span>
+<span class="sd">        gpd.GeoDataFrame: The queried and reprojected GeoDataFrame</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">    ValueError: If the input file is not a shapefile or geopackage.</span>
-<span class="sd">    ValueError: If neither epsg nor crs is specified.</span>
-<span class="sd">    ValueError: If both epsg and crs are specified.</span>
+<span class="sd">        AssertionError: If the input GeoDataFrame is empty.</span>
+<span class="sd">        AssertionError: If the queried GeoDataFrame is empty.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Must specify either epsg or crs.&quot;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">epsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot specify both epsg and crs.&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
-        <span class="n">gdf</span> <span class="o">=</span> <span class="n">data</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">template_meta</span> <span class="o">=</span> <span class="n">template</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">src</span><span class="o">.</span><span class="n">empty</span><span class="p">,</span> <span class="s2">&quot;Input GeoDataFrame is empty.&quot;</span>
 
     <span class="k">if</span> <span class="n">query</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">gdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+        <span class="n">src</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">src</span><span class="o">.</span><span class="n">empty</span><span class="p">,</span> <span class="s2">&quot;Query returned empty GeoDataFrame.&quot;</span>
 
-    <span class="n">out_gdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">epsg</span><span class="o">=</span><span class="n">epsg</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">out_gdf</span></div>
+    <span class="k">return</span> <span class="n">src</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">template_meta</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
 
-<span class="c1"># endregion: reproject vector data</span>
+<div class="viewcode-block" id="rasterize_binary">
+<a class="viewcode-back" href="../../../beak.utilities.vector_processing.html#beak.utilities.vector_processing.rasterize_binary">[docs]</a>
+<span class="k">def</span> <span class="nf">rasterize_binary</span><span class="p">(</span>
+    <span class="n">src</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">template</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">custom_fill_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">custom_nodata_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert features into a binary raster.</span>
+
+<span class="sd">    Use cases:</span>
+<span class="sd">        - Template (coverage) creation: use custom_fill_value of None.</span>
+<span class="sd">        - Encoding categorical features: use custom_fill_value of 0.</span>
+<span class="sd">        - Label creation: use custom_fill_value of 0.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        src: The input GeoDataFrame containing geometries to rasterize.</span>
+<span class="sd">        template: A tuple containing the template array and its metadata.</span>
+<span class="sd">        custom_fill_value: Custom fill value for the raster.</span>
+<span class="sd">        custom_nodata_value: Custom nodata value for the raster.</span>
+<span class="sd">            If not provided, the nodata value will be set to the minimum of the data type.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[np.ndarray, dict]: A tuple containing the rasterized array and its metadata.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        AssertionError: If CRS mismatch between source and template.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">template_meta</span> <span class="o">=</span> <span class="n">template</span>
+    <span class="k">assert</span> <span class="n">src</span><span class="o">.</span><span class="n">crs</span> <span class="o">==</span> <span class="n">template_meta</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">],</span> <span class="s2">&quot;CRS mismatch between source and template.&quot;</span>
+
+    <span class="n">geometries</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">geometries</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span>
+
+    <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">_rasterize_features</span><span class="p">(</span>
+        <span class="n">src</span><span class="o">=</span><span class="p">(</span><span class="n">geometries</span><span class="p">,</span> <span class="n">values</span><span class="p">),</span>
+        <span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span>
+        <span class="n">custom_fill_value</span><span class="o">=</span><span class="n">custom_fill_value</span><span class="p">,</span>
+        <span class="n">custom_nodata_value</span><span class="o">=</span><span class="n">custom_nodata_value</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span></div>
+
+
+
+<div class="viewcode-block" id="rasterize_encode_categorical">
+<a class="viewcode-back" href="../../../beak.utilities.vector_processing.html#beak.utilities.vector_processing.rasterize_encode_categorical">[docs]</a>
+<span class="k">def</span> <span class="nf">rasterize_encode_categorical</span><span class="p">(</span>
+    <span class="n">src</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">template</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">column_to_raster</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">custom_nodata_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rasterize a categorical column from a GeoDataFrame into multiple binary rasters.</span>
+
+<span class="sd">    Takes a GeoDataFrame and a specified column containing categorical data,</span>
+<span class="sd">    and rasterizes each unique value in that column into a separate binary raster indicating</span>
+<span class="sd">    presence (1) or absence (0) of that value in the original geometries.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        src: The input GeoDataFrame containing geometries and categorical data.</span>
+<span class="sd">        template: A tuple containing the template array and its metadata.</span>
+<span class="sd">        column_to_raster: The name of the column in the GeoDataFrame to rasterize.</span>
+<span class="sd">        custom_nodata_value: Custom nodata value for the raster.</span>
+<span class="sd">            If not provided, the nodata value will be set to the minimum of the data type.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        out_encodings: A list of tuples, each containing:</span>
+<span class="sd">            - The name of the raster (str) in the format &quot;column_name_value&quot;.</span>
+<span class="sd">            - The rasterized array (np.ndarray).</span>
+<span class="sd">            - The metadata dictionary (dict) for the raster.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out_encodings</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">unique_values</span> <span class="o">=</span> <span class="n">src</span><span class="p">[</span><span class="n">column_to_raster</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">unique_values</span><span class="p">:</span>
+        <span class="n">geometries</span> <span class="o">=</span> <span class="n">src</span><span class="p">[</span><span class="n">src</span><span class="p">[</span><span class="n">column_to_raster</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">]</span><span class="o">.</span><span class="n">geometry</span>
+        <span class="n">geometries</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometries</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">src</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+
+        <span class="n">out_name</span> <span class="o">=</span> <span class="n">column_to_raster</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">out_raster</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">rasterize_binary</span><span class="p">(</span>
+            <span class="n">src</span><span class="o">=</span><span class="n">geometries</span><span class="p">,</span>
+            <span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span>
+            <span class="n">custom_fill_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">custom_nodata_value</span><span class="o">=</span><span class="n">custom_nodata_value</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">out_name</span><span class="p">,</span> <span class="n">out_raster</span><span class="p">,</span> <span class="n">out_meta</span><span class="p">)</span>
+        <span class="n">out_encodings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out_encodings</span></div>
+
+
+
+<div class="viewcode-block" id="rasterize_continuous">
+<a class="viewcode-back" href="../../../beak.utilities.vector_processing.html#beak.utilities.vector_processing.rasterize_continuous">[docs]</a>
+<span class="k">def</span> <span class="nf">rasterize_continuous</span><span class="p">(</span>
+    <span class="n">src</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">template</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">column_to_raster</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">custom_nodata_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rasterize continuous values from a specified column in a GeoDataFrame.</span>
+
+<span class="sd">    Takes a GeoDataFrame and a specified column containing continuous data,</span>
+<span class="sd">    and rasterizes the values into a raster array based on a given template.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        src: The input GeoDataFrame containing geometries and continuous data.</span>
+<span class="sd">        template: A tuple containing the template raster array and its metadata.</span>
+<span class="sd">            - np.ndarray: The template raster data array.</span>
+<span class="sd">            - dict: The template raster metadata.</span>
+<span class="sd">        column_to_raster: The name of the column in the GeoDataFrame to rasterize.</span>
+<span class="sd">        custom_nodata_value: Custom nodata value for the raster.</span>
+<span class="sd">            If not provided, the nodata value will be set to the minimum of the data type.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[np.ndarray, dict]: A tuple containing:</span>
+<span class="sd">            - np.ndarray: The rasterized array.</span>
+<span class="sd">            - dict: The metadata dictionary for the rasterized array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">geometries</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">geometry</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">src</span><span class="p">[</span><span class="n">column_to_raster</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">template_meta</span> <span class="o">=</span> <span class="n">template</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">):</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">)</span>
+
+    <span class="n">values_min_dtype</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">get_minimum_dtype</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">values_min_dtype</span><span class="p">)</span>
+
+    <span class="n">out_raster</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">_rasterize_features</span><span class="p">(</span>
+        <span class="n">src</span><span class="o">=</span><span class="p">(</span><span class="n">geometries</span><span class="p">,</span> <span class="n">values</span><span class="p">),</span>
+        <span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span>
+        <span class="n">custom_nodata_value</span><span class="o">=</span><span class="n">custom_nodata_value</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out_raster</span><span class="p">,</span> <span class="n">out_meta</span></div>
+
+
+
+<div class="viewcode-block" id="_get_geometry_type">
+<a class="viewcode-back" href="../../../beak.utilities.vector_processing.html#beak.utilities.vector_processing._get_geometry_type">[docs]</a>
+<span class="k">def</span> <span class="nf">_get_geometry_type</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine the geometry type of a GeoDataFrame.</span>
+
+<span class="sd">    Checks the geometry type of all geometries in the provided GeoDataFrame and returns a string</span>
+<span class="sd">    indicating the type of geometry. It supports &#39;Point&#39;, &#39;MultiPoint&#39;, &#39;LineString&#39;, &#39;MultiLineString&#39;, &#39;Polygon&#39;,</span>
+<span class="sd">    and &#39;MultiPolygon&#39;.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        src: The GeoDataFrame whose geometry type is to be determined.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        geometry_type: A string indicating the geometry type of the GeoDataFrame.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the GeoDataFrame contains mixed or unsupported geometry types.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">geom_type</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s2">&quot;Point&quot;</span><span class="p">,</span> <span class="s2">&quot;MultiPoint&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="n">geometry_type</span> <span class="o">=</span> <span class="s2">&quot;point&quot;</span>
+    <span class="k">elif</span> <span class="n">src</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">geom_type</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s2">&quot;LineString&quot;</span><span class="p">,</span> <span class="s2">&quot;MultiLineString&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="n">geometry_type</span> <span class="o">=</span> <span class="s2">&quot;line&quot;</span>
+    <span class="k">elif</span> <span class="n">src</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">geom_type</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s2">&quot;Polygon&quot;</span><span class="p">,</span> <span class="s2">&quot;MultiPolygon&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="n">geometry_type</span> <span class="o">=</span> <span class="s2">&quot;polygon&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The GeoDataFrame contains mixed or unsupported geometry types.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">geometry_type</span></div>
+
+
+
+<div class="viewcode-block" id="_transform_from_geometries">
+<a class="viewcode-back" href="../../../beak.utilities.vector_processing.html#beak.utilities.vector_processing._transform_from_geometries">[docs]</a>
+<span class="k">def</span> <span class="nf">_transform_from_geometries</span><span class="p">(</span>
+    <span class="n">src</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
+    <span class="n">resolution</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">transform</span><span class="o">.</span><span class="n">Affine</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the transform parameters required to convert the input geometries to a specified resolution.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        src: The input GeoDataFrame containing the geometries.</span>
+<span class="sd">        resolution: The desired resolution for the transformation.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[float, float, transform.Affine]: A tuple containing the width, height, and transform</span>
+<span class="sd">            parameters required for the transformation.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">min_x</span><span class="p">,</span> <span class="n">min_y</span><span class="p">,</span> <span class="n">max_x</span><span class="p">,</span> <span class="n">max_y</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">total_bounds</span>
+
+    <span class="n">out_width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">max_x</span> <span class="o">-</span> <span class="n">min_x</span><span class="p">)</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)</span>
+    <span class="n">out_height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">max_y</span> <span class="o">-</span> <span class="n">min_y</span><span class="p">)</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)</span>
+
+    <span class="n">out_transform</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">from_origin</span><span class="p">(</span><span class="n">min_x</span><span class="p">,</span> <span class="n">max_y</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out_width</span><span class="p">,</span> <span class="n">out_height</span><span class="p">,</span> <span class="n">out_transform</span></div>
+
+
+
+<div class="viewcode-block" id="_rasterize_features">
+<a class="viewcode-back" href="../../../beak.utilities.vector_processing.html#beak.utilities.vector_processing._rasterize_features">[docs]</a>
+<span class="k">def</span> <span class="nf">_rasterize_features</span><span class="p">(</span>
+    <span class="n">src</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">GeometryArray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">template</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">custom_fill_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">custom_nodata_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rasterize geometries into a raster array based on a given template.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        src: A tuple containing geometries and values.</span>
+<span class="sd">            - GeometryArray: An array of geometries to be rasterized.</span>
+<span class="sd">            - np.ndarray: An array of values corresponding to the geometries.</span>
+<span class="sd">        template: A tuple containing the template raster array and its metadata.</span>
+<span class="sd">            - np.ndarray: The template raster data array.</span>
+<span class="sd">            - Dict: The template raster metadata.</span>
+<span class="sd">        custom_fill_value: A custom fill value for pixels without geometries.</span>
+<span class="sd">        custom_nodata_value: A custom nodata value for the raster.</span>
+<span class="sd">            If not provided, the nodata value will be set to the minimum of the data type.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A tuple containing:</span>
+<span class="sd">            - out_array: The rasterized array.</span>
+<span class="sd">            - out_meta: The metadata dictionary for the rasterized array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">src_geometries</span><span class="p">,</span> <span class="n">src_values</span> <span class="o">=</span> <span class="n">src</span>
+    <span class="n">template_array</span><span class="p">,</span> <span class="n">template_meta</span> <span class="o">=</span> <span class="n">template</span>
+
+    <span class="c1"># Init nodata and fill values</span>
+    <span class="n">src_values</span><span class="p">,</span> <span class="n">nodata_value</span><span class="p">,</span> <span class="n">fill_value</span> <span class="o">=</span> <span class="n">_initialize_data_for_rasterization</span><span class="p">(</span>
+        <span class="n">src_values</span><span class="p">,</span>
+        <span class="n">custom_nodata_value</span><span class="p">,</span>
+        <span class="n">custom_fill_value</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Rasterize and update metadata</span>
+    <span class="n">raster_array</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">rasterize</span><span class="p">(</span>
+        <span class="n">shapes</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">src_geometries</span><span class="p">,</span> <span class="n">src_values</span><span class="p">)),</span>
+        <span class="n">out_shape</span><span class="o">=</span><span class="p">(</span><span class="n">template_meta</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">],</span> <span class="n">template_meta</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">]),</span>
+        <span class="n">fill</span><span class="o">=</span><span class="n">fill_value</span><span class="p">,</span>
+        <span class="n">transform</span><span class="o">=</span><span class="n">template_meta</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">],</span>
+        <span class="n">all_touched</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">merge_alg</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">MergeAlg</span><span class="p">,</span> <span class="s2">&quot;replace&quot;</span><span class="p">),</span>
+        <span class="n">default_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Mask array with template nodata, update metadata</span>
+    <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">template_array</span> <span class="o">==</span> <span class="n">template_meta</span><span class="p">[</span><span class="s2">&quot;nodata&quot;</span><span class="p">],</span> <span class="n">nodata_value</span><span class="p">,</span> <span class="n">raster_array</span><span class="p">)</span>
+    <span class="n">out_array</span><span class="p">,</span> <span class="n">out_nodata</span> <span class="o">=</span> <span class="n">_cast_array_to_minimum_dtype</span><span class="p">(</span><span class="n">out_array</span><span class="p">,</span> <span class="n">nodata_value</span><span class="p">,</span> <span class="n">unify_integer_types</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">out_meta</span> <span class="o">=</span> <span class="n">template_meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">out_meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="n">nodata</span><span class="o">=</span><span class="n">out_nodata</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">out_array</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="n">count</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span></div>
+
 </pre></div>
 
            </div>

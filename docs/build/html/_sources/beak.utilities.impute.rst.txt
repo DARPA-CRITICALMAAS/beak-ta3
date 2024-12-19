@@ -1,0 +1,8 @@
+beak.utilities.impute module
+============================
+
+.. automodule:: beak.utilities.impute
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

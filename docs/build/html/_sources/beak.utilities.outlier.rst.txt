@@ -1,0 +1,8 @@
+beak.utilities.outlier module
+=============================
+
+.. automodule:: beak.utilities.outlier
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

@@ -12,10 +12,16 @@ def select_negative_samples(
     random_seed: int = 42,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
-    # TODO: Docstring goes here
-    # Uses 0 for negatives by default. Custom negatives can be used by providing labels with -1.
-    # If the multiplier equals 0, only positives will remain.
-    # If the multiplier is less than 0, all negatives will be used (no sampling).
+    Samples negative samples based on the number of positives with a given multiplier.
+
+    Special cases:
+        - Uses 0 for negatives by default. Custom negatives can be used by providing labels with -1.
+        - If the multiplier equals 0, only positives will remain.
+        - If the multiplier is less than 0, all negatives will be used (no sampling).
+        - If the number of negatives available is less than the desired number, all negatives will be used.
+
+    Returns:
+        The sampled data and labels for the negative samples.
     """
     np.random.seed(random_seed)
 
@@ -46,7 +52,20 @@ def random_oversampling(
     random_seed: int = 42,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
-    # TODO: Docstring goes here
+    Oversampling of positive labels using RandomOverSampler.
+
+    Sampling will not be performed if:
+        - The sampling strategy is 0.
+        - The number of negative samples is less than or equal to the number of positive samples.
+
+    Args:
+        X: Input data.
+        y: Input labels.
+        sampling_strategy: Sampling strategy for positive labels. Default to 0.25.
+        random_seed: Random seed for reproducibility. Default to 42.
+
+    Returns:
+        Oversampled data and labels.
     """
     negatives_count = np.count_nonzero(y == 0)
     positives_count = np.count_nonzero(y == 1)
@@ -76,7 +95,19 @@ def select_train_and_test_data(
     random_seed: int = 42,
 ) -> Tuple[np.ndarray, Union[np.ndarray, None], np.ndarray, Union[np.ndarray, None]]:
     """
-    TODO: Docstring goes here
+    Split input data into test and training sets.
+
+    Splitting is not performed if: train size is 0 or 1.
+    None elements are simply being passed through.
+
+    Args:
+        X: Input data.
+        y: Input labels.
+        train_size: Proportion of the dataset to include in the train split. Default to 1 (full dataset).
+        random_seed: Random seed for reproducibility. Default to 42.
+
+    Returns:
+        Training and test data splits.
     """
     if 0 < train_size < 1:
         X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=train_size, random_state=random_seed)

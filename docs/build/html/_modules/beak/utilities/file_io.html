@@ -1,0 +1,794 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>beak.utilities.file_io &mdash; beak-ta3 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=29a6c3e3"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            beak-ta3
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../beak.html">beak package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../beak.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.data.html">beak.data package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.evaluation.html">beak.evaluation package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.evaluation.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.experimental.html">beak.experimental package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.experimental.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.integration.html">beak.integration package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.integration.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.methods.html">beak.methods package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.methods.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../beak.utilities.html">beak.utilities package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../beak.utilities.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">beak-ta3</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">beak.utilities.file_io</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for beak.utilities.file_io</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">urllib.request</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">ssl</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">import</span> <span class="nn">rasterio</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
+
+
+<div class="viewcode-block" id="download_file_from_cdr">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.download_file_from_cdr">[docs]</a>
+<span class="k">def</span> <span class="nf">download_file_from_cdr</span><span class="p">(</span><span class="n">download_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Download a raster file from the specified URL.</span>
+
+<span class="sd">    This function attempts to download a raster file from the given URL.</span>
+<span class="sd">    If the download fails due to SSL verification issues, it retries the download without SSL verification.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        download_url: The URL from which to download the raster file.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        io.BytesIO: A BytesIO object containing that can be used as path-like input.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># With SSL</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">download_url</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="c1"># Remove SSL verification if try fails</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">_create_unverified_context</span><span class="p">()</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">download_url</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="read_raster_band">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.read_raster_band">[docs]</a>
+<span class="k">def</span> <span class="nf">read_raster_band</span><span class="p">(</span>
+    <span class="n">raster</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span>
+    <span class="n">band</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">nodata_to_nan</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read a raster file from the given DatasetReader object and returns the raster array and its metadata.</span>
+
+<span class="sd">    In preparation for iterating over multiple bands, the kwargs argument can take every valid key-value pair</span>
+<span class="sd">    that is present in the input raster&#39;s metadata dictionary. E.g., if different bands have different</span>
+<span class="sd">    nodata values or data types, the metadata will be updated for further processing.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        raster: The DatasetReader object from which to read the raster.</span>
+<span class="sd">        band: The band number to read from the raster.</span>
+<span class="sd">        nodata_to_nan: Whether to apply a mask to the raster array. Default is True.</span>
+<span class="sd">        **kwargs: Additional keyword arguments to update the metadata of the raster.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The raster array and its updated metadata.</span>
+<span class="sd">            - A 2-dimensional raster array read from the input raster.</span>
+<span class="sd">            - The (updated) metadata of the raster read from the input raster.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out_array</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">band</span><span class="p">)</span>
+    <span class="n">out_meta</span> <span class="o">=</span> <span class="n">raster</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">out_meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="n">count</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">)</span>
+    <span class="n">out_meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">out_array</span> <span class="o">==</span> <span class="n">out_meta</span><span class="p">[</span><span class="s2">&quot;nodata&quot;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">out_array</span><span class="p">)</span> <span class="k">if</span> <span class="n">nodata_to_nan</span> <span class="ow">is</span> <span class="kc">True</span> <span class="k">else</span> <span class="n">out_array</span>
+
+    <span class="k">return</span> <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span></div>
+
+
+
+<div class="viewcode-block" id="load_layer">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.load_layer">[docs]</a>
+<span class="k">def</span> <span class="nf">load_layer</span><span class="p">(</span><span class="n">input_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load a raster file from the given file path.</span>
+
+<span class="sd">    Reshapes the output array to (-1, 1).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_file: The file path to the raster file.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The raster array and its metadata.</span>
+<span class="sd">            - A reshaped numpy array.</span>
+<span class="sd">            - The metadata of the raster.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">read_raster_band</span><span class="p">(</span>
+        <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">input_file</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out_array</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">out_meta</span></div>
+
+
+
+<div class="viewcode-block" id="load_layers">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.load_layers">[docs]</a>
+<span class="k">def</span> <span class="nf">load_layers</span><span class="p">(</span>
+    <span class="n">input_files</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load a list of raster files from the given file paths.</span>
+
+<span class="sd">    Single rasters will be reshaped to (-1, 1) and stacked column-wise.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_files: The list of file paths to the raster files.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The stacked raster array with the data from all input files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">layers_stack</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">input_files</span><span class="p">:</span>
+        <span class="n">raster_array</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">load_layer</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="n">layers_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">raster_array</span><span class="p">)</span>
+
+    <span class="n">out_stack</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span><span class="n">layers_stack</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out_stack</span></div>
+
+
+
+<div class="viewcode-block" id="_remove_nan_rows">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io._remove_nan_rows">[docs]</a>
+<span class="k">def</span> <span class="nf">_remove_nan_rows</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remove NaN values from the given data along the specified axis.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: The array to be processed.</span>
+<span class="sd">        axis: The axis along which to remove NaN values. Defaults to 1.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The array with NaN values removed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">model_data</span><span class="p">[</span>
+        <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">model_data</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    <span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="prepare_model_data">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.prepare_model_data">[docs]</a>
+<span class="k">def</span> <span class="nf">prepare_model_data</span><span class="p">(</span>
+    <span class="n">input_layers</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">input_labels</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remove NaN values from both layer and labels for training a model.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_layers: The input raster layers.</span>
+<span class="sd">        input_labels: The input labels for the training data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The prepared model data with layers and labels</span>
+<span class="sd">            - A numpy array containing the prepared training data.</span>
+<span class="sd">            - A numpy array containing the labels.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">input_layers</span><span class="p">,</span> <span class="n">input_labels</span><span class="p">])</span>
+    <span class="n">model_data</span> <span class="o">=</span> <span class="n">_remove_nan_rows</span><span class="p">(</span><span class="n">model_data</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">model_data</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">model_data</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="save_raster">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.save_raster">[docs]</a>
+<span class="k">def</span> <span class="nf">save_raster</span><span class="p">(</span>
+    <span class="n">src_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">src_meta</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">compatibility_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save a raster array to a file with the specified metadata or profile.</span>
+
+<span class="sd">    Writes a given raster array to a file at the specified output path, using the provided metadata.</span>
+<span class="sd">    It ensures that the minimum data type for the raster array is set and updates the metadata with any additional</span>
+<span class="sd">    keyword arguments provided. The metadata can be replaced by the raster&#39;s profile, providing additional parameters</span>
+<span class="sd">    for tiling and block size in order to optimize storage and processing for COG compatibility.</span>
+
+<span class="sd">    Nodata value in the kwargs argument will overwrite the automatically determined nodata value.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        src_array: The raster array to be saved.</span>
+<span class="sd">        src_meta: The metadata dictionary for the raster.</span>
+<span class="sd">        output_path: The file path where the raster will be saved.</span>
+<span class="sd">        compatibility_mode: A boolean indicating whether to enable QGIS compatibility for 8bit signed integers.</span>
+<span class="sd">            the profile will be updated to support Cloud Optimized GeoTIFF (COG).</span>
+<span class="sd">        **kwargs: Additional keyword arguments to update the metadata of the raster.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Prepare data</span>
+    <span class="n">raster_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">src_array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">src_array</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">src_array</span>
+    <span class="n">raster_meta</span> <span class="o">=</span> <span class="n">src_meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">raster_meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># Ensure data types and values</span>
+    <span class="n">raster_array_dtype</span> <span class="o">=</span> <span class="n">raster_array</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">raster_array_dtype_min</span><span class="p">,</span> <span class="n">raster_array_dtype_max</span> <span class="o">=</span> <span class="n">__get_dtype_range_info</span><span class="p">(</span><span class="n">raster_array_dtype</span><span class="p">)</span>
+    <span class="n">raster_array_min</span><span class="p">,</span> <span class="n">raster_array_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">raster_array</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">raster_array</span><span class="p">)</span>
+
+    <span class="n">meta_nodata</span> <span class="o">=</span> <span class="n">raster_meta</span><span class="p">[</span><span class="s2">&quot;nodata&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Assertions</span>
+    <span class="k">assert</span> <span class="n">raster_array_dtype_min</span> <span class="o">&lt;=</span> <span class="n">raster_array_min</span> <span class="o">&lt;=</span> <span class="n">raster_array_dtype_max</span><span class="p">,</span> <span class="s2">&quot;Array minimum out of range.&quot;</span>
+    <span class="k">assert</span> <span class="n">raster_array_dtype_min</span> <span class="o">&lt;=</span> <span class="n">raster_array_max</span> <span class="o">&lt;=</span> <span class="n">raster_array_dtype_max</span><span class="p">,</span> <span class="s2">&quot;Array maximum out of range.&quot;</span>
+    <span class="k">assert</span> <span class="n">raster_array_dtype_min</span> <span class="o">&lt;=</span> <span class="n">meta_nodata</span> <span class="o">&lt;=</span> <span class="n">raster_array_dtype_max</span><span class="p">,</span> <span class="s2">&quot;Nodata value out of range.&quot;</span>
+
+    <span class="k">if</span> <span class="n">compatibility_mode</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">raster_array_dtype</span> <span class="o">=</span> <span class="s2">&quot;int16&quot;</span> <span class="k">if</span> <span class="n">raster_array_dtype</span> <span class="o">==</span> <span class="s2">&quot;int8&quot;</span> <span class="k">else</span> <span class="n">raster_array_dtype</span>
+        <span class="n">raster_array</span> <span class="o">=</span> <span class="n">raster_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">raster_array_dtype</span><span class="p">)</span>
+
+        <span class="n">dtype_min</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">__get_dtype_range_info</span><span class="p">(</span><span class="n">raster_array_dtype</span><span class="p">)</span>
+        <span class="n">raster_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">raster_array</span> <span class="o">==</span> <span class="n">meta_nodata</span><span class="p">,</span> <span class="n">dtype_min</span><span class="p">,</span> <span class="n">raster_array</span><span class="p">)</span>
+
+        <span class="n">raster_meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="n">nodata</span><span class="o">=</span><span class="n">dtype_min</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">raster_array_dtype</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Create file</span>
+    <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="s2">&quot;LZW&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">raster_meta</span><span class="p">)</span> <span class="k">as</span> <span class="n">dst</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">raster_meta</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]):</span>
+            <span class="n">dst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">raster_array</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">dst</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="prepare_output">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.prepare_output">[docs]</a>
+<span class="k">def</span> <span class="nf">prepare_output</span><span class="p">(</span>
+    <span class="n">src_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">src_meta</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prepare output for saving as a raster.</span>
+
+<span class="sd">    Builds a chain for</span>
+<span class="sd">        - Changing NaN to the respective nodata value.</span>
+<span class="sd">        - Casting to the minimum data type possible.</span>
+<span class="sd">        - Update metadata.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The prepared output raster array and its metadata.</span>
+<span class="sd">            - A numpy array containing the prepared output.</span>
+<span class="sd">            - The updated metadata.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out_nodata</span> <span class="o">=</span> <span class="n">_update_nodata</span><span class="p">(</span>
+        <span class="n">src_array</span><span class="p">,</span>
+        <span class="n">src_meta</span><span class="p">[</span><span class="s2">&quot;nodata&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">out_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">src_array</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="n">out_nodata</span><span class="p">)</span>
+    <span class="n">out_array</span><span class="p">,</span> <span class="n">out_nodata</span> <span class="o">=</span> <span class="n">_cast_array_to_minimum_dtype</span><span class="p">(</span><span class="n">out_array</span><span class="p">,</span> <span class="n">out_nodata</span><span class="p">)</span>
+
+    <span class="n">out_meta</span> <span class="o">=</span> <span class="n">src_meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">out_meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="n">nodata</span><span class="o">=</span><span class="n">out_nodata</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">out_array</span><span class="o">.</span><span class="n">dtype</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span></div>
+
+
+
+<div class="viewcode-block" id="_update_nodata">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io._update_nodata">[docs]</a>
+<span class="k">def</span> <span class="nf">_update_nodata</span><span class="p">(</span>
+    <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">nodata_value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update nodata value based on the array&#39;s values.</span>
+
+<span class="sd">    Sets the nodata value to a boundary value of the array if the provided nodata value is</span>
+<span class="sd">    within the array&#39;s range. Does not update anything else than this value.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array: The input array to be adjusted.</span>
+<span class="sd">        nodata_value: The nodata value.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The updated nodata value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out_dtype</span> <span class="o">=</span> <span class="n">__get_minimum_dtype</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+    <span class="n">edge_value</span> <span class="o">=</span> <span class="n">__get_dtype_range_value</span><span class="p">(</span><span class="n">out_dtype</span><span class="p">)</span>
+    <span class="n">values_min</span><span class="p">,</span> <span class="n">values_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">array</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">nodata_value</span> <span class="o">==</span> <span class="n">values_min</span> <span class="ow">or</span> <span class="n">nodata_value</span> <span class="o">==</span> <span class="n">values_max</span><span class="p">:</span>
+        <span class="n">values_dtype</span> <span class="o">=</span> <span class="n">__get_next_higher_dtype</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">out_nodata</span> <span class="o">=</span> <span class="n">__get_dtype_range_value</span><span class="p">(</span><span class="n">values_dtype</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">out_nodata</span> <span class="o">=</span> <span class="n">edge_value</span>
+
+    <span class="k">return</span> <span class="n">out_nodata</span></div>
+
+
+
+<div class="viewcode-block" id="_initialize_data_for_rasterization">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io._initialize_data_for_rasterization">[docs]</a>
+<span class="k">def</span> <span class="nf">_initialize_data_for_rasterization</span><span class="p">(</span>
+    <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">nodata_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">fill_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize data for rasterization by adjusting the array data type and handling nodata and fill values.</span>
+
+<span class="sd">    If the nodata value is None, nodata value will be initialized by the array&#39;s and fill values.</span>
+<span class="sd">    The array will be casted to the minimum possible dtype and nodata will be updated to an edge value:</span>
+<span class="sd">    - for unsigned integers: positive boundary</span>
+<span class="sd">    - for signed integers: negative boundary</span>
+<span class="sd">    - for floating point numbers: negative boundary</span>
+
+<span class="sd">    If the nodata values is not None, the array will be casted to the minimum possible type,</span>
+<span class="sd">        without changing the nodata value.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array: Input data array.</span>
+<span class="sd">        nodata_value: Value representing empty pixels.</span>
+<span class="sd">        fill_value: Value used to fill areas.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The processed array, nodata value, and fill value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Ensure array has the minimum required dtype</span>
+    <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">__get_minimum_dtype</span><span class="p">(</span><span class="n">array</span><span class="p">))</span>
+
+    <span class="c1"># Initialize nodata and fill values</span>
+    <span class="n">nodata</span> <span class="o">=</span> <span class="n">_cast_value_to_int</span><span class="p">(</span><span class="n">nodata_value</span><span class="p">)</span> <span class="k">if</span> <span class="n">nodata_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">fill</span> <span class="o">=</span> <span class="n">_cast_value_to_int</span><span class="p">(</span><span class="n">fill_value</span><span class="p">)</span> <span class="k">if</span> <span class="n">fill_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="c1"># Prepare values for dtype determination</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">array</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">fill</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fill</span><span class="p">)</span>
+
+    <span class="c1"># Determine minimum dtype for values and its edge value</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">values_min</span><span class="p">,</span> <span class="n">values_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">values</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">values_dtype</span> <span class="o">=</span> <span class="n">__get_minimum_dtype</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">dtype_edge</span> <span class="o">=</span> <span class="n">__get_dtype_range_value</span><span class="p">(</span><span class="n">values_dtype</span><span class="p">)</span>
+
+    <span class="c1"># Set default nodata to edge if not provided</span>
+    <span class="k">if</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">nodata</span> <span class="o">=</span> <span class="n">dtype_edge</span>
+
+        <span class="k">if</span> <span class="n">nodata</span> <span class="o">==</span> <span class="n">values_min</span> <span class="ow">or</span> <span class="n">nodata</span> <span class="o">==</span> <span class="n">values_max</span><span class="p">:</span>
+            <span class="n">values_dtype</span> <span class="o">=</span> <span class="n">__get_next_higher_dtype</span><span class="p">(</span><span class="n">values_dtype</span><span class="p">)</span>
+
+        <span class="n">nodata</span> <span class="o">=</span> <span class="n">__get_dtype_range_value</span><span class="p">(</span><span class="n">values_dtype</span><span class="p">)</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">values_dtype</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">array</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_cast_array_to_minimum_dtype</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">nodata</span><span class="p">)</span>
+
+    <span class="c1"># Set fill to nodata if not provided</span>
+    <span class="k">if</span> <span class="n">fill</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fill</span> <span class="o">=</span> <span class="n">nodata</span>
+
+    <span class="k">return</span> <span class="n">array</span><span class="p">,</span> <span class="n">nodata</span><span class="p">,</span> <span class="n">fill</span></div>
+
+
+
+<div class="viewcode-block" id="_cast_value_to_int">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io._cast_value_to_int">[docs]</a>
+<span class="k">def</span> <span class="nf">_cast_value_to_int</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cast a value to integer type if possible.</span>
+
+<span class="sd">    Maximum to cast are &quot;uint64&quot; and &quot;int64&quot; types, which both return True when passed through np.can_cast().</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value: The value to cast to integer type.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Union[int, float]: The value cast to integer type if possible, otherwise the original value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">max_dtypes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;uint64&quot;</span><span class="p">,</span> <span class="s2">&quot;int64&quot;</span><span class="p">]</span>
+
+    <span class="n">dtype_range_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">max_dtypes</span><span class="p">:</span>
+        <span class="n">dtype_range</span> <span class="o">=</span> <span class="n">__get_dtype_range_info</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">dtype_range_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dtype_range</span><span class="p">)</span>
+
+    <span class="n">all_mins</span> <span class="o">=</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">range_pair</span><span class="p">)</span> <span class="k">for</span> <span class="n">range_pair</span> <span class="ow">in</span> <span class="n">dtype_range_list</span><span class="p">]</span>
+    <span class="n">all_maxs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">range_pair</span><span class="p">)</span> <span class="k">for</span> <span class="n">range_pair</span> <span class="ow">in</span> <span class="n">dtype_range_list</span><span class="p">]</span>
+
+    <span class="n">overall_min</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">all_mins</span><span class="p">)</span>
+    <span class="n">overall_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">all_maxs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">float</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">is_integer</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span><span class="n">overall_min</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="n">overall_max</span><span class="p">):</span>
+        <span class="n">out_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">out_value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">return</span> <span class="n">out_value</span></div>
+
+
+
+<div class="viewcode-block" id="_cast_array_to_minimum_dtype">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io._cast_array_to_minimum_dtype">[docs]</a>
+<span class="k">def</span> <span class="nf">_cast_array_to_minimum_dtype</span><span class="p">(</span>
+    <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">unify_integer_types</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine the minimum data type for the raster array.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array: The raster array to determine the minimum data type for.</span>
+<span class="sd">        value: The value for additional comparison.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple of np.ndarray, Dict: The raster array and its metadata.</span>
+<span class="sd">            - np.ndarray: The raster array with the minimum data type determined.</span>
+<span class="sd">            - Dict: The updated metadata dictionary with the minimum data type set.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Init</span>
+    <span class="n">cast_dtype</span> <span class="o">=</span> <span class="n">__get_minimum_dtype</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">unify_integer_types</span><span class="p">)</span>
+
+    <span class="c1"># New minimum data type</span>
+    <span class="n">cast_dtype_min</span><span class="p">,</span> <span class="n">cast_dtype_max</span> <span class="o">=</span> <span class="n">__get_dtype_range_info</span><span class="p">(</span><span class="n">cast_dtype</span><span class="p">)</span>
+
+    <span class="c1"># Ensure consistency with nodata value</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cast_dtype_min</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="n">cast_dtype_max</span><span class="p">:</span>
+        <span class="n">cast_dtype</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">dtype</span>
+
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Cast value to integer type if possible</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">_cast_value_to_int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="c1"># Promote dtype to match nodata value</span>
+        <span class="n">value_dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min_scalar_type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">promoted_dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">promote_types</span><span class="p">(</span><span class="n">cast_dtype</span><span class="p">,</span> <span class="n">value_dtype</span><span class="p">)</span>
+
+        <span class="c1"># Ensure compatibility with rasterio dtypes</span>
+        <span class="n">cast_dtype</span> <span class="o">=</span> <span class="n">__get_minimum_dtype</span><span class="p">(</span>
+            <span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">promoted_dtype</span><span class="p">),</span>
+            <span class="n">unify_integer_types</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">cast_dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">cast_dtype</span><span class="p">),</span> <span class="n">value</span></div>
+
+
+
+<div class="viewcode-block" id="__get_dtype_range_info">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.__get_dtype_range_info">[docs]</a>
+<span class="k">def</span> <span class="nf">__get_dtype_range_info</span><span class="p">(</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine the range of values for the raster array.</span>
+
+<span class="sd">    Replaces the rasterio.dtypes.get_dtype_range_info() since this function returns &quot;float64&quot;</span>
+<span class="sd">    type for min and max values of &quot;float32&quot;.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dtype: A dtype to determine the range for.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple of np.number, np.number: The minimum and maximum values to the related data type.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the dtype is not supported.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
+        <span class="n">dtype_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">min</span>
+        <span class="n">dtype_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
+    <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">):</span>
+        <span class="n">dtype_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">min</span>
+        <span class="n">dtype_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported data type: </span><span class="si">{</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dtype_min</span><span class="p">,</span> <span class="n">dtype_max</span></div>
+
+
+
+<div class="viewcode-block" id="__get_dtype_range_value">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.__get_dtype_range_value">[docs]</a>
+<span class="k">def</span> <span class="nf">__get_dtype_range_value</span><span class="p">(</span><span class="n">dtype</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the range value by dtype.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dtype: The dtype to get the range value for.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Union[int, float]: The range value for the given dtype.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">unsignedinteger</span><span class="p">):</span>
+        <span class="n">dtype_info</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">out_value</span> <span class="o">=</span> <span class="n">dtype_info</span><span class="o">.</span><span class="n">max</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dtype_info</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">signedinteger</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">out_value</span> <span class="o">=</span> <span class="n">dtype_info</span><span class="o">.</span><span class="n">min</span>
+
+    <span class="k">return</span> <span class="n">out_value</span></div>
+
+
+
+<div class="viewcode-block" id="__get_next_higher_dtype">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.__get_next_higher_dtype">[docs]</a>
+<span class="k">def</span> <span class="nf">__get_next_higher_dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the next higher dtype.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dtype: The dtype to get the next higher one for.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.dtype: The next higher dtype. If input dtype is not supported, return the original dtype.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">dtype</span>
+
+    <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;uint1&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span>
+    <span class="k">elif</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;uint4&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span>
+    <span class="k">elif</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;uint8&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint16</span>
+    <span class="k">elif</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;int8&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span>
+    <span class="k">elif</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;uint16&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span>
+    <span class="k">elif</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;int16&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span>
+    <span class="k">elif</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;uint32&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span>
+    <span class="k">elif</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;int32&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span>
+    <span class="k">elif</span> <span class="n">dtype</span> <span class="o">==</span> <span class="s2">&quot;float32&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="__get_minimum_dtype">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.__get_minimum_dtype">[docs]</a>
+<span class="k">def</span> <span class="nf">__get_minimum_dtype</span><span class="p">(</span>
+    <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">unify_integer_types</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine the minimum data type for the raster array.</span>
+
+<span class="sd">    Comparison based on the raster&#39;s minimum and maximum values.</span>
+<span class="sd">    Alternative to rasterio.dtypes._get_minimum_dtype() since it does not return &quot;int8&quot;.</span>
+<span class="sd">    According to the restrictions, smallest bit-size for outputs is:</span>
+<span class="sd">    - 8 for integers</span>
+<span class="sd">    - 32 for floats</span>
+
+<span class="sd">    Restrictions:</span>
+<span class="sd">    - dtypes smaller than &quot;uint8&quot; are not supported by numpy and rasterio</span>
+<span class="sd">    - dtype &quot;float16&quot; is not yet supported rasterio</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array: The raster array to determine the minimum data type for.</span>
+<span class="sd">        unify_integer_types: Whether to differentiate signed and unsigned integers.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The minimum data type for the raster array.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the dtype is not supported.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">signedinteger_dtypes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;int8&quot;</span><span class="p">,</span> <span class="s2">&quot;int16&quot;</span><span class="p">,</span> <span class="s2">&quot;int32&quot;</span><span class="p">,</span>  <span class="s2">&quot;int64&quot;</span><span class="p">]</span>
+    <span class="n">unsignedinteger_dtypes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;uint8&quot;</span><span class="p">,</span> <span class="s2">&quot;uint16&quot;</span><span class="p">,</span><span class="s2">&quot;uint32&quot;</span><span class="p">,</span> <span class="s2">&quot;uint64&quot;</span><span class="p">]</span>
+    <span class="n">integer_dtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">dtype</span> <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">unsignedinteger_dtypes</span><span class="p">,</span> <span class="n">signedinteger_dtypes</span><span class="p">)</span> <span class="k">for</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">pair</span><span class="p">]</span>
+
+    <span class="n">floating_dtypes</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;float32&quot;</span><span class="p">,</span> <span class="s2">&quot;float64&quot;</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Init</span>
+    <span class="n">src_min</span><span class="p">,</span> <span class="n">src_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">array</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+
+    <span class="c1"># Integer</span>
+    <span class="k">if</span> <span class="n">unify_integer_types</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="n">src_min</span> <span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="s2">&quot;int64&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">min</span> <span class="ow">and</span> <span class="n">src_max</span> <span class="o">&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="s2">&quot;uint64&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> \
+                <span class="s2">&quot;Values out of range for supported integer type.&quot;</span>
+
+            <span class="k">return</span> <span class="nb">next</span><span class="p">(</span>
+                <span class="n">dtype</span> <span class="k">for</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">integer_dtypes</span> <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">min</span> <span class="o">&lt;=</span> <span class="n">src_min</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span> <span class="o">&gt;=</span> <span class="n">src_max</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">signedinteger</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="n">src_min</span> <span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="s2">&quot;int64&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">min</span> <span class="ow">and</span> <span class="n">src_max</span> <span class="o">&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="s2">&quot;int64&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> \
+                <span class="s2">&quot;Values out of range for supported signed integers type.&quot;</span>
+
+            <span class="k">return</span> <span class="nb">next</span><span class="p">(</span>
+                <span class="n">dtype</span> <span class="k">for</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">signedinteger_dtypes</span> <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">min</span> <span class="o">&lt;=</span> <span class="n">src_min</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span> <span class="o">&gt;=</span> <span class="n">src_max</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">unsignedinteger</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="n">src_min</span> <span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="s2">&quot;uint64&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">min</span> <span class="ow">and</span> <span class="n">src_max</span> <span class="o">&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="s2">&quot;uint64&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> \
+                <span class="s2">&quot;Values out of range for supported unsigned integers type.&quot;</span>
+
+            <span class="k">return</span> <span class="nb">next</span><span class="p">(</span>
+                <span class="n">dtype</span> <span class="k">for</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">unsignedinteger_dtypes</span> <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">min</span> <span class="o">&lt;=</span> <span class="n">src_min</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">iinfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span> <span class="o">&gt;=</span> <span class="n">src_max</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="c1"># Floating</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">src_min</span> <span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">min</span> <span class="ow">and</span> <span class="n">src_max</span> <span class="o">&lt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> \
+            <span class="s2">&quot;Values out of range for supported floating point type.&quot;</span>
+
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span>
+            <span class="n">dtype</span> <span class="k">for</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">floating_dtypes</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">min</span> <span class="o">&lt;=</span> <span class="n">src_min</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">max</span> <span class="o">&gt;=</span> <span class="n">src_max</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Else case</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported data type: </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="write_json">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.write_json">[docs]</a>
+<span class="k">def</span> <span class="nf">write_json</span><span class="p">(</span><span class="n">folder_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write a json file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        folder_name: The folder name where the json file will be saved.</span>
+<span class="sd">        file_name: The name of the json file.</span>
+<span class="sd">        data: The data to be written in the json file.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder_name</span><span class="p">,</span> <span class="n">file_name</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -16,5 +16,8 @@ Subpackages
    :glob:
 
    beak.data
+   beak.evaluation
+   beak.experimental
+   beak.integration
    beak.methods
    beak.utilities

@@ -1,0 +1,8 @@
+beak.evaluation.calculate\_metrics module
+=========================================
+
+.. automodule:: beak.evaluation.calculate_metrics
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

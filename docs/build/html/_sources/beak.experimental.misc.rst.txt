@@ -1,0 +1,8 @@
+beak.experimental.misc module
+=============================
+
+.. automodule:: beak.experimental.misc
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

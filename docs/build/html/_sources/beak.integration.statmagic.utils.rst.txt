@@ -1,0 +1,8 @@
+beak.integration.statmagic.utils module
+=======================================
+
+.. automodule:: beak.integration.statmagic.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

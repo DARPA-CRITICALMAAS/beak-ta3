@@ -1,0 +1,8 @@
+beak.experimental.eda module
+============================
+
+.. automodule:: beak.experimental.eda
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

@@ -1,0 +1,20 @@
+beak.integration.statmagic package
+==================================
+
+.. automodule:: beak.integration.statmagic
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+Submodules
+----------
+
+.. toctree::
+   :includehidden:
+   :maxdepth: 4
+   :glob:
+
+   beak.integration.statmagic.call_bnn
+   beak.integration.statmagic.call_som
+   beak.integration.statmagic.utils

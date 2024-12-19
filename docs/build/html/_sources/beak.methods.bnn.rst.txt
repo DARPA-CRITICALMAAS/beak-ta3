@@ -1,0 +1,19 @@
+beak.methods.bnn package
+========================
+
+.. automodule:: beak.methods.bnn
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+
+Submodules
+----------
+
+.. toctree::
+   :includehidden:
+   :maxdepth: 4
+   :glob:
+
+   beak.methods.bnn.fastBNN
+   beak.methods.bnn.utils

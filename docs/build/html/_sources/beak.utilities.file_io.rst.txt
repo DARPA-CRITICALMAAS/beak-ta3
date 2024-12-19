@@ -1,0 +1,8 @@
+beak.utilities.file\_io module
+==============================
+
+.. automodule:: beak.utilities.file_io
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

@@ -1,0 +1,8 @@
+beak.experimental.cdr module
+============================
+
+.. automodule:: beak.experimental.cdr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:

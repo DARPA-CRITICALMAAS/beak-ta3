@@ -231,7 +231,13 @@ def _get_label_info(
     data: Optional[np.ndarray],
 ) -> Dict:
     """
-    # TODO: Docstring goes here.
+    Get label information for positives and negatives.
+
+    Args:
+        data: Input data to count positives and negatives.
+
+    Returns:
+        dict: Dictionary containing count of positives and negatives.
     """
     if data is not None:
         positives = np.count_nonzero(data == 1)
@@ -255,7 +261,16 @@ def _collect_settings(
     label_data: List[Tuple[str, Dict]],
 ):
     """
-    # TODO: Docstring goes here.
+    Create a dictionary containing all settings.
+
+    Args:
+        cma_metadata: Metadata for the CMA.
+        train_config: Configuration for training.
+        network_arch: Network architecture.
+        label_data: Data and descriptions for labels.
+
+    Returns:
+        dict: Dictionary containing all settings.
     """
     labels = {}
     for description, data in label_data:

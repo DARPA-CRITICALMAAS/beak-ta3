@@ -53,9 +53,9 @@ def read_raster_band(
         **kwargs: Additional keyword arguments to update the metadata of the raster.
 
     Returns:
-        Tuple of np.ndarray, Dict: The raster array and its updated metadata.
-            - np.ndarray: A 2-dimensional raster array read from the input raster.
-            - Dict: The (updated) metadata of the raster read from the input raster.
+        The raster array and its updated metadata.
+            - A 2-dimensional raster array read from the input raster.
+            - The (updated) metadata of the raster read from the input raster.
     """
     out_array = raster.read(band)
     out_meta = raster.meta.copy()
@@ -71,7 +71,17 @@ def read_raster_band(
 
 def load_layer(input_file: str) -> Tuple[np.ndarray, Dict]:
     """
-    # TODO: Docstring goes here
+    Load a raster file from the given file path.
+
+    Reshapes the output array to (-1, 1).
+
+    Args:
+        input_file: The file path to the raster file.
+
+    Returns:
+        The raster array and its metadata.
+            - A reshaped numpy array.
+            - The metadata of the raster.
     """
     out_array, out_meta = read_raster_band(
         rasterio.open(input_file)
@@ -84,7 +94,15 @@ def load_layers(
     input_files: List[str]
 ) -> np.ndarray:
     """
-    # TODO: Docstring goes here
+    Load a list of raster files from the given file paths.
+
+    Single rasters will be reshaped to (-1, 1) and stacked column-wise.
+
+    Args:
+        input_files: The list of file paths to the raster files.
+
+    Returns:
+        The stacked raster array with the data from all input files.
     """
     layers_stack = []
 
@@ -101,7 +119,14 @@ def _remove_nan_rows(
     axis: int = 1
 ):
     """
-    # TODO: Docstring goes here
+    Remove NaN values from the given data along the specified axis.
+
+    Args:
+        data: The array to be processed.
+        axis: The axis along which to remove NaN values. Defaults to 1.
+
+    Returns:
+        The array with NaN values removed.
     """
     model_data = data.copy()
 
@@ -115,7 +140,16 @@ def prepare_model_data(
     input_labels: np.ndarray,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
-    # TODO: Docstring goes here
+    Remove NaN values from both layer and labels for training a model.
+
+    Args:
+        input_layers: The input raster layers.
+        input_labels: The input labels for the training data.
+
+    Returns:
+        The prepared model data with layers and labels
+            - A numpy array containing the prepared training data.
+            - A numpy array containing the labels.
     """
     model_data = np.column_stack([input_layers, input_labels])
     model_data = _remove_nan_rows(model_data)
@@ -192,7 +226,17 @@ def prepare_output(
     src_meta: Dict,
 ) -> Tuple[np.ndarray, Dict]:
     """
-    # TODO: Docstring goes here
+    Prepare output for saving as a raster.
+
+    Builds a chain for
+        - Changing NaN to the respective nodata value.
+        - Casting to the minimum data type possible.
+        - Update metadata.
+
+    Returns:
+        The prepared output raster array and its metadata.
+            - A numpy array containing the prepared output.
+            - The updated metadata.
     """
     out_nodata = _update_nodata(
         src_array,
@@ -251,12 +295,12 @@ def _initialize_data_for_rasterization(
 
     If the nodata value is None, nodata value will be initialized by the array's and fill values.
     The array will be casted to the minimum possible dtype and nodata will be updated to an edge value:
-        - for unsigned integers: positive boundary
-        - for signed integers: negative boundary
-        - for floating point numbers: negative boundary
+    - for unsigned integers: positive boundary
+    - for signed integers: negative boundary
+    - for floating point numbers: negative boundary
 
     If the nodata values is not None, the array will be casted to the minimum possible type,
-    without changing the nodata value.
+        without changing the nodata value.
 
     Args:
         array: Input data array.
@@ -264,8 +308,7 @@ def _initialize_data_for_rasterization(
         fill_value: Value used to fill areas.
 
     Returns:
-        Tuple[np.ndarray, Union[int, float], Union[int, float]]: Tuple containing
-            the processed array, nodata value, and fill value.
+        The processed array, nodata value, and fill value.
     """
 
     # Ensure array has the minimum required dtype
@@ -483,13 +526,13 @@ def __get_minimum_dtype(
 
     Comparison based on the raster's minimum and maximum values.
     Alternative to rasterio.dtypes._get_minimum_dtype() since it does not return "int8".
-    According to the restrictions, smallest bit-size for outputs is
-        - 8 for integer
-        - 32 for floats
+    According to the restrictions, smallest bit-size for outputs is:
+    - 8 for integers
+    - 32 for floats
 
     Restrictions:
-        - dtypes smaller than "uint8" are not supported by numpy and rasterio
-        - dtype "float16" is not yet supported rasterio
+    - dtypes smaller than "uint8" are not supported by numpy and rasterio
+    - dtype "float16" is not yet supported rasterio
 
     Args:
         array: The raster array to determine the minimum data type for.
@@ -559,7 +602,15 @@ def __get_minimum_dtype(
 
 def write_json(folder_name: str, file_name: str, data: Dict):
     """
-    # TODO: Docstring goes here.
+    Write a json file.
+
+    Args:
+        folder_name: The folder name where the json file will be saved.
+        file_name: The name of the json file.
+        data: The data to be written in the json file.
+
+    Returns:
+        None
     """
     with open(os.path.join(folder_name, file_name), "w", encoding="utf-8") as json_file:
         json.dump(data, json_file, indent=4, ensure_ascii=False)
