@@ -77,13 +77,11 @@ For the latter, add `bash` as prefix to the script names.
 
 The container will be removed automatically after stopping. To avoid this behaviour, open a terminal and 
 navigate to the root directory of the cloned repository. <br>
-Start the container manually from here: 
+Start the container manually from here with: 
 ```bash
 docker run -it --name beak-ta3 -p 8888:8888 -v $(pwd):/beak-ta3 beak-ta3:latest /bin/bash
 ```
-The Docker installation uses Poetry and does not have an environment to be activated.
-After creating the container, `bash` will be activated.<p>
-
+The Docker installation uses Poetry and does not have an environment to be activated.<br>
 The installation is now ready to be attached to your IDE.<p>
 
 **For VSCode**
