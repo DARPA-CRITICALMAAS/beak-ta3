@@ -62,10 +62,11 @@ git clone <https://github.com/DARPA-CRITICALMAAS/beak-ta3.git>
 1. Install a conda environment on your machine
 2. Execute the `setup.sh` script located in the `unix` or `win` folder, respectively
 
-The Conda environment for both Docker and Conda installations is called **beak-ta3.**<br>
+The Conda environment is called **beak-ta3.**<br>
 
 ### Docker installation
-Docker is **recommended** as it containerizes the whole development environment, making sure it stays identical across different developers and operating systems. Using a container also keeps your own computer clean of all dependencies.
+Docker is **recommended** as it containerizes the whole development environment, making sure it stays identical across
+different developers and operating systems. Using a container also keeps your own computer clean of all dependencies.
 
 1. Install Docker
 2. Execute the `build.sh` script to build the container. The image is called `beak-ta3:latest`
@@ -76,20 +77,22 @@ For the latter, add `bash` as prefix to the script names.
 
 Using the `run.sh`, the container will be removed automatically after stopping. 
 
-To avoid this behaviour, go to the root directory of the cloned repository and start the container manually from here: 
+To avoid this behaviour, use the terminal and navigate to the root directory of the cloned repository. 
+Start the container manually from here: 
 ```bash
 docker run -it --name beak-ta3 -p 8888:8888 -v $(pwd):/beak-ta3 beak-ta3:latest /bin/bash
 ```
 The Docker installation uses Poetry and does not have an environment to be activated.
 After creating the container, `bash` will be activated.<p>
 
-The installation is now ready to be attached to your IDE.
+The installation is now ready to be attached to your IDE.<p>
+
 **For VSCode**
 1. Start the Docker container
 2. Start VSCode
 3. Select the "Attach to running container" option
-4. Select the **beak-ta3** container
-<p>
+4. Select the **beak-ta3** container<p>
+
 **For PyCharm**
 1. Start Docker
 2. Add a new interpreter based on the `beak-ta3:latest` image
@@ -104,6 +107,7 @@ The installation is now ready to be attached to your IDE.
 **Local desktop installation**
 1. Activate the environment with `conda activate beak-ta3`
 2. Check the installation by executing `conda list` to see all installed environments.<p>
+
 **Docker installation**
 1. Run the container using the provided commands above
 2. Check the installation with `poetry show` or `poetry run pip list` in the terminal
