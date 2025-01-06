@@ -100,7 +100,7 @@ The installation is now ready to be attached to your IDE.
 - The repository in your computer's filesystem and in the container are exactly the same
 
 
-## 4. Check installation
+### Check
 **Local desktop installation**
 1. Activate the environment with `conda activate beak-ta3`
 2. Check the installation by executing `conda list` to see all installed environments.<p>
