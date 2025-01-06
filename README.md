@@ -154,11 +154,11 @@ To build the documentation, the `sphinx` package is used. It currently works onl
 
 Here is how to solve common `command not found` or `encoding` issues (Windows, Linux and Mac systems have different file endings that may cause erros when executing scripts in the terminal).
 
-**How to solve the `Command not found` error:**
+**How to solve the** `Command not found` **error**:
 1. Add the path with the `builddocs.bash` file to the `PATH` variables:
 2. `export PATH=$PATH:/beak-ta3/`
 
-**How to solve the `/bin/bash^M: bad interpreter: No such file or directory` error:**
+**How to solve the** `/bin/bash^M: bad interpreter: No such file or directory` **error**:
 1. Use a text editor like [Notepad++](https://notepad-plus-plus.org/) or even VSCode
 2. Change the line ending to **Unix (LF)**
 3. Save the file
