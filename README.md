@@ -75,9 +75,8 @@ different developers and operating systems. Using a container also keeps your ow
 Under Windows, either use GIT or the command-line-interface. 
 For the latter, add `bash` as prefix to the script names. 
 
-Using the `run.sh`, the container will be removed automatically after stopping. 
-
-To avoid this behaviour, use the terminal and navigate to the root directory of the cloned repository. 
+The container will be removed automatically after stopping. To avoid this behaviour, open a terminal and 
+navigate to the root directory of the cloned repository. <br>
 Start the container manually from here: 
 ```bash
 docker run -it --name beak-ta3 -p 8888:8888 -v $(pwd):/beak-ta3 beak-ta3:latest /bin/bash
