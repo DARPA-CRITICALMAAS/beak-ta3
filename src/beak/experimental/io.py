@@ -160,7 +160,7 @@ def get_filename_and_extension(file: Path) -> Tuple[str, str]:
 
 
 def create_file_list(
-    folder: Path,
+    folder: Union[str, Path],
     extensions: Optional[Sequence[str]] = None,
     recursive: bool = False,
 ) -> List[Path]:
@@ -177,6 +177,8 @@ def create_file_list(
     Returns:
         List[Path]: A list of Path objects representing the files found.
     """
+    folder = Path(folder)
+
     if extensions is None:
         extensions = [".tif", ".tiff"]
 
@@ -463,7 +465,7 @@ def spatial_filter(
 
 def load_model(
     model: dict,
-    folders: List[Path],
+    folders: List[str | Path],
     file_extensions: Optional[List[str]] = None,
     verbose: int = 0,
 ):

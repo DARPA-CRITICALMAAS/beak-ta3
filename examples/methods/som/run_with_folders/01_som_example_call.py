@@ -5,10 +5,8 @@
 import os
 import argparse
 import json
-from pathlib import Path
 from datetime import datetime
-from beak.models import hack_12m_nico
-from beak.experimental.io import load_model, check_path
+from beak.experimental.io import create_file_list, check_path
 
 # SOM specific
 import beak.methods.som.argsSOM as asom
@@ -27,42 +25,26 @@ def write_args_to_file(file_path, **kwargs):
     json.dump(kwargs, file, indent=4)
     file.close()
 
+def get_timestamp():
+    return datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
 def main(args):
-    # Choose model
-    MODEL = "BASELINE_BISON"
-    BASE_PATH = files("beak.data")
-    model = hack_12m_nico.regional_scale_upper_midwest[MODEL]
+    # Input data
+    DATA_FOLDER = "Path_to_data_folder"
+    LABELS = "Path_to_labels.tif"
+    OUT_PATH = "Path_to_output_folder"
 
-
-    # Choose data path
-    ROOT_PATH = BASE_PATH / "PROCESSED" / "regional_mama_nico_upmidwest_102008_500"
-    PATH_STD_DATA = ROOT_PATH / "unified_scaled_std"
-    PATH_LOG_DATA = ROOT_PATH / "unified_scaled_log"
-    PATH_LABELS = ROOT_PATH / "labels" / "TA2_240609_FILTERED_HM9_TA2_MMS.tif"
-
-    model_dict, file_list, counts = load_model(
-        model=model,
-        folders=[PATH_STD_DATA, PATH_LOG_DATA],
-        file_extensions=[".tif", ".tiff"],
-        verbose=0,
-    )
-
-    # SOM specific
-    label_data_file_list = [str(PATH_LABELS)]
+    file_list = create_file_list(DATA_FOLDER)
+    label_data_file_list = [LABELS]
 
     # Set model name and folder
-    current_dir = Path(os.path.dirname(__file__)).resolve()
-    os.chdir(current_dir)
-
-    MODEL_NAME = "F" + str(len(file_list)) + "_X" + str(args.som_x) + "_Y" + str(args.som_y) + "_E" + str(args.epochs) + "_CMAX" + str(args.kmeans_max) + "_" + datetime.now().strftime("%Y%m%d-%H%M%S")
-    MODEL_FOLDER = Path.cwd() / "models" / MODEL / MODEL_NAME
-    print(MODEL_FOLDER)
-
-    check_path(MODEL_FOLDER)
+    MODEL_ID = get_timestamp()
+    OUT_PATH = os.path.join(OUT_PATH, "models", "bnn", MODEL_ID)
+    check_path(OUT_PATH)
 
     # Set input files path
-    file_path = MODEL_FOLDER / "input_file_list.txt"
-    label_data_file_path = MODEL_FOLDER / "label_file_list.txt"
+    file_path = os.path.join(OUT_PATH, "input_file_list.txt")
+    label_data_file_path = os.path.join(OUT_PATH, "label_file_list.txt")
 
     # Write input file paths and parameters to text files
     with open(file_path, 'w') as file:
@@ -75,7 +57,7 @@ def main(args):
             file.write(f"{string}\n")
         file.close()
 
-    args_path = MODEL_FOLDER / "args.json"
+    args_path = os.path.join(OUT_PATH, "args.json")
     write_args_to_file(file_path=args_path,
                        som_x=args.som_x,
                        som_y=args.som_y,
@@ -100,11 +82,11 @@ def main(args):
                        )
 
     # Args
-    args.output_folder = str(MODEL_FOLDER) + "/" + "exports"
+    args.output_folder = os.path.join(OUT_PATH, "exports")
     check_path(args.output_folder)
 
-    args.output_file_somspace = args.output_folder + "/" + "result_som.txt"
-    args.outgeofile = args.output_folder + "/" + "result_geo.txt"
+    args.output_file_somspace = os.path.join(args.output_folder, "result_som.txt")
+    args.outgeofile = os.path.join(args.output_folder, "result_geo.txt")
     args.output_file_geospace = args.outgeofile
 
     from beak.methods.som.argsSOM import Args
@@ -178,7 +160,7 @@ if __name__ == "__main__":
     parser.add_argument("--initialization", type=str, default="random")     # SOM initialization
     parser.add_argument("--gridtype", type=str, default="rectangular")      # SOM grid shape
     parser.add_argument("--label", type=bool, default=True)                 # Labels (if)
-    parser.add_argument("--normalized", type=bool, default=False)            # Normalize the output units
+    parser.add_argument("--normalized", type=bool, default=False)           # Normalize the output units
 
     args = parser.parse_args()
     main(args)

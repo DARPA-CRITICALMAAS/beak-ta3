@@ -17,6 +17,18 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
+# Certificates
+COPY setup/keys/DOIRootCA2.crt /usr/local/share/ca-certificates
+
+RUN chmod 644 /usr/local/share/ca-certificates/DOIRootCA2.crt \
+	&& update-ca-certificates
+	
+ENV PIP_CERT="/etc/ssl/certs/ca-certificates.crt" \
+    SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt" \
+    CURL_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt" \
+    REQUESTS_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt" \
+    AWS_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt"
+
 # Install Poetry
 RUN pip install poetry
 

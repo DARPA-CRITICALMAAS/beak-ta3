@@ -2,181 +2,113 @@
 Advanced hybrid AI-methods for mineral predictive mapping
 
 ⚠ **Please read all sections carefully to setup your local environment and work with the package**. 
-The provided code can run on Windows, Mac and Linux machines, if correctly set up.
+The provided code can run on Windows, Mac and Linux and Docker.
 
 ## 1. Repository status
+Last update: **06-01-2025**
 
-This repository is still in development. Documentation will grow over time.
+**What's new?**
+- Updated installation routines
+- Updated examples
+- Full SOM support
+- Full BNN support
 
-Last update: **03-04-2024**
-
-What's new?
-- SOM integration to main branch
-- Updated utilities
-- Notebooks f models (NN) from hackathon 6 month event
-- MTRI packagetemplate integration
+**Ongoing tasks**
+- Docker integration to USGS
 
 A backup of the **older** version of the main branch can be found [here](https://github.com/DARPA-CRITICALMAAS/beak-ta3/tree/backup_main_2024-01-16_last_before_package_template_integration).
 
-If you build the environment before **11-12-2023**, please rebuild with the current updates. 
+If you build the environment before **06-01-2025**, please rebuild with the current updates. 
 If you set-up the environment, please **always** use the main branch for the initial setup ❗
 
 ## 2. Repository structure
-
-The repository structure has changed and modified to fit the requirements for MTRI and the provided [package template](https://github.com/DARPA-CRITICALMAAS/mtri-packagetemplate). 
-
 The repository is structured as following:
 
 ```
 ├── beak-ta3/
 │   └── docs/                   # documentations
 │       └── ...
-│   └── experiments             # mineral systems/model configurations and notebooks
+│   └── examples                # examples how to run selected workflows and prediction methods
 │       └── ...
-│   ├── local/                  # stuff that's not being uploaded to GitHub
+│   ├── releases/               # notebooks for final CMA releases to run locally
 │       └── ...
+│   └── setup/                
+│       └── /
+│           ├── docker/         # installation routine for Docker
+│           ├── unix/           # installation routine fo Linux and MacOS     
+│           └── win/            # installation routine for Windows     
 │   └── src/                
 │       └── beak/
 │           ├── data/           # data folder
-│               └── ...         
-│           ├── methods/        # code for respective ML methods
+│               └── ...  
+│           ├── evaluation/     # module for calculating evaluation metrics
+│           ├── experimental/   # former utilities module for first phase events
+│           ├── integration/    
+│               └── statmagic   # call functions for integration of SOM and BNN into StatMaGIC 
+│           ├── methods/        # algorithms for SOM and BNN predictions
 │               ├── bnn         
-│               ├── hybrid         
 │               └── som         
-│           ├── models          # place for model definitions      
-│           └── utilities       # helper functions and modules       
-│   └── tests/              
-│       └── beak                # test functions  
+│           ├── models          # place for model definitions used in first phase
+│           └── utilities       # helper functions and modules for second phase
 ```
-
-Since there is a function that links to the data folder to provide easy data access, **please save all data within the data folder** ❗ 
-
-Also, the content of the **data folder** will not be synchronized with the GitHub repository 📴
-
-The development for **SOM**, **BNN** and potential **hybridization** is accomplished on the respective branches:
-- som_dev
-- bnn_dev
-- hybrid_dev
-
-Depending on the development status, results will be merged to the main branch. 
-Some may be created when starting the development.
-
-## 3. Prerequisites
-
+## 3. Installation
+### Prerequisites
 All contributing developers/users need git, and a copy of the repository.
-
+Clone the repository with:
 ```
 git clone <https://github.com/DARPA-CRITICALMAAS/beak-ta3.git>
 ```
+### Local desktop installation for Linux, MacOS and Windows
+1. Install a conda environment on your machine
+2. Execute the `setup.sh` script located in the `unix` or `win` folder, respectively
 
-Alternatively, you can also you GitHub Desktop instead of Git for repo-management.
+The Conda environment for both Docker and Conda installations is called **beak-ta3.**<br>
 
-After cloning, there are two options setting up your local development environment.
+### Docker installation
+Docker is **recommended** as it containerizes the whole development environment, making sure it stays identical across different developers and operating systems. Using a container also keeps your own computer clean of all dependencies.
 
-1. Docker
-2. Conda
+1. Install Docker
+2. Execute the `build.sh` script to build the container. The image is called `beak-ta3:latest`
+3. Execute the `run.sh` script to run the container
 
-Docker is recommended as it containerizes the whole development environment, making sure it stays identical across different developers and operating systems. Using a container also keeps your own computer clean of all dependencies.
+Under Windows, either use GIT or the command-line-interface. 
+For the latter, add `bash` as prefix to the script names. 
 
-If you’re not familiar with development inside a container, see [https://code.visualstudio.com/docs/devcontainers/containers](https://code.visualstudio.com/docs/devcontainers/containers) and [https://code.visualstudio.com/docs/devcontainers/tutorial](https://code.visualstudio.com/docs/devcontainers/tutorial) to prepare, e.g. for VSCODE.
+Using the `run.sh`, the container will be removed automatically after stopping. 
 
-All code and functionality is designed to run on CPU since GPU-processing requires special preparation and environment setup depending on graphics card (driver), CUDA and TensorFlow versions.
-
-The conda environment for both Docker and Conda installations is called **beak-ta3.** 
-
-## 4. Environment setup
-
-### Setting up a local environment with docker
-#### Installation
-
-Create a terminal instance from within the beak-ta3 folder. Build and run the container. Run this and every other command in the repository root unless otherwise directed.
-
+To avoid this behaviour, go to the root directory of the cloned repository and start the container manually from here: 
+```bash
+docker run -it --name beak-ta3 -p 8888:8888 -v $(pwd):/beak-ta3 beak-ta3:latest /bin/bash
 ```
-docker compose up -d
-```
+The Docker installation uses Poetry and does not have an environment to be activated.
+After creating the container, `bash` will be activated.<p>
 
-If you need to rebuild already existing container (e.g. dependencies have been updated), run
-
-```
-docker compose up -d --build
-```
-
-#### Working with the container
-
-Attach to the running container
-
-```
-docker attach beak-ta3-dev
-```
-
-You are now in your local development container, and all your commands in the current terminal window interact with the container.
-
-If you want to work using the terminal, you also need to open the SHELL in advance and activate the environment:
-
-```
-bash
-conda activate beak-ta3
-```
-
-**Note** that your local repository gets automatically mounted into the container. This means that:
-
-- The container has a folder that redirects to the local repository called **beak-ta3**
-- The repository in your computer's filesystem and in the container are exactly the same
-
-**Alternatively**, if your are working with **VSCode**, you can also use the following steps to start:
+The installation is now ready to be attached to your IDE.
+**For VSCode**
 1. Start the Docker container
 2. Start VSCode
 3. Select the "Attach to running container" option
 4. Select the **beak-ta3** container
+<p>
+**For PyCharm**
+1. Start Docker
+2. Add a new interpreter based on the `beak-ta3:latest` image
 
-### Setting up a local conda environment
-#### Installation
+**Note** that your local repository clone gets automatically mounted into the container. This means that:
 
-You can also set-up a local conda environment on your OS using the **environment.yml** from within the cloned repository folder.
+- The container has a folder that redirects to the local repository called **beak-ta3**
+- The repository in your computer's filesystem and in the container are exactly the same
 
-Create the basic environment:
-```
-conda env create -f environment.yml
-```
 
-Activate it:
-```
-conda activate beak-ta3
-```
+## 4. Check installation
+**Local desktop installation**
+1. Activate the environment with `conda activate beak-ta3`
+2. Check the installation by executing `conda list` to see all installed environments.<p>
+**Docker installation**
+1. Run the container using the provided commands above
+2. Check the installation with `poetry show` or `poetry run pip list` in the terminal
 
-Install additional packages from the PyPi (https://pypi.org/) repository:
-```
-pip install -r requirements.txt
-```
-
-#### Working inside the environment
-
-Whether or not using docker we manage the python dependencies with **conda**. This means that a python conda environment is found in the container, too. Inside the container, you can get into the environment like you normally would when using conda as package manager:
-
-```
-conda activate beak-ta3
-```
-
-You can run your code and tests from the command line. For example:
-
-```
-conda activate <env-name>
-python <path/to/your/file.py>
-```
-
-To start with, open your IDE of choice and select the Python interpreter from the **beak-ta3** environment.
-
-## 6. How to use
-Before you can use the code, you need to ensure that the repository behaves as a local package. Therefore,
-
-1. Navigate into the repository root folder on your local harddrive
-2. Active the created environment
-3. Execude `pip install -e .` 
-
-You can check the installation by executing `conda list` to see all installed environments.
-If the **beak** packge is listed, the installation was successfull.
-You only need to do this step **once** after the installation of the environment.
-
+If the **beak** package is listed, the installation was successfull.
 Because the repository behaves as a **local** python package 🐍, all functions can be accessed like so:
 
 ```python
@@ -187,50 +119,35 @@ from beak.module.submodule import function
 function(arguments)
 ```
 
-Even better, **data** 💾 can be accessed by:
+**Data** 💾 located in the `../src/beak/data` folder can be accessed by:
 ```python
-# Import
+# Import files module
 from importlib.resources import files
-from 🦄 import load_function
 
-# Path
-file_path = str(files("beak.data") / "subfolder" / "file_name.ext")
-
-# Load data
-data = load_function(file_path)
+# Set Path
+file_path = files("beak.data") / "subfolder" / "file_name.ext"
 ```
 
 ## 5. For developers
-
 ### Information
-If you are a developer, you might want to update the package or modify it.
-Thanks to [MTRI](https://github.com/DARPA-CRITICALMAAS/mtri-packagetemplate), we can use the **repository code** like a **package**. To install everything from scratch, follow the instructions on the linked page, with some minor adjustments.
+Thanks to [MTRI](https://github.com/DARPA-CRITICALMAAS/mtri-packagetemplate), we can use the **repository code** like a **package**. 
+To install everything from scratch, follow the instructions on the linked page.
+We have updated the process by replacing the `setup.py` with a `pyproject.toml` file, which enables to install the 
+environment in multiple ways.<p>
 
-If **necessarry**, execute the inital** `pip install -e .` **after setting up the environment**. Only consider the steps below if you change something in the setup, e.g. version numbers or other entries ❗
+The provided installation methods contain the `pip install -e .` execution, which is necessary for treating the
+code as local package. If you are going to do a complete manual installation, you may need to execute this command
+at the very end within your Conda or Docker installation **after setting up the environment**.<p>
 
-### Install
-There are some bottlenecks regarding the package requirements and channels they can installed from. For some of them, only pip works fine, for some, only conda, and others require previously installed packages and cannot installed with their prerequisites in one run. 
+There are some bottlenecks regarding the installation of packages, mainly due to different versions on the 
+repositories, for  
+- platform (Unix, Windows, Docker) and
+- platform architecture (x86, ARM)
 
-To solve this, we've chosen the way to set-up the environment as described using the
-- **environments.yml** for the basic Conda setup and the
-- **requirements.txt** for additional packages based on the [PyPi](https://pypi.org/) repository
-
-To use the repository as a **local** Python package 🐍, you need to setup the environment correctly, either by:
-1. install everything by your own and follow the [template](https://github.com/DARPA-CRITICALMAAS/mtri-packagetemplate) instructions or
-2. **use one of the two described ways via Docker or Conda**
-
-We recommend the **second way**, since it is approved and results in less headache 🤯.
-
-🚨 The installation of all neccessary requirements by using the placeholders in the `setup.py` in the provided template will **not** work due to the explained dependency and availability issues for some packages.
-
-Once the environment is ready: 
-1. update pip: `pip install --upgrade pip`
-2. install the wheel: `pip install wheel`
-3. install the package: `pip install -e .`
-
-The `-e` tells the environment that source files may change, so you don't have to re-run the `pip install` command after you edit your files. 
-
-The package works with the provided repository, so you can simply use it as it is. If you decide for whatever reason to switch from **Docker** to **Conda** or vice-versa, you **do not** need to **re-run** the initialization steps either. It will work **just fine** 😎 as long as your're doing all your stuff in the repository folder 🥋. 
+Particularly, `gdal` and `somoclu` packages may raise some issues if installed from [PyPi](https://pypi.org/). 
+These are not part of the `pyproject.toml` environment requirements and installed separately from within the `dockerfile`.
+If possible, stick to one of the Conda installations, which are based on [Conda-Forge](https://conda-forge.org/).
+ 
 ### Documentation
 To build the documentation, the `sphinx` package is used. It currently works only in Linux/Docker. The provided template `builddocs.bash` may not work for everyone directly. The documentation files can be generated by running the `builddocs.bash` file from within the top-level folder of the package.
 
