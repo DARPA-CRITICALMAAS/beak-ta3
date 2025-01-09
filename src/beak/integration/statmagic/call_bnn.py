@@ -127,12 +127,13 @@ def run_bnn(
     y_train, y_test = expand_dims([y_train, y_test])
 
     # Create model inputs
+    buffer_size = tf.data.experimental.UNKNOWN_CARDINALITY
     data_train = tf.data.Dataset.from_tensor_slices(
         (
             X_train,
             y_train,
         )
-    ).shuffle(X_train.shape[0]).batch(512)
+    ).shuffle(buffer_size).batch(512)
 
     # Run training
     feature_count = X_train.shape[1]
@@ -282,7 +283,7 @@ def _collect_settings(
 
     metadata = {
         "cma": cma_metadata,
-        "input_settings": train_config,
+        "train_config": train_config,
         "network_architecture": network_arch,
         "labels": labels,
     }

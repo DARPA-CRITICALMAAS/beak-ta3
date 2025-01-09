@@ -189,29 +189,6 @@ def negative_log_likelihood(y_true: tf.Tensor, y_pred: tf.Tensor):
     return -tf.reduce_mean(distribution.log_prob(y_true[:, 0]))
 
 
-@tf.function
-def train_step(
-    x_data: tf.Tensor,
-    y_data: tf.Tensor,
-    core_layers: List,
-    loc_head: List,
-    std_head: List,
-    optimizer: tf.keras.optimizers.Optimizer,
-    N: int
-) -> tf.Tensor:
-    """
-    Perform a single training step (forward pass + loss calculation + optimization).
-    """
-    with tf.GradientTape() as tape:
-        y_pred = bayesian_network_forward(x_data, core_layers, loc_head, std_head, trainable=True)
-        kl_loss = calculate_total_kl(core_layers + loc_head + std_head)
-        elbo_loss = (kl_loss / tf.constant(N, dtype=tf.float32)) + negative_log_likelihood(y_data, y_pred)
-
-    variables = [v for layer in core_layers + loc_head + std_head for v in layer]
-    gradients = tape.gradient(elbo_loss, variables)
-    optimizer.apply_gradients(zip(gradients, variables))
-
-    return elbo_loss
 
 
 def fit_model(
@@ -232,11 +209,29 @@ def fit_model(
         head_units,
     )
     optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
+
+    @tf.function
+    def train_step(x_data: tf.Tensor, y_data: tf.Tensor, N: tf.Tensor) -> tf.Tensor:
+        """
+        Perform a single training step (forward pass + loss calculation + optimization).
+        """
+        with tf.GradientTape() as tape:
+            y_pred = bayesian_network_forward(x_data, core_layers, loc_head, std_head, trainable=True)
+            kl_loss = calculate_total_kl(core_layers + loc_head + std_head)
+            elbo_loss = (kl_loss / N) + negative_log_likelihood(y_data, y_pred)
+
+        variables = [v for layer in core_layers + loc_head + std_head for v in layer]
+        gradients = tape.gradient(elbo_loss, variables)
+        optimizer.apply_gradients(zip(gradients, variables))
+
+        return elbo_loss
+
     elbo = np.zeros(epochs)
+    N = tf.constant(N, dtype=tf.float32)
 
     for epoch in tqdm(range(epochs), desc="Training", unit="Epoch"):
         for x_data, y_data in data_train:
-            elbo[epoch] = train_step(x_data, y_data, core_layers, loc_head, std_head, optimizer, N).numpy()
+            elbo[epoch] = train_step(x_data, y_data, N).numpy()
 
     return (core_layers, loc_head, std_head), elbo
 
