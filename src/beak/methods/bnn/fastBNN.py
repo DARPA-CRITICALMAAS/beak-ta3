@@ -189,8 +189,6 @@ def negative_log_likelihood(y_true: tf.Tensor, y_pred: tf.Tensor):
     return -tf.reduce_mean(distribution.log_prob(y_true[:, 0]))
 
 
-
-
 def fit_model(
     data_train,
     input_shape: int,
