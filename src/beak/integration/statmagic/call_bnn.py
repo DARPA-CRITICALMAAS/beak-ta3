@@ -83,12 +83,12 @@ def run_bnn(
     network_core = train_config["network_arch_core_units"]
     network_head = train_config["network_arch_head_units"]
 
-    # Create model topology
+    # Create model topology 
     core_units, head_units = build_network_architecture(
         depth_per_network=network_depth,
         minimum_width=network_width,
-        core_units=None if not isinstance(network_core, list) else network_core,
-        head_units=None if not isinstance(network_head, list) else network_head,
+        core_units = network_core if network_core else None,
+        head_units = network_head if network_head else None,
     )
 
     # Load layers
