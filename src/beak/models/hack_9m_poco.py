@@ -1,7 +1,6 @@
 """
 This file contains the models used for the MVT_REG experiment.
 """
-
 national_scale = {
     "BASELINE_BISON": {
         # Model without geochemistry and geological proxies

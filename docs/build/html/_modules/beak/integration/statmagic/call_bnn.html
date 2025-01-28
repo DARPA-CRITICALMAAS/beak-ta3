@@ -281,7 +281,7 @@
         <span class="p">(</span><span class="s2">&quot;final&quot;</span><span class="p">,</span> <span class="n">_get_label_info</span><span class="p">(</span><span class="n">y_train</span><span class="p">)),</span>
     <span class="p">]</span>
 
-    <span class="n">model_metadata</span> <span class="o">=</span> <span class="n">_collect_settings</span><span class="p">(</span>
+    <span class="n">model_metadata</span> <span class="o">=</span> <span class="n">_update_labels</span><span class="p">(</span>
         <span class="n">cma_metadata</span><span class="o">=</span><span class="n">cma_metadata</span><span class="p">,</span>
         <span class="n">train_config</span><span class="o">=</span><span class="n">train_config</span><span class="p">,</span>
         <span class="n">network_arch</span><span class="o">=</span><span class="n">network_arch</span><span class="p">,</span>
@@ -357,9 +357,9 @@
 
 
 
-<div class="viewcode-block" id="_collect_settings">
-<a class="viewcode-back" href="../../../../beak.integration.statmagic.call_bnn.html#beak.integration.statmagic.call_bnn._collect_settings">[docs]</a>
-<span class="k">def</span> <span class="nf">_collect_settings</span><span class="p">(</span>
+<div class="viewcode-block" id="_update_labels">
+<a class="viewcode-back" href="../../../../beak.integration.statmagic.call_bnn.html#beak.integration.statmagic.call_bnn._update_labels">[docs]</a>
+<span class="k">def</span> <span class="nf">_update_labels</span><span class="p">(</span>
     <span class="n">cma_metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
     <span class="n">train_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
     <span class="n">network_arch</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>

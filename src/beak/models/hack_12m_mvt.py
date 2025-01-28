@@ -4,7 +4,6 @@ The BISON model is used as a geophysical baseline model for deeper sources (even
 The JELLIFISH model is most comparable to the google sheet model configuration, but does not include high-res data.
 The PUMA model is an additional configuration for self-organizing maps with high-res data.
 """
-
 from beak.experimental.misc import update_model_config
 
 regional_scale_ceus = {

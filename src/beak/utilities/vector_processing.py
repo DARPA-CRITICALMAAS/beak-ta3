@@ -1,14 +1,45 @@
-import geopandas as gpd
-import numpy as np
-from typing import Tuple, Optional, List, Union
+import pyproj
 import rasterio
+import numpy as np
+import pandas as pd
+import geopandas as gpd
+
+from typing import Tuple, Optional, List, Union, Dict
 from rasterio import features, transform
 from rasterio.enums import MergeAlg
+from rasterio.crs import CRS
+
 
 from beak.utilities.file_io import (
     _cast_array_to_minimum_dtype,
     _initialize_data_for_rasterization
 )
+
+
+def create_geodataframe_from_points(
+    src: pd.DataFrame,
+    coord_columns: Tuple[str, str] = ("longitude", "latitude"),
+    crs: Optional[Union[str, rasterio.crs.CRS, pyproj.crs.CRS]] = None,
+) -> gpd.GeoDataFrame:
+    """
+    Creates a GeoDataFrame from a DataFrame containing geographic coordinates.
+
+    Args:
+        src: The input DataFrame containing geographic coordinates.
+        coord_columns: A tuple of strings representing the names of the longitude and latitude columns.
+        crs: An optional CRS string or rasterio CRS object for projecting the GeoDataFrame.
+
+    Returns:
+        gpd.GeoDataFrame: The resulting GeoDataFrame.
+    """
+    longitude, latitude = coord_columns
+
+    geodataframe = gpd.GeoDataFrame(
+        data=src,
+        geometry=gpd.points_from_xy(src.loc[:, longitude], src.loc[:, latitude]),
+        crs=crs,
+    )
+    return geodataframe
 
 
 def prepare_geodataframe(
@@ -293,3 +324,48 @@ def _rasterize_features(
     )
 
     return out_array, out_meta
+
+
+def extract_values_from_points(
+    src_points: pd.DataFrame,
+    src_arrays: List[np.ndarray],
+    src_descriptions: List[str],
+    template: Tuple[np.ndarray, Dict],
+) -> pd.DataFrame:
+    """
+    Extract values from a raster array at specified point locations.
+
+    Args:
+        src_points: A GeoDataFrame containing point geometries and attributes.
+        src_arrays: A list of raster arrays to extract values from.
+        src_descriptions: A list of names for the extracted values.
+        template: A tuple containing the template raster array and its metadata.
+            - np.ndarray: The template raster data array.
+            - dict: The template raster metadata.
+
+    Returns:
+        A DataFrame containing the extracted values and additional attributes from the input GeoDataFrame.
+    """
+    if not src_points.empty:
+        _, meta = template
+
+        if not src_points.crs == meta["crs"]:
+            src_points = src_points.to_crs(meta["crs"])
+
+        rows, cols = rasterio.transform.rowcol(
+            meta["transform"],
+            src_points.geometry.x,
+            src_points.geometry.y
+        )
+
+        extracted_values = np.column_stack([
+            raster[rows, cols] for raster in src_arrays
+        ])
+
+        extracted_values = pd.DataFrame(extracted_values, columns=src_descriptions)
+        extracted_values = pd.concat([src_points, extracted_values], axis=1)
+        extracted_values = gpd.GeoDataFrame(extracted_values, geometry=src_points.geometry, crs=meta["crs"])
+    else:
+        extracted_values = src_points
+
+    return extracted_values

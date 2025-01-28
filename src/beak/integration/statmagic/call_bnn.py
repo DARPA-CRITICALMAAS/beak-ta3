@@ -1,15 +1,22 @@
 import os
+
+# Remove Tensorflow's warning messages
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+
 import numpy as np
 import pandas as pd
 import tensorflow as tf
 
-from pathlib import Path
+from itertools import product
+from datetime import datetime
 from typing import List, Tuple, Dict, Optional
 
 from beak.utilities.sampling import (
     select_negative_samples,
     select_train_and_test_data,
     random_oversampling,
+    extract_train_test_locations
 )
 
 from beak.utilities.conversion import convert_dtypes, expand_dims
@@ -19,8 +26,10 @@ from beak.utilities.file_io import (
     prepare_model_data,
     prepare_output,
     save_raster,
-    write_json
+    write_json,
 )
+
+from beak.utilities.raster_processing import add_coordinates_to_raster
 from beak.methods.bnn.fastBNN import fit_model, predict_model
 from beak.methods.bnn.utils import build_network_architecture
 from beak.evaluation.calculate_metrics import binary_classification
@@ -28,14 +37,14 @@ from beak.evaluation.calculate_metrics import binary_classification
 from beak.integration.statmagic.utils import (
     create_file_list,
     prepare_output_layers,
+    export_train_test_splits,
+    _create_model_run_config,
+    _create_runtime_stats,
+    _add_raster_results_to_output_layers,
+    _create_prospectivity_output_layers
 )
 
 from cdr_schemas.prospectivity_input import ProspectivityOutputLayer
-
-
-# Remove Tensorflow's warning messages
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
-os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 
 
 def run_bnn(
@@ -53,6 +62,7 @@ def run_bnn(
         input_labels: String containing the path of the input labels.
         config_file: Path to the JSON configuration file.
         output_folder: Output folder for the results.
+        random_seed: Random seed for reproducibility.
 
     Returns:
         None
@@ -64,6 +74,15 @@ def run_bnn(
     raster_folder = os.path.join(output_folder, "raster")
     os.makedirs(output_folder, exist_ok=True)
     os.makedirs(raster_folder, exist_ok=True)
+
+    # Set output names for meta, splits and results
+    metrics_name = "metrics"
+    settings_name = "settings"
+    runtime_name = "runtime"
+    train_split_name = "train_split"
+    test_split_name = "test_split"
+    prediction_name = "likelihoods"
+    uncertainty_name = "uncertainties"
 
     # Read model_run config
     json_data = pd.read_json(config_file)
@@ -83,7 +102,7 @@ def run_bnn(
     network_core = train_config["network_arch_core_units"]
     network_head = train_config["network_arch_head_units"]
 
-    # Create model topology 
+    # Create model topology
     core_units, head_units = build_network_architecture(
         depth_per_network=network_depth,
         minimum_width=network_width,
@@ -91,14 +110,26 @@ def run_bnn(
         head_units = network_head if network_head else None,
     )
 
+    # Runtime init
+    start_time = datetime.now()
+
     # Load layers
-    input_layers = load_layers(input_layers)
-    input_labels, meta = load_layer(input_labels)
+    print("Load layers...")
+    layers = load_layers(input_layers)
+    labels, meta = load_layer(input_labels)
+
+    # Add coordinates to raster
+    layers_with_coords = add_coordinates_to_raster(
+        src_array=layers,
+        coord_file=input_labels
+    )
 
     # Load initial data into array
-    X_prepared, y_prepared = prepare_model_data(input_layers, input_labels)
+    print("Prepare model data...")
+    X_prepared, y_prepared = prepare_model_data(layers_with_coords, labels)
 
     # Select random negatives
+    print("Sample negatives...")
     X_sampled, y_sampled = select_negative_samples(
         X=X_prepared,
         y=y_prepared,
@@ -107,6 +138,7 @@ def run_bnn(
     )
 
     # Create train and test sets
+    print("Create splits...")
     X_train_split, X_test_split, y_train_split, y_test_split = select_train_and_test_data(
         X=X_sampled,
         y=y_sampled,
@@ -114,7 +146,12 @@ def run_bnn(
         random_seed=random_seed,
     )
 
+    # Create train and test split outputs and locations
+    X_train_split, train_locations = extract_train_test_locations(X_train_split, y_train_split, crs=meta["crs"])
+    X_test_split, test_locations = extract_train_test_locations(X_test_split, y_test_split, crs=meta["crs"])
+
     # Oversample positives
+    print("Modify labels...")
     X_train, y_train = random_oversampling(
         X=X_train_split,
         y=y_train_split,
@@ -136,6 +173,7 @@ def run_bnn(
     ).shuffle(buffer_size).batch(512)
 
     # Run training
+    print("\nTraining...")
     feature_count = X_train.shape[1]
     data_count = X_train.shape[0]
 
@@ -150,6 +188,7 @@ def run_bnn(
     )
 
     # Evaluation
+    print("\nEvaluation...")
     metrics_train = binary_classification(model, X_train_split, y_train_split)
     evaluations =  {"train": metrics_train}
 
@@ -158,18 +197,50 @@ def run_bnn(
         evaluations.update({"test": metrics_test})
 
     # Prediction
-    results = predict_model(
+    print("Prediction...")
+    prediction, uncertainty = predict_model(
         model,
-        input_layers,
+        layers,
         target_shape=(meta["height"], meta["width"])
     )
 
-    # Collect metadata
-    cma_metadata = {
-        "cma_id": cma_id,
-        "model_run_id": model_run_id
-    }
+    # Save rasters
+    target_meta = meta.copy()
+    target_meta.update(
+        {
+            "nodata": -99999
+        }
+    )
 
+    results_data = (prediction, uncertainty)
+    results_files = (prediction_name, uncertainty_name)
+
+    for result, name in zip(results_data, results_files):
+        out_file = os.path.join(raster_folder, name + ".tif")
+        out_array, out_meta = prepare_output(result, target_meta)
+        save_raster(out_array, out_meta, out_file)
+
+    # Extract values from points for training and testing datasets
+    export_train_test_splits(
+        src_data=(
+            [prediction, uncertainty],
+            [prediction_name, uncertainty_name]
+        ),
+        split_data=(
+            [train_locations, test_locations],
+            [train_split_name, test_split_name]
+        ),
+        template=(labels, meta),
+        output_folder=output_folder,
+    )
+
+    # Runtime final
+    end_time = datetime.now()
+    duration = end_time - start_time
+    runtime = duration.total_seconds()
+
+    # Collect metadata
+    print("Create and collect outputs...")
     network_arch = {
         "core_units": core_units,
         "head_units": head_units,
@@ -180,49 +251,59 @@ def run_bnn(
         ("sampled_negatives", _get_label_info(y_sampled)),
         ("train_split", _get_label_info(y_train_split)),
         ("test_split", _get_label_info(y_test_split)),
-        ("final", _get_label_info(y_train)),
+        ("final", _get_label_info(y_train))
     ]
 
-    model_metadata = _collect_settings(
-        cma_metadata=cma_metadata,
+    additional_config_info = {
+        "network_architecture": network_arch,
+        "sampled_labels": _get_sampled_labels(label_data)
+    }
+
+    model_config = _create_model_run_config(
+        model_run=(cma_id, model_run_id),
+        input_data=(input_layers, input_labels),
         train_config=train_config,
-        network_arch=network_arch,
-        label_data=label_data,
+        **additional_config_info
     )
 
-    # Set output locations for files
-    metrics_file_name = "metrics.json"
-    meta_file_name = "settings.json"
+    additional_runtime_info = {
+        "input_labels": sum( _get_label_info(y_train).values()),
+        "nn_epochs": train_epochs,
+        "nn_parameters": _get_network_parameters(feature_count, core_units + head_units + [1])
+    }
 
+    runtime_stats = _create_runtime_stats(
+        input_size=feature_count,
+        meta=meta,
+        runtime=runtime,
+        **additional_runtime_info
+    )
+
+    # Set outputs
     output_locations = (
         output_folder,
-        raster_folder,
-        os.path.join(output_folder, metrics_file_name),
-        os.path.join(output_folder, meta_file_name),
+        raster_folder
+    )
+
+    output_files = (
+        metrics_name,
+        settings_name,
+        train_split_name,
+        test_split_name,
+        runtime_name
     )
 
     # Save metrics and model metadata
-    write_json(output_folder, metrics_file_name, evaluations)
-    write_json(output_folder, meta_file_name, model_metadata)
-
-    # Save rasters
-    target_meta = meta.copy()
-    target_meta.update(
-        {
-            "nodata": -99999
-        }
-    )
-
-    for result, name in zip(results, ["likelihoods", "uncertainties"]):
-        out_file = os.path.join(raster_folder, f"{name}.tif")
-        out_array, out_meta = prepare_output(result, target_meta)
-        save_raster(out_array, out_meta, out_file)
+    write_json(output_folder, metrics_name + ".json", evaluations)
+    write_json(output_folder, settings_name + ".json", model_config)
+    write_json(output_folder, runtime_name + ".json", runtime_stats)
 
     # Collect results
     out_layers = _collect_results(
         cma_id=cma_id,
         model_run_id=model_run_id,
         output_locations=output_locations,
+        output_files=output_files
     )
 
     return out_layers
@@ -255,23 +336,17 @@ def _get_label_info(
     return out_dict
 
 
-def _collect_settings(
-    cma_metadata: Dict,
-    train_config: Dict,
-    network_arch: Dict,
+def _get_sampled_labels(
     label_data: List[Tuple[str, Dict]],
 ):
     """
     Create a dictionary containing all settings.
 
     Args:
-        cma_metadata: Metadata for the CMA.
-        train_config: Configuration for training.
-        network_arch: Network architecture.
         label_data: Data and descriptions for labels.
 
     Returns:
-        dict: Dictionary containing all settings.
+        dict: Dictionary containing labels processed in the workflow.
     """
     labels = {}
     for description, data in label_data:
@@ -281,20 +356,38 @@ def _collect_settings(
             }
         )
 
-    metadata = {
-        "cma": cma_metadata,
-        "train_config": train_config,
-        "network_architecture": network_arch,
-        "labels": labels,
-    }
+    return labels
 
-    return metadata
+
+def _get_network_parameters(
+    input_size: int,
+    nodes: List[int],
+) -> int:
+    """
+    Get the number of parameters in the neural network.
+
+    Args:
+        input_size: Size of the input layer.
+        nodes: Number of neurons for each layer.
+    """
+    # Input to first hidden layer
+    weight_params = input_size * nodes[0]
+
+    # Hidden layers to output layer
+    for i in range(1, len(nodes)):
+        weight_params += nodes[i - 1] * nodes[i]
+
+    # Add bias parameters for each layer
+    bias_params = sum(nodes)
+
+    return weight_params + bias_params
 
 
 def _collect_results(
     cma_id: str,
     model_run_id: str,
     output_locations: Tuple[str, ...],
+    output_files: Tuple[str,...],
 ) -> List[Tuple[str, ProspectivityOutputLayer]]:
     """
     Create information for the CDR ProspectivityOutputLayer Class.
@@ -307,7 +400,8 @@ def _collect_results(
     Returns:
         List of tuples, where each tuple contains the file path and the related ProspectivityOutputLayer object.
     """
-    output_folder, raster_folder, metrics_file, settings_file = output_locations
+    output_folder, raster_folder = output_locations
+    metrics, settings, train_split, test_split, runtime_stats = output_files
 
     # Initialization
     init_meta = {
@@ -339,20 +433,11 @@ def _collect_results(
     )
 
     # Initialize output
-    layers_list = []
-
-    # Add raster results
-    for file in results_file_list:
-        file_stem = Path(file).stem.lower()
-        meta = init_meta.copy()
-
-        for key, value in results.items():
-            if key == file_stem:
-                meta.update(value)
-
-                layers_list.append(
-                    (file, meta)
-                )
+    layers_list = _add_raster_results_to_output_layers(
+        file_list=results_file_list,
+        results=results,
+        init_meta=init_meta
+    )
 
     # Add metrics
     update_meta = {
@@ -362,9 +447,9 @@ def _collect_results(
 
     layers_list = prepare_output_layers(
         layers=layers_list,
-        files=metrics_file,
+        files=os.path.join(output_folder, metrics + ".json"),
         meta=(init_meta, update_meta),
-        output=(output_folder, "metrics.zip")
+        output=(output_folder, metrics + ".zip")
     )
 
     # Add metadata and settings
@@ -375,20 +460,47 @@ def _collect_results(
 
     layers_list = prepare_output_layers(
         layers=layers_list,
-        files=settings_file,
+        files=os.path.join(output_folder, settings + ".json"),
         meta=(init_meta, update_meta),
-        output=(output_folder, "settings.zip")
+        output=(output_folder, settings + ".zip")
+    )
+
+    # Add runtime stats
+    update_meta = {
+        "output_type": "runtime",
+        "title": "Archive containing runtime statistics"
+    }
+
+    layers_list = prepare_output_layers(
+        layers=layers_list,
+        files=os.path.join(output_folder, runtime_stats + ".json"),
+        meta=(init_meta, update_meta),
+        output=(output_folder, runtime_stats + ".zip")
+    )
+
+    # Add splits
+    update_meta = {
+        "output_type": "train_test_data",
+        "title": "Archive containing the train and test data"
+    }
+
+    splits = [train_split, test_split]
+    extensions = [".csv", ".gpkg"]
+
+    model_data = [
+        os.path.join(output_folder, split + extension)
+        for split, extension in product(splits, extensions)
+    ]
+    model_data = [file for file in model_data if os.path.exists(file)]
+
+    layers_list = prepare_output_layers(
+        layers=layers_list,
+        files=model_data,
+        meta=(init_meta, update_meta),
+        output=(output_folder, "train_test_data.zip")
     )
 
     # Create CDR object
-    prospectivity_output_layers = []
-    for layer in layers_list:
-        layer_path = layer[0]
-        layer_meta = layer[1]
-
-        layer_object = ProspectivityOutputLayer(**layer_meta)
-        prospectivity_output_layers.append(
-            (layer_path, layer_object)
-        )
+    prospectivity_output_layers = _create_prospectivity_output_layers(layers_list)
 
     return prospectivity_output_layers

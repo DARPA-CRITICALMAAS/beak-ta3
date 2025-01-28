@@ -17,7 +17,7 @@ def run_SOM(args):
 			args.initialcodebook=som_dictionary['codebook']
 			args.initialization=None           
 	
-	print('Load data')
+	print('Load data...')
 	# Record the start time
 	start_time = time.time()
 	if (args.label == True):
@@ -27,9 +27,9 @@ def run_SOM(args):
 	# Record the end time
 	end_time = time.time()
 	# Print the elapsed time
-	print(f"    Execution time: {end_time - start_time} seconds")
+	# print(f"    Execution time: {end_time - start_time} seconds")
 
-	print('Run SOM')
+	print("Run SOM...")
 	start_time = time.time()
 	som = nxtsomcore.train(
 		header['data'],
@@ -37,7 +37,7 @@ def run_SOM(args):
 		args.som_y,
 		args.epochs,
 		kerneltype=0,
-		verbose=1,
+		verbose=0,
 		neighborhood=args.neighborhood,
 		std_coeff=args.std_coeff,
 		maptype=args.maptype,
@@ -48,7 +48,7 @@ def run_SOM(args):
 		gridtype=args.gridtype
 		)    
 	end_time = time.time()
-	print(f"    Execution time: {end_time - start_time} seconds")
+	# print(f"    Execution time: {end_time - start_time} seconds")
 
 	if(args.output_folder==""):
 		output_folder="C:/Temp/NextSom"
@@ -56,34 +56,37 @@ def run_SOM(args):
 		output_folder=args.output_folder
 
 	if(args.kmeans==True):
+		print("Run k-means clustering...")
 		start_time = time.time()
 		som['clusters']=nxtsomcore.clusters(som,args.kmeans_min,args.kmeans_max,args.kmeans_init,output_folder)     
 		end_time = time.time()
-		print(f"    Execution time: {end_time - start_time} seconds")
+		# print(f"    Execution time: {end_time - start_time} seconds")
 
-	print('Save SOM object to file')
+	print("Save temporary outputs...")
+	# print('Save SOM object to file')
 	start_time = time.time()
 	with open(output_folder+'/som.dictionary', 'wb') as som_dictionary_file:
 		pickle.dump(som, som_dictionary_file) #save som object to file.
 	end_time = time.time()
-	print(f"    Execution time: {end_time - start_time} seconds")
+	# print(f"    Execution time: {end_time - start_time} seconds")
 
-	print('Save SOM space results')
+	# print('Save SOM space results')
 	start_time = time.time()
 	nxtsomcore.save_somspace_result(args.output_file_somspace, header, som, output_folder, args.normalized)  
 	end_time = time.time()
-	print(f"    Execution time: {end_time - start_time} seconds")
+	# print(f"    Execution time: {end_time - start_time} seconds")
 
 	if args.outgeofile is not None:
-		print('Save geo space results')
+		# print('Save geo space results')
 		start_time = time.time()
 		geo_data = nxtsomcore.save_geospace_result(args.outgeofile, header, som, output_folder, args.input_file, args.normalized, args.label) 
 		end_time = time.time()
-		print(f"    Execution time: {end_time - start_time} seconds") 
+		# print(f"    Execution time: {end_time - start_time} seconds")
 
 	index_nolabel = None
 	if args.label is True:
-		print('Do label analysis and write to file')
+		# print('Do label analysis and write to file')
+		print("Label analysis...")
 		start_time = time.time()
 
 		annot_ticks, annot_strings, annot_data, index_label, index_nolabel  = get_label_annotation_data(som, geo_data, args.output_file_geospace, header['noDataValue'])
@@ -97,25 +100,25 @@ def run_SOM(args):
 				write_bmu_cluster_label_data(args.output_folder, None, geo_data, labels)
 
 		end_time = time.time()
-		print(f"    Execution time: {end_time - start_time} seconds")
+		# print(f"    Execution time: {end_time - start_time} seconds")
 
+	print("Create final results...")
 	if(args.geotiff_input is not None):
-		print('Write GeoTIFF file')
+		# print('Write GeoTIFF file')
 		start_time = time.time()
 		inputFileArray=args.geotiff_input.split(",")  
 		bmu_id = create_bmu_id(args.som_x, args.som_y, args.output_folder)  
 		nxtsomcore.write_geotiff_out(args.output_folder, args.output_raster_folder, args.output_file_geospace, args.output_file_somspace, inputFileArray[0], args.label, index_nolabel, bmu_id)
 		end_time = time.time()
-		print(f"    Execution time: {end_time - start_time} seconds")
-	
-	
-	print('Count cluster hit count')
+		# print(f"    Execution time: {end_time - start_time} seconds")
+
+	# print('Count cluster hit count')
 	start_time = time.time()
 	
 	cluster_hit_count(som, args.output_file_somspace, args.output_folder)
 	
 	end_time = time.time()
-	print(f"    Execution time: {end_time - start_time} seconds")
+	# print(f"    Execution time: {end_time - start_time} seconds")
 
 
 def cluster_hit_count(som, output_file_somspace, output_folder):

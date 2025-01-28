@@ -140,7 +140,7 @@ class NxtSomCore(object):
         else:
             interval=1      
         
-        print("Clustering progress:")
+        # print("Clustering progress:")
         for a in range(cluster_min, cluster_max+1):                                   
             min=float("inf")
             min_dict={}
@@ -156,8 +156,8 @@ class NxtSomCore(object):
                 dict={'db_score': current, 'n_clusters' : a, 'cluster' : clusters}
                 
                 value=((a-cluster_min)*cluster_init + j)
-                if (value%interval==0):
-                    print(("%.2f" % ((value/total)*100))+"%")
+                # if (value%interval==0):
+                    # print(("- %.2f" % ((value/total)*100))+"%")
                 if(min>current):
                     min=current
                     #min_clusters=clusters
@@ -167,7 +167,7 @@ class NxtSomCore(object):
         smallest_3=heapq.nsmallest(3, cluster_list,key=lambda k: k['db_score'])    
         with open(working_dir+'/cluster.dictionary', 'wb') as cluster_dictionary_file:
             pickle.dump(cluster_list, cluster_dictionary_file)
-        print("100% Clustering completed.")
+        # print("100% Clustering completed.")
         return smallest_3[0]["cluster"]     
 
 
@@ -233,7 +233,7 @@ class NxtSomCore(object):
                     N = Decimal(som_cols["data"][j][i + 3].item())
                     som_cols["data"][j][i + 3] = (maxD - minD) * (N - Decimal(minN)) / (Decimal(maxN) - Decimal(minN)) + minD
         
-        print("         combine data colums for output geo file (for large data arrays memory usage might be a concern)")
+        # print("         combine data colums for output geo file (for large data arrays memory usage might be a concern)")
 
         combined_cols = np.c_[coord_cols['data'], som_cols['data'], data_cols['data'], q_error]     
         combined_cols_deleted = np.c_[coord_cols['data_deleted'], np.full((coord_cols['data_deleted'].shape[0],combined_cols.shape[1] - 2), np.nan)]
@@ -241,7 +241,7 @@ class NxtSomCore(object):
         # Join the arrays
         combined_cols_all = np.vstack((combined_cols, combined_cols_deleted))
         
-        print("         savetxt")
+        # print("         savetxt")
 
         if(labelIndex==True):
             #-- when input format is lrn file:
@@ -384,9 +384,9 @@ class NxtSomCore(object):
 
         driver = gdal.GetDriverByName('GTiff')
 
-        print("     read_csv som_data")
+        # print("     read_csv som_data")
         som_data = pd.read_csv(somdatafile, skiprows=0, delimiter=' ').values
-        print("     read_csv geo_data")
+        # print("     read_csv geo_data")
         geo_data = pd.read_csv(geodatafile, skiprows=0, delimiter=' ').values
         headers = pd.read_csv(geodatafile, nrows=0, delimiter=' ').columns.tolist()
 
@@ -397,10 +397,10 @@ class NxtSomCore(object):
         destination_path = os.path.join(output_folder, output_raster_folder) + "/"
         os.makedirs(destination_path, exist_ok=True)
 
-        print("     Iterate over each TIF file:")
+        # print("     Iterate over each TIF file:")
 
         for a in range(0, som_data.shape[1]-4): 
-            print("         ", os.path.splitext(os.path.basename(headers[4 + a]))[0])
+            # print("         ", os.path.splitext(os.path.basename(headers[4 + a]))[0])
 
             z=geo_data[:,(4+a)]
             df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
@@ -436,7 +436,7 @@ class NxtSomCore(object):
             outDs = None
             
         #q_error.
-        print("          q_error")
+        # print("          q_error")
         z=geo_data[:,(len(som_data[0])-5)*2 +5]
         df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
         df.columns = ['X_value','Y_value','Z_value']
@@ -464,7 +464,7 @@ class NxtSomCore(object):
         # BMU ID in geo space:
         if bmu_id is not None:
             BMUnoDataValue = -99
-            print("          BMU_ID")
+            # print("          BMU_ID")
 
             bmu_x_index = np.where(np.isnan(geo_data[:, 2]), -1, geo_data[:, 2]).astype(int)
             bmu_y_index = np.where(np.isnan(geo_data[:, 3]), -1, geo_data[:, 3]).astype(int)
@@ -536,7 +536,7 @@ class NxtSomCore(object):
                 if (len(unique_z) == 1):
                     print("         ", f"bmu_{z_value.replace(' ', '_')} contains only one unique cluster. No tif file created.")
                 else:
-                    print("         ", f"bmu_{z_value.replace(' ', '_')}")
+                    # print("         ", f"bmu_{z_value.replace(' ', '_')}")
                     z = np.concatenate([label_data_df[z_value], unique_z_no_label])
                     df = pd.DataFrame({'X_value': x_label, 'Y_value': y_label, 'Z_value': z})
                     df['Z_value'] = pd.to_numeric(df['Z_value'])

@@ -3,8 +3,10 @@ from rasterio import warp
 from rasterio.enums import Resampling
 from typing import Optional, Tuple, Dict
 
+from rasterio.transform import xy
+
 from beak.utilities.file_io import (
-    _cast_array_to_minimum_dtype
+    _cast_array_to_minimum_dtype, load_layer
 )
 
 
@@ -63,3 +65,32 @@ def coregistration(
     )
 
     return out_array.squeeze(), out_meta
+
+
+def add_coordinates_to_raster(
+    src_array: np.ndarray,
+    coord_file: str,
+) -> np.ndarray:
+    """
+    Add longitude and latitude coordinates to the stacked raster array.
+
+    Args:
+        raster_stack: The stacked raster array with the data from all input files.
+        input_file: The file path to the raster file used to determine the coordinate system.
+
+    Returns:
+        The stacked raster array with longitude and latitude coordinates added on last two columns.
+    """
+    _, meta = load_layer(coord_file)
+    height, width, transform = meta["height"], meta["width"], meta["transform"]
+
+    rows, cols = np.meshgrid(np.arange(height), np.arange(width), indexing="ij")
+
+    longitudes, latitudes = xy(
+        transform,
+        list(rows.reshape(-1, 1)),
+        list(cols.reshape(-1, 1))
+    )
+
+    out_stack = np.column_stack([src_array, longitudes, latitudes])
+    return out_stack

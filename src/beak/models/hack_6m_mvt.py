@@ -1,12 +1,9 @@
 """
-This file contains the models used for the MVT_NAT experiment.
-
-Currently, the models are:<br>
+For Lawley et al. 2022, we have the following experiments:<br>
     `BASELINE`: The baseline model for MVT deposits from the Lawley et al. 2022 paper, containing only geophysical layers.<p>
     `PREFERRED`: The preferred model for MVT deposits from the Lawley et al. 2022 paper, containing geophysical and geological layers.<p>
     `PREFERRED_ISOGRAV`: The MVT_PREFERRED model but gravity has been substituted with isostatic gravity.<p>
 """
-
 national_scale = {
     "BASELINE": {
         # Gravity

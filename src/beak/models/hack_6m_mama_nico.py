@@ -1,7 +1,6 @@
 """
 This file contains the models used for the MAGMATIC_NICKEL experiment.
 """
-
 national_scale = {
   "BASELINE_BISON": {
         "IsostaticGravity": True,
@@ -19,7 +18,7 @@ national_scale = {
         "LAB_HGM": True,
         "LAB_Worms_Proximity": True,
     },
-    "MAGMATIC_NICKEL_V1": {
+    "magmatic_nickel_v1": {
         # Geology from Datacube
         "Geology_Lithology_Majority": True,
         "Geology_Lithology_Minority": True,

@@ -47,7 +47,8 @@ def run_plotting_script(argsP):
         argsP (dict): Dictionary holding agruments: file path to som results, size of som space, input file string, grid type, no data value, working directory
     """
 
-    print("Setup figures")
+    print("Create plots...")
+    # print("Setup figures")
     start_time = time.time()
 
     # Set output directory for plot exports
@@ -66,10 +67,11 @@ def run_plotting_script(argsP):
         argsP.grid_type, argsP.noDataValue, argsP.outgeofile)
 
     end_time = time.time()
-    print(f"    Execution time: {end_time - start_time} seconds")
+    # print(f"    Execution time: {end_time - start_time} seconds")
 
     if argsP.outgeofile is not None: #if spatial, draw geo plots
-        print("Plot geo space results")
+        print("- Geospace")
+        # print("Plot geo space results")
         start_time = time.time()
         if(argsP.dataType=='scatter'):
             if(clusters>1):
@@ -83,30 +85,32 @@ def run_plotting_script(argsP):
                 plot_geospace_results_grid(geo_data, geo_headers, som_data, argsP.noDataValue, output_folder)
 
         end_time = time.time()
-        print(f"    Execution time: {end_time - start_time} seconds")
+        # print(f"    Execution time: {end_time - start_time} seconds")
 
-    if(clusters>1): 
-        print("Plot Cluster result SOM space")
+    if(clusters>1):
+        print("- Clusters")
+        # print("Plot Cluster result SOM space")
         start_time = time.time()
 
-        print("    Draw som cluster plot")
+        # print("    Draw som cluster plot")
         draw_som_clusters(argsP, grid, som_data, som_table, annot_ticks, som_headers, discrete_cmap, discrete_cmap_2, clusters, cluster_ticks, cluster_tick_labels, labelIndex, annot_strings, output_folder)
         loaded_cluster_list = load_cluster_dictionary(argsP.dir)
         
-        print("    Plot Davies Bouldin index")
+        # print("    Plot Davies Bouldin index")
         plot_davies_bouldin(loaded_cluster_list, output_folder)
         
-        print("    Plot cluster hit count")
+        # print("    Plot cluster hit count")
         plot_cluster_hit_count(argsP.dir+"/cluster_hit_count.txt", output_folder)
        
         if labelIndex is not None:
-            print("    Plot cluster label count")
+            # print("    Plot cluster label count")
             plot_cluster_label_count(argsP.dir+"/cluster_label_counts.txt", output_folder)
 
         end_time = time.time()
-        print(f"    Execution time: {end_time - start_time} seconds")
+        # print(f"    Execution time: {end_time - start_time} seconds")
 
-    print("Plot SOM space results")
+    print("- SOM space")
+    # print("Plot SOM space results")
     start_time = time.time()
     bmu_id = []
     with open(argsP.dir+'/bmu_ids.txt', 'r') as file:
@@ -125,18 +129,19 @@ def run_plotting_script(argsP):
         draw_som_results(argsP, som_data, som_table, grid, annot_ticks, som_headers, clusters, cluster_tick_labels, output_folder)
         
     end_time = time.time()
-    print(f"    Execution time: {end_time - start_time} seconds")
+    # print(f"    Execution time: {end_time - start_time} seconds")
     
     #print("SomSpace plots finshed")
 
     if(som_dict['clusters'] is not None):
-        print("Plot Boxplots")
+        print("- Boxplots")
+        # print("Plot Boxplots")
         start_time = time.time()
 
         draw_boxplots(som_data,som_headers,discrete_cmap, cluster_tick_labels, output_folder)
         #print("Boxplots finished")
         end_time = time.time()
-        print(f"    Execution time: {end_time - start_time} seconds")
+        # print(f"    Execution time: {end_time - start_time} seconds")
 
 
 def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, noDataValue, aOutgeofile):
@@ -156,7 +161,6 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, no
     Returns:
         dict: dictionary containing initialized variables
     """
- 
     somx=int(som_x)        
     somy=int(som_y)
     outgeofile=None          
@@ -174,7 +178,7 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, no
     som_headers=pd.read_csv(outsomfile, delimiter=' ', header=None).iloc[0] 
 
     time_1 = time.time()
-    print(f"        Read som data execution time: {time_1 - time_0} seconds")
+    # print(f"        Read som data execution time: {time_1 - time_0} seconds")
 
     if outgeofile is not None:
         #geo_data=np.genfromtxt(outgeofile, skip_header=(1), delimiter=' ')
@@ -190,7 +194,7 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, no
         geo_headers = geo_headers +header_line.split(" ")
 
         time_2 = time.time()
-        print(f"        Read geo data execution time: {time_2 - time_1} seconds")
+        # print(f"        Read geo data execution time: {time_2 - time_1} seconds")
 
     som_table=np.zeros((somx,somy))#empty somx*somy sized table for som plots
 
@@ -237,7 +241,7 @@ def basic_setup(outsomfile, som_x, som_y, input_file, working_dir, grid_type, no
     colnames = header_line.split() if outgeofile is not None else header_line.split("\t")
 
     if 'label' in colnames:
-        print(f"        Read label annotation data")
+        # print(f"        Read label annotation data")
         annot_ticks, annot_strings, annot_data, index_label, index_nolabel  = get_label_annotation_data(som_dict, geo_data, outgeofile, noDataValue)
         #labelIndex = geo_data.shape[1] - 1
         labelIndex = colnames.index('label')
@@ -287,7 +291,7 @@ def plot_geospace_results_grid(geo_data, geo_headers, som_data, noDataValue, wor
     mpl.rcParams.update({'font.size': 14})
 
     for i in range(0, len(som_data[0])-4): 
-        print(f"    geospace plot no. {i+2} from {len(som_data[0])-3}", end='\r')  
+        # print(f"    geospace plot no. {i+2} from {len(som_data[0])-3}", end='\r')
         x=geo_data[:,0]      
         y=geo_data[:,1]
         z=geo_data[:,(5+i)]
@@ -339,10 +343,11 @@ def plot_geospace_results_grid(geo_data, geo_headers, som_data, noDataValue, wor
         plt.clf()
         plt.cla()
         plt.close()
-    print()    
+    # print()
         
     #q_error:
-    print(f"    q-error plot")
+    print ("- Q-Error")
+    # print(f"    q-error plot")
     x=geo_data[:,0]
     y=geo_data[:,1]
     z=geo_data[:,(len(som_data[0])-5)*2 +5] 
@@ -410,7 +415,7 @@ def plot_geospace_results_scatter(geo_data, geo_headers, som_data, working_dir):
           'y':np.array([len(geo_data)])}
 
     for i in range(0, len(som_data[0])-4):  
-        print(f"    geospace plot no. {i+2} from {len(som_data[0])-3}", end='\r')
+        # print(f"    geospace plot no. {i+2} from {len(som_data[0])-3}", end='\r')
         z=geo_data[:,(5+i)]   
         sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
         mpl.rcParams.update({'font.size': 30})
@@ -424,10 +429,11 @@ def plot_geospace_results_scatter(geo_data, geo_headers, som_data, working_dir):
         plt.cla()
         plt.close()
         mpl.rcParams.update({'font.size': 12})  
-    print()
+    # print()
         
     #draw q_error:
-    print(f"    q-error plot")
+    print ("- Q-Error")
+    # print(f"    q-error plot")
     z=geo_data[:,(len(som_data[0])-5)*2 +5]   
     sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
     mpl.rcParams.update({'font.size': 30})
@@ -457,7 +463,7 @@ def draw_som_results(argsP, som_data, som_table,grid, annot_ticks, som_headers,c
         output_folder (str): working directory where to save figures
     """    
     for j in range(2,len(som_data[0])-3):
-        print(f"    somspace plot no. {j-1} from {len(som_data[0])-5}", end='\r')
+        # print(f"    somspace plot no. {j-1} from {len(som_data[0])-5}", end='\r')
         if(argsP.grid_type.lower()=="rectangular"):
             for i in range(0,len(som_data)): 
                 som_table[int(som_data[i][0])][int(som_data[i][1])]=som_data[i][j] #som_table: somx*somy size
@@ -479,7 +485,7 @@ def draw_som_results(argsP, som_data, som_table,grid, annot_ticks, som_headers,c
         plt.cla()
         plt.close()  
         mpl.rcParams.update({'font.size': 12})
-    print()
+    # print()
         
 
 def draw_umatrix(somx,somy,clusters,cluster_tick_labels,som_data, som_table,grid, grid_type, annot_ticks, som_headers,working_dir):
@@ -728,7 +734,7 @@ def draw_boxplots(som_data,som_headers,discrete_cmap,cluster_tick_labels,working
             discrete_cmap.pop(k)  
     
     for i in range(2,len(som_data[0])-3): 
-        print(f"    boxplot no. {i-1} from {len(som_data[0])-3-2}", end='\r')
+        # print(f"    boxplot no. {i-1} from {len(som_data[0])-3-2}", end='\r')
         z=som_data[:,i]
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=FutureWarning)
@@ -745,7 +751,7 @@ def draw_boxplots(som_data,som_headers,discrete_cmap,cluster_tick_labels,working
         plt.clf()
         plt.cla()
         plt.close()  
-    print()      
+    # print()
         
 
 def draw_number_of_hits(argsP, som_dict,som_data,clusters,grid,cluster_tick_labels,annot_ticks, output_folder):

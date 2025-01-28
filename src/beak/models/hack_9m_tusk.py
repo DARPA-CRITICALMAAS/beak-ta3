@@ -1,7 +1,6 @@
 """
 This file contains the models used for the MVT_REG experiment.
 """
-
 regional_scale_alaska_ytu = {
     "BASELINE_BISON": {
         # Geophysics: Seismic

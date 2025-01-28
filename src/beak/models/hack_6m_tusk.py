@@ -1,7 +1,6 @@
 """
 This file contains the models used for the TUNGSTEN_SKARN experiment.
 """
-
 national_scale = {
     "TUNGSTEN_SKARN_V1": {
         # Geology from Datacube

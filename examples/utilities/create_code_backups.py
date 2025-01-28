@@ -109,7 +109,7 @@ def copy_files_excluding(
 
 if __name__ == "__main__":
     in_folders = [Path("S:/Projekte/20230082_DARPA_CriticalMAAS_TA3/Bearbeitung/GitHub/beak-ta3")]
-    out_folder = Path("S:/Temp/Projekte/Backups/Experiments/code_before_refactoring_to_experimental/")
+    out_folder = Path("S:/Temp/Projekte/20230082_DARPA_CriticalMAAS_TA3/Backups/beak-ta3/")
 
     copy_files_excluding(in_folders, out_folder)
 

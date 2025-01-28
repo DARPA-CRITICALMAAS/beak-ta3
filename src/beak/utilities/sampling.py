@@ -1,8 +1,13 @@
+import pyproj
+import rasterio
 import numpy as np
+import geopandas as gpd
 
 from imblearn.over_sampling import RandomOverSampler
 from sklearn.model_selection import train_test_split
-from typing import Tuple, Union
+from typing import Tuple, Union, Optional
+
+from beak.utilities.vector_processing import create_geodataframe_from_points
 
 
 def select_negative_samples(
@@ -115,3 +120,36 @@ def select_train_and_test_data(
         X_train, X_test, y_train, y_test = X, None, y, None
 
     return X_train, X_test, y_train, y_test
+
+
+def extract_train_test_locations(
+    X: Optional[np.ndarray],
+    y: Optional[np.ndarray],
+    crs: Optional[Union[str, rasterio.crs.CRS, pyproj.crs.CRS]],
+) -> Tuple[Union[np.ndarray, None], Union[gpd.GeoDataFrame, None]]:
+    """
+    Extracts the training locations from the input data.
+
+    Args:
+        X: Input data with last two columns as the longitude/latitude coordinates.
+        y: Input labels.
+        crs: Coordinate reference system for the locations.
+
+    Returns:
+        Data with coordinates removed, and the locations themselves.
+    """
+    if all(isinstance(data, np.ndarray) for data in (X, y)):
+        locations = gpd.GeoDataFrame(
+            data=np.column_stack((y, X[:, -2:])),
+            columns=["label", "longitude", "latitude"],
+        )
+
+        locations = create_geodataframe_from_points(
+            src=locations,
+            crs=crs
+        )
+        X = X[:, :-2]
+    else:
+        locations = gpd.GeoDataFrame()
+
+    return X, locations

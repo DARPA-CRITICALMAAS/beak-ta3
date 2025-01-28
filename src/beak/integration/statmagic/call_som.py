@@ -1,8 +1,10 @@
-import os.path
+import os
 import warnings
 import pandas as pd
+import rasterio
 
 from pathlib import Path
+from datetime import datetime
 from typing import List, Tuple, Dict, Optional
 
 import beak.methods.som.argsSOM as asom
@@ -14,11 +16,15 @@ from beak.integration.statmagic.utils import (
     create_file_list,
     prepare_output_layers,
     delete_files,
-    _create_zip_from_files,
     _filter_files,
     _filter_layers_from_payload,
+    _create_model_run_config,
+    _create_runtime_stats,
+    _add_raster_results_to_output_layers,
+    _create_prospectivity_output_layers
 )
 
+from beak.utilities.file_io import write_json
 from cdr_schemas.prospectivity_input import ProspectivityOutputLayer
 
 
@@ -61,6 +67,8 @@ def run_som(
     args.output_file_somspace = os.path.join(output_folder, "result_som.txt")
     args.output_file_geospace = os.path.join(output_folder, "result_geo.txt")
     args.outgeofile = args.output_file_geospace
+    config_name = "settings"
+    runtime_name = "runtime"
 
     # Plot input and outputs
     argsP.input_file = args.input_file
@@ -69,10 +77,15 @@ def run_som(
     argsP.outgeofile = args.output_file_geospace
 
     # Pack output folders
-    output_folders = (
+    output_locations = (
         output_folder,
         os.path.join(output_folder, args.output_raster_folder),
         os.path.join(output_folder, argsP.output_plots_folder)
+    )
+
+    output_files = (
+        config_name,
+        runtime_name
     )
 
     # Read model_run config
@@ -99,7 +112,6 @@ def run_som(
     args.gridtype = train_config["grid_type"]
 
     # K-means arguments
-    # Parameters in the CDR schema
     args.kmeans = train_config["kmeans"]
     args.kmeans_min = train_config["kmeans_min"]
     args.kmeans_max = train_config["kmeans_max"]
@@ -109,6 +121,9 @@ def run_som(
     argsP.som_x = args.som_x
     argsP.som_y = args.som_y
     argsP.grid_type = args.gridtype
+
+    # Runtime init
+    start_time = datetime.now()
 
     # Run SOM without k-means warning
     with warnings.catch_warnings():
@@ -121,15 +136,45 @@ def run_som(
     _create_layer_plot_names(
         payload=payload,
         label_column="label_raster",
-        output_folder=output_folders[2],
+        output_folder=output_locations[2],
     )
+
+    # Runtime final
+    end_time = datetime.now()
+    duration = end_time - start_time
+    runtime = duration.total_seconds()
+
+    # Collect metadata
+    model_config = _create_model_run_config(
+        model_run=(cma_id, model_run_id),
+        input_data=(input_layers, input_labels),
+        train_config=train_config,
+    )
+
+    additional_runtime_info = {
+        "som_size": args.som_x * args.som_y,
+        "som_epochs": args.epochs,
+        "kmeans_clusters": args.kmeans_max
+    }
+
+    runtime_stats = _create_runtime_stats(
+        input_size=len(input_layers),
+        meta=rasterio.open(input_layers[0]).meta,
+        runtime=runtime,
+        **additional_runtime_info
+    )
+
+    # Save model settings and metadata
+    write_json(output_folder, config_name + ".json", model_config)
+    write_json(output_folder, runtime_name + ".json", runtime_stats)
 
     # Collect results
     out_layers = _collect_results(
         cma_id=cma_id,
         model_run_id=model_run_id,
         kmeans=args.kmeans,
-        output_folders=output_folders
+        output_locations=output_locations,
+        output_files=output_files
     )
 
     # Delete intermediate files
@@ -195,7 +240,8 @@ def _collect_results(
     cma_id: str,
     model_run_id: str,
     kmeans: bool,
-    output_folders: Tuple[str, str, str],
+    output_locations: Tuple[str, ...],
+    output_files: Tuple[str, ...]
 ) -> List[Tuple[str, ProspectivityOutputLayer]]:
     """
     Create information for the CDR ProspectivityOutputLayer Class.
@@ -204,12 +250,13 @@ def _collect_results(
         cma_id: Unique identifier for the CMA.
         model_run_id: Unique identifier for the model run.
         kmeans: Boolean indicating if k-means clustering was performed.
-        output_folders: Tuple containing the output folder, raster folder, and plots folder.
+        output_locations: Tuple containing the output folder, raster folder, and plots folder.
 
     Returns:
         List of tuples, where each tuple contains the file path and the related ProspectivityOutputLayer object.
     """
-    output_folder, raster_folder, plots_folder = output_folders
+    output_folder, raster_folder, plots_folder = output_locations
+    settings, runtime_stats = output_files
 
     # Initialization
     init_meta = {
@@ -270,20 +317,11 @@ def _collect_results(
     )
 
     # Initialize output
-    layers_list = []
-
-    # Add raster results
-    for file in results_file_list:
-        file_stem = Path(file).stem.lower()
-        meta = init_meta.copy()
-
-        for key, value in results.items():
-            if key == file_stem:
-                meta.update(value)
-
-                layers_list.append(
-                    (file, meta)
-                )
+    layers_list = _add_raster_results_to_output_layers(
+        file_list=results_file_list,
+        results=results,
+        init_meta=init_meta
+    )
 
     # Add codebook maps, names starting with "b_"
     for file in codebook_maps_file_list:
@@ -317,15 +355,33 @@ def _collect_results(
             output=(output_folder, "plots.zip")
         )
 
+    # Add metadata and settings
+    update_meta = {
+        "output_type": "metadata",
+        "title": "Archive containing model metadata and settings"
+    }
+
+    layers_list = prepare_output_layers(
+        layers=layers_list,
+        files=os.path.join(output_folder, settings + ".json"),
+        meta=(init_meta, update_meta),
+        output=(output_folder, settings + ".zip")
+    )
+
+    # Add runtime stats
+    update_meta = {
+        "output_type": "runtime",
+        "title": "Archive containing runtime statistics"
+    }
+
+    layers_list = prepare_output_layers(
+        layers=layers_list,
+        files=os.path.join(output_folder, runtime_stats + ".json"),
+        meta=(init_meta, update_meta),
+        output=(output_folder, runtime_stats + ".zip")
+    )
+
     # Create CDR object
-    prospectivity_output_layers = [] 
-    for layer in layers_list:
-        layer_path = layer[0]
-        layer_meta = layer[1]
-        
-        layer_object = ProspectivityOutputLayer(**layer_meta)
-        prospectivity_output_layers.append(
-            (layer_path, layer_object)
-        )
-    
+    prospectivity_output_layers = _create_prospectivity_output_layers(layers_list)
+
     return prospectivity_output_layers

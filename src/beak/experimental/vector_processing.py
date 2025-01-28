@@ -1,16 +1,10 @@
-import multiprocessing as mp
-import os
-
-from pathlib import Path
-from typing import Optional, Tuple, Union, Literal
-
-import numpy as np
 import geopandas as gpd
 import rasterio
 import pyproj
 
+from pathlib import Path
+from typing import Optional, Union
 from rasterio.crs import CRS
-from tqdm import tqdm
 
 
 # region: reproject vector data

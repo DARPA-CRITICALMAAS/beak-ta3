@@ -2,7 +2,6 @@
 This file contains the models used for the MAGMATIC_NICKEL experiment.
 The BISON model is used as a geophysical baseline model and is the same as the pre-hack FOX model.
 """
-
 national_scale = {
     "BASELINE_BISON": {
         # Gravity

@@ -155,13 +155,14 @@ def create_geodataframe_from_points(
     Create a GeoDataFrame from a DataFrame.
 
     Args:
-        data (pd.DataFrame): The input DataFrame containing the data.
-        long_col (str): The name of the column containing the longitude values.
-        lat_col (str): The name of the column containing the latitude values.
-        epsg_code (Optional[int]): The EPSG code specifying the coordinate reference system (CRS) of the data.
+        data: The input DataFrame containing the data.
+        long_col: The name of the column containing the longitude values.
+        lat_col: The name of the column containing the latitude values.
+        epsg_code: The EPSG code specifying the coordinate reference system (CRS) of the data.
             If not provided, a ValueError will be raised.
-        crs (Optional[CRS]): The coordinate reference system (CRS) of the data.
+        crs: The coordinate reference system (CRS) of the data.
             If provided, it will be used instead of the `epsg_code` parameter.
+        query: The query string to filter the DataFrame.
 
     Returns:
         gpd.GeoDataFrame: The resulting GeoDataFrame.

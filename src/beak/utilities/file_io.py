@@ -3,9 +3,11 @@ import urllib.request
 import io
 import ssl
 import json
-
 import rasterio
+import pandas as pd
+import geopandas as gpd
 import numpy as np
+
 from typing import Dict, Tuple, Union, Optional, List
 
 
@@ -91,7 +93,7 @@ def load_layer(input_file: str) -> Tuple[np.ndarray, Dict]:
 
 
 def load_layers(
-    input_files: List[str]
+    input_files: List[str],
 ) -> np.ndarray:
     """
     Load a list of raster files from the given file paths.
@@ -614,3 +616,47 @@ def write_json(folder_name: str, file_name: str, data: Dict):
     """
     with open(os.path.join(folder_name, file_name), "w", encoding="utf-8") as json_file:
         json.dump(data, json_file, indent=4, ensure_ascii=False)
+
+    json_file.close()
+
+
+def write_csv(
+    src_data: pd.DataFrame,
+    file_path: str,
+    drop_columns: Optional[List[str]] = None,
+) -> None:
+    """
+    Export a DataFrame to a CSV file.
+
+    Args:
+        src_data: The DataFrame to be exported.
+        file_path: The file path.
+        drop_columns: The columns to be dropped before export.
+
+    Returns:
+        None
+    """
+    if not src_data.empty:
+        out_data = src_data.drop(columns=drop_columns, inplace=False) if drop_columns else src_data
+        out_data.to_csv(file_path, index=False)
+
+
+def write_gpkg(
+    src_data: pd.DataFrame,
+    file_path: str,
+    drop_columns: Optional[List[str]] = None,
+) -> None:
+    """
+    Export a GeoDataFrame to a Geopackage file.
+
+    Args:
+        src_data: The GeoDataFrame to be exported.
+        file_path: The file path.
+        drop_columns: The columns to be dropped before export.
+
+    Returns:
+        None
+    """
+    if not src_data.empty:
+        out_data = src_data.drop(columns=drop_columns, inplace=False) if drop_columns else src_data
+        out_data.to_file(file_path, driver="GPKG")

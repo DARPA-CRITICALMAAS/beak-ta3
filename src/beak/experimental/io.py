@@ -11,6 +11,7 @@ from rasterio.io import MemoryFile
 
 import os
 import sys
+import json
 import multiprocessing as mp
 
 from pathlib import Path
@@ -18,9 +19,10 @@ from typing import Optional, Tuple, Union, Dict, Sequence, List, Any
 from numbers import Number
 from collections import Counter
 from tqdm import tqdm
+from importlib import import_module
 
-# from importlib.resources.abc import Traversable
 from beak.experimental.checks import check_write_permissions
+from beak.utilities.helper import get_timestamp
 
 
 def data_folder(package_name: str = "beak", folder_name: str = "data") -> Any:
@@ -391,7 +393,8 @@ def load_feather(
     storage_options: Optional[dict] = None,
     nrows: Optional[int] = None,
 ) -> pd.DataFrame:
-    """Load data from a feather file into a pandas DataFrame.
+    """
+    Load data from a feather file into a pandas DataFrame.
 
     Args:
         file_path (Path): The path to the feather file.
@@ -591,6 +594,9 @@ def load_model(
             raise ValueError("Some filenames occur multiple times. Please check with option 'verbose=1' to see affected files.")
 
     print(f"Number of files in file list: {len(file_list)}")
+
+    # Convert file list to strings
+    file_list = [str(file) for file in file_list]
     return model_dict, file_list, filename_counts
 
 
@@ -726,6 +732,100 @@ def save_geodataframe(
             dataframe.to_file(path, driver="ESRI Shapefile")
         elif path_suffix == ".gpkg":
             dataframe.to_file(path, driver="GPKG")
+
+
+def create_model_setup(
+    method: str,
+    input_config: str = "config_base.json",
+    train_config: Optional[str] = None,
+    base_path: Optional[str] = None,
+    work_dir: Optional[str] = None
+) -> Tuple[str, List, str, str]:
+    """
+    Create a model setup based on the provided method.
+
+    Args:
+        method (str): The method for creating the model setup.
+        input_config (str, optional): The input configuration file. Defaults to "config_base.json".
+        train_config (str, optional): The training configuration file. Defaults to None.
+        base_path (str, optional): The base path for the processed model data. Defaults to None.
+        work_dir (str, optional): The working directory. Defaults to the current directory.
+
+    Returns:
+        The model setup dictionary, file list, labels and output path.
+    """
+    work_dir = Path(work_dir) if work_dir is not None else Path(
+        os.path.abspath(os.path.dirname(__file__))
+    )
+
+    input_config_path = work_dir / input_config
+    input_config_dict = json.load(
+        open(input_config_path, "r")
+    )
+
+    model = input_config_dict["model"]
+    model_description = model["description"]
+    model_commodity = model["commodity"]
+    model_dict = model["dict"]
+    model_name = model["name"]
+    model_module = f"{model_description}_{model_commodity}"
+
+    spatial_setup = input_config_dict["spatial_setup"]
+    scale = spatial_setup["scale"]
+    region = spatial_setup["region"]
+    epsg = spatial_setup["epsg"]
+    res = spatial_setup["res"]
+    subarea = spatial_setup["subarea"]
+
+    input_data = input_config_dict["input_data"]
+    layers_folders = input_data["layers_folders"]
+    labels_file = input_data["labels_file"]
+    read_method = input_data["read_method"]
+
+    if scale == "national":
+        cma = f"{scale}_{region}_{epsg}_{res}"
+        model = scale
+    elif scale == "regional":
+        cma = f"{scale}_{model_commodity}_{region}_{epsg}_{res}"
+        model = f"{scale}_{region}"
+    else:
+        raise ValueError("Invalid scale!")
+
+    model_config = import_module(f"beak.models.{model_module}")
+    model_config = getattr(model_config, model_dict)
+    model_config = model_config[model][model_name]
+
+    if base_path is None:
+        base_path = data_folder() / "PROCESSED" / cma
+        base_path = base_path / subarea if subarea else base_path
+        base_path = str(base_path)
+
+    out_path = os.path.join(work_dir, "models", method, model_name, get_timestamp())
+    train_config = os.path.join(work_dir, f"config_{method}.json") if train_config is None else train_config
+    labels = os.path.join(base_path, "labels", labels_file)
+
+    input_folders = [
+        Path(os.path.join(base_path, folder))
+        for folder in layers_folders
+    ]
+
+    if read_method == "dict":
+        _, file_list, _ = load_model(
+            model=model_config,
+            folders=input_folders,
+            verbose=0
+        )
+    elif read_method == "folder":
+        file_list = []
+        for folder in input_folders:
+            file_list.extend(
+                create_file_list(folder)
+            )
+        file_list = [str(file) for file in file_list]
+    else:
+        raise ValueError("Invalid read method!")
+
+    return train_config, file_list, labels, out_path
 
 
 # region: Test code
