@@ -1,0 +1,152 @@
+import numpy as np
+import rasterio
+from rasterio import warp
+from rasterio.enums import Resampling
+from typing import Optional, Tuple, Dict, Union
+from pathlib import Path
+
+from rasterio.transform import xy
+
+from beak.utilities.file_io import (
+    _cast_array_to_minimum_dtype, load_layer
+)
+
+
+def coregistration(
+    src: Tuple[np.ndarray, Dict],
+    template: Tuple[np.ndarray, Dict],
+    resampling: Optional[Resampling] = None,
+) -> Tuple[np.ndarray, Dict]:
+    """
+    Co-registering a source raster to match the spatial properties of a template raster.
+
+    Args:
+        src: A tuple containing the source raster array and its metadata.
+            - np.ndarray: The source raster data array.
+            - Dict: The source raster metadata.
+        template: A tuple containing the template raster array and its metadata.
+            - np.ndarray: The template raster data array.
+            - Dict: The template raster metadata.
+        resampling: The resampling method to use. If None, it defaults to nearest for integer data types
+            and bilinear for floating-point data types.
+
+    Returns:
+        np.ndarray: The 2-dimensional coregistered raster data array.
+        Dict: The updated metadata for the coregistered raster.
+    """
+    src_array, src_meta = src
+    template_array, template_meta = template
+
+    dst_array = np.empty((src_meta["count"], template_meta["height"], template_meta["width"]))
+    dst_array.fill(src_meta["nodata"])
+
+    if resampling is None:
+        if np.issubdtype(src_array.dtype, np.integer):
+            resampling = Resampling.nearest
+        elif np.issubdtype(src_array.dtype, np.floating):
+            resampling = Resampling.bilinear
+
+    out_array = warp.reproject(
+        source=src_array,
+        src_crs=src_meta["crs"],
+        src_transform=src_meta["transform"],
+        src_nodata=src_meta["nodata"],
+        destination=dst_array,
+        dst_crs=template_meta["crs"],
+        dst_transform=template_meta["transform"],
+        dst_nodata=src_meta["nodata"],
+        resampling=resampling,
+    )[0]
+
+    out_array, out_nodata = _cast_array_to_minimum_dtype(out_array, src_meta["nodata"])
+
+    out_meta = template_meta.copy()
+    out_meta.update(
+        dtype=out_array.dtype,
+        nodata=out_nodata,
+    )
+
+    return out_array.squeeze(), out_meta
+
+
+def add_coordinates_to_raster(
+    src_array: np.ndarray,
+    coord_file: str,
+) -> np.ndarray:
+    """
+    Add longitude and latitude coordinates to the stacked raster array.
+
+    Args:
+        src_array: The stacked raster array with the data from all input files.
+        coord_file: The file path to the raster file used to determine the coordinate system.
+
+    Returns:
+        The stacked raster array with longitude and latitude coordinates added on last two columns.
+    """
+    _, meta = load_layer(coord_file)
+    height, width, transform = meta["height"], meta["width"], meta["transform"]
+
+    rows, cols = np.meshgrid(np.arange(height), np.arange(width), indexing="ij")
+
+    longitudes, latitudes = xy(
+        transform,
+        list(rows.reshape(-1, 1)),
+        list(cols.reshape(-1, 1))
+    )
+
+    out_stack = np.column_stack([src_array, longitudes, latitudes])
+    return out_stack
+
+
+def _convert_binary_raster_to_point(
+    src_array: np.ndarray,
+    src_meta: Dict,
+    filter_value: int,
+) -> Tuple[np.ndarray]:
+
+    transform = src_meta["transform"]
+    crs = src_meta["crs"]
+
+    rows, cols = np.where(src_array == filter_value)
+
+    points = [
+        Point(xy(transform, row, col, offset='center'))
+        for row, col in zip(rows, cols)
+    ]
+
+    gdf = gpd.GeoDataFrame(geometry=points, crs=crs)
+
+
+def convert_raster_to_point(
+    src_path: Union[str, Path],
+    out_path: Union[str, Path],
+    filter_value: int
+):
+    """
+    Extract points from a single-band raster and save to GeoPackage.
+
+    Args:
+        input_raster: Path to the input raster file.
+        output_gpkg: Path to the output GeoPackage file.
+        filter_value: The value to filter in the raster.
+
+    Returns:
+        None
+    """
+    src_raster = rasterio.open(src_path)
+    src_array = src_raster.read(1)
+
+
+
+        # Convert pixel coordinates to geographic coordinates
+        points = [
+            Point(xy(transform, row, col, offset='center'))
+            for row, col in zip(rows, cols)
+        ]
+
+        # Create GeoDataFrame
+        gdf = gpd.GeoDataFrame(geometry=points, crs=crs)
+
+        # Save to GeoPackage
+        gdf.to_file(output_gpkg, driver='GPKG')
+        print(f"Successfully saved {len(gdf)} points to {output_gpkg}")

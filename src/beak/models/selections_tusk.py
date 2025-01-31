@@ -226,7 +226,7 @@ hackathon_12m = {
         }
     },
     "regional_great_basin_geodawn": {
-        "baseline_bison": {
+        "baseline_bison_pp": {
             # Gravity
             "Geophysics_Gravity_Bouguer_HGM": True,
             "Geophysics_Gravity_Bouguer_Up30km": True,
@@ -247,7 +247,7 @@ hackathon_12m = {
             "Geophysics_MT2023_15km": True,
             "Geophysics_MT2023_9km": True,
         },
-        "morph_mamba": {
+        "morph_mamba_pp": {
             # Gravity
             "Geophysics_Gravity_Bouguer_HGM": True,
             "Geophysics_Gravity_Bouguer_Up30km": True,

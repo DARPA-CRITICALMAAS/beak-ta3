@@ -1,7 +1,13 @@
 import numpy as np
+import geopandas as gpd
+import pandas as pd
+import rasterio
 from rasterio import warp
 from rasterio.enums import Resampling
-from typing import Optional, Tuple, Dict
+from typing import Optional, Tuple, Dict, Union
+from pathlib import Path
+from shapely.geometry import Point
+
 
 from rasterio.transform import xy
 
@@ -75,8 +81,8 @@ def add_coordinates_to_raster(
     Add longitude and latitude coordinates to the stacked raster array.
 
     Args:
-        raster_stack: The stacked raster array with the data from all input files.
-        input_file: The file path to the raster file used to determine the coordinate system.
+        src_array: The stacked raster array with the data from all input files.
+        coord_file: The file path to the raster file used to determine the coordinate system.
 
     Returns:
         The stacked raster array with longitude and latitude coordinates added on last two columns.
@@ -94,3 +100,65 @@ def add_coordinates_to_raster(
 
     out_stack = np.column_stack([src_array, longitudes, latitudes])
     return out_stack
+
+
+def _convert_binary_raster_to_point(
+    src_array: np.ndarray,
+    src_meta: Dict,
+    filter_value: int,
+) -> pd.DataFrame:
+    """
+    Convert a binary raster to a GeoDataFrame of points.
+
+    Args:
+        src_array: The binary raster data array.
+        src_meta: The metadata dictionary for the raster.
+        filter_value: The value to filter in the raster.
+
+    Returns:
+        A GeoDataFrame of points.
+    """
+
+    transform = src_meta["transform"]
+    crs = src_meta["crs"]
+
+    rows, cols = np.where(src_array == filter_value)
+
+    points = [
+        Point(xy(transform, row, col, offset="center"))
+        for row, col in zip(rows, cols)
+    ]
+
+    return gpd.GeoDataFrame(geometry=points, crs=crs)
+
+
+def convert_raster_to_point(
+    src_path: Union[str, Path],
+    out_path: Union[str, Path],
+    filter_value: int = 1,
+    driver: str = "GPKG"
+):
+    """
+    Extract points from a single-band raster and save to GeoPackage.
+
+    Args:
+        input_raster: Path to the input raster file.
+        output_gpkg: Path to the output GeoPackage file.
+        filter_value: The value to filter in the raster.
+        driver: The file format driver to use. Defaults to "GPKG" (GeoPackage).
+            Can also be "ESRI Shapefile" or other formats supported by fiona.
+
+    Returns:
+        None
+    """
+    src_raster = rasterio.open(src_path)
+    src_array = src_raster.read(1)
+    src_meta = src_raster.meta.copy()
+
+    point_table = _convert_binary_raster_to_point(
+        src_array,
+        src_meta,
+        filter_value
+    )
+
+    point_table.to_file(out_path, driver=driver)

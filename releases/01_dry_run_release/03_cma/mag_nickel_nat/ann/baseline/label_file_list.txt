@@ -1,1 +1,0 @@
-S:\Projekte\20230082_DARPA_CriticalMAAS_TA3\Bearbeitung\GitHub\beak-ta3\src\beak\data\DATA_OLD\hackathon_6m_related\TRAINING_LABELS\MAGMATIC_NICKEL_NAT\MAGMATIC_NICKEL_TA2_EPSG_4326_RES_0_025_US_CONT.tif

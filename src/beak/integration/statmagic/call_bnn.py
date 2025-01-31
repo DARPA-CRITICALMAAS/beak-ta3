@@ -119,14 +119,15 @@ def run_bnn(
     labels, meta = load_layer(input_labels)
 
     # Add coordinates to raster
+    print("Prepare model data...")
     layers_with_coords = add_coordinates_to_raster(
         src_array=layers,
         coord_file=input_labels
     )
 
     # Load initial data into array
-    print("Prepare model data...")
     X_prepared, y_prepared = prepare_model_data(layers_with_coords, labels)
+    assert np.any(y_prepared == 1), "No positive samples found. Please check your input data and consider imputing missing values."
 
     # Select random negatives
     print("Sample negatives...")
@@ -491,7 +492,6 @@ def _collect_results(
         os.path.join(output_folder, split + extension)
         for split, extension in product(splits, extensions)
     ]
-    model_data = [file for file in model_data if os.path.exists(file)]
 
     layers_list = prepare_output_layers(
         layers=layers_list,

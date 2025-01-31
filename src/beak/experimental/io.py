@@ -800,7 +800,7 @@ def create_model_setup(
         base_path = base_path / subarea if subarea else base_path
         base_path = str(base_path)
 
-    out_path = os.path.join(work_dir, "models", method, model_name, get_timestamp())
+    out_path = os.path.join(work_dir, method, "models", model_name, get_timestamp())
     train_config = os.path.join(work_dir, f"config_{method}.json") if train_config is None else train_config
     labels = os.path.join(base_path, "labels", labels_file)
 

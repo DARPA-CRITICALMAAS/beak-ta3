@@ -150,7 +150,7 @@ hackathon_12m = {
             "CONUS_MT2023_15km": True,
             "CONUS_MT2023_30km": True,
         },
-        "loss_llama": {
+        "loss_llama_pp": {
             # Gravity
             "Gravity_Up30km": True,
             "Gravity_Up30km_HGM": True,

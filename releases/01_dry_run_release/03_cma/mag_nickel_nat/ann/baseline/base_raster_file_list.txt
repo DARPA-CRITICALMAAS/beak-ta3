@@ -1,1 +1,0 @@
-S:\Projekte\20230082_DARPA_CriticalMAAS_TA3\Bearbeitung\GitHub\beak-ta3\src\beak\data\DATA_OLD\hackathon_6m_related\BASE_RASTERS\EPSG_4326_RES_0_025_US_CONT.tif

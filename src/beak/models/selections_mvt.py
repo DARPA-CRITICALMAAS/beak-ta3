@@ -179,7 +179,7 @@ hackathon_12m = {
         },
     },
     "regional_southmid_cont": {
-        "dropout_duck": {
+        "dropout_duck_pp": {
             # Gravity
             "Gravity_Up30km_HGM": True,
             "DeepGravitySources_Worms_Proximity": True,

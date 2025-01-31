@@ -172,10 +172,15 @@ def _create_zip_from_files(
     Returns:
         None
     """
+    file_list = [Path(file) for file in file_list if os.path.exists(file)]
+    archive_path = Path(archive_path)
+
     with zipfile.ZipFile(archive_path, "w") as archive:
         for file in file_list:
-            file = Path(file)
             archive.write(filename=file, arcname=file.name)
+
+    if not file_list:
+        print(f"Warning: Empty archive {archive_path.name} created.")
 
 
 def delete_files(file_list: List[str]) -> None:
@@ -262,9 +267,7 @@ def prepare_output_layers(
     else:
         file_path = files
 
-    layers.append(
-        (file_path, meta)
-    )
+    layers.append((file_path, meta)) if os.path.exists(file_path) else layers
 
     return layers
 
