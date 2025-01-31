@@ -1,4 +1,0 @@
-Following data from the SGMC were created externally:
-- distance to unconsolidated lithologies
-- minimum age
-- maximum age

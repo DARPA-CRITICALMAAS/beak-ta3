@@ -1,7 +1,0 @@
-S:\Projekte\20230082_DARPA_CriticalMAAS_TA3\Bearbeitung\GitHub\beak-ta3\src\beak\data\BAK\hackathon_6m_related\MCCAFFERTY23\PROCESSED\EPSG_4326_RES_0_025\US_CONT\GEOPHYSICS\LAB_HGM_cog.tif
-S:\Projekte\20230082_DARPA_CriticalMAAS_TA3\Bearbeitung\GitHub\beak-ta3\src\beak\data\BAK\hackathon_6m_related\MCCAFFERTY23\PROCESSED\EPSG_4326_RES_0_025\US_CONT\GEOPHYSICS\LAB_Worms_Proximity.tif
-S:\Projekte\20230082_DARPA_CriticalMAAS_TA3\Bearbeitung\GitHub\beak-ta3\src\beak\data\BAK\hackathon_6m_related\MCCAFFERTY23\PROCESSED\EPSG_4326_RES_0_025\US_CONT\GEOPHYSICS\Gravity_Up30km_HGM.tif
-S:\Projekte\20230082_DARPA_CriticalMAAS_TA3\Bearbeitung\GitHub\beak-ta3\src\beak\data\BAK\hackathon_6m_related\LAWLEY22\EXPORT\EPSG_4326_RES_0_025\US_CONT\NUMERICAL\Gravity_Bouguer_UpCont30km_HGM_Worms_Proximity.tif
-S:\Projekte\20230082_DARPA_CriticalMAAS_TA3\Bearbeitung\GitHub\beak-ta3\src\beak\data\BAK\hackathon_6m_related\MCCAFFERTY23\PROCESSED\EPSG_4326_RES_0_025\US_CONT\GEOPHYSICS\MagRTP_HGMDeepSources.tif
-S:\Projekte\20230082_DARPA_CriticalMAAS_TA3\Bearbeitung\GitHub\beak-ta3\src\beak\data\BAK\hackathon_6m_related\LAWLEY22\EXPORT\EPSG_4326_RES_0_025\US_CONT\NUMERICAL\Magnetic_LongWavelength_HGM_Worms_Proximity.tif
-S:\Projekte\20230082_DARPA_CriticalMAAS_TA3\Bearbeitung\GitHub\beak-ta3\src\beak\data\BAK\hackathon_6m_related\GEOPHYSICS_MAGNETOTELLURICS\PROCESSED\CONUS_2023\EPSG_4326_RES_0_025\US_CONT\UNIFIED\CONUS_MT2023_30km_cog.tif

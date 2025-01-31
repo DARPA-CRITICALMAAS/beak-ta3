@@ -190,7 +190,7 @@ experiments/**/models/
 experiments/*evaluation*/
 experiments/hackathon_12m_related/**/bnn
 
-
+releases_old/**
 releases/**/export/
 releases/**/model/
 releases/**/models/
@@ -198,7 +198,6 @@ releases/**/prediction/
 releases/**/train/
 releases/**/validation/
 releases/*hackathon_m9_pre_hack/**/bnn
-
 
 *.zip
 *.json
