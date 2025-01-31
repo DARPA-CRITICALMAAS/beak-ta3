@@ -190,7 +190,7 @@ experiments/**/models/
 experiments/*evaluation*/
 experiments/hackathon_12m_related/**/bnn
 
-releases_old/**
+releases/**
 releases/**/export/
 releases/**/model/
 releases/**/models/
