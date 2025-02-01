@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.utilities.impute &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -95,10 +95,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for beak.utilities.impute</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="kn">from</span> <span class="nn">beak.utilities.file_io</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.utilities.file_io</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">_cast_array_to_minimum_dtype</span><span class="p">,</span>
     <span class="n">_update_nodata</span>
 <span class="p">)</span>
@@ -106,7 +106,7 @@
 
 <div class="viewcode-block" id="__impute_min">
 <a class="viewcode-back" href="../../../beak.utilities.impute.html#beak.utilities.impute.__impute_min">[docs]</a>
-<span class="k">def</span> <span class="nf">__impute_min</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">__impute_min</span><span class="p">(</span>
     <span class="n">src_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="n">impute_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">src_array</span><span class="p">)</span>
@@ -116,7 +116,7 @@
 
 <div class="viewcode-block" id="__impute_max">
 <a class="viewcode-back" href="../../../beak.utilities.impute.html#beak.utilities.impute.__impute_max">[docs]</a>
-<span class="k">def</span> <span class="nf">__impute_max</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">__impute_max</span><span class="p">(</span>
     <span class="n">src_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="n">impute_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">src_array</span><span class="p">)</span>
@@ -126,7 +126,7 @@
 
 <div class="viewcode-block" id="__impute_mean">
 <a class="viewcode-back" href="../../../beak.utilities.impute.html#beak.utilities.impute.__impute_mean">[docs]</a>
-<span class="k">def</span> <span class="nf">__impute_mean</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">__impute_mean</span><span class="p">(</span>
     <span class="n">src_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="n">impute_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">src_array</span><span class="p">)</span>
@@ -136,7 +136,7 @@
 
 <div class="viewcode-block" id="__impute_median">
 <a class="viewcode-back" href="../../../beak.utilities.impute.html#beak.utilities.impute.__impute_median">[docs]</a>
-<span class="k">def</span> <span class="nf">__impute_median</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">__impute_median</span><span class="p">(</span>
     <span class="n">src_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="n">impute_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmedian</span><span class="p">(</span><span class="n">src_array</span><span class="p">)</span>
@@ -146,7 +146,7 @@
 
 <div class="viewcode-block" id="__impute_zero">
 <a class="viewcode-back" href="../../../beak.utilities.impute.html#beak.utilities.impute.__impute_zero">[docs]</a>
-<span class="k">def</span> <span class="nf">__impute_zero</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">__impute_zero</span><span class="p">(</span>
     <span class="n">src_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="n">impute_value</span> <span class="o">=</span> <span class="mi">0</span>
@@ -156,7 +156,7 @@
 
 <div class="viewcode-block" id="__impute_custom">
 <a class="viewcode-back" href="../../../beak.utilities.impute.html#beak.utilities.impute.__impute_custom">[docs]</a>
-<span class="k">def</span> <span class="nf">__impute_custom</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">__impute_custom</span><span class="p">(</span>
     <span class="n">src_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">custom_value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -167,7 +167,7 @@
 
 <div class="viewcode-block" id="impute">
 <a class="viewcode-back" href="../../../beak.utilities.impute.html#beak.utilities.impute.impute">[docs]</a>
-<span class="k">def</span> <span class="nf">impute</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">impute</span><span class="p">(</span>
     <span class="n">src</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">],</span>
     <span class="n">template</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]],</span>
     <span class="n">method</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="s2">&quot;zero&quot;</span><span class="p">,</span> <span class="s2">&quot;custom&quot;</span><span class="p">],</span>
@@ -249,7 +249,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

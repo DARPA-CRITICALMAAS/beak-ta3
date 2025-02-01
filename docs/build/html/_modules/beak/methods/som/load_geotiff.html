@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.methods.som.load_geotiff &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -102,15 +102,15 @@
 <span class="sd">@author: shautala</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">osgeo</span> <span class="kn">import</span> <span class="n">gdal</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">osgeo</span><span class="w"> </span><span class="kn">import</span> <span class="n">gdal</span>
 <span class="n">gdal</span><span class="o">.</span><span class="n">DontUseExceptions</span><span class="p">()</span>  <span class="c1"># gdal.UseExceptions()  # Explicitly Use or Don&#39;t Use Exceptions</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 
 <div class="viewcode-block" id="load_geotiff_files">
 <a class="viewcode-back" href="../../../../beak.methods.som.load_geotiff.html#beak.methods.som.load_geotiff.load_geotiff_files">[docs]</a>
-<span class="k">def</span> <span class="nf">load_geotiff_files</span><span class="p">(</span><span class="n">input_file_list</span><span class="p">,</span> <span class="n">label_file</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_geotiff_files</span><span class="p">(</span><span class="n">input_file_list</span><span class="p">,</span> <span class="n">label_file</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load data and meta data of geotiff files using gdal</span>
 
 <span class="sd">    Args:</span>
@@ -214,7 +214,7 @@
 
 <div class="viewcode-block" id="delete_rows_with_no_data">
 <a class="viewcode-back" href="../../../../beak.methods.som.load_geotiff.html#beak.methods.som.load_geotiff.delete_rows_with_no_data">[docs]</a>
-<span class="k">def</span> <span class="nf">delete_rows_with_no_data</span><span class="p">(</span><span class="n">geotiff_header</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">delete_rows_with_no_data</span><span class="p">(</span><span class="n">geotiff_header</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Delete rows from ndarray that contain noData values. Data and rows count of ndarray is updated and returned as a dictionary with same format as input dictionary.</span>
 
 <span class="sd">    Args:</span>
@@ -247,7 +247,7 @@
 
 <div class="viewcode-block" id="read_geotiff_coordinate_columns">
 <a class="viewcode-back" href="../../../../beak.methods.som.load_geotiff.html#beak.methods.som.load_geotiff.read_geotiff_coordinate_columns">[docs]</a>
-<span class="k">def</span> <span class="nf">read_geotiff_coordinate_columns</span><span class="p">(</span><span class="n">geotiff_header</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_geotiff_coordinate_columns</span><span class="p">(</span><span class="n">geotiff_header</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read coordinate columns from dictionary</span>
 
 <span class="sd">    Args:</span>
@@ -286,7 +286,7 @@
 
 <div class="viewcode-block" id="read_geotiff_data_columns">
 <a class="viewcode-back" href="../../../../beak.methods.som.load_geotiff.html#beak.methods.som.load_geotiff.read_geotiff_data_columns">[docs]</a>
-<span class="k">def</span> <span class="nf">read_geotiff_data_columns</span><span class="p">(</span><span class="n">geotiff_header</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_geotiff_data_columns</span><span class="p">(</span><span class="n">geotiff_header</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read data columns from dictionary</span>
 
 <span class="sd">    Args:</span>
@@ -309,7 +309,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

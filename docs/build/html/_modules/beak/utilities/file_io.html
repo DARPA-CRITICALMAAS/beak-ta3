@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.utilities.file_io &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -95,20 +95,22 @@
            <div itemprop="articleBody">
              
   <h1>Source code for beak.utilities.file_io</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">urllib.request</span>
-<span class="kn">import</span> <span class="nn">io</span>
-<span class="kn">import</span> <span class="nn">ssl</span>
-<span class="kn">import</span> <span class="nn">json</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ssl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">import</span> <span class="nn">rasterio</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
 
 
 <div class="viewcode-block" id="download_file_from_cdr">
 <a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.download_file_from_cdr">[docs]</a>
-<span class="k">def</span> <span class="nf">download_file_from_cdr</span><span class="p">(</span><span class="n">download_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">download_file_from_cdr</span><span class="p">(</span><span class="n">download_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Download a raster file from the specified URL.</span>
 
@@ -135,7 +137,7 @@
 
 <div class="viewcode-block" id="read_raster_band">
 <a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.read_raster_band">[docs]</a>
-<span class="k">def</span> <span class="nf">read_raster_band</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_raster_band</span><span class="p">(</span>
     <span class="n">raster</span><span class="p">:</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">DatasetReader</span><span class="p">,</span>
     <span class="n">band</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="n">nodata_to_nan</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -174,7 +176,7 @@
 
 <div class="viewcode-block" id="load_layer">
 <a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.load_layer">[docs]</a>
-<span class="k">def</span> <span class="nf">load_layer</span><span class="p">(</span><span class="n">input_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_layer</span><span class="p">(</span><span class="n">input_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load a raster file from the given file path.</span>
 
@@ -198,8 +200,8 @@
 
 <div class="viewcode-block" id="load_layers">
 <a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.load_layers">[docs]</a>
-<span class="k">def</span> <span class="nf">load_layers</span><span class="p">(</span>
-    <span class="n">input_files</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_layers</span><span class="p">(</span>
+    <span class="n">input_files</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load a list of raster files from the given file paths.</span>
@@ -225,7 +227,7 @@
 
 <div class="viewcode-block" id="_remove_nan_rows">
 <a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io._remove_nan_rows">[docs]</a>
-<span class="k">def</span> <span class="nf">_remove_nan_rows</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_remove_nan_rows</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="p">):</span>
@@ -249,7 +251,7 @@
 
 <div class="viewcode-block" id="prepare_model_data">
 <a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.prepare_model_data">[docs]</a>
-<span class="k">def</span> <span class="nf">prepare_model_data</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">prepare_model_data</span><span class="p">(</span>
     <span class="n">input_layers</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">input_labels</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
@@ -274,7 +276,7 @@
 
 <div class="viewcode-block" id="save_raster">
 <a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.save_raster">[docs]</a>
-<span class="k">def</span> <span class="nf">save_raster</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_raster</span><span class="p">(</span>
     <span class="n">src_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">src_meta</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
     <span class="n">output_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -341,7 +343,7 @@
 
 <div class="viewcode-block" id="prepare_output">
 <a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.prepare_output">[docs]</a>
-<span class="k">def</span> <span class="nf">prepare_output</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">prepare_output</span><span class="p">(</span>
     <span class="n">src_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">src_meta</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
@@ -378,7 +380,7 @@
 
 <div class="viewcode-block" id="_update_nodata">
 <a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io._update_nodata">[docs]</a>
-<span class="k">def</span> <span class="nf">_update_nodata</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_update_nodata</span><span class="p">(</span>
     <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">nodata_value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
 <span class="p">):</span>
@@ -411,7 +413,7 @@
 
 <div class="viewcode-block" id="_initialize_data_for_rasterization">
 <a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io._initialize_data_for_rasterization">[docs]</a>
-<span class="k">def</span> <span class="nf">_initialize_data_for_rasterization</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_initialize_data_for_rasterization</span><span class="p">(</span>
     <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">nodata_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">],</span>
     <span class="n">fill_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">],</span>
@@ -480,7 +482,7 @@
 
 <div class="viewcode-block" id="_cast_value_to_int">
 <a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io._cast_value_to_int">[docs]</a>
-<span class="k">def</span> <span class="nf">_cast_value_to_int</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_cast_value_to_int</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cast a value to integer type if possible.</span>
 
@@ -516,7 +518,7 @@
 
 <div class="viewcode-block" id="_cast_array_to_minimum_dtype">
 <a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io._cast_array_to_minimum_dtype">[docs]</a>
-<span class="k">def</span> <span class="nf">_cast_array_to_minimum_dtype</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_cast_array_to_minimum_dtype</span><span class="p">(</span>
     <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">unify_integer_types</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -568,7 +570,7 @@
 
 <div class="viewcode-block" id="__get_dtype_range_info">
 <a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.__get_dtype_range_info">[docs]</a>
-<span class="k">def</span> <span class="nf">__get_dtype_range_info</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">__get_dtype_range_info</span><span class="p">(</span>
     <span class="n">dtype</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -601,7 +603,7 @@
 
 <div class="viewcode-block" id="__get_dtype_range_value">
 <a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.__get_dtype_range_value">[docs]</a>
-<span class="k">def</span> <span class="nf">__get_dtype_range_value</span><span class="p">(</span><span class="n">dtype</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">__get_dtype_range_value</span><span class="p">(</span><span class="n">dtype</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the range value by dtype.</span>
 
@@ -624,7 +626,7 @@
 
 <div class="viewcode-block" id="__get_next_higher_dtype">
 <a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.__get_next_higher_dtype">[docs]</a>
-<span class="k">def</span> <span class="nf">__get_next_higher_dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">__get_next_higher_dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the next higher dtype.</span>
 
@@ -661,7 +663,7 @@
 
 <div class="viewcode-block" id="__get_minimum_dtype">
 <a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.__get_minimum_dtype">[docs]</a>
-<span class="k">def</span> <span class="nf">__get_minimum_dtype</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">__get_minimum_dtype</span><span class="p">(</span>
     <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">unify_integer_types</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -747,7 +749,7 @@
 
 <div class="viewcode-block" id="write_json">
 <a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.write_json">[docs]</a>
-<span class="k">def</span> <span class="nf">write_json</span><span class="p">(</span><span class="n">folder_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_json</span><span class="p">(</span><span class="n">folder_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Write a json file.</span>
 
@@ -760,7 +762,57 @@
 <span class="sd">        None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder_name</span><span class="p">,</span> <span class="n">file_name</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
-        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">json_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="write_csv">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.write_csv">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_csv</span><span class="p">(</span>
+    <span class="n">src_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">drop_columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Export a DataFrame to a CSV file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        src_data: The DataFrame to be exported.</span>
+<span class="sd">        file_path: The file path.</span>
+<span class="sd">        drop_columns: The columns to be dropped before export.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">src_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">out_data</span> <span class="o">=</span> <span class="n">src_data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">drop_columns</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">if</span> <span class="n">drop_columns</span> <span class="k">else</span> <span class="n">src_data</span>
+        <span class="n">out_data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="write_gpkg">
+<a class="viewcode-back" href="../../../beak.utilities.file_io.html#beak.utilities.file_io.write_gpkg">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_gpkg</span><span class="p">(</span>
+    <span class="n">src_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">drop_columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Export a GeoDataFrame to a Geopackage file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        src_data: The GeoDataFrame to be exported.</span>
+<span class="sd">        file_path: The file path.</span>
+<span class="sd">        drop_columns: The columns to be dropped before export.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">src_data</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">out_data</span> <span class="o">=</span> <span class="n">src_data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">drop_columns</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">if</span> <span class="n">drop_columns</span> <span class="k">else</span> <span class="n">src_data</span>
+        <span class="n">out_data</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">&quot;GPKG&quot;</span><span class="p">)</span></div>
 
 </pre></div>
 
@@ -771,7 +823,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

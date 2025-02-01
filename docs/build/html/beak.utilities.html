@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.utilities package &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
@@ -126,7 +126,14 @@
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.file_io.html#beak.utilities.file_io.prepare_output"><code class="docutils literal notranslate"><span class="pre">prepare_output()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.file_io.html#beak.utilities.file_io.read_raster_band"><code class="docutils literal notranslate"><span class="pre">read_raster_band()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.file_io.html#beak.utilities.file_io.save_raster"><code class="docutils literal notranslate"><span class="pre">save_raster()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.file_io.html#beak.utilities.file_io.write_csv"><code class="docutils literal notranslate"><span class="pre">write_csv()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.file_io.html#beak.utilities.file_io.write_gpkg"><code class="docutils literal notranslate"><span class="pre">write_gpkg()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.file_io.html#beak.utilities.file_io.write_json"><code class="docutils literal notranslate"><span class="pre">write_json()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="beak.utilities.helper.html">beak.utilities.helper module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.helper.html#beak.utilities.helper.get_runtime"><code class="docutils literal notranslate"><span class="pre">get_runtime()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.helper.html#beak.utilities.helper.get_timestamp"><code class="docutils literal notranslate"><span class="pre">get_timestamp()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="beak.utilities.impute.html">beak.utilities.impute module</a><ul>
@@ -145,10 +152,14 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="beak.utilities.raster_processing.html">beak.utilities.raster_processing module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.raster_processing.html#beak.utilities.raster_processing._convert_binary_raster_to_point"><code class="docutils literal notranslate"><span class="pre">_convert_binary_raster_to_point()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.raster_processing.html#beak.utilities.raster_processing.add_coordinates_to_raster"><code class="docutils literal notranslate"><span class="pre">add_coordinates_to_raster()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.raster_processing.html#beak.utilities.raster_processing.convert_raster_to_point"><code class="docutils literal notranslate"><span class="pre">convert_raster_to_point()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.raster_processing.html#beak.utilities.raster_processing.coregistration"><code class="docutils literal notranslate"><span class="pre">coregistration()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="beak.utilities.sampling.html">beak.utilities.sampling module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.sampling.html#beak.utilities.sampling.extract_train_test_locations"><code class="docutils literal notranslate"><span class="pre">extract_train_test_locations()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.sampling.html#beak.utilities.sampling.random_oversampling"><code class="docutils literal notranslate"><span class="pre">random_oversampling()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.sampling.html#beak.utilities.sampling.select_negative_samples"><code class="docutils literal notranslate"><span class="pre">select_negative_samples()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.sampling.html#beak.utilities.sampling.select_train_and_test_data"><code class="docutils literal notranslate"><span class="pre">select_train_and_test_data()</span></code></a></li>
@@ -169,6 +180,8 @@
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.vector_processing.html#beak.utilities.vector_processing._get_geometry_type"><code class="docutils literal notranslate"><span class="pre">_get_geometry_type()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.vector_processing.html#beak.utilities.vector_processing._rasterize_features"><code class="docutils literal notranslate"><span class="pre">_rasterize_features()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.vector_processing.html#beak.utilities.vector_processing._transform_from_geometries"><code class="docutils literal notranslate"><span class="pre">_transform_from_geometries()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.vector_processing.html#beak.utilities.vector_processing.create_geodataframe_from_points"><code class="docutils literal notranslate"><span class="pre">create_geodataframe_from_points()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="beak.utilities.vector_processing.html#beak.utilities.vector_processing.extract_values_from_points"><code class="docutils literal notranslate"><span class="pre">extract_values_from_points()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.vector_processing.html#beak.utilities.vector_processing.prepare_geodataframe"><code class="docutils literal notranslate"><span class="pre">prepare_geodataframe()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.vector_processing.html#beak.utilities.vector_processing.rasterize_binary"><code class="docutils literal notranslate"><span class="pre">rasterize_binary()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="beak.utilities.vector_processing.html#beak.utilities.vector_processing.rasterize_continuous"><code class="docutils literal notranslate"><span class="pre">rasterize_continuous()</span></code></a></li>
@@ -191,7 +204,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -17,6 +17,7 @@ Submodules
 
    beak.utilities.conversion
    beak.utilities.file_io
+   beak.utilities.helper
    beak.utilities.impute
    beak.utilities.outlier
    beak.utilities.raster_processing

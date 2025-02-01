@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.utilities.vector_processing &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -95,22 +95,56 @@
            <div itemprop="articleBody">
              
   <h1>Source code for beak.utilities.vector_processing</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">import</span> <span class="nn">rasterio</span>
-<span class="kn">from</span> <span class="nn">rasterio</span> <span class="kn">import</span> <span class="n">features</span><span class="p">,</span> <span class="n">transform</span>
-<span class="kn">from</span> <span class="nn">rasterio.enums</span> <span class="kn">import</span> <span class="n">MergeAlg</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyproj</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 
-<span class="kn">from</span> <span class="nn">beak.utilities.file_io</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rasterio</span><span class="w"> </span><span class="kn">import</span> <span class="n">features</span><span class="p">,</span> <span class="n">transform</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">MergeAlg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.crs</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.utilities.file_io</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">_cast_array_to_minimum_dtype</span><span class="p">,</span>
     <span class="n">_initialize_data_for_rasterization</span>
 <span class="p">)</span>
 
 
+<div class="viewcode-block" id="create_geodataframe_from_points">
+<a class="viewcode-back" href="../../../beak.utilities.vector_processing.html#beak.utilities.vector_processing.create_geodataframe_from_points">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_geodataframe_from_points</span><span class="p">(</span>
+    <span class="n">src</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">coord_columns</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span><span class="p">),</span>
+    <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">,</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">CRS</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a GeoDataFrame from a DataFrame containing geographic coordinates.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        src: The input DataFrame containing geographic coordinates.</span>
+<span class="sd">        coord_columns: A tuple of strings representing the names of the longitude and latitude columns.</span>
+<span class="sd">        crs: An optional CRS string or rasterio CRS object for projecting the GeoDataFrame.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        gpd.GeoDataFrame: The resulting GeoDataFrame.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">longitude</span><span class="p">,</span> <span class="n">latitude</span> <span class="o">=</span> <span class="n">coord_columns</span>
+
+    <span class="n">geodataframe</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">src</span><span class="p">,</span>
+        <span class="n">geometry</span><span class="o">=</span><span class="n">gpd</span><span class="o">.</span><span class="n">points_from_xy</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">longitude</span><span class="p">],</span> <span class="n">src</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">latitude</span><span class="p">]),</span>
+        <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">geodataframe</span></div>
+
+
+
 <div class="viewcode-block" id="prepare_geodataframe">
 <a class="viewcode-back" href="../../../beak.utilities.vector_processing.html#beak.utilities.vector_processing.prepare_geodataframe">[docs]</a>
-<span class="k">def</span> <span class="nf">prepare_geodataframe</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">prepare_geodataframe</span><span class="p">(</span>
     <span class="n">src</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
     <span class="n">template</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
     <span class="n">query</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -148,7 +182,7 @@
 
 <div class="viewcode-block" id="rasterize_binary">
 <a class="viewcode-back" href="../../../beak.utilities.vector_processing.html#beak.utilities.vector_processing.rasterize_binary">[docs]</a>
-<span class="k">def</span> <span class="nf">rasterize_binary</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rasterize_binary</span><span class="p">(</span>
     <span class="n">src</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
     <span class="n">template</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
     <span class="n">custom_fill_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -194,7 +228,7 @@
 
 <div class="viewcode-block" id="rasterize_encode_categorical">
 <a class="viewcode-back" href="../../../beak.utilities.vector_processing.html#beak.utilities.vector_processing.rasterize_encode_categorical">[docs]</a>
-<span class="k">def</span> <span class="nf">rasterize_encode_categorical</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rasterize_encode_categorical</span><span class="p">(</span>
     <span class="n">src</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
     <span class="n">template</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
     <span class="n">column_to_raster</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -244,7 +278,7 @@
 
 <div class="viewcode-block" id="rasterize_continuous">
 <a class="viewcode-back" href="../../../beak.utilities.vector_processing.html#beak.utilities.vector_processing.rasterize_continuous">[docs]</a>
-<span class="k">def</span> <span class="nf">rasterize_continuous</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rasterize_continuous</span><span class="p">(</span>
     <span class="n">src</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
     <span class="n">template</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
     <span class="n">column_to_raster</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -292,7 +326,7 @@
 
 <div class="viewcode-block" id="_get_geometry_type">
 <a class="viewcode-back" href="../../../beak.utilities.vector_processing.html#beak.utilities.vector_processing._get_geometry_type">[docs]</a>
-<span class="k">def</span> <span class="nf">_get_geometry_type</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_geometry_type</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determine the geometry type of a GeoDataFrame.</span>
 
@@ -324,7 +358,7 @@
 
 <div class="viewcode-block" id="_transform_from_geometries">
 <a class="viewcode-back" href="../../../beak.utilities.vector_processing.html#beak.utilities.vector_processing._transform_from_geometries">[docs]</a>
-<span class="k">def</span> <span class="nf">_transform_from_geometries</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_transform_from_geometries</span><span class="p">(</span>
     <span class="n">src</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
     <span class="n">resolution</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">transform</span><span class="o">.</span><span class="n">Affine</span><span class="p">]:</span>
@@ -352,7 +386,7 @@
 
 <div class="viewcode-block" id="_rasterize_features">
 <a class="viewcode-back" href="../../../beak.utilities.vector_processing.html#beak.utilities.vector_processing._rasterize_features">[docs]</a>
-<span class="k">def</span> <span class="nf">_rasterize_features</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_rasterize_features</span><span class="p">(</span>
     <span class="n">src</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">GeometryArray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">template</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
     <span class="n">custom_fill_value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -411,6 +445,54 @@
 
     <span class="k">return</span> <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span></div>
 
+
+
+<div class="viewcode-block" id="extract_values_from_points">
+<a class="viewcode-back" href="../../../beak.utilities.vector_processing.html#beak.utilities.vector_processing.extract_values_from_points">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_values_from_points</span><span class="p">(</span>
+    <span class="n">src_points</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">src_arrays</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">src_descriptions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">template</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract values from a raster array at specified point locations.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        src_points: A GeoDataFrame containing point geometries and attributes.</span>
+<span class="sd">        src_arrays: A list of raster arrays to extract values from.</span>
+<span class="sd">        src_descriptions: A list of names for the extracted values.</span>
+<span class="sd">        template: A tuple containing the template raster array and its metadata.</span>
+<span class="sd">            - np.ndarray: The template raster data array.</span>
+<span class="sd">            - dict: The template raster metadata.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A DataFrame containing the extracted values and additional attributes from the input GeoDataFrame.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">src_points</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">template</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">src_points</span><span class="o">.</span><span class="n">crs</span> <span class="o">==</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">]:</span>
+            <span class="n">src_points</span> <span class="o">=</span> <span class="n">src_points</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">])</span>
+
+        <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">rowcol</span><span class="p">(</span>
+            <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;transform&quot;</span><span class="p">],</span>
+            <span class="n">src_points</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+            <span class="n">src_points</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">y</span>
+        <span class="p">)</span>
+
+        <span class="n">extracted_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span>
+            <span class="n">raster</span><span class="p">[</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">]</span> <span class="k">for</span> <span class="n">raster</span> <span class="ow">in</span> <span class="n">src_arrays</span>
+        <span class="p">])</span>
+
+        <span class="n">extracted_values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">extracted_values</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">src_descriptions</span><span class="p">)</span>
+        <span class="n">extracted_values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">src_points</span><span class="p">,</span> <span class="n">extracted_values</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">extracted_values</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">extracted_values</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">src_points</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">extracted_values</span> <span class="o">=</span> <span class="n">src_points</span>
+
+    <span class="k">return</span> <span class="n">extracted_values</span></div>
+
 </pre></div>
 
            </div>
@@ -420,7 +502,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

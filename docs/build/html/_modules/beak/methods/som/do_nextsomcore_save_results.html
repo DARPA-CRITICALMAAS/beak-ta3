@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.methods.som.do_nextsomcore_save_results &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -95,15 +95,15 @@
            <div itemprop="articleBody">
              
   <h1>Source code for beak.methods.som.do_nextsomcore_save_results</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">.nextsomcore.nextsomcore</span> <span class="kn">import</span> <span class="n">NxtSomCore</span>
-<span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">.label_analysis</span> <span class="kn">import</span> <span class="o">*</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">.nextsomcore.nextsomcore</span><span class="w"> </span><span class="kn">import</span> <span class="n">NxtSomCore</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.label_analysis</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
 
 <div class="viewcode-block" id="run_SOM">
 <a class="viewcode-back" href="../../../../beak.methods.som.do_nextsomcore_save_results.html#beak.methods.som.do_nextsomcore_save_results.run_SOM">[docs]</a>
-<span class="k">def</span> <span class="nf">run_SOM</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_SOM</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
 <span class="w">	</span><span class="sd">&quot;&quot;&quot;Load data, run SOM and k-means clustering, write output to file.</span>
 
 <span class="sd">	Args:</span>
@@ -116,7 +116,7 @@
 			<span class="n">args</span><span class="o">.</span><span class="n">initialcodebook</span><span class="o">=</span><span class="n">som_dictionary</span><span class="p">[</span><span class="s1">&#39;codebook&#39;</span><span class="p">]</span>
 			<span class="n">args</span><span class="o">.</span><span class="n">initialization</span><span class="o">=</span><span class="kc">None</span>           
 	
-	<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Load data&#39;</span><span class="p">)</span>
+	<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Load data...&#39;</span><span class="p">)</span>
 	<span class="c1"># Record the start time</span>
 	<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 	<span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="kc">True</span><span class="p">):</span>
@@ -126,9 +126,9 @@
 	<span class="c1"># Record the end time</span>
 	<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 	<span class="c1"># Print the elapsed time</span>
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Execution time: </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+	<span class="c1"># print(f&quot;    Execution time: {end_time - start_time} seconds&quot;)</span>
 
-	<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Run SOM&#39;</span><span class="p">)</span>
+	<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Run SOM...&quot;</span><span class="p">)</span>
 	<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 	<span class="n">som</span> <span class="o">=</span> <span class="n">nxtsomcore</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
 		<span class="n">header</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span>
@@ -136,7 +136,7 @@
 		<span class="n">args</span><span class="o">.</span><span class="n">som_y</span><span class="p">,</span>
 		<span class="n">args</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span>
 		<span class="n">kerneltype</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-		<span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+		<span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
 		<span class="n">neighborhood</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">neighborhood</span><span class="p">,</span>
 		<span class="n">std_coeff</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">std_coeff</span><span class="p">,</span>
 		<span class="n">maptype</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">maptype</span><span class="p">,</span>
@@ -147,7 +147,7 @@
 		<span class="n">gridtype</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">gridtype</span>
 		<span class="p">)</span>    
 	<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Execution time: </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+	<span class="c1"># print(f&quot;    Execution time: {end_time - start_time} seconds&quot;)</span>
 
 	<span class="k">if</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_folder</span><span class="o">==</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
 		<span class="n">output_folder</span><span class="o">=</span><span class="s2">&quot;C:/Temp/NextSom&quot;</span>
@@ -155,34 +155,37 @@
 		<span class="n">output_folder</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">output_folder</span>
 
 	<span class="k">if</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">kmeans</span><span class="o">==</span><span class="kc">True</span><span class="p">):</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Run k-means clustering...&quot;</span><span class="p">)</span>
 		<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 		<span class="n">som</span><span class="p">[</span><span class="s1">&#39;clusters&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">nxtsomcore</span><span class="o">.</span><span class="n">clusters</span><span class="p">(</span><span class="n">som</span><span class="p">,</span><span class="n">args</span><span class="o">.</span><span class="n">kmeans_min</span><span class="p">,</span><span class="n">args</span><span class="o">.</span><span class="n">kmeans_max</span><span class="p">,</span><span class="n">args</span><span class="o">.</span><span class="n">kmeans_init</span><span class="p">,</span><span class="n">output_folder</span><span class="p">)</span>     
 		<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-		<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Execution time: </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+		<span class="c1"># print(f&quot;    Execution time: {end_time - start_time} seconds&quot;)</span>
 
-	<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Save SOM object to file&#39;</span><span class="p">)</span>
+	<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Save temporary outputs...&quot;</span><span class="p">)</span>
+	<span class="c1"># print(&#39;Save SOM object to file&#39;)</span>
 	<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 	<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_folder</span><span class="o">+</span><span class="s1">&#39;/som.dictionary&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">som_dictionary_file</span><span class="p">:</span>
 		<span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">som</span><span class="p">,</span> <span class="n">som_dictionary_file</span><span class="p">)</span> <span class="c1">#save som object to file.</span>
 	<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Execution time: </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+	<span class="c1"># print(f&quot;    Execution time: {end_time - start_time} seconds&quot;)</span>
 
-	<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Save SOM space results&#39;</span><span class="p">)</span>
+	<span class="c1"># print(&#39;Save SOM space results&#39;)</span>
 	<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 	<span class="n">nxtsomcore</span><span class="o">.</span><span class="n">save_somspace_result</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_file_somspace</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">som</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">normalized</span><span class="p">)</span>  
 	<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Execution time: </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+	<span class="c1"># print(f&quot;    Execution time: {end_time - start_time} seconds&quot;)</span>
 
 	<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">outgeofile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Save geo space results&#39;</span><span class="p">)</span>
+		<span class="c1"># print(&#39;Save geo space results&#39;)</span>
 		<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 		<span class="n">geo_data</span> <span class="o">=</span> <span class="n">nxtsomcore</span><span class="o">.</span><span class="n">save_geospace_result</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">outgeofile</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">som</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">input_file</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">normalized</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">label</span><span class="p">)</span> 
 		<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-		<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Execution time: </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span> 
+		<span class="c1"># print(f&quot;    Execution time: {end_time - start_time} seconds&quot;)</span>
 
 	<span class="n">index_nolabel</span> <span class="o">=</span> <span class="kc">None</span>
 	<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">label</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Do label analysis and write to file&#39;</span><span class="p">)</span>
+		<span class="c1"># print(&#39;Do label analysis and write to file&#39;)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Label analysis...&quot;</span><span class="p">)</span>
 		<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
 		<span class="n">annot_ticks</span><span class="p">,</span> <span class="n">annot_strings</span><span class="p">,</span> <span class="n">annot_data</span><span class="p">,</span> <span class="n">index_label</span><span class="p">,</span> <span class="n">index_nolabel</span>  <span class="o">=</span> <span class="n">get_label_annotation_data</span><span class="p">(</span><span class="n">som</span><span class="p">,</span> <span class="n">geo_data</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">output_file_geospace</span><span class="p">,</span> <span class="n">header</span><span class="p">[</span><span class="s1">&#39;noDataValue&#39;</span><span class="p">])</span>
@@ -196,31 +199,31 @@
 				<span class="n">write_bmu_cluster_label_data</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_folder</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">geo_data</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
 
 		<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-		<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Execution time: </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+		<span class="c1"># print(f&quot;    Execution time: {end_time - start_time} seconds&quot;)</span>
 
+	<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Create final results...&quot;</span><span class="p">)</span>
 	<span class="k">if</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">geotiff_input</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
-		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Write GeoTIFF file&#39;</span><span class="p">)</span>
+		<span class="c1"># print(&#39;Write GeoTIFF file&#39;)</span>
 		<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 		<span class="n">inputFileArray</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">geotiff_input</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>  
 		<span class="n">bmu_id</span> <span class="o">=</span> <span class="n">create_bmu_id</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">som_x</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">som_y</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">output_folder</span><span class="p">)</span>  
 		<span class="n">nxtsomcore</span><span class="o">.</span><span class="n">write_geotiff_out</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">output_raster_folder</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">output_file_geospace</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">output_file_somspace</span><span class="p">,</span> <span class="n">inputFileArray</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">args</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">index_nolabel</span><span class="p">,</span> <span class="n">bmu_id</span><span class="p">)</span>
 		<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-		<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Execution time: </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
-	
-	
-	<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Count cluster hit count&#39;</span><span class="p">)</span>
+		<span class="c1"># print(f&quot;    Execution time: {end_time - start_time} seconds&quot;)</span>
+
+	<span class="c1"># print(&#39;Count cluster hit count&#39;)</span>
 	<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 	
 	<span class="n">cluster_hit_count</span><span class="p">(</span><span class="n">som</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">output_file_somspace</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">output_folder</span><span class="p">)</span>
 	
-	<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-	<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Execution time: </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span></div>
+	<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span></div>
 
+	<span class="c1"># print(f&quot;    Execution time: {end_time - start_time} seconds&quot;)</span>
 
 
 <div class="viewcode-block" id="cluster_hit_count">
 <a class="viewcode-back" href="../../../../beak.methods.som.do_nextsomcore_save_results.html#beak.methods.som.do_nextsomcore_save_results.cluster_hit_count">[docs]</a>
-<span class="k">def</span> <span class="nf">cluster_hit_count</span><span class="p">(</span><span class="n">som</span><span class="p">,</span> <span class="n">output_file_somspace</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cluster_hit_count</span><span class="p">(</span><span class="n">som</span><span class="p">,</span> <span class="n">output_file_somspace</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">):</span>
 <span class="w">	</span><span class="sd">&quot;&quot;&quot;Counts hits per cluster and creates a NumPy array with cluster numbers and hit counts. Saves the array to a text file.</span>
 
 <span class="sd">	Args:</span>
@@ -251,7 +254,7 @@
 
 <div class="viewcode-block" id="create_bmu_id">
 <a class="viewcode-back" href="../../../../beak.methods.som.do_nextsomcore_save_results.html#beak.methods.som.do_nextsomcore_save_results.create_bmu_id">[docs]</a>
-<span class="k">def</span> <span class="nf">create_bmu_id</span><span class="p">(</span><span class="n">som_x</span><span class="p">,</span> <span class="n">som_y</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_bmu_id</span><span class="p">(</span><span class="n">som_x</span><span class="p">,</span> <span class="n">som_y</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">):</span>
 <span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">	Generate BMU (Best Matching Unit) IDs for all combinations of SOM (Self-Organizing Map) coordinates.</span>
 <span class="sd">	Args:</span>
@@ -287,7 +290,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

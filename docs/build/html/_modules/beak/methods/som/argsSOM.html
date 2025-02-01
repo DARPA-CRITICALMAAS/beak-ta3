@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.methods.som.argsSOM &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -95,13 +95,13 @@
            <div itemprop="articleBody">
              
   <h1>Source code for beak.methods.som.argsSOM</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">glob</span>
-<span class="kn">import</span> <span class="nn">json</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">glob</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
 <div class="viewcode-block" id="Args">
 <a class="viewcode-back" href="../../../../beak.methods.som.argsSOM.html#beak.methods.som.argsSOM.Args">[docs]</a>
-<span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Arguments for SOM and k-means clustering.</span>
 
 <span class="sd">    Args:</span>
@@ -145,7 +145,7 @@
 <span class="sd">        label_geotiff_file (Optional[str]): Geotiff_input file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for the class. Initialize all attributes with default values</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_file</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
@@ -182,7 +182,7 @@
 <div class="viewcode-block" id="Args.from_json_file">
 <a class="viewcode-back" href="../../../../beak.methods.som.argsSOM.html#beak.methods.som.argsSOM.Args.from_json_file">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_json_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file_path</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_json_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">file_path</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates an instance of Args from a JSON file.</span>
 
 <span class="sd">        Args:</span>
@@ -201,7 +201,7 @@
 
 <div class="viewcode-block" id="Args.create_list_from_pattern">
 <a class="viewcode-back" href="../../../../beak.methods.som.argsSOM.html#beak.methods.som.argsSOM.Args.create_list_from_pattern">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_list_from_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">file_patterns</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_list_from_pattern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">file_patterns</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a list of full file names from files matching the given file_patterns within the file_path</span>
 
 <span class="sd">        Args:</span>
@@ -237,7 +237,7 @@
     
 <div class="viewcode-block" id="Args.create_list_from_file">
 <a class="viewcode-back" href="../../../../beak.methods.som.argsSOM.html#beak.methods.som.argsSOM.Args.create_list_from_file">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_list_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">file_path_label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_list_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">file_path_label</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;create a list of input file names and path</span>
 
 <span class="sd">        Args:</span>
@@ -282,7 +282,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

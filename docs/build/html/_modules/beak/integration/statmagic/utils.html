@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.integration.statmagic.utils &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -95,18 +95,25 @@
            <div itemprop="articleBody">
              
   <h1>Source code for beak.integration.statmagic.utils</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">requests</span>
-<span class="kn">import</span> <span class="nn">zipfile</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zipfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.utilities.file_io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_json</span><span class="p">,</span> <span class="n">write_csv</span><span class="p">,</span> <span class="n">write_gpkg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.utilities.vector_processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_values_from_points</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">cdr_schemas.prospectivity_input</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProspectivityOutputLayer</span>
 
 
 <div class="viewcode-block" id="_get_data_folder">
 <a class="viewcode-back" href="../../../../beak.integration.statmagic.utils.html#beak.integration.statmagic.utils._get_data_folder">[docs]</a>
-<span class="k">def</span> <span class="nf">_get_data_folder</span><span class="p">(</span><span class="n">package_name</span> <span class="o">=</span> <span class="s2">&quot;beak&quot;</span><span class="p">,</span> <span class="n">folder_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;data&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_data_folder</span><span class="p">(</span><span class="n">package_name</span> <span class="o">=</span> <span class="s2">&quot;beak&quot;</span><span class="p">,</span> <span class="n">folder_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;data&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Obtain the path to the specified data folder.</span>
 
@@ -117,9 +124,9 @@
 <span class="sd">        The relative path to the specified data folder.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">importlib_resources</span> <span class="kn">import</span> <span class="n">files</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">importlib_resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">importlib.resources</span> <span class="kn">import</span> <span class="n">files</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
 
     <span class="k">return</span> <span class="n">files</span><span class="p">(</span><span class="n">package_name</span><span class="p">)</span> <span class="o">/</span> <span class="n">folder_name</span></div>
 
@@ -127,7 +134,7 @@
 
 <div class="viewcode-block" id="_extract_rows">
 <a class="viewcode-back" href="../../../../beak.integration.statmagic.utils.html#beak.integration.statmagic.utils._extract_rows">[docs]</a>
-<span class="k">def</span> <span class="nf">_extract_rows</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_extract_rows</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">attribute</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
@@ -153,7 +160,7 @@
 
 <div class="viewcode-block" id="create_file_list">
 <a class="viewcode-back" href="../../../../beak.integration.statmagic.utils.html#beak.integration.statmagic.utils.create_file_list">[docs]</a>
-<span class="k">def</span> <span class="nf">create_file_list</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_file_list</span><span class="p">(</span>
     <span class="n">folder</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
     <span class="n">file_suffix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;.tif&quot;</span><span class="p">,</span> <span class="s2">&quot;.tiff&quot;</span><span class="p">),</span>
     <span class="n">file_prefix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -182,7 +189,7 @@
 
 <div class="viewcode-block" id="_filter_files">
 <a class="viewcode-back" href="../../../../beak.integration.statmagic.utils.html#beak.integration.statmagic.utils._filter_files">[docs]</a>
-<span class="k">def</span> <span class="nf">_filter_files</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_filter_files</span><span class="p">(</span>
     <span class="n">file_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">file_suffix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
     <span class="n">file_prefix</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
@@ -227,7 +234,7 @@
 
 <div class="viewcode-block" id="_download_cdr_files">
 <a class="viewcode-back" href="../../../../beak.integration.statmagic.utils.html#beak.integration.statmagic.utils._download_cdr_files">[docs]</a>
-<span class="k">def</span> <span class="nf">_download_cdr_files</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_download_cdr_files</span><span class="p">(</span>
     <span class="n">download_urls</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">download_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">verify_ssl</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
@@ -265,7 +272,7 @@
 
 <div class="viewcode-block" id="_create_zip_from_files">
 <a class="viewcode-back" href="../../../../beak.integration.statmagic.utils.html#beak.integration.statmagic.utils._create_zip_from_files">[docs]</a>
-<span class="k">def</span> <span class="nf">_create_zip_from_files</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_zip_from_files</span><span class="p">(</span>
     <span class="n">file_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]],</span>
     <span class="n">archive_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span>
 <span class="p">):</span>
@@ -279,16 +286,21 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file</span><span class="p">)]</span>
+    <span class="n">archive_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">archive_path</span><span class="p">)</span>
+
     <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">archive_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">archive</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span><span class="p">:</span>
-            <span class="n">file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-            <span class="n">archive</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">file</span><span class="p">,</span> <span class="n">arcname</span><span class="o">=</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+            <span class="n">archive</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">file</span><span class="p">,</span> <span class="n">arcname</span><span class="o">=</span><span class="n">file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">file_list</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Empty archive </span><span class="si">{</span><span class="n">archive_path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> created.&quot;</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="delete_files">
 <a class="viewcode-back" href="../../../../beak.integration.statmagic.utils.html#beak.integration.statmagic.utils.delete_files">[docs]</a>
-<span class="k">def</span> <span class="nf">delete_files</span><span class="p">(</span><span class="n">file_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">delete_files</span><span class="p">(</span><span class="n">file_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Delete files from the specified list.</span>
 
@@ -308,7 +320,7 @@
 
 <div class="viewcode-block" id="_filter_layers_from_payload">
 <a class="viewcode-back" href="../../../../beak.integration.statmagic.utils.html#beak.integration.statmagic.utils._filter_layers_from_payload">[docs]</a>
-<span class="k">def</span> <span class="nf">_filter_layers_from_payload</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_filter_layers_from_payload</span><span class="p">(</span>
     <span class="n">payload</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">label_column</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">filter_labels</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
@@ -338,7 +350,7 @@
 
 <div class="viewcode-block" id="prepare_output_layers">
 <a class="viewcode-back" href="../../../../beak.integration.statmagic.utils.html#beak.integration.statmagic.utils.prepare_output_layers">[docs]</a>
-<span class="k">def</span> <span class="nf">prepare_output_layers</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">prepare_output_layers</span><span class="p">(</span>
     <span class="n">layers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]],</span>
     <span class="n">files</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
     <span class="n">meta</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">],</span>
@@ -378,11 +390,248 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">file_path</span> <span class="o">=</span> <span class="n">files</span>
 
-    <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span>
-    <span class="p">)</span>
+    <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">file_path</span><span class="p">,</span> <span class="n">meta</span><span class="p">))</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">else</span> <span class="n">layers</span>
 
     <span class="k">return</span> <span class="n">layers</span></div>
+
+
+
+<div class="viewcode-block" id="_create_model_run_config">
+<a class="viewcode-back" href="../../../../beak.integration.statmagic.utils.html#beak.integration.statmagic.utils._create_model_run_config">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_model_run_config</span><span class="p">(</span>
+    <span class="n">model_run</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">input_data</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+    <span class="n">train_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a configuration file for the given CMA and model run ID.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model_run: Tuple containing CMA ID and model run ID.</span>
+<span class="sd">        input_data: Tuple containing list of input layers and optional label file path.</span>
+<span class="sd">        train_config: Dictionary containing training configuration.</span>
+<span class="sd">        **kwargs: Additional key-value pairs to be included in the export.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Dictionary containing the the model run configuration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cma_id</span><span class="p">,</span> <span class="n">model_run_id</span> <span class="o">=</span> <span class="n">model_run</span>
+    <span class="n">layers</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">input_data</span>
+    
+    <span class="n">model_config</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;cma&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;cma_id&quot;</span><span class="p">:</span> <span class="n">cma_id</span><span class="p">,</span>
+            <span class="s2">&quot;model_run_id&quot;</span><span class="p">:</span> <span class="n">model_run_id</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;train_config&quot;</span><span class="p">:</span> <span class="n">train_config</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">model_config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">layers_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">layers</span><span class="p">):</span>
+        <span class="n">layers_dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="sa">f</span><span class="s2">&quot;layer_</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="p">})</span>
+
+    <span class="n">model_config</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">&quot;input_data&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;labels&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="k">if</span> <span class="n">labels</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;layers&quot;</span><span class="p">:</span> <span class="n">layers_dict</span>
+        <span class="p">}</span>
+    <span class="p">})</span>
+    
+    <span class="k">return</span> <span class="n">model_config</span></div>
+
+
+
+<div class="viewcode-block" id="update_config_json">
+<a class="viewcode-back" href="../../../../beak.integration.statmagic.utils.html#beak.integration.statmagic.utils.update_config_json">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_config_json</span><span class="p">(</span>
+    <span class="n">file_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">config_loc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load the config JSON file, update parameters, and save the changes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file_path: Path to the config file.</span>
+<span class="sd">        config_loc: List of keys to navigate through the JSON structure. Defaults to None.</span>
+<span class="sd">        **kwargs: Keyword arguments for parameters to update.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">config_loc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">config_loc</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;events&quot;</span><span class="p">,</span> <span class="s2">&quot;payload&quot;</span><span class="p">,</span> <span class="s2">&quot;train_config&quot;</span><span class="p">]</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+    <span class="n">config_key</span> <span class="o">=</span> <span class="n">config</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">config_loc</span><span class="p">:</span>
+        <span class="n">config_key</span> <span class="o">=</span> <span class="n">config_key</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="n">config_key</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="n">write_json</span><span class="p">(</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file_path</span><span class="p">),</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">file_path</span><span class="p">),</span>
+        <span class="n">config</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="_add_raster_results_to_output_layers">
+<a class="viewcode-back" href="../../../../beak.integration.statmagic.utils.html#beak.integration.statmagic.utils._add_raster_results_to_output_layers">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_add_raster_results_to_output_layers</span><span class="p">(</span>
+    <span class="n">file_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">results</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">init_meta</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add raster results to output layers.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file_list: List of file paths.</span>
+<span class="sd">        results: Dictionary containing raster results.</span>
+<span class="sd">        init_meta: Initial metadata for the output layers.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List of tuples containing file paths and updated metadata for output layers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">layers_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span><span class="p">:</span>
+        <span class="n">file_stem</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">init_meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">file_stem</span><span class="p">:</span>
+                <span class="n">meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+                <span class="n">layers_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span>
+                <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">layers_list</span></div>
+
+
+
+<div class="viewcode-block" id="export_train_test_splits">
+<a class="viewcode-back" href="../../../../beak.integration.statmagic.utils.html#beak.integration.statmagic.utils.export_train_test_splits">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">export_train_test_splits</span><span class="p">(</span>
+    <span class="n">src_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]],</span>
+    <span class="n">split_data</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+    <span class="n">template</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">],</span>
+    <span class="n">output_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">geometry</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;geometry&quot;</span><span class="p">,</span>
+    <span class="n">drop_columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Export train/test splits as CSV and GeoPackage files.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        src_data: Optional tuple containing source arrays and names.</span>
+<span class="sd">        split_data: Tuple containing split dataframes and names.</span>
+<span class="sd">        template: Template data and metadata.</span>
+<span class="sd">        output_folder: Output folder path.</span>
+<span class="sd">        geometry: Name of the geometry column. Defaults to &quot;geometry&quot;.</span>
+<span class="sd">        drop_columns: List of columns to drop from the output CSV and GeoPackage files. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">src_arrays</span><span class="p">,</span> <span class="n">src_names</span> <span class="o">=</span> <span class="n">src_data</span>
+    <span class="n">split_sets</span><span class="p">,</span> <span class="n">split_names</span> <span class="o">=</span> <span class="n">split_data</span>
+    <span class="n">drop_columns</span> <span class="o">=</span> <span class="n">drop_columns</span> <span class="ow">or</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">split</span><span class="p">,</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">split_sets</span><span class="p">,</span> <span class="n">split_names</span><span class="p">):</span>
+        <span class="n">out_data</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">extract_values_from_points</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="n">src_arrays</span><span class="p">,</span> <span class="n">src_names</span><span class="p">,</span> <span class="n">template</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">src_arrays</span> <span class="ow">and</span> <span class="n">src_names</span> <span class="k">else</span> <span class="n">split</span>
+        <span class="p">)</span>
+
+        <span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+
+        <span class="n">drop_cols_csv</span> <span class="o">=</span> <span class="n">drop_columns</span> <span class="o">+</span> <span class="p">[</span><span class="n">geometry</span><span class="p">]</span>
+        <span class="n">drop_cols_gpkg</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">drop_columns</span> <span class="k">if</span> <span class="n">col</span> <span class="o">!=</span> <span class="n">geometry</span><span class="p">]</span>
+
+        <span class="n">write_csv</span><span class="p">(</span><span class="n">src_data</span><span class="o">=</span><span class="n">out_data</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">,</span> <span class="n">drop_columns</span><span class="o">=</span><span class="n">drop_cols_csv</span><span class="p">)</span>
+        <span class="n">write_gpkg</span><span class="p">(</span><span class="n">src_data</span><span class="o">=</span><span class="n">out_data</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">.gpkg&quot;</span><span class="p">,</span> <span class="n">drop_columns</span><span class="o">=</span><span class="n">drop_cols_gpkg</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="_create_prospectivity_output_layers">
+<a class="viewcode-back" href="../../../../beak.integration.statmagic.utils.html#beak.integration.statmagic.utils._create_prospectivity_output_layers">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_prospectivity_output_layers</span><span class="p">(</span>
+    <span class="n">layers_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ProspectivityOutputLayer</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create ProspectivityOutputLayer objects from the provided layers and metadata.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        layers_list: List of tuples containing file paths and metadata for output layers.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List of tuples containing file paths and ProspectivityOutputLayer objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">prospectivity_output_layers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">layers_list</span><span class="p">:</span>
+        <span class="n">layer_path</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">layer_meta</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">layer_object</span> <span class="o">=</span> <span class="n">ProspectivityOutputLayer</span><span class="p">(</span><span class="o">**</span><span class="n">layer_meta</span><span class="p">)</span>
+        <span class="n">prospectivity_output_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">layer_path</span><span class="p">,</span> <span class="n">layer_object</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">prospectivity_output_layers</span></div>
+
+
+
+<div class="viewcode-block" id="_create_runtime_stats">
+<a class="viewcode-back" href="../../../../beak.integration.statmagic.utils.html#beak.integration.statmagic.utils._create_runtime_stats">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_runtime_stats</span><span class="p">(</span>
+    <span class="n">input_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">meta</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">runtime</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a dictionary containing runtime statistics for a model run.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_size: Number of input layers used in the model.</span>
+<span class="sd">        meta: Dictionary containing metadata about the model run, including width and height.</span>
+<span class="sd">        runtime: Total runtime of the model in seconds.</span>
+<span class="sd">        **kwargs: Additional keyword arguments to include in the model run statistics.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A dictionary containing model run information and runtime statistics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">],</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span>
+
+    <span class="n">runtime_stats</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;model_run&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;extent_width&quot;</span><span class="p">:</span> <span class="n">width</span><span class="p">,</span>
+            <span class="s2">&quot;extent_height&quot;</span><span class="p">:</span> <span class="n">height</span><span class="p">,</span>
+            <span class="s2">&quot;extent_pixels&quot;</span><span class="p">:</span> <span class="n">width</span> <span class="o">*</span> <span class="n">height</span><span class="p">,</span>
+            <span class="s2">&quot;input_layers&quot;</span><span class="p">:</span> <span class="n">input_size</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">runtime_stats</span><span class="p">[</span><span class="s2">&quot;model_run&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">runtime_stats</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">&quot;runtime_stats&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;runtime_seconds&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">runtime</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="s2">&quot;runtime_minutes&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">runtime</span> <span class="o">/</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="s2">&quot;runtime_hours&quot;</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">runtime</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">runtime_stats</span></div>
 
 </pre></div>
 
@@ -393,7 +642,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

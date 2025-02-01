@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.integration.statmagic.call_som &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -95,33 +95,39 @@
            <div itemprop="articleBody">
              
   <h1>Source code for beak.integration.statmagic.call_som</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os.path</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
 
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="kn">import</span> <span class="nn">beak.methods.som.argsSOM</span> <span class="k">as</span> <span class="nn">asom</span>
-<span class="kn">import</span> <span class="nn">beak.methods.som.do_nextsomcore_save_results</span> <span class="k">as</span> <span class="nn">dnsr</span>
-<span class="kn">import</span> <span class="nn">beak.methods.som.argsPlot</span> <span class="k">as</span> <span class="nn">aplot</span>
-<span class="kn">import</span> <span class="nn">beak.methods.som.plot_som_results</span> <span class="k">as</span> <span class="nn">plot</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">beak.methods.som.argsSOM</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">asom</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">beak.methods.som.do_nextsomcore_save_results</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dnsr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">beak.methods.som.argsPlot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">aplot</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">beak.methods.som.plot_som_results</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plot</span>
 
-<span class="kn">from</span> <span class="nn">beak.integration.statmagic.utils</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.integration.statmagic.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">create_file_list</span><span class="p">,</span>
     <span class="n">prepare_output_layers</span><span class="p">,</span>
     <span class="n">delete_files</span><span class="p">,</span>
-    <span class="n">_create_zip_from_files</span><span class="p">,</span>
     <span class="n">_filter_files</span><span class="p">,</span>
     <span class="n">_filter_layers_from_payload</span><span class="p">,</span>
+    <span class="n">_create_model_run_config</span><span class="p">,</span>
+    <span class="n">_create_runtime_stats</span><span class="p">,</span>
+    <span class="n">_add_raster_results_to_output_layers</span><span class="p">,</span>
+    <span class="n">_create_prospectivity_output_layers</span>
 <span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">cdr_schemas.prospectivity_input</span> <span class="kn">import</span> <span class="n">ProspectivityOutputLayer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.utilities.file_io</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cdr_schemas.prospectivity_input</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProspectivityOutputLayer</span>
 
 
 <div class="viewcode-block" id="run_som">
 <a class="viewcode-back" href="../../../../beak.integration.statmagic.call_som.html#beak.integration.statmagic.call_som.run_som">[docs]</a>
-<span class="k">def</span> <span class="nf">run_som</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_som</span><span class="p">(</span>
     <span class="n">input_layers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">input_labels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">config_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -160,6 +166,8 @@
     <span class="n">args</span><span class="o">.</span><span class="n">output_file_somspace</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="s2">&quot;result_som.txt&quot;</span><span class="p">)</span>
     <span class="n">args</span><span class="o">.</span><span class="n">output_file_geospace</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="s2">&quot;result_geo.txt&quot;</span><span class="p">)</span>
     <span class="n">args</span><span class="o">.</span><span class="n">outgeofile</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">output_file_geospace</span>
+    <span class="n">config_name</span> <span class="o">=</span> <span class="s2">&quot;settings&quot;</span>
+    <span class="n">runtime_name</span> <span class="o">=</span> <span class="s2">&quot;runtime&quot;</span>
 
     <span class="c1"># Plot input and outputs</span>
     <span class="n">argsP</span><span class="o">.</span><span class="n">input_file</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">input_file</span>
@@ -168,10 +176,15 @@
     <span class="n">argsP</span><span class="o">.</span><span class="n">outgeofile</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">output_file_geospace</span>
 
     <span class="c1"># Pack output folders</span>
-    <span class="n">output_folders</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">output_locations</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">output_folder</span><span class="p">,</span>
         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">output_raster_folder</span><span class="p">),</span>
         <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">argsP</span><span class="o">.</span><span class="n">output_plots_folder</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">output_files</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">config_name</span><span class="p">,</span>
+        <span class="n">runtime_name</span>
     <span class="p">)</span>
 
     <span class="c1"># Read model_run config</span>
@@ -198,7 +211,6 @@
     <span class="n">args</span><span class="o">.</span><span class="n">gridtype</span> <span class="o">=</span> <span class="n">train_config</span><span class="p">[</span><span class="s2">&quot;grid_type&quot;</span><span class="p">]</span>
 
     <span class="c1"># K-means arguments</span>
-    <span class="c1"># Parameters in the CDR schema</span>
     <span class="n">args</span><span class="o">.</span><span class="n">kmeans</span> <span class="o">=</span> <span class="n">train_config</span><span class="p">[</span><span class="s2">&quot;kmeans&quot;</span><span class="p">]</span>
     <span class="n">args</span><span class="o">.</span><span class="n">kmeans_min</span> <span class="o">=</span> <span class="n">train_config</span><span class="p">[</span><span class="s2">&quot;kmeans_min&quot;</span><span class="p">]</span>
     <span class="n">args</span><span class="o">.</span><span class="n">kmeans_max</span> <span class="o">=</span> <span class="n">train_config</span><span class="p">[</span><span class="s2">&quot;kmeans_max&quot;</span><span class="p">]</span>
@@ -208,6 +220,9 @@
     <span class="n">argsP</span><span class="o">.</span><span class="n">som_x</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">som_x</span>
     <span class="n">argsP</span><span class="o">.</span><span class="n">som_y</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">som_y</span>
     <span class="n">argsP</span><span class="o">.</span><span class="n">grid_type</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">gridtype</span>
+
+    <span class="c1"># Runtime init</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
 
     <span class="c1"># Run SOM without k-means warning</span>
     <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
@@ -220,15 +235,45 @@
     <span class="n">_create_layer_plot_names</span><span class="p">(</span>
         <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
         <span class="n">label_column</span><span class="o">=</span><span class="s2">&quot;label_raster&quot;</span><span class="p">,</span>
-        <span class="n">output_folder</span><span class="o">=</span><span class="n">output_folders</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+        <span class="n">output_folder</span><span class="o">=</span><span class="n">output_locations</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
     <span class="p">)</span>
+
+    <span class="c1"># Runtime final</span>
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+    <span class="n">runtime</span> <span class="o">=</span> <span class="n">duration</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+
+    <span class="c1"># Collect metadata</span>
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">_create_model_run_config</span><span class="p">(</span>
+        <span class="n">model_run</span><span class="o">=</span><span class="p">(</span><span class="n">cma_id</span><span class="p">,</span> <span class="n">model_run_id</span><span class="p">),</span>
+        <span class="n">input_data</span><span class="o">=</span><span class="p">(</span><span class="n">input_layers</span><span class="p">,</span> <span class="n">input_labels</span><span class="p">),</span>
+        <span class="n">train_config</span><span class="o">=</span><span class="n">train_config</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">additional_runtime_info</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;som_size&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">som_x</span> <span class="o">*</span> <span class="n">args</span><span class="o">.</span><span class="n">som_y</span><span class="p">,</span>
+        <span class="s2">&quot;som_epochs&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span>
+        <span class="s2">&quot;kmeans_clusters&quot;</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">kmeans_max</span>
+    <span class="p">}</span>
+
+    <span class="n">runtime_stats</span> <span class="o">=</span> <span class="n">_create_runtime_stats</span><span class="p">(</span>
+        <span class="n">input_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">input_layers</span><span class="p">),</span>
+        <span class="n">meta</span><span class="o">=</span><span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">input_layers</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">meta</span><span class="p">,</span>
+        <span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">additional_runtime_info</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Save model settings and metadata</span>
+    <span class="n">write_json</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">config_name</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="n">model_config</span><span class="p">)</span>
+    <span class="n">write_json</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">runtime_name</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="n">runtime_stats</span><span class="p">)</span>
 
     <span class="c1"># Collect results</span>
     <span class="n">out_layers</span> <span class="o">=</span> <span class="n">_collect_results</span><span class="p">(</span>
         <span class="n">cma_id</span><span class="o">=</span><span class="n">cma_id</span><span class="p">,</span>
         <span class="n">model_run_id</span><span class="o">=</span><span class="n">model_run_id</span><span class="p">,</span>
         <span class="n">kmeans</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">kmeans</span><span class="p">,</span>
-        <span class="n">output_folders</span><span class="o">=</span><span class="n">output_folders</span>
+        <span class="n">output_locations</span><span class="o">=</span><span class="n">output_locations</span><span class="p">,</span>
+        <span class="n">output_files</span><span class="o">=</span><span class="n">output_files</span>
     <span class="p">)</span>
 
     <span class="c1"># Delete intermediate files</span>
@@ -240,7 +285,7 @@
 
 <div class="viewcode-block" id="_delete_intermediate_files">
 <a class="viewcode-back" href="../../../../beak.integration.statmagic.call_som.html#beak.integration.statmagic.call_som._delete_intermediate_files">[docs]</a>
-<span class="k">def</span> <span class="nf">_delete_intermediate_files</span><span class="p">(</span><span class="n">output_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_delete_intermediate_files</span><span class="p">(</span><span class="n">output_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Delete intermediate files from the output folder.</span>
 
@@ -263,7 +308,7 @@
 
 <div class="viewcode-block" id="_create_layer_plot_names">
 <a class="viewcode-back" href="../../../../beak.integration.statmagic.call_som.html#beak.integration.statmagic.call_som._create_layer_plot_names">[docs]</a>
-<span class="k">def</span> <span class="nf">_create_layer_plot_names</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_layer_plot_names</span><span class="p">(</span>
     <span class="n">payload</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">label_column</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">output_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -299,11 +344,12 @@
 
 <div class="viewcode-block" id="_collect_results">
 <a class="viewcode-back" href="../../../../beak.integration.statmagic.call_som.html#beak.integration.statmagic.call_som._collect_results">[docs]</a>
-<span class="k">def</span> <span class="nf">_collect_results</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_collect_results</span><span class="p">(</span>
     <span class="n">cma_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">model_run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">kmeans</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-    <span class="n">output_folders</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">output_locations</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="n">output_files</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ProspectivityOutputLayer</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create information for the CDR ProspectivityOutputLayer Class.</span>
@@ -312,12 +358,13 @@
 <span class="sd">        cma_id: Unique identifier for the CMA.</span>
 <span class="sd">        model_run_id: Unique identifier for the model run.</span>
 <span class="sd">        kmeans: Boolean indicating if k-means clustering was performed.</span>
-<span class="sd">        output_folders: Tuple containing the output folder, raster folder, and plots folder.</span>
+<span class="sd">        output_locations: Tuple containing the output folder, raster folder, and plots folder.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        List of tuples, where each tuple contains the file path and the related ProspectivityOutputLayer object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">output_folder</span><span class="p">,</span> <span class="n">raster_folder</span><span class="p">,</span> <span class="n">plots_folder</span> <span class="o">=</span> <span class="n">output_folders</span>
+    <span class="n">output_folder</span><span class="p">,</span> <span class="n">raster_folder</span><span class="p">,</span> <span class="n">plots_folder</span> <span class="o">=</span> <span class="n">output_locations</span>
+    <span class="n">settings</span><span class="p">,</span> <span class="n">runtime_stats</span> <span class="o">=</span> <span class="n">output_files</span>
 
     <span class="c1"># Initialization</span>
     <span class="n">init_meta</span> <span class="o">=</span> <span class="p">{</span>
@@ -378,20 +425,11 @@
     <span class="p">)</span>
 
     <span class="c1"># Initialize output</span>
-    <span class="n">layers_list</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="c1"># Add raster results</span>
-    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">results_file_list</span><span class="p">:</span>
-        <span class="n">file_stem</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-        <span class="n">meta</span> <span class="o">=</span> <span class="n">init_meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">file_stem</span><span class="p">:</span>
-                <span class="n">meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-
-                <span class="n">layers_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span>
-                <span class="p">)</span>
+    <span class="n">layers_list</span> <span class="o">=</span> <span class="n">_add_raster_results_to_output_layers</span><span class="p">(</span>
+        <span class="n">file_list</span><span class="o">=</span><span class="n">results_file_list</span><span class="p">,</span>
+        <span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="p">,</span>
+        <span class="n">init_meta</span><span class="o">=</span><span class="n">init_meta</span>
+    <span class="p">)</span>
 
     <span class="c1"># Add codebook maps, names starting with &quot;b_&quot;</span>
     <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">codebook_maps_file_list</span><span class="p">:</span>
@@ -425,17 +463,35 @@
             <span class="n">output</span><span class="o">=</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="s2">&quot;plots.zip&quot;</span><span class="p">)</span>
         <span class="p">)</span>
 
+    <span class="c1"># Add metadata and settings</span>
+    <span class="n">update_meta</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;output_type&quot;</span><span class="p">:</span> <span class="s2">&quot;metadata&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Archive containing model metadata and settings&quot;</span>
+    <span class="p">}</span>
+
+    <span class="n">layers_list</span> <span class="o">=</span> <span class="n">prepare_output_layers</span><span class="p">(</span>
+        <span class="n">layers</span><span class="o">=</span><span class="n">layers_list</span><span class="p">,</span>
+        <span class="n">files</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">settings</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">),</span>
+        <span class="n">meta</span><span class="o">=</span><span class="p">(</span><span class="n">init_meta</span><span class="p">,</span> <span class="n">update_meta</span><span class="p">),</span>
+        <span class="n">output</span><span class="o">=</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">settings</span> <span class="o">+</span> <span class="s2">&quot;.zip&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Add runtime stats</span>
+    <span class="n">update_meta</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;output_type&quot;</span><span class="p">:</span> <span class="s2">&quot;runtime&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Archive containing runtime statistics&quot;</span>
+    <span class="p">}</span>
+
+    <span class="n">layers_list</span> <span class="o">=</span> <span class="n">prepare_output_layers</span><span class="p">(</span>
+        <span class="n">layers</span><span class="o">=</span><span class="n">layers_list</span><span class="p">,</span>
+        <span class="n">files</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">runtime_stats</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">),</span>
+        <span class="n">meta</span><span class="o">=</span><span class="p">(</span><span class="n">init_meta</span><span class="p">,</span> <span class="n">update_meta</span><span class="p">),</span>
+        <span class="n">output</span><span class="o">=</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">runtime_stats</span> <span class="o">+</span> <span class="s2">&quot;.zip&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
     <span class="c1"># Create CDR object</span>
-    <span class="n">prospectivity_output_layers</span> <span class="o">=</span> <span class="p">[]</span> 
-    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">layers_list</span><span class="p">:</span>
-        <span class="n">layer_path</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">layer_meta</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        
-        <span class="n">layer_object</span> <span class="o">=</span> <span class="n">ProspectivityOutputLayer</span><span class="p">(</span><span class="o">**</span><span class="n">layer_meta</span><span class="p">)</span>
-        <span class="n">prospectivity_output_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="p">(</span><span class="n">layer_path</span><span class="p">,</span> <span class="n">layer_object</span><span class="p">)</span>
-        <span class="p">)</span>
-    
+    <span class="n">prospectivity_output_layers</span> <span class="o">=</span> <span class="n">_create_prospectivity_output_layers</span><span class="p">(</span><span class="n">layers_list</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">prospectivity_output_layers</span></div>
 
 </pre></div>
@@ -447,7 +503,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

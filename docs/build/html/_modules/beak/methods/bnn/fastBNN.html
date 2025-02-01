@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.methods.bnn.fastBNN &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -95,45 +95,19 @@
            <div itemprop="articleBody">
              
   <h1>Source code for beak.methods.bnn.fastBNN</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This file contains code adapted from the work of Brendan Hasz (2018)</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="sd">MIT License</span>
-
-<span class="sd">Copyright (c) 2018 Brendan Hasz</span>
-
-<span class="sd">Permission is hereby granted, free of charge, to any person obtaining a copy</span>
-<span class="sd">of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
-<span class="sd">in the Software without restriction, including without limitation the rights</span>
-<span class="sd">to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
-<span class="sd">copies of the Software, and to permit persons to whom the Software is</span>
-<span class="sd">furnished to do so, subject to the following conditions:</span>
-
-<span class="sd">The above copyright notice and this permission notice shall be included in all</span>
-<span class="sd">copies or substantial portions of the Software.</span>
-
-<span class="sd">THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
-<span class="sd">IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
-<span class="sd">FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
-<span class="sd">AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
-<span class="sd">LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
-<span class="sd">OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span>
-<span class="sd">SOFTWARE.</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
-
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">tensorflow_probability</span> <span class="k">as</span> <span class="nn">tfp</span>
-<span class="kn">from</span> <span class="nn">tensorflow_probability</span> <span class="kn">import</span> <span class="n">distributions</span> <span class="k">as</span> <span class="n">tfd</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">from</span> <span class="nn">beak.utilities.transform</span> <span class="kn">import</span> <span class="n">__transform_minmax</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tensorflow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tf</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tensorflow_probability</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tfp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow_probability</span><span class="w"> </span><span class="kn">import</span> <span class="n">distributions</span> <span class="k">as</span> <span class="n">tfd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.utilities.transform</span><span class="w"> </span><span class="kn">import</span> <span class="n">__transform_minmax</span>
 
 
 <div class="viewcode-block" id="set_global_seed">
 <a class="viewcode-back" href="../../../../beak.methods.bnn.fastBNN.html#beak.methods.bnn.fastBNN.set_global_seed">[docs]</a>
-<span class="k">def</span> <span class="nf">set_global_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_global_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the global random seed for reproducibility.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -147,7 +121,7 @@
 
 <div class="viewcode-block" id="initializer">
 <a class="viewcode-back" href="../../../../beak.methods.bnn.fastBNN.html#beak.methods.bnn.fastBNN.initializer">[docs]</a>
-<span class="k">def</span> <span class="nf">initializer</span><span class="p">(</span><span class="n">shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">initializer</span><span class="p">(</span><span class="n">shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Xavier initialization for weights.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -161,7 +135,7 @@
 
 <div class="viewcode-block" id="create_layer_params">
 <a class="viewcode-back" href="../../../../beak.methods.bnn.fastBNN.html#beak.methods.bnn.fastBNN.create_layer_params">[docs]</a>
-<span class="k">def</span> <span class="nf">create_layer_params</span><span class="p">(</span><span class="n">d_in</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">d_out</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_layer_params</span><span class="p">(</span><span class="n">d_in</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">d_out</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create layer parameters for weights and biases with initialization.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -176,7 +150,7 @@
 
 <div class="viewcode-block" id="dense_layer_forward">
 <a class="viewcode-back" href="../../../../beak.methods.bnn.fastBNN.html#beak.methods.bnn.fastBNN.dense_layer_forward">[docs]</a>
-<span class="k">def</span> <span class="nf">dense_layer_forward</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dense_layer_forward</span><span class="p">(</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
     <span class="n">params</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">],</span>
     <span class="n">trainable</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
@@ -210,7 +184,7 @@
 
 <div class="viewcode-block" id="kl_divergence">
 <a class="viewcode-back" href="../../../../beak.methods.bnn.fastBNN.html#beak.methods.bnn.fastBNN.kl_divergence">[docs]</a>
-<span class="k">def</span> <span class="nf">kl_divergence</span><span class="p">(</span><span class="n">parameter</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">kl_divergence</span><span class="p">(</span><span class="n">parameter</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate KL divergence for a single layer.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -224,7 +198,7 @@
 
 <div class="viewcode-block" id="build_network">
 <a class="viewcode-back" href="../../../../beak.methods.bnn.fastBNN.html#beak.methods.bnn.fastBNN.build_network">[docs]</a>
-<span class="k">def</span> <span class="nf">build_network</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_network</span><span class="p">(</span>
     <span class="n">input_dims</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="n">output_dims</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">]]:</span>
@@ -237,7 +211,7 @@
 
 <div class="viewcode-block" id="forward_network">
 <a class="viewcode-back" href="../../../../beak.methods.bnn.fastBNN.html#beak.methods.bnn.fastBNN.forward_network">[docs]</a>
-<span class="k">def</span> <span class="nf">forward_network</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">forward_network</span><span class="p">(</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
     <span class="n">layers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">]],</span>
     <span class="n">activations</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
@@ -253,7 +227,7 @@
 
 <div class="viewcode-block" id="apply_activation">
 <a class="viewcode-back" href="../../../../beak.methods.bnn.fastBNN.html#beak.methods.bnn.fastBNN.apply_activation">[docs]</a>
-<span class="k">def</span> <span class="nf">apply_activation</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">activation</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_activation</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">activation</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply specified activation function.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -263,7 +237,7 @@
 
 <div class="viewcode-block" id="calculate_total_kl">
 <a class="viewcode-back" href="../../../../beak.methods.bnn.fastBNN.html#beak.methods.bnn.fastBNN.calculate_total_kl">[docs]</a>
-<span class="k">def</span> <span class="nf">calculate_total_kl</span><span class="p">(</span><span class="n">layers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_total_kl</span><span class="p">(</span><span class="n">layers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the total KL divergence loss for all layers.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -273,7 +247,7 @@
 
 <div class="viewcode-block" id="build_bayesian_network">
 <a class="viewcode-back" href="../../../../beak.methods.bnn.fastBNN.html#beak.methods.bnn.fastBNN.build_bayesian_network">[docs]</a>
-<span class="k">def</span> <span class="nf">build_bayesian_network</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_bayesian_network</span><span class="p">(</span>
     <span class="n">input_shape</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">core_units</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="n">head_units</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
@@ -292,7 +266,7 @@
 
 <div class="viewcode-block" id="forward_layers">
 <a class="viewcode-back" href="../../../../beak.methods.bnn.fastBNN.html#beak.methods.bnn.fastBNN.forward_layers">[docs]</a>
-<span class="k">def</span> <span class="nf">forward_layers</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">forward_layers</span><span class="p">(</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
     <span class="n">layers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">]],</span>
     <span class="n">activations</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
@@ -310,7 +284,7 @@
 
 <div class="viewcode-block" id="bayesian_network_forward">
 <a class="viewcode-back" href="../../../../beak.methods.bnn.fastBNN.html#beak.methods.bnn.fastBNN.bayesian_network_forward">[docs]</a>
-<span class="k">def</span> <span class="nf">bayesian_network_forward</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">bayesian_network_forward</span><span class="p">(</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
     <span class="n">core_unit</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
     <span class="n">loc_head</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
@@ -340,7 +314,7 @@
 
 <div class="viewcode-block" id="negative_log_likelihood">
 <a class="viewcode-back" href="../../../../beak.methods.bnn.fastBNN.html#beak.methods.bnn.fastBNN.negative_log_likelihood">[docs]</a>
-<span class="k">def</span> <span class="nf">negative_log_likelihood</span><span class="p">(</span><span class="n">y_true</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">negative_log_likelihood</span><span class="p">(</span><span class="n">y_true</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate negative log likelighood.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -351,37 +325,9 @@
 
 
 
-<div class="viewcode-block" id="train_step">
-<a class="viewcode-back" href="../../../../beak.methods.bnn.fastBNN.html#beak.methods.bnn.fastBNN.train_step">[docs]</a>
-<span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
-<span class="k">def</span> <span class="nf">train_step</span><span class="p">(</span>
-    <span class="n">x_data</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
-    <span class="n">y_data</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
-    <span class="n">core_layers</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
-    <span class="n">loc_head</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
-    <span class="n">std_head</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
-    <span class="n">optimizer</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">,</span>
-    <span class="n">N</span><span class="p">:</span> <span class="nb">int</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Perform a single training step (forward pass + loss calculation + optimization).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">GradientTape</span><span class="p">()</span> <span class="k">as</span> <span class="n">tape</span><span class="p">:</span>
-        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">bayesian_network_forward</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">core_layers</span><span class="p">,</span> <span class="n">loc_head</span><span class="p">,</span> <span class="n">std_head</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">kl_loss</span> <span class="o">=</span> <span class="n">calculate_total_kl</span><span class="p">(</span><span class="n">core_layers</span> <span class="o">+</span> <span class="n">loc_head</span> <span class="o">+</span> <span class="n">std_head</span><span class="p">)</span>
-        <span class="n">elbo_loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">kl_loss</span> <span class="o">/</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span> <span class="o">+</span> <span class="n">negative_log_likelihood</span><span class="p">(</span><span class="n">y_data</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
-
-    <span class="n">variables</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">core_layers</span> <span class="o">+</span> <span class="n">loc_head</span> <span class="o">+</span> <span class="n">std_head</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">layer</span><span class="p">]</span>
-    <span class="n">gradients</span> <span class="o">=</span> <span class="n">tape</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">elbo_loss</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
-    <span class="n">optimizer</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">gradients</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
-
-    <span class="k">return</span> <span class="n">elbo_loss</span></div>
-
-
-
 <div class="viewcode-block" id="fit_model">
 <a class="viewcode-back" href="../../../../beak.methods.bnn.fastBNN.html#beak.methods.bnn.fastBNN.fit_model">[docs]</a>
-<span class="k">def</span> <span class="nf">fit_model</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_model</span><span class="p">(</span>
     <span class="n">data_train</span><span class="p">,</span>
     <span class="n">input_shape</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">core_units</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
@@ -399,11 +345,29 @@
         <span class="n">head_units</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">learning_rate</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
+
+    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">train_step</span><span class="p">(</span><span class="n">x_data</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">y_data</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">N</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Perform a single training step (forward pass + loss calculation + optimization).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">GradientTape</span><span class="p">()</span> <span class="k">as</span> <span class="n">tape</span><span class="p">:</span>
+            <span class="n">y_pred</span> <span class="o">=</span> <span class="n">bayesian_network_forward</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">core_layers</span><span class="p">,</span> <span class="n">loc_head</span><span class="p">,</span> <span class="n">std_head</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">kl_loss</span> <span class="o">=</span> <span class="n">calculate_total_kl</span><span class="p">(</span><span class="n">core_layers</span> <span class="o">+</span> <span class="n">loc_head</span> <span class="o">+</span> <span class="n">std_head</span><span class="p">)</span>
+            <span class="n">elbo_loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">kl_loss</span> <span class="o">/</span> <span class="n">N</span><span class="p">)</span> <span class="o">+</span> <span class="n">negative_log_likelihood</span><span class="p">(</span><span class="n">y_data</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+
+        <span class="n">variables</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">core_layers</span> <span class="o">+</span> <span class="n">loc_head</span> <span class="o">+</span> <span class="n">std_head</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">layer</span><span class="p">]</span>
+        <span class="n">gradients</span> <span class="o">=</span> <span class="n">tape</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">elbo_loss</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">gradients</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">elbo_loss</span>
+
     <span class="n">elbo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Training&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;Epoch&quot;</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span> <span class="ow">in</span> <span class="n">data_train</span><span class="p">:</span>
-            <span class="n">elbo</span><span class="p">[</span><span class="n">epoch</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_step</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="n">core_layers</span><span class="p">,</span> <span class="n">loc_head</span><span class="p">,</span> <span class="n">std_head</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="n">elbo</span><span class="p">[</span><span class="n">epoch</span><span class="p">]</span> <span class="o">=</span> <span class="n">train_step</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">core_layers</span><span class="p">,</span> <span class="n">loc_head</span><span class="p">,</span> <span class="n">std_head</span><span class="p">),</span> <span class="n">elbo</span></div>
 
@@ -411,7 +375,7 @@
 
 <div class="viewcode-block" id="predict_model">
 <a class="viewcode-back" href="../../../../beak.methods.bnn.fastBNN.html#beak.methods.bnn.fastBNN.predict_model">[docs]</a>
-<span class="k">def</span> <span class="nf">predict_model</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">predict_model</span><span class="p">(</span>
     <span class="n">model</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">List</span><span class="p">],</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">target_shape</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -446,7 +410,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

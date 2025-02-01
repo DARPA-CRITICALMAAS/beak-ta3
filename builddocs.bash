@@ -2,7 +2,7 @@
 # Installs and builds Sphinx with necessary extensions. If run more than once, will search for updates in codebase to add to html  
 # 05/2022 Aidan Sorensen
 
-author="Michigan Tech Research Institute"
+author="Beak Consultants GmbH"
 release=1
 version=1.0.0
 currentdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # Find current directory

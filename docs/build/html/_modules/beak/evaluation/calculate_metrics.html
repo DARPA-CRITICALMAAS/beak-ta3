@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.evaluation.calculate_metrics &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -95,17 +95,17 @@
            <div itemprop="articleBody">
              
   <h1>Source code for beak.evaluation.calculate_metrics</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
-<span class="kn">from</span> <span class="nn">beak.methods.bnn.fastBNN</span> <span class="kn">import</span> <span class="n">predict_model</span>
-<span class="kn">from</span> <span class="nn">beak.evaluation.metrics_definitions</span> <span class="kn">import</span> <span class="n">classification</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.methods.bnn.fastBNN</span><span class="w"> </span><span class="kn">import</span> <span class="n">predict_model</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.evaluation.metrics_definitions</span><span class="w"> </span><span class="kn">import</span> <span class="n">classification</span>
 
 
 <div class="viewcode-block" id="_calculate_metric">
 <a class="viewcode-back" href="../../../beak.evaluation.calculate_metrics.html#beak.evaluation.calculate_metrics._calculate_metric">[docs]</a>
-<span class="k">def</span> <span class="nf">_calculate_metric</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">metric_function</span><span class="p">,</span> <span class="n">decimal_places</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_calculate_metric</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">metric_function</span><span class="p">,</span> <span class="n">decimal_places</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate a specific metric from a given true and predicted array.</span>
 
@@ -124,7 +124,7 @@
 
 <div class="viewcode-block" id="binary_classification">
 <a class="viewcode-back" href="../../../beak.evaluation.calculate_metrics.html#beak.evaluation.calculate_metrics.binary_classification">[docs]</a>
-<span class="k">def</span> <span class="nf">binary_classification</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">binary_classification</span><span class="p">(</span>
     <span class="n">model</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">List</span><span class="p">],</span>
     <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -183,7 +183,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

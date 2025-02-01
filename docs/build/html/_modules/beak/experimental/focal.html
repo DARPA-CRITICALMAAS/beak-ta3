@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.experimental.focal &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -95,16 +95,16 @@
            <div itemprop="articleBody">
              
   <h1>Source code for beak.experimental.focal</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Number</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Number</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Callable</span>
-<span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="n">generic_filter</span><span class="p">,</span> <span class="n">binary_dilation</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.ndimage</span><span class="w"> </span><span class="kn">import</span> <span class="n">generic_filter</span><span class="p">,</span> <span class="n">binary_dilation</span>
 
 
 <div class="viewcode-block" id="_check_filter_size">
 <a class="viewcode-back" href="../../../beak.experimental.focal.html#beak.experimental.focal._check_filter_size">[docs]</a>
-<span class="k">def</span> <span class="nf">_check_filter_size</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_filter_size</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check the filter size and raise exceptions if it does not meet the requirements.</span>
 
@@ -121,7 +121,7 @@
 
 <div class="viewcode-block" id="_get_kernel_size">
 <a class="viewcode-back" href="../../../beak.experimental.focal.html#beak.experimental.focal._get_kernel_size">[docs]</a>
-<span class="k">def</span> <span class="nf">_get_kernel_size</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_kernel_size</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate the kernel size and on the given radius.</span>
 
@@ -138,7 +138,7 @@
 
 <div class="viewcode-block" id="_create_grid">
 <a class="viewcode-back" href="../../../beak.experimental.focal.html#beak.experimental.focal._create_grid">[docs]</a>
-<span class="k">def</span> <span class="nf">_create_grid</span><span class="p">(</span><span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_grid</span><span class="p">(</span><span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a grid of coordinates.</span>
 
@@ -155,7 +155,7 @@
 
 <div class="viewcode-block" id="_basic_kernel">
 <a class="viewcode-back" href="../../../beak.experimental.focal.html#beak.experimental.focal._basic_kernel">[docs]</a>
-<span class="k">def</span> <span class="nf">_basic_kernel</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;square&quot;</span><span class="p">,</span> <span class="s2">&quot;circle&quot;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_basic_kernel</span><span class="p">(</span><span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;square&quot;</span><span class="p">,</span> <span class="s2">&quot;circle&quot;</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a basic kernel of a specified size and shape.</span>
 
@@ -182,7 +182,7 @@
 
 <div class="viewcode-block" id="_apply_generic_filter">
 <a class="viewcode-back" href="../../../beak.experimental.focal.html#beak.experimental.focal._apply_generic_filter">[docs]</a>
-<span class="k">def</span> <span class="nf">_apply_generic_filter</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_apply_generic_filter</span><span class="p">(</span>
     <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">filter_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">kernel</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -203,7 +203,7 @@
 
 <div class="viewcode-block" id="_apply_binary_dilation">
 <a class="viewcode-back" href="../../../beak.experimental.focal.html#beak.experimental.focal._apply_binary_dilation">[docs]</a>
-<span class="k">def</span> <span class="nf">_apply_binary_dilation</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_apply_binary_dilation</span><span class="p">(</span>
     <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">kernel</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">target_value</span><span class="p">:</span> <span class="n">Number</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -223,7 +223,7 @@
 
 <div class="viewcode-block" id="_replace_value_in_kernel">
 <a class="viewcode-back" href="../../../beak.experimental.focal.html#beak.experimental.focal._replace_value_in_kernel">[docs]</a>
-<span class="k">def</span> <span class="nf">_replace_value_in_kernel</span><span class="p">(</span><span class="n">window</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">target_value</span><span class="p">:</span> <span class="n">Number</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Number</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_replace_value_in_kernel</span><span class="p">(</span><span class="n">window</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">target_value</span><span class="p">:</span> <span class="n">Number</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Number</span><span class="p">:</span>
     <span class="n">p_center</span> <span class="o">=</span> <span class="n">window</span><span class="p">[</span><span class="n">window</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">window</span> <span class="o">==</span> <span class="n">target_value</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
@@ -236,7 +236,7 @@
 
 <div class="viewcode-block" id="create_simple_buffer">
 <a class="viewcode-back" href="../../../beak.experimental.focal.html#beak.experimental.focal.create_simple_buffer">[docs]</a>
-<span class="k">def</span> <span class="nf">create_simple_buffer</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_simple_buffer</span><span class="p">(</span>
     <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">target_value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -273,7 +273,7 @@
 
 <div class="viewcode-block" id="_create_local_buffer_generic_version">
 <a class="viewcode-back" href="../../../beak.experimental.focal.html#beak.experimental.focal._create_local_buffer_generic_version">[docs]</a>
-<span class="k">def</span> <span class="nf">_create_local_buffer_generic_version</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_local_buffer_generic_version</span><span class="p">(</span>
     <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">shape</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;square&quot;</span><span class="p">,</span> <span class="s2">&quot;circle&quot;</span><span class="p">],</span>
@@ -305,7 +305,7 @@
 
 <div class="viewcode-block" id="_create_local_buffer_binary_version">
 <a class="viewcode-back" href="../../../beak.experimental.focal.html#beak.experimental.focal._create_local_buffer_binary_version">[docs]</a>
-<span class="k">def</span> <span class="nf">_create_local_buffer_binary_version</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_local_buffer_binary_version</span><span class="p">(</span>
     <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">shape</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;square&quot;</span><span class="p">,</span> <span class="s2">&quot;circle&quot;</span><span class="p">],</span>
@@ -337,7 +337,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

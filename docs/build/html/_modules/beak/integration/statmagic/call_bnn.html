@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.integration.statmagic.call_bnn &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -95,49 +95,58 @@
            <div itemprop="articleBody">
              
   <h1>Source code for beak.integration.statmagic.call_bnn</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="c1"># Remove Tensorflow&#39;s warning messages</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TF_CPP_MIN_LOG_LEVEL&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;3&quot;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TF_ENABLE_ONEDNN_OPTS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
 
-<span class="kn">from</span> <span class="nn">beak.utilities.sampling</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tensorflow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tf</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">product</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.utilities.sampling</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">select_negative_samples</span><span class="p">,</span>
     <span class="n">select_train_and_test_data</span><span class="p">,</span>
     <span class="n">random_oversampling</span><span class="p">,</span>
+    <span class="n">extract_train_test_locations</span>
 <span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">beak.utilities.conversion</span> <span class="kn">import</span> <span class="n">convert_dtypes</span><span class="p">,</span> <span class="n">expand_dims</span>
-<span class="kn">from</span> <span class="nn">beak.utilities.file_io</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.utilities.conversion</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_dtypes</span><span class="p">,</span> <span class="n">expand_dims</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.utilities.file_io</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">load_layers</span><span class="p">,</span>
     <span class="n">load_layer</span><span class="p">,</span>
     <span class="n">prepare_model_data</span><span class="p">,</span>
     <span class="n">prepare_output</span><span class="p">,</span>
     <span class="n">save_raster</span><span class="p">,</span>
-    <span class="n">write_json</span>
+    <span class="n">write_json</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">beak.methods.bnn.fastBNN</span> <span class="kn">import</span> <span class="n">fit_model</span><span class="p">,</span> <span class="n">predict_model</span>
-<span class="kn">from</span> <span class="nn">beak.methods.bnn.utils</span> <span class="kn">import</span> <span class="n">build_network_architecture</span>
-<span class="kn">from</span> <span class="nn">beak.evaluation.calculate_metrics</span> <span class="kn">import</span> <span class="n">binary_classification</span>
 
-<span class="kn">from</span> <span class="nn">beak.integration.statmagic.utils</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.utilities.raster_processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_coordinates_to_raster</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.methods.bnn.fastBNN</span><span class="w"> </span><span class="kn">import</span> <span class="n">fit_model</span><span class="p">,</span> <span class="n">predict_model</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.methods.bnn.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_network_architecture</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.evaluation.calculate_metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">binary_classification</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.integration.statmagic.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">create_file_list</span><span class="p">,</span>
     <span class="n">prepare_output_layers</span><span class="p">,</span>
+    <span class="n">export_train_test_splits</span><span class="p">,</span>
+    <span class="n">_create_model_run_config</span><span class="p">,</span>
+    <span class="n">_create_runtime_stats</span><span class="p">,</span>
+    <span class="n">_add_raster_results_to_output_layers</span><span class="p">,</span>
+    <span class="n">_create_prospectivity_output_layers</span>
 <span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">cdr_schemas.prospectivity_input</span> <span class="kn">import</span> <span class="n">ProspectivityOutputLayer</span>
-
-
-<span class="c1"># Remove Tensorflow&#39;s warning messages</span>
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TF_CPP_MIN_LOG_LEVEL&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TF_ENABLE_ONEDNN_OPTS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cdr_schemas.prospectivity_input</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProspectivityOutputLayer</span>
 
 
 <div class="viewcode-block" id="run_bnn">
 <a class="viewcode-back" href="../../../../beak.integration.statmagic.call_bnn.html#beak.integration.statmagic.call_bnn.run_bnn">[docs]</a>
-<span class="k">def</span> <span class="nf">run_bnn</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_bnn</span><span class="p">(</span>
     <span class="n">input_layers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">input_labels</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">config_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -152,6 +161,7 @@
 <span class="sd">        input_labels: String containing the path of the input labels.</span>
 <span class="sd">        config_file: Path to the JSON configuration file.</span>
 <span class="sd">        output_folder: Output folder for the results.</span>
+<span class="sd">        random_seed: Random seed for reproducibility.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        None</span>
@@ -163,6 +173,15 @@
     <span class="n">raster_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="s2">&quot;raster&quot;</span><span class="p">)</span>
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">raster_folder</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Set output names for meta, splits and results</span>
+    <span class="n">metrics_name</span> <span class="o">=</span> <span class="s2">&quot;metrics&quot;</span>
+    <span class="n">settings_name</span> <span class="o">=</span> <span class="s2">&quot;settings&quot;</span>
+    <span class="n">runtime_name</span> <span class="o">=</span> <span class="s2">&quot;runtime&quot;</span>
+    <span class="n">train_split_name</span> <span class="o">=</span> <span class="s2">&quot;train_split&quot;</span>
+    <span class="n">test_split_name</span> <span class="o">=</span> <span class="s2">&quot;test_split&quot;</span>
+    <span class="n">prediction_name</span> <span class="o">=</span> <span class="s2">&quot;likelihoods&quot;</span>
+    <span class="n">uncertainty_name</span> <span class="o">=</span> <span class="s2">&quot;uncertainties&quot;</span>
 
     <span class="c1"># Read model_run config</span>
     <span class="n">json_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
@@ -186,18 +205,31 @@
     <span class="n">core_units</span><span class="p">,</span> <span class="n">head_units</span> <span class="o">=</span> <span class="n">build_network_architecture</span><span class="p">(</span>
         <span class="n">depth_per_network</span><span class="o">=</span><span class="n">network_depth</span><span class="p">,</span>
         <span class="n">minimum_width</span><span class="o">=</span><span class="n">network_width</span><span class="p">,</span>
-        <span class="n">core_units</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">network_core</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">network_core</span><span class="p">,</span>
-        <span class="n">head_units</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">network_head</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">network_head</span><span class="p">,</span>
+        <span class="n">core_units</span> <span class="o">=</span> <span class="n">network_core</span> <span class="k">if</span> <span class="n">network_core</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">head_units</span> <span class="o">=</span> <span class="n">network_head</span> <span class="k">if</span> <span class="n">network_head</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
 
+    <span class="c1"># Runtime init</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+
     <span class="c1"># Load layers</span>
-    <span class="n">input_layers</span> <span class="o">=</span> <span class="n">load_layers</span><span class="p">(</span><span class="n">input_layers</span><span class="p">)</span>
-    <span class="n">input_labels</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">load_layer</span><span class="p">(</span><span class="n">input_labels</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Load layers...&quot;</span><span class="p">)</span>
+    <span class="n">layers</span> <span class="o">=</span> <span class="n">load_layers</span><span class="p">(</span><span class="n">input_layers</span><span class="p">)</span>
+    <span class="n">labels</span><span class="p">,</span> <span class="n">meta</span> <span class="o">=</span> <span class="n">load_layer</span><span class="p">(</span><span class="n">input_labels</span><span class="p">)</span>
+
+    <span class="c1"># Add coordinates to raster</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Prepare model data...&quot;</span><span class="p">)</span>
+    <span class="n">layers_with_coords</span> <span class="o">=</span> <span class="n">add_coordinates_to_raster</span><span class="p">(</span>
+        <span class="n">src_array</span><span class="o">=</span><span class="n">layers</span><span class="p">,</span>
+        <span class="n">coord_file</span><span class="o">=</span><span class="n">input_labels</span>
+    <span class="p">)</span>
 
     <span class="c1"># Load initial data into array</span>
-    <span class="n">X_prepared</span><span class="p">,</span> <span class="n">y_prepared</span> <span class="o">=</span> <span class="n">prepare_model_data</span><span class="p">(</span><span class="n">input_layers</span><span class="p">,</span> <span class="n">input_labels</span><span class="p">)</span>
+    <span class="n">X_prepared</span><span class="p">,</span> <span class="n">y_prepared</span> <span class="o">=</span> <span class="n">prepare_model_data</span><span class="p">(</span><span class="n">layers_with_coords</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">y_prepared</span> <span class="o">==</span> <span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;No positive samples found. Please check your input data and consider imputing missing values.&quot;</span>
 
     <span class="c1"># Select random negatives</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample negatives...&quot;</span><span class="p">)</span>
     <span class="n">X_sampled</span><span class="p">,</span> <span class="n">y_sampled</span> <span class="o">=</span> <span class="n">select_negative_samples</span><span class="p">(</span>
         <span class="n">X</span><span class="o">=</span><span class="n">X_prepared</span><span class="p">,</span>
         <span class="n">y</span><span class="o">=</span><span class="n">y_prepared</span><span class="p">,</span>
@@ -206,6 +238,7 @@
     <span class="p">)</span>
 
     <span class="c1"># Create train and test sets</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Create splits...&quot;</span><span class="p">)</span>
     <span class="n">X_train_split</span><span class="p">,</span> <span class="n">X_test_split</span><span class="p">,</span> <span class="n">y_train_split</span><span class="p">,</span> <span class="n">y_test_split</span> <span class="o">=</span> <span class="n">select_train_and_test_data</span><span class="p">(</span>
         <span class="n">X</span><span class="o">=</span><span class="n">X_sampled</span><span class="p">,</span>
         <span class="n">y</span><span class="o">=</span><span class="n">y_sampled</span><span class="p">,</span>
@@ -213,7 +246,12 @@
         <span class="n">random_seed</span><span class="o">=</span><span class="n">random_seed</span><span class="p">,</span>
     <span class="p">)</span>
 
+    <span class="c1"># Create train and test split outputs and locations</span>
+    <span class="n">X_train_split</span><span class="p">,</span> <span class="n">train_locations</span> <span class="o">=</span> <span class="n">extract_train_test_locations</span><span class="p">(</span><span class="n">X_train_split</span><span class="p">,</span> <span class="n">y_train_split</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">])</span>
+    <span class="n">X_test_split</span><span class="p">,</span> <span class="n">test_locations</span> <span class="o">=</span> <span class="n">extract_train_test_locations</span><span class="p">(</span><span class="n">X_test_split</span><span class="p">,</span> <span class="n">y_test_split</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">])</span>
+
     <span class="c1"># Oversample positives</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Modify labels...&quot;</span><span class="p">)</span>
     <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span> <span class="o">=</span> <span class="n">random_oversampling</span><span class="p">(</span>
         <span class="n">X</span><span class="o">=</span><span class="n">X_train_split</span><span class="p">,</span>
         <span class="n">y</span><span class="o">=</span><span class="n">y_train_split</span><span class="p">,</span>
@@ -226,14 +264,16 @@
     <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">expand_dims</span><span class="p">([</span><span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span><span class="p">])</span>
 
     <span class="c1"># Create model inputs</span>
+    <span class="n">buffer_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">UNKNOWN_CARDINALITY</span>
     <span class="n">data_train</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_tensor_slices</span><span class="p">(</span>
         <span class="p">(</span>
             <span class="n">X_train</span><span class="p">,</span>
             <span class="n">y_train</span><span class="p">,</span>
         <span class="p">)</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="mi">512</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">buffer_size</span><span class="p">)</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="mi">512</span><span class="p">)</span>
 
     <span class="c1"># Run training</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Training...&quot;</span><span class="p">)</span>
     <span class="n">feature_count</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">data_count</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
@@ -248,6 +288,7 @@
     <span class="p">)</span>
 
     <span class="c1"># Evaluation</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Evaluation...&quot;</span><span class="p">)</span>
     <span class="n">metrics_train</span> <span class="o">=</span> <span class="n">binary_classification</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_train_split</span><span class="p">,</span> <span class="n">y_train_split</span><span class="p">)</span>
     <span class="n">evaluations</span> <span class="o">=</span>  <span class="p">{</span><span class="s2">&quot;train&quot;</span><span class="p">:</span> <span class="n">metrics_train</span><span class="p">}</span>
 
@@ -256,18 +297,50 @@
         <span class="n">evaluations</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;test&quot;</span><span class="p">:</span> <span class="n">metrics_test</span><span class="p">})</span>
 
     <span class="c1"># Prediction</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="n">predict_model</span><span class="p">(</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Prediction...&quot;</span><span class="p">)</span>
+    <span class="n">prediction</span><span class="p">,</span> <span class="n">uncertainty</span> <span class="o">=</span> <span class="n">predict_model</span><span class="p">(</span>
         <span class="n">model</span><span class="p">,</span>
-        <span class="n">input_layers</span><span class="p">,</span>
+        <span class="n">layers</span><span class="p">,</span>
         <span class="n">target_shape</span><span class="o">=</span><span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">],</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">])</span>
     <span class="p">)</span>
 
-    <span class="c1"># Collect metadata</span>
-    <span class="n">cma_metadata</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;cma_id&quot;</span><span class="p">:</span> <span class="n">cma_id</span><span class="p">,</span>
-        <span class="s2">&quot;model_run_id&quot;</span><span class="p">:</span> <span class="n">model_run_id</span>
-    <span class="p">}</span>
+    <span class="c1"># Save rasters</span>
+    <span class="n">target_meta</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">target_meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;nodata&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">99999</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
 
+    <span class="n">results_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">prediction</span><span class="p">,</span> <span class="n">uncertainty</span><span class="p">)</span>
+    <span class="n">results_files</span> <span class="o">=</span> <span class="p">(</span><span class="n">prediction_name</span><span class="p">,</span> <span class="n">uncertainty_name</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">result</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">results_data</span><span class="p">,</span> <span class="n">results_files</span><span class="p">):</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raster_folder</span><span class="p">,</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.tif&quot;</span><span class="p">)</span>
+        <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">prepare_output</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">target_meta</span><span class="p">)</span>
+        <span class="n">save_raster</span><span class="p">(</span><span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span><span class="p">,</span> <span class="n">out_file</span><span class="p">)</span>
+
+    <span class="c1"># Extract values from points for training and testing datasets</span>
+    <span class="n">export_train_test_splits</span><span class="p">(</span>
+        <span class="n">src_data</span><span class="o">=</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">prediction</span><span class="p">,</span> <span class="n">uncertainty</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">prediction_name</span><span class="p">,</span> <span class="n">uncertainty_name</span><span class="p">]</span>
+        <span class="p">),</span>
+        <span class="n">split_data</span><span class="o">=</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">train_locations</span><span class="p">,</span> <span class="n">test_locations</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">train_split_name</span><span class="p">,</span> <span class="n">test_split_name</span><span class="p">]</span>
+        <span class="p">),</span>
+        <span class="n">template</span><span class="o">=</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">meta</span><span class="p">),</span>
+        <span class="n">output_folder</span><span class="o">=</span><span class="n">output_folder</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Runtime final</span>
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+    <span class="n">runtime</span> <span class="o">=</span> <span class="n">duration</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+
+    <span class="c1"># Collect metadata</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Create and collect outputs...&quot;</span><span class="p">)</span>
     <span class="n">network_arch</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;core_units&quot;</span><span class="p">:</span> <span class="n">core_units</span><span class="p">,</span>
         <span class="s2">&quot;head_units&quot;</span><span class="p">:</span> <span class="n">head_units</span><span class="p">,</span>
@@ -278,49 +351,59 @@
         <span class="p">(</span><span class="s2">&quot;sampled_negatives&quot;</span><span class="p">,</span> <span class="n">_get_label_info</span><span class="p">(</span><span class="n">y_sampled</span><span class="p">)),</span>
         <span class="p">(</span><span class="s2">&quot;train_split&quot;</span><span class="p">,</span> <span class="n">_get_label_info</span><span class="p">(</span><span class="n">y_train_split</span><span class="p">)),</span>
         <span class="p">(</span><span class="s2">&quot;test_split&quot;</span><span class="p">,</span> <span class="n">_get_label_info</span><span class="p">(</span><span class="n">y_test_split</span><span class="p">)),</span>
-        <span class="p">(</span><span class="s2">&quot;final&quot;</span><span class="p">,</span> <span class="n">_get_label_info</span><span class="p">(</span><span class="n">y_train</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s2">&quot;final&quot;</span><span class="p">,</span> <span class="n">_get_label_info</span><span class="p">(</span><span class="n">y_train</span><span class="p">))</span>
     <span class="p">]</span>
 
-    <span class="n">model_metadata</span> <span class="o">=</span> <span class="n">_update_labels</span><span class="p">(</span>
-        <span class="n">cma_metadata</span><span class="o">=</span><span class="n">cma_metadata</span><span class="p">,</span>
+    <span class="n">additional_config_info</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;network_architecture&quot;</span><span class="p">:</span> <span class="n">network_arch</span><span class="p">,</span>
+        <span class="s2">&quot;sampled_labels&quot;</span><span class="p">:</span> <span class="n">_get_sampled_labels</span><span class="p">(</span><span class="n">label_data</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">_create_model_run_config</span><span class="p">(</span>
+        <span class="n">model_run</span><span class="o">=</span><span class="p">(</span><span class="n">cma_id</span><span class="p">,</span> <span class="n">model_run_id</span><span class="p">),</span>
+        <span class="n">input_data</span><span class="o">=</span><span class="p">(</span><span class="n">input_layers</span><span class="p">,</span> <span class="n">input_labels</span><span class="p">),</span>
         <span class="n">train_config</span><span class="o">=</span><span class="n">train_config</span><span class="p">,</span>
-        <span class="n">network_arch</span><span class="o">=</span><span class="n">network_arch</span><span class="p">,</span>
-        <span class="n">label_data</span><span class="o">=</span><span class="n">label_data</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">additional_config_info</span>
     <span class="p">)</span>
 
-    <span class="c1"># Set output locations for files</span>
-    <span class="n">metrics_file_name</span> <span class="o">=</span> <span class="s2">&quot;metrics.json&quot;</span>
-    <span class="n">meta_file_name</span> <span class="o">=</span> <span class="s2">&quot;settings.json&quot;</span>
+    <span class="n">additional_runtime_info</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;input_labels&quot;</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span> <span class="n">_get_label_info</span><span class="p">(</span><span class="n">y_train</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
+        <span class="s2">&quot;nn_epochs&quot;</span><span class="p">:</span> <span class="n">train_epochs</span><span class="p">,</span>
+        <span class="s2">&quot;nn_parameters&quot;</span><span class="p">:</span> <span class="n">_get_network_parameters</span><span class="p">(</span><span class="n">feature_count</span><span class="p">,</span> <span class="n">core_units</span> <span class="o">+</span> <span class="n">head_units</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="p">}</span>
 
+    <span class="n">runtime_stats</span> <span class="o">=</span> <span class="n">_create_runtime_stats</span><span class="p">(</span>
+        <span class="n">input_size</span><span class="o">=</span><span class="n">feature_count</span><span class="p">,</span>
+        <span class="n">meta</span><span class="o">=</span><span class="n">meta</span><span class="p">,</span>
+        <span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">additional_runtime_info</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Set outputs</span>
     <span class="n">output_locations</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">output_folder</span><span class="p">,</span>
-        <span class="n">raster_folder</span><span class="p">,</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">metrics_file_name</span><span class="p">),</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">meta_file_name</span><span class="p">),</span>
+        <span class="n">raster_folder</span>
+    <span class="p">)</span>
+
+    <span class="n">output_files</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">metrics_name</span><span class="p">,</span>
+        <span class="n">settings_name</span><span class="p">,</span>
+        <span class="n">train_split_name</span><span class="p">,</span>
+        <span class="n">test_split_name</span><span class="p">,</span>
+        <span class="n">runtime_name</span>
     <span class="p">)</span>
 
     <span class="c1"># Save metrics and model metadata</span>
-    <span class="n">write_json</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">metrics_file_name</span><span class="p">,</span> <span class="n">evaluations</span><span class="p">)</span>
-    <span class="n">write_json</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">meta_file_name</span><span class="p">,</span> <span class="n">model_metadata</span><span class="p">)</span>
-
-    <span class="c1"># Save rasters</span>
-    <span class="n">target_meta</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">target_meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-        <span class="p">{</span>
-            <span class="s2">&quot;nodata&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">99999</span>
-        <span class="p">}</span>
-    <span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">result</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;likelihoods&quot;</span><span class="p">,</span> <span class="s2">&quot;uncertainties&quot;</span><span class="p">]):</span>
-        <span class="n">out_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raster_folder</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.tif&quot;</span><span class="p">)</span>
-        <span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span> <span class="o">=</span> <span class="n">prepare_output</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">target_meta</span><span class="p">)</span>
-        <span class="n">save_raster</span><span class="p">(</span><span class="n">out_array</span><span class="p">,</span> <span class="n">out_meta</span><span class="p">,</span> <span class="n">out_file</span><span class="p">)</span>
+    <span class="n">write_json</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">metrics_name</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="n">evaluations</span><span class="p">)</span>
+    <span class="n">write_json</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">settings_name</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="n">model_config</span><span class="p">)</span>
+    <span class="n">write_json</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">runtime_name</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="n">runtime_stats</span><span class="p">)</span>
 
     <span class="c1"># Collect results</span>
     <span class="n">out_layers</span> <span class="o">=</span> <span class="n">_collect_results</span><span class="p">(</span>
         <span class="n">cma_id</span><span class="o">=</span><span class="n">cma_id</span><span class="p">,</span>
         <span class="n">model_run_id</span><span class="o">=</span><span class="n">model_run_id</span><span class="p">,</span>
         <span class="n">output_locations</span><span class="o">=</span><span class="n">output_locations</span><span class="p">,</span>
+        <span class="n">output_files</span><span class="o">=</span><span class="n">output_files</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">out_layers</span></div>
@@ -329,7 +412,7 @@
 
 <div class="viewcode-block" id="_get_label_info">
 <a class="viewcode-back" href="../../../../beak.integration.statmagic.call_bnn.html#beak.integration.statmagic.call_bnn._get_label_info">[docs]</a>
-<span class="k">def</span> <span class="nf">_get_label_info</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_label_info</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -357,25 +440,19 @@
 
 
 
-<div class="viewcode-block" id="_update_labels">
-<a class="viewcode-back" href="../../../../beak.integration.statmagic.call_bnn.html#beak.integration.statmagic.call_bnn._update_labels">[docs]</a>
-<span class="k">def</span> <span class="nf">_update_labels</span><span class="p">(</span>
-    <span class="n">cma_metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
-    <span class="n">train_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
-    <span class="n">network_arch</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+<div class="viewcode-block" id="_get_sampled_labels">
+<a class="viewcode-back" href="../../../../beak.integration.statmagic.call_bnn.html#beak.integration.statmagic.call_bnn._get_sampled_labels">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_sampled_labels</span><span class="p">(</span>
     <span class="n">label_data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]],</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a dictionary containing all settings.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        cma_metadata: Metadata for the CMA.</span>
-<span class="sd">        train_config: Configuration for training.</span>
-<span class="sd">        network_arch: Network architecture.</span>
 <span class="sd">        label_data: Data and descriptions for labels.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        dict: Dictionary containing all settings.</span>
+<span class="sd">        dict: Dictionary containing labels processed in the workflow.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">labels</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">description</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">label_data</span><span class="p">:</span>
@@ -385,23 +462,44 @@
             <span class="p">}</span>
         <span class="p">)</span>
 
-    <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;cma&quot;</span><span class="p">:</span> <span class="n">cma_metadata</span><span class="p">,</span>
-        <span class="s2">&quot;input_settings&quot;</span><span class="p">:</span> <span class="n">train_config</span><span class="p">,</span>
-        <span class="s2">&quot;network_architecture&quot;</span><span class="p">:</span> <span class="n">network_arch</span><span class="p">,</span>
-        <span class="s2">&quot;labels&quot;</span><span class="p">:</span> <span class="n">labels</span><span class="p">,</span>
-    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">labels</span></div>
 
-    <span class="k">return</span> <span class="n">metadata</span></div>
+
+
+<div class="viewcode-block" id="_get_network_parameters">
+<a class="viewcode-back" href="../../../../beak.integration.statmagic.call_bnn.html#beak.integration.statmagic.call_bnn._get_network_parameters">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_network_parameters</span><span class="p">(</span>
+    <span class="n">input_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">nodes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the number of parameters in the neural network.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_size: Size of the input layer.</span>
+<span class="sd">        nodes: Number of neurons for each layer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Input to first hidden layer</span>
+    <span class="n">weight_params</span> <span class="o">=</span> <span class="n">input_size</span> <span class="o">*</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Hidden layers to output layer</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)):</span>
+        <span class="n">weight_params</span> <span class="o">+=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="c1"># Add bias parameters for each layer</span>
+    <span class="n">bias_params</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">weight_params</span> <span class="o">+</span> <span class="n">bias_params</span></div>
 
 
 
 <div class="viewcode-block" id="_collect_results">
 <a class="viewcode-back" href="../../../../beak.integration.statmagic.call_bnn.html#beak.integration.statmagic.call_bnn._collect_results">[docs]</a>
-<span class="k">def</span> <span class="nf">_collect_results</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_collect_results</span><span class="p">(</span>
     <span class="n">cma_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">model_run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">output_locations</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="n">output_files</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="o">...</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ProspectivityOutputLayer</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create information for the CDR ProspectivityOutputLayer Class.</span>
@@ -414,7 +512,8 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        List of tuples, where each tuple contains the file path and the related ProspectivityOutputLayer object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">output_folder</span><span class="p">,</span> <span class="n">raster_folder</span><span class="p">,</span> <span class="n">metrics_file</span><span class="p">,</span> <span class="n">settings_file</span> <span class="o">=</span> <span class="n">output_locations</span>
+    <span class="n">output_folder</span><span class="p">,</span> <span class="n">raster_folder</span> <span class="o">=</span> <span class="n">output_locations</span>
+    <span class="n">metrics</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">train_split</span><span class="p">,</span> <span class="n">test_split</span><span class="p">,</span> <span class="n">runtime_stats</span> <span class="o">=</span> <span class="n">output_files</span>
 
     <span class="c1"># Initialization</span>
     <span class="n">init_meta</span> <span class="o">=</span> <span class="p">{</span>
@@ -446,20 +545,11 @@
     <span class="p">)</span>
 
     <span class="c1"># Initialize output</span>
-    <span class="n">layers_list</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="c1"># Add raster results</span>
-    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">results_file_list</span><span class="p">:</span>
-        <span class="n">file_stem</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-        <span class="n">meta</span> <span class="o">=</span> <span class="n">init_meta</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">file_stem</span><span class="p">:</span>
-                <span class="n">meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-
-                <span class="n">layers_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span>
-                <span class="p">)</span>
+    <span class="n">layers_list</span> <span class="o">=</span> <span class="n">_add_raster_results_to_output_layers</span><span class="p">(</span>
+        <span class="n">file_list</span><span class="o">=</span><span class="n">results_file_list</span><span class="p">,</span>
+        <span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="p">,</span>
+        <span class="n">init_meta</span><span class="o">=</span><span class="n">init_meta</span>
+    <span class="p">)</span>
 
     <span class="c1"># Add metrics</span>
     <span class="n">update_meta</span> <span class="o">=</span> <span class="p">{</span>
@@ -469,9 +559,9 @@
 
     <span class="n">layers_list</span> <span class="o">=</span> <span class="n">prepare_output_layers</span><span class="p">(</span>
         <span class="n">layers</span><span class="o">=</span><span class="n">layers_list</span><span class="p">,</span>
-        <span class="n">files</span><span class="o">=</span><span class="n">metrics_file</span><span class="p">,</span>
+        <span class="n">files</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">metrics</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">),</span>
         <span class="n">meta</span><span class="o">=</span><span class="p">(</span><span class="n">init_meta</span><span class="p">,</span> <span class="n">update_meta</span><span class="p">),</span>
-        <span class="n">output</span><span class="o">=</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="s2">&quot;metrics.zip&quot;</span><span class="p">)</span>
+        <span class="n">output</span><span class="o">=</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">metrics</span> <span class="o">+</span> <span class="s2">&quot;.zip&quot;</span><span class="p">)</span>
     <span class="p">)</span>
 
     <span class="c1"># Add metadata and settings</span>
@@ -482,21 +572,47 @@
 
     <span class="n">layers_list</span> <span class="o">=</span> <span class="n">prepare_output_layers</span><span class="p">(</span>
         <span class="n">layers</span><span class="o">=</span><span class="n">layers_list</span><span class="p">,</span>
-        <span class="n">files</span><span class="o">=</span><span class="n">settings_file</span><span class="p">,</span>
+        <span class="n">files</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">settings</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">),</span>
         <span class="n">meta</span><span class="o">=</span><span class="p">(</span><span class="n">init_meta</span><span class="p">,</span> <span class="n">update_meta</span><span class="p">),</span>
-        <span class="n">output</span><span class="o">=</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="s2">&quot;settings.zip&quot;</span><span class="p">)</span>
+        <span class="n">output</span><span class="o">=</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">settings</span> <span class="o">+</span> <span class="s2">&quot;.zip&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Add runtime stats</span>
+    <span class="n">update_meta</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;output_type&quot;</span><span class="p">:</span> <span class="s2">&quot;runtime&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Archive containing runtime statistics&quot;</span>
+    <span class="p">}</span>
+
+    <span class="n">layers_list</span> <span class="o">=</span> <span class="n">prepare_output_layers</span><span class="p">(</span>
+        <span class="n">layers</span><span class="o">=</span><span class="n">layers_list</span><span class="p">,</span>
+        <span class="n">files</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">runtime_stats</span> <span class="o">+</span> <span class="s2">&quot;.json&quot;</span><span class="p">),</span>
+        <span class="n">meta</span><span class="o">=</span><span class="p">(</span><span class="n">init_meta</span><span class="p">,</span> <span class="n">update_meta</span><span class="p">),</span>
+        <span class="n">output</span><span class="o">=</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">runtime_stats</span> <span class="o">+</span> <span class="s2">&quot;.zip&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Add splits</span>
+    <span class="n">update_meta</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;output_type&quot;</span><span class="p">:</span> <span class="s2">&quot;train_test_data&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Archive containing the train and test data&quot;</span>
+    <span class="p">}</span>
+
+    <span class="n">splits</span> <span class="o">=</span> <span class="p">[</span><span class="n">train_split</span><span class="p">,</span> <span class="n">test_split</span><span class="p">]</span>
+    <span class="n">extensions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;.csv&quot;</span><span class="p">,</span> <span class="s2">&quot;.gpkg&quot;</span><span class="p">]</span>
+
+    <span class="n">model_data</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">split</span> <span class="o">+</span> <span class="n">extension</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">split</span><span class="p">,</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="n">splits</span><span class="p">,</span> <span class="n">extensions</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="n">layers_list</span> <span class="o">=</span> <span class="n">prepare_output_layers</span><span class="p">(</span>
+        <span class="n">layers</span><span class="o">=</span><span class="n">layers_list</span><span class="p">,</span>
+        <span class="n">files</span><span class="o">=</span><span class="n">model_data</span><span class="p">,</span>
+        <span class="n">meta</span><span class="o">=</span><span class="p">(</span><span class="n">init_meta</span><span class="p">,</span> <span class="n">update_meta</span><span class="p">),</span>
+        <span class="n">output</span><span class="o">=</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="s2">&quot;train_test_data.zip&quot;</span><span class="p">)</span>
     <span class="p">)</span>
 
     <span class="c1"># Create CDR object</span>
-    <span class="n">prospectivity_output_layers</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">layers_list</span><span class="p">:</span>
-        <span class="n">layer_path</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">layer_meta</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-
-        <span class="n">layer_object</span> <span class="o">=</span> <span class="n">ProspectivityOutputLayer</span><span class="p">(</span><span class="o">**</span><span class="n">layer_meta</span><span class="p">)</span>
-        <span class="n">prospectivity_output_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="p">(</span><span class="n">layer_path</span><span class="p">,</span> <span class="n">layer_object</span><span class="p">)</span>
-        <span class="p">)</span>
+    <span class="n">prospectivity_output_layers</span> <span class="o">=</span> <span class="n">_create_prospectivity_output_layers</span><span class="p">(</span><span class="n">layers_list</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">prospectivity_output_layers</span></div>
 
@@ -509,7 +625,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

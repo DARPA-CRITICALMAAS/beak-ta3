@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.experimental.preparation &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -95,24 +95,24 @@
            <div itemprop="articleBody">
              
   <h1>Source code for beak.experimental.preparation</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">rasterio</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">sklearn.impute</span> <span class="kn">import</span> <span class="n">SimpleImputer</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Sequence</span>
-<span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Number</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.impute</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleImputer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Number</span>
 
-<span class="kn">from</span> <span class="nn">beak.experimental.io</span> <span class="kn">import</span> <span class="n">load_raster</span><span class="p">,</span> <span class="n">read_raster</span>
-<span class="kn">from</span> <span class="nn">beak.experimental.focal</span> <span class="kn">import</span> <span class="n">_create_local_buffer_binary_version</span><span class="p">,</span> <span class="n">_create_local_buffer_generic_version</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.experimental.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_raster</span><span class="p">,</span> <span class="n">read_raster</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.experimental.focal</span><span class="w"> </span><span class="kn">import</span> <span class="n">_create_local_buffer_binary_version</span><span class="p">,</span> <span class="n">_create_local_buffer_generic_version</span>
 
 
 <div class="viewcode-block" id="create_encodings_from_dataframe">
 <a class="viewcode-back" href="../../../beak.experimental.preparation.html#beak.experimental.preparation.create_encodings_from_dataframe">[docs]</a>
-<span class="k">def</span> <span class="nf">create_encodings_from_dataframe</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_encodings_from_dataframe</span><span class="p">(</span>
     <span class="n">value_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">export_absent</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
@@ -151,7 +151,7 @@
 
 <div class="viewcode-block" id="impute_data">
 <a class="viewcode-back" href="../../../beak.experimental.preparation.html#beak.experimental.preparation.impute_data">[docs]</a>
-<span class="k">def</span> <span class="nf">impute_data</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">impute_data</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">],</span>
     <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">strategy</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="s2">&quot;most_frequent&quot;</span><span class="p">,</span> <span class="s2">&quot;constant&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
@@ -197,7 +197,7 @@
 
 <div class="viewcode-block" id="delete_nan_elements">
 <a class="viewcode-back" href="../../../beak.experimental.preparation.html#beak.experimental.preparation.delete_nan_elements">[docs]</a>
-<span class="k">def</span> <span class="nf">delete_nan_elements</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">transpose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">delete_nan_elements</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">transpose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Deletes NaN elements from the given array.</span>
 
@@ -220,7 +220,7 @@
 
 <div class="viewcode-block" id="create_hard_buffer_around_labels">
 <a class="viewcode-back" href="../../../beak.experimental.preparation.html#beak.experimental.preparation.create_hard_buffer_around_labels">[docs]</a>
-<span class="k">def</span> <span class="nf">create_hard_buffer_around_labels</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_hard_buffer_around_labels</span><span class="p">(</span>
     <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="n">shape</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;square&quot;</span><span class="p">,</span> <span class="s2">&quot;circle&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;circle&quot;</span><span class="p">,</span>
@@ -275,7 +275,7 @@
 <span class="c1"># region: Sampling functions</span>
 <div class="viewcode-block" id="_sampling_select_classes">
 <a class="viewcode-back" href="../../../beak.experimental.preparation.html#beak.experimental.preparation._sampling_select_classes">[docs]</a>
-<span class="k">def</span> <span class="nf">_sampling_select_classes</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_sampling_select_classes</span><span class="p">(</span>
     <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
@@ -323,7 +323,7 @@
 
 <div class="viewcode-block" id="_get_unique_values_list">
 <a class="viewcode-back" href="../../../beak.experimental.preparation.html#beak.experimental.preparation._get_unique_values_list">[docs]</a>
-<span class="k">def</span> <span class="nf">_get_unique_values_list</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_unique_values_list</span><span class="p">(</span>
     <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">include_nan</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">include_inf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -370,7 +370,7 @@
 
 <div class="viewcode-block" id="_sampling_select_random_points">
 <a class="viewcode-back" href="../../../beak.experimental.preparation.html#beak.experimental.preparation._sampling_select_random_points">[docs]</a>
-<span class="k">def</span> <span class="nf">_sampling_select_random_points</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_sampling_select_random_points</span><span class="p">(</span>
     <span class="n">array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">selection</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="n">strategy</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Number</span><span class="p">],</span> <span class="n">Number</span><span class="p">],</span>
@@ -474,7 +474,7 @@
 
 <div class="viewcode-block" id="_sampling_by_selection">
 <a class="viewcode-back" href="../../../beak.experimental.preparation.html#beak.experimental.preparation._sampling_by_selection">[docs]</a>
-<span class="k">def</span> <span class="nf">_sampling_by_selection</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_sampling_by_selection</span><span class="p">(</span>
     <span class="n">file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
     <span class="n">include</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">exclude</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -514,7 +514,7 @@
 
 <div class="viewcode-block" id="_sampling_by_threshold">
 <a class="viewcode-back" href="../../../beak.experimental.preparation.html#beak.experimental.preparation._sampling_by_threshold">[docs]</a>
-<span class="k">def</span> <span class="nf">_sampling_by_threshold</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_sampling_by_threshold</span><span class="p">(</span>
     <span class="n">file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
     <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;positives&quot;</span><span class="p">,</span> <span class="s2">&quot;negatives&quot;</span><span class="p">],</span>
     <span class="n">threshold</span><span class="p">:</span> <span class="n">Number</span><span class="p">,</span>
@@ -585,7 +585,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

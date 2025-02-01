@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.experimental.cdr &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -95,32 +95,32 @@
            <div itemprop="articleBody">
              
   <h1>Source code for beak.experimental.cdr</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">requests</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
-<span class="kn">import</span> <span class="nn">shapely</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shapely</span>
 
-<span class="kn">import</span> <span class="nn">urllib3</span>
-<span class="kn">import</span> <span class="nn">zipfile</span>
-<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zipfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 <span class="n">urllib3</span><span class="o">.</span><span class="n">disable_warnings</span><span class="p">(</span><span class="n">urllib3</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">InsecureRequestWarning</span><span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
-<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">json_normalize</span>
-<span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Number</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">json_normalize</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numbers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Number</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
-<span class="kn">from</span> <span class="nn">beak.experimental.io</span> <span class="kn">import</span> <span class="n">check_path</span><span class="p">,</span> <span class="n">data_folder</span>
-<span class="kn">from</span> <span class="nn">beak.experimental.misc</span> <span class="kn">import</span> <span class="n">replace_invalid_characters</span>
-<span class="kn">from</span> <span class="nn">beak.experimental.conversions</span> <span class="kn">import</span> <span class="n">create_binary_raster</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.experimental.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_path</span><span class="p">,</span> <span class="n">data_folder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.experimental.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">replace_invalid_characters</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">beak.experimental.conversions</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_binary_raster</span>
 
 
 <div class="viewcode-block" id="_get_cma">
 <a class="viewcode-back" href="../../../beak.experimental.cdr.html#beak.experimental.cdr._get_cma">[docs]</a>
-<span class="k">def</span> <span class="nf">_get_cma</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_cma</span><span class="p">(</span>
     <span class="n">json</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
     <span class="n">target</span><span class="o">=</span><span class="s2">&quot;cma&quot;</span><span class="p">,</span>
     <span class="n">payloads</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s2">&quot;payload&quot;</span>
@@ -145,7 +145,7 @@
 
 <div class="viewcode-block" id="_get_evidence_layers">
 <a class="viewcode-back" href="../../../beak.experimental.cdr.html#beak.experimental.cdr._get_evidence_layers">[docs]</a>
-<span class="k">def</span> <span class="nf">_get_evidence_layers</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_evidence_layers</span><span class="p">(</span>
     <span class="n">json</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
     <span class="n">target</span><span class="o">=</span><span class="s2">&quot;evidence_layers&quot;</span><span class="p">,</span>
     <span class="n">payloads</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s2">&quot;payload&quot;</span>
@@ -171,7 +171,7 @@
 
 <div class="viewcode-block" id="_download_cdr_files">
 <a class="viewcode-back" href="../../../beak.experimental.cdr.html#beak.experimental.cdr._download_cdr_files">[docs]</a>
-<span class="k">def</span> <span class="nf">_download_cdr_files</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_download_cdr_files</span><span class="p">(</span>
     <span class="n">download_url</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
     <span class="n">download_file_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
     <span class="n">verify_ssl</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
@@ -188,7 +188,7 @@
 
 <div class="viewcode-block" id="create_template_raster">
 <a class="viewcode-back" href="../../../beak.experimental.cdr.html#beak.experimental.cdr.create_template_raster">[docs]</a>
-<span class="k">def</span> <span class="nf">create_template_raster</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_template_raster</span><span class="p">(</span>
     <span class="n">cma</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
     <span class="n">snap_to</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Number</span><span class="p">,</span> <span class="n">Number</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -231,7 +231,7 @@
 
 <div class="viewcode-block" id="_zip_file_extract_core">
 <a class="viewcode-back" href="../../../beak.experimental.cdr.html#beak.experimental.cdr._zip_file_extract_core">[docs]</a>
-<span class="k">def</span> <span class="nf">_zip_file_extract_core</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_zip_file_extract_core</span><span class="p">(</span>
     <span class="n">file_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
     <span class="n">extract_to</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
 <span class="p">):</span>
@@ -242,7 +242,7 @@
 
 <div class="viewcode-block" id="_zip_file_extract_run">
 <a class="viewcode-back" href="../../../beak.experimental.cdr.html#beak.experimental.cdr._zip_file_extract_run">[docs]</a>
-<span class="k">def</span> <span class="nf">_zip_file_extract_run</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_zip_file_extract_run</span><span class="p">(</span>
     <span class="n">extract_zip</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">file_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
     <span class="n">extract_to</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
@@ -259,7 +259,7 @@
 
 <div class="viewcode-block" id="download_evidence_layers">
 <a class="viewcode-back" href="../../../beak.experimental.cdr.html#beak.experimental.cdr.download_evidence_layers">[docs]</a>
-<span class="k">def</span> <span class="nf">download_evidence_layers</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">download_evidence_layers</span><span class="p">(</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">cma</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="n">base_folder</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span><span class="o">=</span><span class="n">data_folder</span><span class="p">(),</span>
@@ -330,7 +330,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

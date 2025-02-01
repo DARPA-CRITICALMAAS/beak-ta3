@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.experimental.conversions module &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
@@ -279,13 +279,14 @@ If provided, it will be used instead of the <cite>epsg_code</cite> parameter.</p
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – The input DataFrame containing the data.</p></li>
-<li><p><strong>long_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The name of the column containing the longitude values.</p></li>
-<li><p><strong>lat_col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The name of the column containing the latitude values.</p></li>
-<li><p><strong>epsg_code</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>]</em>) – The EPSG code specifying the coordinate reference system (CRS) of the data.
+<li><p><strong>data</strong> – The input DataFrame containing the data.</p></li>
+<li><p><strong>long_col</strong> – The name of the column containing the longitude values.</p></li>
+<li><p><strong>lat_col</strong> – The name of the column containing the latitude values.</p></li>
+<li><p><strong>epsg_code</strong> – The EPSG code specifying the coordinate reference system (CRS) of the data.
 If not provided, a ValueError will be raised.</p></li>
-<li><p><strong>crs</strong> (<em>Optional</em><em>[</em><em>CRS</em><em>]</em>) – The coordinate reference system (CRS) of the data.
+<li><p><strong>crs</strong> – The coordinate reference system (CRS) of the data.
 If provided, it will be used instead of the <cite>epsg_code</cite> parameter.</p></li>
+<li><p><strong>query</strong> – The query string to filter the DataFrame.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -417,7 +418,7 @@ parameters required for the transformation.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

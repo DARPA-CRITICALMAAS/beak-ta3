@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.methods.som.nextsomcore.loadfile &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -106,14 +106,14 @@
 <span class="sd">Modyfied by Ina Storch, 2024</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">.lrnfile</span> <span class="kn">import</span> <span class="n">load_lrn_file</span><span class="p">,</span> <span class="n">read_lrn_coordinate_columns</span><span class="p">,</span> <span class="n">read_lrn_data_columns</span>
-<span class="kn">from</span> <span class="nn">..load_geotiff</span> <span class="kn">import</span> <span class="n">load_geotiff_files</span><span class="p">,</span> <span class="n">delete_rows_with_no_data</span><span class="p">,</span> <span class="n">read_geotiff_coordinate_columns</span><span class="p">,</span> <span class="n">read_geotiff_data_columns</span>
-<span class="kn">from</span> <span class="nn">..load_csv</span> <span class="kn">import</span> <span class="n">load_csv_file</span><span class="p">,</span> <span class="n">read_csv_coordinate_columns</span><span class="p">,</span><span class="n">read_csv_data_columns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.lrnfile</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_lrn_file</span><span class="p">,</span> <span class="n">read_lrn_coordinate_columns</span><span class="p">,</span> <span class="n">read_lrn_data_columns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..load_geotiff</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_geotiff_files</span><span class="p">,</span> <span class="n">delete_rows_with_no_data</span><span class="p">,</span> <span class="n">read_geotiff_coordinate_columns</span><span class="p">,</span> <span class="n">read_geotiff_data_columns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..load_csv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_csv_file</span><span class="p">,</span> <span class="n">read_csv_coordinate_columns</span><span class="p">,</span><span class="n">read_csv_data_columns</span>
 
 
 <div class="viewcode-block" id="load_input_file">
 <a class="viewcode-back" href="../../../../../beak.methods.som.nextsomcore.loadfile.html#beak.methods.som.nextsomcore.loadfile.load_input_file">[docs]</a>
-<span class="k">def</span> <span class="nf">load_input_file</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">label_file</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span><span class="c1">#input file in case of lrn, input file list in case of geoTiff</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_input_file</span><span class="p">(</span><span class="n">input_file</span><span class="p">,</span> <span class="n">label_file</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span><span class="c1">#input file in case of lrn, input file list in case of geoTiff</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;load input file of type lrn, csv or geotiff</span>
 
 <span class="sd">    Args:</span>
@@ -141,7 +141,7 @@
 
 <div class="viewcode-block" id="read_coordinate_columns">
 <a class="viewcode-back" href="../../../../../beak.methods.som.nextsomcore.loadfile.html#beak.methods.som.nextsomcore.loadfile.read_coordinate_columns">[docs]</a>
-<span class="k">def</span> <span class="nf">read_coordinate_columns</span><span class="p">(</span><span class="n">header</span><span class="p">):</span> 
+<span class="k">def</span><span class="w"> </span><span class="nf">read_coordinate_columns</span><span class="p">(</span><span class="n">header</span><span class="p">):</span> 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;read coordinate columns for file types lrn, csv and geotiff</span>
 
 <span class="sd">    Args:</span>
@@ -164,7 +164,7 @@
 
 <div class="viewcode-block" id="read_data_columns">
 <a class="viewcode-back" href="../../../../../beak.methods.som.nextsomcore.loadfile.html#beak.methods.som.nextsomcore.loadfile.read_data_columns">[docs]</a>
-<span class="k">def</span> <span class="nf">read_data_columns</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_data_columns</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;read data columns for file types lrn, csv and geotiff</span>
 
 <span class="sd">    Args:</span>
@@ -193,7 +193,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>beak.methods.som.plot_som_results &mdash; beak-ta3 1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -117,21 +117,21 @@
 <span class="sd">10) Redraw (boolean) - whether to calculate all plots or only those that deal with clustering </span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
-<span class="kn">import</span> <span class="nn">pickle</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">matplotlib.offsetbox</span> <span class="kn">import</span> <span class="n">AnchoredOffsetbox</span><span class="p">,</span> <span class="n">TextArea</span><span class="p">,</span> <span class="n">VPacker</span> <span class="c1"># HPacker,</span>
-<span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="kn">import</span> <span class="n">FormatStrFormatter</span>
-<span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">from</span> <span class="nn">matplotlib.lines</span> <span class="kn">import</span> <span class="n">Line2D</span>
-<span class="kn">from</span> <span class="nn">.plotting_functions</span> <span class="kn">import</span> <span class="n">plot_hexa</span>
-<span class="kn">from</span> <span class="nn">.label_analysis</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.offsetbox</span><span class="w"> </span><span class="kn">import</span> <span class="n">AnchoredOffsetbox</span><span class="p">,</span> <span class="n">TextArea</span><span class="p">,</span> <span class="n">VPacker</span> <span class="c1"># HPacker,</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.ticker</span><span class="w"> </span><span class="kn">import</span> <span class="n">FormatStrFormatter</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.lines</span><span class="w"> </span><span class="kn">import</span> <span class="n">Line2D</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.plotting_functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_hexa</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.label_analysis</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
 
 <span class="sd">&quot;&quot;&quot;</span>
@@ -139,14 +139,15 @@
 <span class="sd">&quot;&quot;&quot;</span>    
 <div class="viewcode-block" id="run_plotting_script">
 <a class="viewcode-back" href="../../../../beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.run_plotting_script">[docs]</a>
-<span class="k">def</span> <span class="nf">run_plotting_script</span><span class="p">(</span><span class="n">argsP</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_plotting_script</span><span class="p">(</span><span class="n">argsP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the basic set up of figures and plot som space results, geo space results, draw som clusters, plot Davies-Bouldin index, cluster hit count, U-matrix and box-plots.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        argsP (dict): Dictionary holding agruments: file path to som results, size of som space, input file string, grid type, no data value, working directory</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Setup figures&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Create plots...&quot;</span><span class="p">)</span>
+    <span class="c1"># print(&quot;Setup figures&quot;)</span>
     <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
     <span class="c1"># Set output directory for plot exports</span>
@@ -165,10 +166,11 @@
         <span class="n">argsP</span><span class="o">.</span><span class="n">grid_type</span><span class="p">,</span> <span class="n">argsP</span><span class="o">.</span><span class="n">noDataValue</span><span class="p">,</span> <span class="n">argsP</span><span class="o">.</span><span class="n">outgeofile</span><span class="p">)</span>
 
     <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Execution time: </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+    <span class="c1"># print(f&quot;    Execution time: {end_time - start_time} seconds&quot;)</span>
 
     <span class="k">if</span> <span class="n">argsP</span><span class="o">.</span><span class="n">outgeofile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="c1">#if spatial, draw geo plots</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Plot geo space results&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;- Geospace&quot;</span><span class="p">)</span>
+        <span class="c1"># print(&quot;Plot geo space results&quot;)</span>
         <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="k">if</span><span class="p">(</span><span class="n">argsP</span><span class="o">.</span><span class="n">dataType</span><span class="o">==</span><span class="s1">&#39;scatter&#39;</span><span class="p">):</span>
             <span class="k">if</span><span class="p">(</span><span class="n">clusters</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">):</span>
@@ -182,30 +184,32 @@
                 <span class="n">plot_geospace_results_grid</span><span class="p">(</span><span class="n">geo_data</span><span class="p">,</span> <span class="n">geo_headers</span><span class="p">,</span> <span class="n">som_data</span><span class="p">,</span> <span class="n">argsP</span><span class="o">.</span><span class="n">noDataValue</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">)</span>
 
         <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Execution time: </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+        <span class="c1"># print(f&quot;    Execution time: {end_time - start_time} seconds&quot;)</span>
 
-    <span class="k">if</span><span class="p">(</span><span class="n">clusters</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">):</span> 
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Plot Cluster result SOM space&quot;</span><span class="p">)</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">clusters</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;- Clusters&quot;</span><span class="p">)</span>
+        <span class="c1"># print(&quot;Plot Cluster result SOM space&quot;)</span>
         <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;    Draw som cluster plot&quot;</span><span class="p">)</span>
+        <span class="c1"># print(&quot;    Draw som cluster plot&quot;)</span>
         <span class="n">draw_som_clusters</span><span class="p">(</span><span class="n">argsP</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">som_data</span><span class="p">,</span> <span class="n">som_table</span><span class="p">,</span> <span class="n">annot_ticks</span><span class="p">,</span> <span class="n">som_headers</span><span class="p">,</span> <span class="n">discrete_cmap</span><span class="p">,</span> <span class="n">discrete_cmap_2</span><span class="p">,</span> <span class="n">clusters</span><span class="p">,</span> <span class="n">cluster_ticks</span><span class="p">,</span> <span class="n">cluster_tick_labels</span><span class="p">,</span> <span class="n">labelIndex</span><span class="p">,</span> <span class="n">annot_strings</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">)</span>
         <span class="n">loaded_cluster_list</span> <span class="o">=</span> <span class="n">load_cluster_dictionary</span><span class="p">(</span><span class="n">argsP</span><span class="o">.</span><span class="n">dir</span><span class="p">)</span>
         
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;    Plot Davies Bouldin index&quot;</span><span class="p">)</span>
+        <span class="c1"># print(&quot;    Plot Davies Bouldin index&quot;)</span>
         <span class="n">plot_davies_bouldin</span><span class="p">(</span><span class="n">loaded_cluster_list</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">)</span>
         
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;    Plot cluster hit count&quot;</span><span class="p">)</span>
+        <span class="c1"># print(&quot;    Plot cluster hit count&quot;)</span>
         <span class="n">plot_cluster_hit_count</span><span class="p">(</span><span class="n">argsP</span><span class="o">.</span><span class="n">dir</span><span class="o">+</span><span class="s2">&quot;/cluster_hit_count.txt&quot;</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">)</span>
        
         <span class="k">if</span> <span class="n">labelIndex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;    Plot cluster label count&quot;</span><span class="p">)</span>
+            <span class="c1"># print(&quot;    Plot cluster label count&quot;)</span>
             <span class="n">plot_cluster_label_count</span><span class="p">(</span><span class="n">argsP</span><span class="o">.</span><span class="n">dir</span><span class="o">+</span><span class="s2">&quot;/cluster_label_counts.txt&quot;</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">)</span>
 
         <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Execution time: </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+        <span class="c1"># print(f&quot;    Execution time: {end_time - start_time} seconds&quot;)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Plot SOM space results&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;- SOM space&quot;</span><span class="p">)</span>
+    <span class="c1"># print(&quot;Plot SOM space results&quot;)</span>
     <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="n">bmu_id</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">argsP</span><span class="o">.</span><span class="n">dir</span><span class="o">+</span><span class="s1">&#39;/bmu_ids.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
@@ -224,24 +228,25 @@
         <span class="n">draw_som_results</span><span class="p">(</span><span class="n">argsP</span><span class="p">,</span> <span class="n">som_data</span><span class="p">,</span> <span class="n">som_table</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">annot_ticks</span><span class="p">,</span> <span class="n">som_headers</span><span class="p">,</span> <span class="n">clusters</span><span class="p">,</span> <span class="n">cluster_tick_labels</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">)</span>
         
     <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Execution time: </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+    <span class="c1"># print(f&quot;    Execution time: {end_time - start_time} seconds&quot;)</span>
     
     <span class="c1">#print(&quot;SomSpace plots finshed&quot;)</span>
 
     <span class="k">if</span><span class="p">(</span><span class="n">som_dict</span><span class="p">[</span><span class="s1">&#39;clusters&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Plot Boxplots&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;- Boxplots&quot;</span><span class="p">)</span>
+        <span class="c1"># print(&quot;Plot Boxplots&quot;)</span>
         <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
         <span class="n">draw_boxplots</span><span class="p">(</span><span class="n">som_data</span><span class="p">,</span><span class="n">som_headers</span><span class="p">,</span><span class="n">discrete_cmap</span><span class="p">,</span> <span class="n">cluster_tick_labels</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">)</span>
         <span class="c1">#print(&quot;Boxplots finished&quot;)</span>
-        <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Execution time: </span><span class="si">{</span><span class="n">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start_time</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span></div>
+        <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span></div>
 
+        <span class="c1"># print(f&quot;    Execution time: {end_time - start_time} seconds&quot;)</span>
 
 
 <div class="viewcode-block" id="basic_setup">
 <a class="viewcode-back" href="../../../../beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.basic_setup">[docs]</a>
-<span class="k">def</span> <span class="nf">basic_setup</span><span class="p">(</span><span class="n">outsomfile</span><span class="p">,</span> <span class="n">som_x</span><span class="p">,</span> <span class="n">som_y</span><span class="p">,</span> <span class="n">input_file</span><span class="p">,</span> <span class="n">working_dir</span><span class="p">,</span> <span class="n">grid_type</span><span class="p">,</span> <span class="n">noDataValue</span><span class="p">,</span> <span class="n">aOutgeofile</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">basic_setup</span><span class="p">(</span><span class="n">outsomfile</span><span class="p">,</span> <span class="n">som_x</span><span class="p">,</span> <span class="n">som_y</span><span class="p">,</span> <span class="n">input_file</span><span class="p">,</span> <span class="n">working_dir</span><span class="p">,</span> <span class="n">grid_type</span><span class="p">,</span> <span class="n">noDataValue</span><span class="p">,</span> <span class="n">aOutgeofile</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load input parameters &amp; do basic setup, Initialize variables.</span>
 
@@ -258,7 +263,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        dict: dictionary containing initialized variables</span>
 <span class="sd">    &quot;&quot;&quot;</span>
- 
     <span class="n">somx</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">som_x</span><span class="p">)</span>        
     <span class="n">somy</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">som_y</span><span class="p">)</span>
     <span class="n">outgeofile</span><span class="o">=</span><span class="kc">None</span>          
@@ -276,7 +280,7 @@
     <span class="n">som_headers</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">outsomfile</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
 
     <span class="n">time_1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;        Read som data execution time: </span><span class="si">{</span><span class="n">time_1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">time_0</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+    <span class="c1"># print(f&quot;        Read som data execution time: {time_1 - time_0} seconds&quot;)</span>
 
     <span class="k">if</span> <span class="n">outgeofile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1">#geo_data=np.genfromtxt(outgeofile, skip_header=(1), delimiter=&#39; &#39;)</span>
@@ -292,7 +296,7 @@
         <span class="n">geo_headers</span> <span class="o">=</span> <span class="n">geo_headers</span> <span class="o">+</span><span class="n">header_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
 
         <span class="n">time_2</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;        Read geo data execution time: </span><span class="si">{</span><span class="n">time_2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">time_1</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+        <span class="c1"># print(f&quot;        Read geo data execution time: {time_2 - time_1} seconds&quot;)</span>
 
     <span class="n">som_table</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">somx</span><span class="p">,</span><span class="n">somy</span><span class="p">))</span><span class="c1">#empty somx*somy sized table for som plots</span>
 
@@ -339,7 +343,7 @@
     <span class="n">colnames</span> <span class="o">=</span> <span class="n">header_line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">if</span> <span class="n">outgeofile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">header_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s1">&#39;label&#39;</span> <span class="ow">in</span> <span class="n">colnames</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;        Read label annotation data&quot;</span><span class="p">)</span>
+        <span class="c1"># print(f&quot;        Read label annotation data&quot;)</span>
         <span class="n">annot_ticks</span><span class="p">,</span> <span class="n">annot_strings</span><span class="p">,</span> <span class="n">annot_data</span><span class="p">,</span> <span class="n">index_label</span><span class="p">,</span> <span class="n">index_nolabel</span>  <span class="o">=</span> <span class="n">get_label_annotation_data</span><span class="p">(</span><span class="n">som_dict</span><span class="p">,</span> <span class="n">geo_data</span><span class="p">,</span> <span class="n">outgeofile</span><span class="p">,</span> <span class="n">noDataValue</span><span class="p">)</span>
         <span class="c1">#labelIndex = geo_data.shape[1] - 1</span>
         <span class="n">labelIndex</span> <span class="o">=</span> <span class="n">colnames</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">)</span>
@@ -379,7 +383,7 @@
 
 <div class="viewcode-block" id="plot_geospace_results_grid">
 <a class="viewcode-back" href="../../../../beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.plot_geospace_results_grid">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_geospace_results_grid</span><span class="p">(</span><span class="n">geo_data</span><span class="p">,</span> <span class="n">geo_headers</span><span class="p">,</span> <span class="n">som_data</span><span class="p">,</span> <span class="n">noDataValue</span><span class="p">,</span> <span class="n">working_dir</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_geospace_results_grid</span><span class="p">(</span><span class="n">geo_data</span><span class="p">,</span> <span class="n">geo_headers</span><span class="p">,</span> <span class="n">som_data</span><span class="p">,</span> <span class="n">noDataValue</span><span class="p">,</span> <span class="n">working_dir</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot geo space results &amp; q-error if type is grid.</span>
 
 <span class="sd">    Args:</span>
@@ -392,7 +396,7 @@
     <span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.size&#39;</span><span class="p">:</span> <span class="mi">14</span><span class="p">})</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">som_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">4</span><span class="p">):</span> 
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    geospace plot no. </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">som_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">3</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">)</span>  
+        <span class="c1"># print(f&quot;    geospace plot no. {i+2} from {len(som_data[0])-3}&quot;, end=&#39;\r&#39;)</span>
         <span class="n">x</span><span class="o">=</span><span class="n">geo_data</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>      
         <span class="n">y</span><span class="o">=</span><span class="n">geo_data</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">z</span><span class="o">=</span><span class="n">geo_data</span><span class="p">[:,(</span><span class="mi">5</span><span class="o">+</span><span class="n">i</span><span class="p">)]</span>
@@ -444,10 +448,11 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">()</span>    
+    <span class="c1"># print()</span>
         
     <span class="c1">#q_error:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    q-error plot&quot;</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;- Q-Error&quot;</span><span class="p">)</span>
+    <span class="c1"># print(f&quot;    q-error plot&quot;)</span>
     <span class="n">x</span><span class="o">=</span><span class="n">geo_data</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">y</span><span class="o">=</span><span class="n">geo_data</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">z</span><span class="o">=</span><span class="n">geo_data</span><span class="p">[:,(</span><span class="nb">len</span><span class="p">(</span><span class="n">som_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span> <span class="o">+</span><span class="mi">5</span><span class="p">]</span> 
@@ -500,7 +505,7 @@
 
 <div class="viewcode-block" id="plot_geospace_results_scatter">
 <a class="viewcode-back" href="../../../../beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.plot_geospace_results_scatter">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_geospace_results_scatter</span><span class="p">(</span><span class="n">geo_data</span><span class="p">,</span> <span class="n">geo_headers</span><span class="p">,</span> <span class="n">som_data</span><span class="p">,</span> <span class="n">working_dir</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_geospace_results_scatter</span><span class="p">(</span><span class="n">geo_data</span><span class="p">,</span> <span class="n">geo_headers</span><span class="p">,</span> <span class="n">som_data</span><span class="p">,</span> <span class="n">working_dir</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot geo space results &amp; q-error if type is scatter.</span>
 
 <span class="sd">    Args:</span>
@@ -518,7 +523,7 @@
           <span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">geo_data</span><span class="p">)])}</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">som_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">4</span><span class="p">):</span>  
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    geospace plot no. </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">som_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">3</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># print(f&quot;    geospace plot no. {i+2} from {len(som_data[0])-3}&quot;, end=&#39;\r&#39;)</span>
         <span class="n">z</span><span class="o">=</span><span class="n">geo_data</span><span class="p">[:,(</span><span class="mi">5</span><span class="o">+</span><span class="n">i</span><span class="p">)]</span>   
         <span class="n">sns</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s2">&quot;ticks&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;xtick.major.size&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s2">&quot;ytick.major.size&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">})</span>
         <span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.size&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">})</span>
@@ -532,10 +537,11 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.size&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">})</span>  
-    <span class="nb">print</span><span class="p">()</span>
+    <span class="c1"># print()</span>
         
     <span class="c1">#draw q_error:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    q-error plot&quot;</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;- Q-Error&quot;</span><span class="p">)</span>
+    <span class="c1"># print(f&quot;    q-error plot&quot;)</span>
     <span class="n">z</span><span class="o">=</span><span class="n">geo_data</span><span class="p">[:,(</span><span class="nb">len</span><span class="p">(</span><span class="n">som_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span> <span class="o">+</span><span class="mi">5</span><span class="p">]</span>   
     <span class="n">sns</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s2">&quot;ticks&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;xtick.major.size&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s2">&quot;ytick.major.size&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">})</span>
     <span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.size&#39;</span><span class="p">:</span> <span class="mi">30</span><span class="p">})</span>
@@ -555,7 +561,7 @@
 
 <div class="viewcode-block" id="draw_som_results">
 <a class="viewcode-back" href="../../../../beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.draw_som_results">[docs]</a>
-<span class="k">def</span> <span class="nf">draw_som_results</span><span class="p">(</span><span class="n">argsP</span><span class="p">,</span> <span class="n">som_data</span><span class="p">,</span> <span class="n">som_table</span><span class="p">,</span><span class="n">grid</span><span class="p">,</span> <span class="n">annot_ticks</span><span class="p">,</span> <span class="n">som_headers</span><span class="p">,</span><span class="n">clusters</span><span class="p">,</span> <span class="n">cluster_tick_labels</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">draw_som_results</span><span class="p">(</span><span class="n">argsP</span><span class="p">,</span> <span class="n">som_data</span><span class="p">,</span> <span class="n">som_table</span><span class="p">,</span><span class="n">grid</span><span class="p">,</span> <span class="n">annot_ticks</span><span class="p">,</span> <span class="n">som_headers</span><span class="p">,</span><span class="n">clusters</span><span class="p">,</span> <span class="n">cluster_tick_labels</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Draw results in som space.</span>
 
 <span class="sd">    Args:</span>
@@ -568,7 +574,7 @@
 <span class="sd">        output_folder (str): working directory where to save figures</span>
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">som_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">3</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    somspace plot no. </span><span class="si">{</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">som_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">5</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># print(f&quot;    somspace plot no. {j-1} from {len(som_data[0])-5}&quot;, end=&#39;\r&#39;)</span>
         <span class="k">if</span><span class="p">(</span><span class="n">argsP</span><span class="o">.</span><span class="n">grid_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s2">&quot;rectangular&quot;</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">som_data</span><span class="p">)):</span> 
                 <span class="n">som_table</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">som_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])][</span><span class="nb">int</span><span class="p">(</span><span class="n">som_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])]</span><span class="o">=</span><span class="n">som_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="c1">#som_table: somx*somy size</span>
@@ -589,14 +595,14 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  
-        <span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.size&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">})</span>
-    <span class="nb">print</span><span class="p">()</span></div>
+        <span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.size&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">})</span></div>
 
+    <span class="c1"># print()</span>
         
 
 <div class="viewcode-block" id="draw_umatrix">
 <a class="viewcode-back" href="../../../../beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.draw_umatrix">[docs]</a>
-<span class="k">def</span> <span class="nf">draw_umatrix</span><span class="p">(</span><span class="n">somx</span><span class="p">,</span><span class="n">somy</span><span class="p">,</span><span class="n">clusters</span><span class="p">,</span><span class="n">cluster_tick_labels</span><span class="p">,</span><span class="n">som_data</span><span class="p">,</span> <span class="n">som_table</span><span class="p">,</span><span class="n">grid</span><span class="p">,</span> <span class="n">grid_type</span><span class="p">,</span> <span class="n">annot_ticks</span><span class="p">,</span> <span class="n">som_headers</span><span class="p">,</span><span class="n">working_dir</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">draw_umatrix</span><span class="p">(</span><span class="n">somx</span><span class="p">,</span><span class="n">somy</span><span class="p">,</span><span class="n">clusters</span><span class="p">,</span><span class="n">cluster_tick_labels</span><span class="p">,</span><span class="n">som_data</span><span class="p">,</span> <span class="n">som_table</span><span class="p">,</span><span class="n">grid</span><span class="p">,</span> <span class="n">grid_type</span><span class="p">,</span> <span class="n">annot_ticks</span><span class="p">,</span> <span class="n">som_headers</span><span class="p">,</span><span class="n">working_dir</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Draw U-matrix in geo space.</span>
 
 <span class="sd">    Args:</span>
@@ -635,7 +641,7 @@
 
 <div class="viewcode-block" id="draw_som_clusters">
 <a class="viewcode-back" href="../../../../beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.draw_som_clusters">[docs]</a>
-<span class="k">def</span> <span class="nf">draw_som_clusters</span><span class="p">(</span><span class="n">argsP</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">som_data</span><span class="p">,</span> <span class="n">som_table</span><span class="p">,</span> <span class="n">annot_ticks</span><span class="p">,</span> <span class="n">som_headers</span><span class="p">,</span><span class="n">discrete_cmap</span><span class="p">,</span><span class="n">discrete_cmap_2</span><span class="p">,</span><span class="n">clusters</span><span class="p">,</span><span class="n">cluster_ticks</span><span class="p">,</span><span class="n">cluster_tick_labels</span><span class="p">,</span> <span class="n">labelIndex</span><span class="p">,</span> <span class="n">annot_strings</span><span class="p">,</span> <span class="n">working_dir</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">draw_som_clusters</span><span class="p">(</span><span class="n">argsP</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">som_data</span><span class="p">,</span> <span class="n">som_table</span><span class="p">,</span> <span class="n">annot_ticks</span><span class="p">,</span> <span class="n">som_headers</span><span class="p">,</span><span class="n">discrete_cmap</span><span class="p">,</span><span class="n">discrete_cmap_2</span><span class="p">,</span><span class="n">clusters</span><span class="p">,</span><span class="n">cluster_ticks</span><span class="p">,</span><span class="n">cluster_tick_labels</span><span class="p">,</span> <span class="n">labelIndex</span><span class="p">,</span> <span class="n">annot_strings</span><span class="p">,</span> <span class="n">working_dir</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Draw Som Cluster plot.</span>
 
 <span class="sd">    Args:</span>
@@ -721,7 +727,7 @@
 
 <div class="viewcode-block" id="plot_geospace_clusters_grid">
 <a class="viewcode-back" href="../../../../beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.plot_geospace_clusters_grid">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_geospace_clusters_grid</span><span class="p">(</span><span class="n">geo_data</span><span class="p">,</span><span class="n">discrete_cmap</span><span class="p">,</span><span class="n">clusters</span><span class="p">,</span><span class="n">cluster_ticks</span><span class="p">,</span><span class="n">cluster_tick_labels</span><span class="p">,</span><span class="n">working_dir</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_geospace_clusters_grid</span><span class="p">(</span><span class="n">geo_data</span><span class="p">,</span><span class="n">discrete_cmap</span><span class="p">,</span><span class="n">clusters</span><span class="p">,</span><span class="n">cluster_ticks</span><span class="p">,</span><span class="n">cluster_tick_labels</span><span class="p">,</span><span class="n">working_dir</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot geospace clusters, if there is more than 1 cluster and input type is grid.</span>
 
 <span class="sd">    Args:</span>
@@ -790,7 +796,7 @@
     
 <div class="viewcode-block" id="plot_geospace_clusters_scatter">
 <a class="viewcode-back" href="../../../../beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.plot_geospace_clusters_scatter">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_geospace_clusters_scatter</span><span class="p">(</span><span class="n">somx</span><span class="p">,</span><span class="n">somy</span><span class="p">,</span><span class="n">clusters</span><span class="p">,</span><span class="n">cluster_tick_labels</span><span class="p">,</span><span class="n">geo_data</span><span class="p">,</span><span class="n">discrete_cmap_2</span><span class="p">,</span><span class="n">working_dir</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_geospace_clusters_scatter</span><span class="p">(</span><span class="n">somx</span><span class="p">,</span><span class="n">somy</span><span class="p">,</span><span class="n">clusters</span><span class="p">,</span><span class="n">cluster_tick_labels</span><span class="p">,</span><span class="n">geo_data</span><span class="p">,</span><span class="n">discrete_cmap_2</span><span class="p">,</span><span class="n">working_dir</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot geospace clusters if input type is scatter</span>
 
 <span class="sd">    Args:</span>
@@ -832,7 +838,7 @@
 
 <div class="viewcode-block" id="draw_boxplots">
 <a class="viewcode-back" href="../../../../beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.draw_boxplots">[docs]</a>
-<span class="k">def</span> <span class="nf">draw_boxplots</span><span class="p">(</span><span class="n">som_data</span><span class="p">,</span><span class="n">som_headers</span><span class="p">,</span><span class="n">discrete_cmap</span><span class="p">,</span><span class="n">cluster_tick_labels</span><span class="p">,</span><span class="n">working_dir</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">draw_boxplots</span><span class="p">(</span><span class="n">som_data</span><span class="p">,</span><span class="n">som_headers</span><span class="p">,</span><span class="n">discrete_cmap</span><span class="p">,</span><span class="n">cluster_tick_labels</span><span class="p">,</span><span class="n">working_dir</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot boxplots using som data</span>
 
 <span class="sd">    Args:</span>
@@ -854,7 +860,7 @@
             <span class="n">discrete_cmap</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>  
     
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">som_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">3</span><span class="p">):</span> 
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    boxplot no. </span><span class="si">{</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s2"> from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">som_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">3</span><span class="o">-</span><span class="mi">2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># print(f&quot;    boxplot no. {i-1} from {len(som_data[0])-3-2}&quot;, end=&#39;\r&#39;)</span>
         <span class="n">z</span><span class="o">=</span><span class="n">som_data</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span>
         <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">FutureWarning</span><span class="p">)</span>
@@ -870,14 +876,14 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">working_dir</span><span class="o">+</span><span class="s1">&#39;/boxplot_&#39;</span> <span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;.png&#39;</span><span class="p">)</span>   
         <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">cla</span><span class="p">()</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  
-    <span class="nb">print</span><span class="p">()</span>      </div>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  </div>
 
+    <span class="c1"># print()</span>
         
 
 <div class="viewcode-block" id="draw_number_of_hits">
 <a class="viewcode-back" href="../../../../beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.draw_number_of_hits">[docs]</a>
-<span class="k">def</span> <span class="nf">draw_number_of_hits</span><span class="p">(</span><span class="n">argsP</span><span class="p">,</span> <span class="n">som_dict</span><span class="p">,</span><span class="n">som_data</span><span class="p">,</span><span class="n">clusters</span><span class="p">,</span><span class="n">grid</span><span class="p">,</span><span class="n">cluster_tick_labels</span><span class="p">,</span><span class="n">annot_ticks</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">draw_number_of_hits</span><span class="p">(</span><span class="n">argsP</span><span class="p">,</span> <span class="n">som_dict</span><span class="p">,</span><span class="n">som_data</span><span class="p">,</span><span class="n">clusters</span><span class="p">,</span><span class="n">grid</span><span class="p">,</span><span class="n">cluster_tick_labels</span><span class="p">,</span><span class="n">annot_ticks</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Draw number of hits for each som cell</span>
 
 <span class="sd">    Args:</span>
@@ -921,7 +927,7 @@
  
 <div class="viewcode-block" id="load_cluster_dictionary">
 <a class="viewcode-back" href="../../../../beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.load_cluster_dictionary">[docs]</a>
-<span class="k">def</span> <span class="nf">load_cluster_dictionary</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_cluster_dictionary</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the clustering dictionary from the specified file path.</span>
 
 <span class="sd">    Args:</span>
@@ -938,7 +944,7 @@
 
 <div class="viewcode-block" id="plot_davies_bouldin">
 <a class="viewcode-back" href="../../../../beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.plot_davies_bouldin">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_davies_bouldin</span><span class="p">(</span><span class="n">cluster_list</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_davies_bouldin</span><span class="p">(</span><span class="n">cluster_list</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot the number of clusters against the Davies-Bouldin Index and save the plot to a file.</span>
 <span class="sd">    </span>
@@ -971,7 +977,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <div class="viewcode-block" id="plot_cluster_hit_count">
 <a class="viewcode-back" href="../../../../beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.plot_cluster_hit_count">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_cluster_hit_count</span><span class="p">(</span><span class="n">txtFile</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_cluster_hit_count</span><span class="p">(</span><span class="n">txtFile</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Draw cluster_hit_count</span>
 
 <span class="sd">    Args:</span>
@@ -999,7 +1005,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <div class="viewcode-block" id="plot_cluster_label_count">
 <a class="viewcode-back" href="../../../../beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.plot_cluster_label_count">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_cluster_label_count</span><span class="p">(</span><span class="n">txtFile</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_cluster_label_count</span><span class="p">(</span><span class="n">txtFile</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Draw cluster_label_count</span>
 
 <span class="sd">    Args:</span>
@@ -1024,7 +1030,7 @@
 
 <div class="viewcode-block" id="plot_bmu_id_grid">
 <a class="viewcode-back" href="../../../../beak.methods.som.plot_som_results.html#beak.methods.som.plot_som_results.plot_bmu_id_grid">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_bmu_id_grid</span><span class="p">(</span><span class="n">bmu_id</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_bmu_id_grid</span><span class="p">(</span><span class="n">bmu_id</span><span class="p">,</span> <span class="n">output_folder</span><span class="p">):</span>
 
     <span class="c1"># Convert bmu_ids to a NumPy array for plotting</span>
     <span class="n">bmu_ids_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bmu_id</span><span class="p">)</span>
@@ -1075,7 +1081,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Michigan Tech Research Institute.</p>
+    <p>&#169; Copyright 2025, Beak Consultants GmbH.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
