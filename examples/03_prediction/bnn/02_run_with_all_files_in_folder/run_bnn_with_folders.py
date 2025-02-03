@@ -7,35 +7,22 @@ from beak.integration.statmagic.utils import (
 )
 
 from beak.integration.statmagic.call_bnn import run_bnn
-from beak.experimental.io import load_model
-
-# Helper
-def get_timestamp():
-    return datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+from beak.experimental.io import create_file_list, check_path
+from beak.utilities.helper import get_timestamp
 
 # User inputs
-from beak.models.phase_1 import poco as model_config
-
-MODEL_CONFIG = model_config["national"]["feature_fox"]
-CMA = "national_us_cont_102008_2240"
 CONFIG_FILE = "bnn_config.json"
+DATA_FOLDER = "Path_to_data_folder"
 OUT_PATH = "Path_to_output_folder"
-
-DATA_FOLDERS = [
-    "Path_to_data_folder_1",
-    "Path_to_data_folder_2",
-]
 LABELS = "Path_to_labels.tif"
 
 MODEL_ID = get_timestamp()
 OUT_PATH = os.path.join(OUT_PATH, "models", "bnn", MODEL_ID)
+check_path(OUT_PATH)
 
-# Load model config
-model_dict, file_list, counts = load_model(
-    model=MODEL_CONFIG,
-    folders=DATA_FOLDERS,
-    verbose=0,
-)
+# Input files
+file_list = create_file_list(DATA_FOLDER)
+file_list = [str(file) for file in file_list]
 
 # Run BNN
 output_prospectivity_layers = run_bnn(
