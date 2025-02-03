@@ -30,13 +30,10 @@ The repository is structured as following:
 │       └── ...
 │   └── examples                # examples how to run selected workflows and prediction methods
 │       └── ...
-│   ├── releases/               # notebooks for final CMA releases to run locally
-│       └── ...
 │   └── setup/                
-│       └── /
-│           ├── docker/         # installation routine for Docker
-│           ├── unix/           # installation routine fo Linux and MacOS     
-│           └── win/            # installation routine for Windows     
+│       ├── docker/             # installation routine for Docker
+│       ├── unix/               # installation routine fo Linux and MacOS     
+│       └── win/                # installation routine for Windows     
 │   └── src/                
 │       └── beak/
 │           ├── data/           # data folder
@@ -79,7 +76,7 @@ The container will be removed automatically after stopping. To avoid this behavi
 navigate to the root directory of the cloned repository. <br>
 Start the container manually from here with: 
 ```bash
-docker run -it --name beak-ta3 -p 8888:8888 -v $(pwd):/beak-ta3 beak-ta3:latest /bin/bash
+docker run -it --name beak-ta3 -p 8888:8888 -v .:/beak-ta3 beak-ta3:latest /bin/bash
 ```
 The Docker installation uses Poetry and does not have an environment to be activated.<br>
 The installation is now ready to be attached to your IDE.<p>
