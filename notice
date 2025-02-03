@@ -13,4 +13,5 @@ This project includes adapted and modified code from the following third-party s
     License: GNU General Public License v3.0
     Submodule: src/beak/methods/som/nextsomcore
 
+	Modifications: This code has been modified from the original version.
     For the full license text, see: https://github.com/gtkfi/GisSOM/blob/main/LICENSE
