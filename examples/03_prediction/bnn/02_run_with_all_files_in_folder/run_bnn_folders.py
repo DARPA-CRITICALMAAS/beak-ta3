@@ -1,33 +1,29 @@
-# Imports
 import os
-import datetime
-
-from beak.integration.statmagic.utils import (
-    _get_data_folder,
-)
-
 from beak.integration.statmagic.call_bnn import run_bnn
 from beak.experimental.io import create_file_list, check_path
 from beak.utilities.helper import get_timestamp
 
+
 # User inputs
-CONFIG_FILE = "bnn_config.json"
+MODEL_SETTINGS = "config_bnn.json"
 DATA_FOLDER = "Path_to_data_folder"
-OUT_PATH = "Path_to_output_folder"
 LABELS = "Path_to_labels.tif"
 
+# Use the current folder as working directory: results will be saved here in respective subfolders
+ROOT_PATH_OUT = os.getcwd()
+
+# Create model run output folder
 MODEL_ID = get_timestamp()
-OUT_PATH = os.path.join(OUT_PATH, "models", "bnn", MODEL_ID)
+OUT_PATH = os.path.join(ROOT_PATH_OUT, "models", "bnn", MODEL_ID)
 check_path(OUT_PATH)
 
 # Input files
-file_list = create_file_list(DATA_FOLDER)
-file_list = [str(file) for file in file_list]
+file_list = create_file_list(DATA_FOLDER, out_string=True)
 
 # Run BNN
 output_prospectivity_layers = run_bnn(
     input_layers=file_list,
     input_labels=LABELS,
-    config_file=CONFIG_FILE,
+    config_file=MODEL_SETTINGS,
     output_folder=OUT_PATH,
 )

@@ -165,19 +165,19 @@ def create_file_list(
     folder: Union[str, Path],
     extensions: Optional[Sequence[str]] = None,
     recursive: bool = False,
-) -> List[Path]:
+    out_string: bool = False
+) -> List[Union[str, Path]]:
     """
     Create a list of files in the specified folder with the given extensions.
 
     Args:
-        folder (Path): The folder path to search for files.
-        extensions (Optional[Sequence[str]]): Sequence of file extensions to include.
-            Defaults are [".tif", ".tiff"].
-        recursive (bool): Whether to search for files recursively in subdirectories.
-            Defaults to False.
+        folder: The folder path to search for files.
+        extensions: Sequence of file extensions to include. Defaults are [".tif", ".tiff"].
+        recursive: Whether to search for files recursively in subdirectories. Defaults to False.
+        out_string: Whether to return the file paths as strings. Defaults. to False.
 
     Returns:
-        List[Path]: A list of Path objects representing the files found.
+        A list of Path objects representing the files found.
     """
     folder = Path(folder)
 
@@ -194,6 +194,7 @@ def create_file_list(
     for file in files:
         file = Path(file)
         if any(file.suffix.lower() == ext for ext in extensions):
+            file = str(file) if out_string else file
             file_list.append(file)
 
     return file_list
