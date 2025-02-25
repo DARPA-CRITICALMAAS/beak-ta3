@@ -715,11 +715,11 @@ def save_geodataframe(
     depending on the file extension provided in the output path.
 
     Args:
-        dataframe (gpd.GeoDataFrame): The GeoDataFrame to be saved.
-        path (Path): The path to the output file. The file extension determines the format:
+        dataframe: The GeoDataFrame to be saved.
+        path: The path to the output file. The file extension determines the format:
                      - ".shp" for ESRI Shapefile
                      - ".gpkg" for GeoPackage
-        overwrite (bool): Whether to overwrite the file if it already exists. Defaults to False.
+        overwrite: Whether to overwrite the file if it already exists. Defaults to False.
 
     Returns:
         None
@@ -746,11 +746,11 @@ def create_model_setup(
     Create a model setup based on the provided method.
 
     Args:
-        method (str): The method for creating the model setup.
-        input_config (str, optional): The input configuration file. Defaults to "config_base.json".
-        train_config (str, optional): The training configuration file. Defaults to None.
-        base_path (str, optional): The base path for the processed model data. Defaults to None.
-        work_dir (str, optional): The working directory. Defaults to the current directory.
+        method: The method for creating the model setup.
+        input_config: The input configuration file. Defaults to "config_base.json".
+        train_config: The training configuration file. Defaults to None.
+        base_path: The base path for the processed model data. Defaults to None.
+        work_dir: The working directory. Defaults to the current directory.
 
     Returns:
         The model setup dictionary, file list, labels and output path.
@@ -803,21 +803,23 @@ def create_model_setup(
 
     out_path = os.path.join(work_dir, method, "models", model_name, get_timestamp())
     train_config = os.path.join(work_dir, f"config_{method}.json") if train_config is None else train_config
-    labels = os.path.join(base_path, "labels", labels_file)
-
-    input_folders = [
-        Path(os.path.join(base_path, folder))
-        for folder in layers_folders
-    ]
+    labels = labels_file if os.path.isabs(labels_file) else os.path.join(base_path, "labels", labels_file)
 
     if read_method == "dict":
+        input_folders = [
+            Path(os.path.join(base_path, folder)) if not os.path.isabs(folder) else Path(folder)
+            for folder in layers_folders
+        ]
+
         _, file_list, _ = load_model(
             model=model_config,
             folders=input_folders,
             verbose=0
         )
     elif read_method == "folder":
+        input_folders = layers_folders
         file_list = []
+
         for folder in input_folders:
             file_list.extend(
                 create_file_list(folder)
