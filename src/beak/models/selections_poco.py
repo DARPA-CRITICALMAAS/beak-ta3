@@ -150,6 +150,34 @@ hackathon_12m = {
             "CONUS_MT2023_15km": True,
             "CONUS_MT2023_30km": True,
         },
+        "dropout_duck_pp": {
+            # Gravity
+            "Gravity_Up30km": True,
+            "Gravity_Up30km_HGM": True,
+            "DeepGravitySources_Worms_Proximity": True,
+            "IsostaticGravity": True,
+            "IsostaticGravity_HGM": True,
+            # Magnetics
+            "Geophysics_Mag_RTP_SWNM": True,
+            "Geophysics_Mag_RTP_HGM_SWNM": True,
+            "Geophysics_Mag_1VD_SWNM": True,
+            "Mag_RTP_DeepSources": True,
+            "Mag_RTP_HGM_DeepSources": True,
+            "DeepMagSources_Worms_Proximity": True,
+            # Seismics
+            "LAB": True,
+            "LAB_HGM": True,
+            "LAB_Worms_Proximity": True,
+            "Moho": True,
+            # Magnetotellurics
+            "CONUS_MT2023_9km": True,
+            "CONUS_MT2023_15km": True,
+            "CONUS_MT2023_30km": True,
+            # Radiometrics
+            "Radiometric_K_SWNM": True,
+            "Radiometric_Th_SWNM": True,
+            "Radiometric_U_SWNM": True,
+        },
         "loss_llama_pp": {
             # Gravity
             "Gravity_Up30km": True,
