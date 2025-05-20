@@ -4,12 +4,10 @@ import pandas as pd
 import rasterio
 from rasterio import warp
 from rasterio.enums import Resampling
+from rasterio.transform import xy
 from typing import Optional, Tuple, Dict, Union
 from pathlib import Path
 from shapely.geometry import Point
-
-
-from rasterio.transform import xy
 
 from beak.utilities.file_io import (
     _cast_array_to_minimum_dtype, load_layer
@@ -90,16 +88,34 @@ def add_coordinates_to_raster(
     _, meta = load_layer(coord_file)
     height, width, transform = meta["height"], meta["width"], meta["transform"]
 
-    rows, cols = np.meshgrid(np.arange(height), np.arange(width), indexing="ij")
+    longitudes, latitudes = _calculate_xy_from_transform(transform, (height, width))
 
-    longitudes, latitudes = xy(
-        transform,
-        list(rows.reshape(-1, 1)),
-        list(cols.reshape(-1, 1))
-    )
+    return np.column_stack([src_array, longitudes, latitudes])
 
-    out_stack = np.column_stack([src_array, longitudes, latitudes])
-    return out_stack
+
+def _calculate_xy_from_transform(
+    transform: rasterio.transform.Affine,
+    shape: Tuple[int, int]
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Calculate the x and y coordinates from a transform object and a shape tuple.
+
+    Args:
+        transform: The transform object.
+        shape: The shape tuple (height, width).
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: The x and y coordinates as numpy arrays.
+    """
+    rows, cols = np.indices(shape)
+
+    a, b, c = transform.a, transform.b, transform.c
+    d, e, f = transform.d, transform.e, transform.f
+
+    x_coordinates = a * cols + b * rows + c
+    y_coordinates = d * cols + e * rows + f
+
+    return x_coordinates.reshape(-1, 1), y_coordinates.reshape(-1, 1)
 
 
 def _convert_binary_raster_to_point(

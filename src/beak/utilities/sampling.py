@@ -141,11 +141,8 @@ def extract_train_test_locations(
     if all(isinstance(data, np.ndarray) for data in (X, y)):
         locations = gpd.GeoDataFrame(
             data=np.column_stack((y, X[:, -2:])),
+            geometry=gpd.points_from_xy(X[:, -2], X[:, -1]),
             columns=["label", "longitude", "latitude"],
-        )
-
-        locations = create_geodataframe_from_points(
-            src=locations,
             crs=crs
         )
         X = X[:, :-2]
