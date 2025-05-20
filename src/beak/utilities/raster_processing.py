@@ -5,7 +5,7 @@ import rasterio
 from rasterio import warp
 from rasterio.enums import Resampling
 from rasterio.transform import xy
-from typing import Optional, Tuple, Dict, Union
+from typing import Optional, Tuple, Dict, Union, Literal
 from pathlib import Path
 from shapely.geometry import Point
 
@@ -90,12 +90,13 @@ def add_coordinates_to_raster(
 
     longitudes, latitudes = _calculate_xy_from_transform(transform, (height, width))
 
-    return np.column_stack([src_array, longitudes, latitudes])
+    return np.column_stack([src_array, longitudes.reshape(-1, 1), latitudes.reshape(-1, 1)])
 
 
 def _calculate_xy_from_transform(
     transform: rasterio.transform.Affine,
-    shape: Tuple[int, int]
+    shape: Tuple[int, int],
+    offset: Literal["center", "upper_left", "upper_right", "lower_left", "lower_right"] = "center",
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Calculate the x and y coordinates from a transform object and a shape tuple.
@@ -103,19 +104,33 @@ def _calculate_xy_from_transform(
     Args:
         transform: The transform object.
         shape: The shape tuple (height, width).
+        offset: The offset to apply to the coordinates. Defaults to "center".
 
     Returns:
         Tuple[np.ndarray, np.ndarray]: The x and y coordinates as numpy arrays.
     """
-    rows, cols = np.indices(shape)
+    rows, cols = np.indices(shape).astype(np.floating)
+
+    if offset == "center":
+        rows += 0.5
+        cols += 0.5
+    elif offset == "upper_left":
+        pass
+    elif offset == "upper_right":
+        cols += 1
+    elif offset == "lower_left":
+        rows += 1
+    elif offset == "lower_right":
+        rows += 1
+        cols += 1
 
     a, b, c = transform.a, transform.b, transform.c
     d, e, f = transform.d, transform.e, transform.f
 
-    x_coordinates = a * cols + b * rows + c
-    y_coordinates = d * cols + e * rows + f
+    xs = a * cols + b * rows + c
+    ys = d * cols + e * rows + f
 
-    return x_coordinates.reshape(-1, 1), y_coordinates.reshape(-1, 1)
+    return xs, ys
 
 
 def _convert_binary_raster_to_point(
