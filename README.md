@@ -164,3 +164,10 @@ Alternative:
 1. Set the preferences for new documents to **Unix (LF)**
 2. Copy/paste the file content
 3. Save as another/overwrite the original file
+
+# License
+This project is dual-licensed:
+- **MIT License**: applies to the main codebase (see [license](license))
+- **GPLv3**: applies to the SOM component in `src/beak/methods/som/` (see [SOM LICENSE](src/beak/methods/som/LICENSE))
+
+Third-party attributions are listed in the [notice](notice) file.

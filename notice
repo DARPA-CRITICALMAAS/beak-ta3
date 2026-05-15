@@ -1,3 +1,8 @@
+This project is dual-licensed:
+- The main codebase is licensed under the MIT License (see root license file).
+- The SOM component (src/beak/methods/som/) is licensed under the GNU General
+  Public License v3.0 (see src/beak/methods/som/LICENSE).
+
 This project includes adapted and modified code from the following third-party sources:
 
 1. Bayesian Neural Network
@@ -11,7 +16,17 @@ This project includes adapted and modified code from the following third-party s
 2. Self-organizing Maps
     Author: GTK, 2022
     License: GNU General Public License v3.0
-    Submodule: src/beak/methods/som/nextsomcore
+    Directory: src/beak/methods/som/ (including nextsomcore)
 
-	Modifications: This code has been modified from the original version.
+    Modifications: This code has been modified from the original version.
     For the full license text, see: https://github.com/gtkfi/GisSOM/blob/main/LICENSE
+
+3. EIS Toolkit
+    Author: Gispo Ltd.
+    License: EUPL-1.2
+    Files: src/beak/experimental/transformation.py,
+           src/beak/experimental/eda.py,
+           src/beak/experimental/conversions.py
+
+    Modifications: Code adapted from the original version.
+    For the full license text, see: https://github.com/GispoCoding/eis_toolkit
