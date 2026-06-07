@@ -2,11 +2,16 @@
 name = "beak"
 version = "0.0.0"
 description = "Integration of Beak algorithms for CriticalMAAS"
-authors = ["Beak Consultants GmbH <postmaster@beak.de>"]
 readme = "README.md"
 
 packages = [
          {include = "beak", from = "src"},
+]
+
+authors = [
+  "Michael Steffen <michael.steffen@beak.de>",
+  "Ina Storch <ina.storch@beak.de>",
+  "Roberto De La Rosa <roberto.delarosa@beak.de>",
 ]
 
 classifiers = [

@@ -164,3 +164,19 @@ Alternative:
 1. Set the preferences for new documents to **Unix (LF)**
 2. Copy/paste the file content
 3. Save as another/overwrite the original file
+
+
+## 6. License
+This project is licensed under the **GNU General Public License v3.0 (GPLv3)** —
+see [LICENSE](LICENSE). The project as a whole is GPL because it includes
+GPL-licensed third-party code.
+
+Third-party attributions are listed in the [NOTICE](NOTICE) file.
+
+## 7. Authors
+
+- Michael Steffen
+- Ina Storch
+- Roberto De La Rosa
+
+Developed at [Beak Consultants GmbH](www.beak.de).
